@@ -346,7 +346,9 @@ function lgShow(){const sa=isAdm&&st==='ready'&&!admOpen;if(sa!==admv){admv=sa;Q
 // Konto = Firebase-Login mit <name>@tiefenrausch.spiel (die Spieler sehen nur den Benutzernamen). Rechte stehen in firestore.rules.
 const FB_CFG={apiKey:"AIzaSyCat3UKNGXzPrvsXai_E29NsCOnn9Soumk",authDomain:"tiefenrausch.firebaseapp.com",projectId:"tiefenrausch",storageBucket:"tiefenrausch.firebasestorage.app",messagingSenderId:"829464869579",appId:"1:829464869579:web:0b36d11ca409792b15b94e"};
 const FB_MAIL='@tiefenrausch.spiel',FB_OWNER='burgergoat44'+FB_MAIL,FB_V='10.12.2';
-const FB_ON=!window.claude&&(/\.github\.io$/.test(location.hostname)||!!window.FB_TEST);
+// FB_LIVE erst auf true setzen, wenn die Regeln (firestore.rules) in der Firebase-Konsole veröffentlicht sind.
+const FB_LIVE=false;
+const FB_ON=!window.claude&&(FB_LIVE&&/\.github\.io$/.test(location.hostname)||!!window.FB_TEST);
 let fbP=null;
 function fbLoad(){if(fbP)return fbP;
   fbP=new Promise((res,rej)=>{const L=['app','auth','firestore'];let i=0;
