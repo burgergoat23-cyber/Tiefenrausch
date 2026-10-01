@@ -2,7 +2,13 @@
 
 Dungeon-Crawler im Browser (Canvas, eine einzige HTML-Datei).
 
-- `index.html`: das komplette Spiel. Lokal einfach im Browser öffnen.
-- Konten, Bestenliste und Tageslauf laufen über die Claude-Artifact-Laufzeit (`window.claude`). Ohne sie funktioniert nur „Als Gast spielen“.
+**Spielen:** https://burgergoat23-cyber.github.io/Tiefenrausch/
 
-Quelle: Claude-Artifact „Tiefenrausch“ (Stand 2026-10-01).
+- `index.html`: das komplette Spiel. Läuft auch lokal, einfach im Browser öffnen.
+- Auf GitHub Pages und lokal startet das Spiel direkt als Gast; der Spielstand wird im Browser gespeichert.
+- Konten, Rangliste und Admin-Panel funktionieren nur in der claude.ai-Version (sie brauchen die Artifact-Laufzeit `window.claude`).
+
+## GitHub Pages einrichten (einmalig)
+
+Settings → Pages → Source: „Deploy from a branch“ → Branch `claude/tiefen-raush-code-review-jb306f`, Ordner `/ (root)` → Save.
+Nach 1–2 Minuten ist das Spiel unter dem Link oben erreichbar. Jeder neue Push aktualisiert es automatisch.

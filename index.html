@@ -381,7 +381,7 @@ async function doAuth(reg){
       await migrateLegacy(d,id,ref,u,lg);setAcct(u,ref,lg.salt,hash,lg);}
   }catch(e){lgMsg('Fehler: '+(e&&e.message||e));}
 }
-function logout(){acct=null;guest=false;clearTimeout(mcT);mcT=0;cwFail=0;cwAgain=0;saves={endless:null,story:null};meta=newMeta();bk=null;try{localStorage.removeItem('dg_meta');localStorage.removeItem('dg_auth');localStorage.removeItem('dg_save');localStorage.removeItem('dg_saves')}catch(e){}}
+function logout(){if(!acct){guest=false;bk=null;return;}acct=null;guest=false;clearTimeout(mcT);mcT=0;cwFail=0;cwAgain=0;saves={endless:null,story:null};meta=newMeta();bk=null;try{localStorage.removeItem('dg_meta');localStorage.removeItem('dg_auth');localStorage.removeItem('dg_save');localStorage.removeItem('dg_saves')}catch(e){}}
 async function initAuth(){try{const a=JSON.parse(localStorage.getItem('dg_auth')||'null');if(!a)return;const d=await getDb();if(!d)return;const id=await uid();if(!id)return;
   await checkBan();if(banned){lgMsg('Dein Zugang wurde vom Admin gesperrt.');return;}
   const ref=accRef(d,id,a.u),sn=await ref.get();
@@ -3071,6 +3071,8 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min(.05,(n-last)/1000
   if(errT&&!errU)errU=setTimeout(()=>{errT='';errU=0;},6000);
   if(errT){g.setTransform(1,0,0,1,0,0);g.fillStyle='rgba(120,0,20,.85)';g.fillRect(0,H-26,W,26);g.fillStyle='#fff';g.font='12px system-ui,sans-serif';g.textAlign='left';g.fillText('Fehler: '+errT,8,H-9);}}
 initLang();requestAnimationFrame(loop);
+// Außerhalb von claude.ai (GitHub Pages, lokale Datei) gibt es keine Konten: direkt als Gast starten.
+if(/\.github\.io$/.test(location.hostname)||location.protocol==='file:')guest=true;
 Q('bl').onclick=()=>doAuth(0);Q('br').onclick=()=>doAuth(1);Q('bg').onclick=()=>{guest=true;};Q('pw').addEventListener('keydown',ev=>{if(ev.key==='Enter')doAuth(0);});
 Q('admb').onclick=admShow;Q('adx').onclick=admHide;Q('adr').onclick=()=>{admBusy=0;admLoad();};
 isOwner().then(v=>{isAdm=v;});
