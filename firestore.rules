@@ -1,0 +1,45 @@
+rules_version = '2';
+// Sicherheitsregeln für Tiefenrausch (Firebase-Projekt "tiefenrausch").
+// Einfügen unter: Firebase-Konsole → Firestore Database → Regeln → Veröffentlichen.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function self(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && request.auth.token.email == 'burgergoat44@tiefenrausch.spiel'; }
+    function banned() { return exists(/databases/$(database)/documents/banned/$(request.auth.uid)); }
+    function small(n) { return request.resource.size() <= n; }
+
+    // Spielkonto mit Speicherständen: nur der Spieler selbst.
+    match /data/users/{uid}/{acc} {
+      allow read: if self(uid);
+      allow write: if self(uid) && acc.matches('a_[a-z0-9_]{3,16}');
+    }
+
+    // Vergebene Benutzernamen: einmal angelegt, gehört der Name diesem Spieler.
+    match /names/{name} {
+      allow read: if signedIn();
+      allow create: if signedIn() && name.matches('[a-z0-9_]{3,16}') && request.resource.data.id == request.auth.uid;
+    }
+
+    // Spielerliste für das Admin-Panel: jeder schreibt nur seinen Eintrag, lesen darf nur der Admin.
+    match /players/{uid} {
+      allow read: if isAdmin();
+      allow write: if self(uid) && !banned() && small(20);
+    }
+
+    // Sperrliste: nur der Admin schreibt; jeder darf nachsehen, ob er selbst gesperrt ist.
+    match /banned/{uid} {
+      allow read: if self(uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Tages-Rangliste: für alle lesbar, jeder schreibt nur seinen Eintrag, der Admin darf Einträge löschen.
+    match /daily/{uid} {
+      allow read: if true;
+      allow create, update: if self(uid) && !banned() && small(10)
+        && request.resource.data.s is int && request.resource.data.s >= 0 && request.resource.data.s < 1000000
+        && request.resource.data.d is string && request.resource.data.u is string && request.resource.data.u.size() <= 16;
+      allow delete: if self(uid) || isAdmin();
+    }
+  }
+}

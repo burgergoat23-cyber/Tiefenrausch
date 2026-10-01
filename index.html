@@ -340,6 +340,55 @@ function persistSaves(){try{localStorage.setItem('dg_saves',JSON.stringify(saves
 const Q=id=>document.getElementById(id);
 function lgMsg(t,c){Q('lm').textContent=t;Q('lm').style.color=c||'#ff8f9e';}
 function lgShow(){const sa=isAdm&&st==='ready'&&!admOpen;if(sa!==admv){admv=sa;Q('admb').style.display=sa?'block':'none';}const sv=st==='ready'&&!acct&&!guest;if(sv!==lgv){lgv=sv;Q('lg').style.display=sv?'block':'none';if(!sv){try{const ae=document.activeElement;if(ae&&ae!==document.body)ae.blur();}catch(e){}}}}
+// ===== Firebase: Konten, Rangliste und Admin auf GitHub Pages =====
+// In claude.ai liefert die Artifact-Laufzeit window.claude (Datenbank + Nutzer). Auf GitHub Pages gibt es die nicht;
+// dort bildet dieser Block dieselbe Schnittstelle (claude.use('db'|'user')) mit Firebase nach, damit der übrige Code unverändert bleibt.
+// Konto = Firebase-Login mit <name>@tiefenrausch.spiel (die Spieler sehen nur den Benutzernamen). Rechte stehen in firestore.rules.
+const FB_CFG={apiKey:"AIzaSyCat3UKNGXzPrvsXai_E29NsCOnn9Soumk",authDomain:"tiefenrausch.firebaseapp.com",projectId:"tiefenrausch",storageBucket:"tiefenrausch.firebasestorage.app",messagingSenderId:"829464869579",appId:"1:829464869579:web:0b36d11ca409792b15b94e"};
+const FB_MAIL='@tiefenrausch.spiel',FB_OWNER='burgergoat44'+FB_MAIL,FB_V='10.12.2';
+const FB_ON=!window.claude&&(/\.github\.io$/.test(location.hostname)||!!window.FB_TEST);
+let fbP=null;
+function fbLoad(){if(fbP)return fbP;
+  fbP=new Promise((res,rej)=>{const L=['app','auth','firestore'];let i=0;
+    const next=()=>{if(i<L.length){const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/'+FB_V+'/firebase-'+L[i++]+'-compat.js';s.onload=next;s.onerror=()=>rej(new Error('Firebase konnte nicht geladen werden'));document.head.appendChild(s);return;}
+      try{firebase.initializeApp(FB_CFG);const a=firebase.auth(),db=firebase.firestore();if(window.FB_TEST)window.FB_TEST(a,db);
+        a.onAuthStateChanged(u=>{try{isAdm=!!(u&&u.email===FB_OWNER);}catch(e){}});
+        const un=a.onAuthStateChanged(()=>{un();res({a,db});});}catch(e){rej(e);}};
+    next();});
+  fbP.catch(()=>{fbP=null;});return fbP;}
+// Daten werden als JSON-Text (_j) gespeichert: Firestore kann weder verschachtelte Arrays noch undefined.
+// Einfache Felder (Zahlen, Texte) stehen zusätzlich direkt im Dokument, damit Regeln und Abfragen sie sehen.
+function fbPack(o){const r={_j:JSON.stringify(o)};for(const k in o){const v=o[k];if(typeof v==='number'&&isFinite(v)||typeof v==='string'||typeof v==='boolean')r[k]=v;}return r;}
+function fbUnpack(x){if(!x)return x;if(typeof x._j==='string'){try{return JSON.parse(x._j);}catch(e){}}return x;}
+function fbSnap(s){return{exists:s.exists,id:s.id,data:()=>fbUnpack(s.data())};}
+function fbDoc(db,p){const r=db.doc(p);return{get:async()=>fbSnap(await r.get()),set:o=>r.set(fbPack(o)),delete:()=>r.delete()};}
+// Abfragen: Gleichheits-Filter laufen auf dem Server, Bereich/Sortierung/Limit im Browser (so braucht Firestore keine extra Indexe).
+function fbQuery(db,c,f,o,n){
+  const eq=f.filter(x=>x[1]==='=='),rest=f.filter(x=>x[1]!=='==');
+  return{where:(a,op,v)=>fbQuery(db,c,f.concat([[a,op,v]]),o,n),orderBy:(a,dir)=>fbQuery(db,c,f,[a,dir||'asc'],n),limit:k=>fbQuery(db,c,f,o,k),
+    get:async()=>{let q=db.collection(c);for(const x of eq)q=q.where(x[0],'==',x[2]);if(n&&!rest.length&&!o)q=q.limit(n);
+      let d=(await q.get()).docs.map(fbSnap);
+      const T={'<':(a,b)=>a<b,'<=':(a,b)=>a<=b,'>':(a,b)=>a>b,'>=':(a,b)=>a>=b,'!=':(a,b)=>a!==b};
+      for(const x of rest)d=d.filter(s=>{const v=(s.data()||{})[x[0]];return v!==undefined&&T[x[1]](v,x[2]);});
+      if(o)d.sort((p,q2)=>{const a=(p.data()||{})[o[0]],b=(q2.data()||{})[o[0]];return(a<b?-1:a>b?1:0)*(o[1]==='desc'?-1:1);});
+      if(n)d=d.slice(0,n);return{docs:d,size:d.length};}};}
+function fbDb(db){return{doc:p=>fbDoc(db,p),collection:c=>fbQuery(db,c,[],null,0)};}
+if(FB_ON)window.claude={use:async k=>{const f=await fbLoad();
+  if(k==='db')return fbDb(f.db);
+  if(k==='user'){const u=f.a.currentUser;return{id:async()=>u?u.uid:null,isOwner:async()=>!!(u&&u.email===FB_OWNER)};}
+  return null;}};
+function fbErr(e){const c=(e&&e.code)||'';
+  return c==='auth/email-already-in-use'?'Dieser Name ist schon vergeben':
+    c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-login-credentials'?'Benutzername oder Passwort falsch':
+    c==='auth/too-many-requests'?'Zu viele Versuche. Warte kurz und versuche es nochmal.':
+    c==='auth/network-request-failed'?'Keine Verbindung zum Konto-Server':
+    c==='auth/weak-password'?'Passwort: mindestens 6 Zeichen':'Fehler: '+((e&&e.message)||e);}
+// Meldet bei Firebase an (oder legt das Konto an). Gibt eine Fehlermeldung zurück oder '' bei Erfolg.
+async function fbSign(u,pw,reg){try{const{a}=await fbLoad(),em=u+FB_MAIL;myId=null;
+    if(a.currentUser&&a.currentUser.email!==em)await a.signOut();
+    if(!a.currentUser){if(reg)await a.createUserWithEmailAndPassword(em,pw);else await a.signInWithEmailAndPassword(em,pw);}
+    return'';}catch(e){return fbErr(e);}}
+function fbOut(){myId=null;try{if(fbP)fbP.then(f=>f.a.signOut()).catch(()=>{});}catch(e){}}
 async function hashPw(pw,salt){const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);const sb=Uint8Array.from(salt.match(/../g).map(h=>parseInt(h,16)));const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:sb,iterations:150000,hash:'SHA-256'},km,256);return[...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');}
 async function getDb(){try{if(window.claude&&claude.use)return await claude.use('db');}catch(e){}return null;}
 async function uid(){try{if(myId)return myId;const u=window.claude&&claude.use?await claude.use('user'):null,i=u?await u.id():null;if(i)myId=i;return i||null;}catch(e){return null;}}
@@ -362,11 +411,13 @@ function absorb(x){if(!x)return;const rs=x.saves||(x.save&&x.save.fl?{[x.save.mo
   if(x.best)best=Math.max(best,x.best);if(x.meta)mergeMeta(x.meta);try{localStorage.setItem('dg_saves',JSON.stringify(saves));localStorage.setItem('dg_meta',JSON.stringify(meta));}catch(e){}}
 function setAcct(u,ref,salt,hash,x,cr){acct={u,ref,salt,hash,cr:cr||(x&&x.cr)||Date.now()};try{localStorage.setItem('dg_auth',JSON.stringify({u,hash}))}catch(e){}
   absorb(x);Q('pw').value='';Q('lg').style.display='none';lastPing=0;pingPlayer();}
-async function doAuth(reg){
+async function doAuth(reg){await doAuth0(reg);if(FB_ON&&!acct)fbOut();}
+async function doAuth0(reg){
   const u=Q('un').value.trim().toLowerCase(),pw=Q('pw').value;
   if(!/^[a-z0-9_]{3,16}$/.test(u))return lgMsg('Benutzername: 3–16 Zeichen (a–z, 0–9, _)');
   if(pw.length<6)return lgMsg('Passwort: mindestens 6 Zeichen');
   lgMsg('Bitte warten …','#c9b6ff');
+  if(FB_ON){const r=await fbSign(u,pw,reg);if(r)return lgMsg(r);}
   const d=await getDb();if(!d)return lgMsg('Konto-Server nicht erreichbar. Öffne das Spiel in claude.ai (angemeldet) oder spiele als Gast.');
   const id=await uid();if(!id)return lgMsg('Für Konten musst du bei claude.ai angemeldet sein. Du kannst als Gast spielen.');
   try{await checkBan();if(banned)return lgMsg('Dein Zugang wurde vom Admin gesperrt. Du kannst als Gast spielen.');
@@ -375,13 +426,15 @@ async function doAuth(reg){
       if(sn.exists||!(await claimName(d,id,u)))return lgMsg('Dieser Name ist schon vergeben');
       const salt=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join(''),hash=await hashPw(pw,salt),cr=Date.now();
       await ref.set({u,salt,hash,saves,best,meta,cr,t:cr});setAcct(u,ref,salt,hash,null,cr);}
+    else if(FB_ON&&!sn.exists){await claimName(d,id,u);const salt=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join(''),hash=await hashPw(pw,salt),cr=Date.now();
+      await ref.set({u,salt,hash,saves,best,meta,cr,t:cr});setAcct(u,ref,salt,hash,null,cr);}
     else if(sn.exists){const x=sn.data(),hash=await hashPw(pw,x.salt);if(hash!==x.hash)return lgMsg('Falsches Passwort');setAcct(u,ref,x.salt,hash,x);}
     else{const lg=await legacyAcct(d,u);if(!lg)return lgMsg('Konto nicht gefunden. Konten gehören zu deinem Claude-Zugang.');
       const hash=await hashPw(pw,lg.salt);if(hash!==lg.hash)return lgMsg('Falsches Passwort');
       await migrateLegacy(d,id,ref,u,lg);setAcct(u,ref,lg.salt,hash,lg);}
   }catch(e){lgMsg('Fehler: '+(e&&e.message||e));}
 }
-function logout(){if(!acct){guest=false;bk=null;return;}acct=null;guest=false;clearTimeout(mcT);mcT=0;cwFail=0;cwAgain=0;saves={endless:null,story:null};meta=newMeta();bk=null;try{localStorage.removeItem('dg_meta');localStorage.removeItem('dg_auth');localStorage.removeItem('dg_save');localStorage.removeItem('dg_saves')}catch(e){}}
+function logout(){if(!acct){guest=false;bk=null;return;}acct=null;guest=false;myId=null;isAdm=false;if(FB_ON)fbOut();clearTimeout(mcT);mcT=0;cwFail=0;cwAgain=0;saves={endless:null,story:null};meta=newMeta();bk=null;try{localStorage.removeItem('dg_meta');localStorage.removeItem('dg_auth');localStorage.removeItem('dg_save');localStorage.removeItem('dg_saves')}catch(e){}}
 async function initAuth(){try{const a=JSON.parse(localStorage.getItem('dg_auth')||'null');if(!a)return;const d=await getDb();if(!d)return;const id=await uid();if(!id)return;
   await checkBan();if(banned){lgMsg('Dein Zugang wurde vom Admin gesperrt.');return;}
   const ref=accRef(d,id,a.u),sn=await ref.get();
@@ -3071,8 +3124,8 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min(.05,(n-last)/1000
   if(errT&&!errU)errU=setTimeout(()=>{errT='';errU=0;},6000);
   if(errT){g.setTransform(1,0,0,1,0,0);g.fillStyle='rgba(120,0,20,.85)';g.fillRect(0,H-26,W,26);g.fillStyle='#fff';g.font='12px system-ui,sans-serif';g.textAlign='left';g.fillText('Fehler: '+errT,8,H-9);}}
 initLang();requestAnimationFrame(loop);
-// Außerhalb von claude.ai (GitHub Pages, lokale Datei) gibt es keine Konten: direkt als Gast starten.
-if(/\.github\.io$/.test(location.hostname)||location.protocol==='file:')guest=true;
+// Als lokale Datei gibt es keine Konten: direkt als Gast starten. (GitHub Pages nutzt Firebase, siehe oben.)
+if(!FB_ON&&(/\.github\.io$/.test(location.hostname)||location.protocol==='file:'))guest=true;
 Q('bl').onclick=()=>doAuth(0);Q('br').onclick=()=>doAuth(1);Q('bg').onclick=()=>{guest=true;};Q('pw').addEventListener('keydown',ev=>{if(ev.key==='Enter')doAuth(0);});
 Q('admb').onclick=admShow;Q('adx').onclick=admHide;Q('adr').onclick=()=>{admBusy=0;admLoad();};
 isOwner().then(v=>{isAdm=v;});
