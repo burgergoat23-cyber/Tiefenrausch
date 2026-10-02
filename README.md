@@ -5,8 +5,9 @@ Dungeon-Crawler im Browser (Canvas, eine einzige HTML-Datei).
 **Spielen:** https://burgergoat23-cyber.github.io/Tiefenrausch/
 
 - `index.html`: das komplette Spiel. Läuft auch lokal, einfach im Browser öffnen.
-- Auf GitHub Pages und lokal startet das Spiel direkt als Gast; der Spielstand wird im Browser gespeichert.
-- Konten, Rangliste und Admin-Panel funktionieren nur in der claude.ai-Version (sie brauchen die Artifact-Laufzeit `window.claude`).
+- Auf GitHub Pages laufen Konten, Tages-Rangliste und Admin-Panel über Firebase (Projekt `tiefenrausch`). Admin ist das Konto `burgergoat44`.
+- Die Sicherheitsregeln stehen in `firestore.rules` und müssen nach Änderungen in der Firebase-Konsole (Firestore → Regeln) veröffentlicht werden.
+- Als lokale Datei geöffnet startet das Spiel direkt als Gast. In claude.ai nutzt das Spiel weiter die Artifact-Laufzeit (`window.claude`).
 
 ## GitHub Pages einrichten (einmalig)
 
