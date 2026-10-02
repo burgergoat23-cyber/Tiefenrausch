@@ -18,7 +18,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Aktiv: **Authentication → E-Mail/Passwort**, **Firestore** (Standort europe-west3, Produktionsmodus + eigene Regeln). Gratis-Tarif (Spark).
 - Konto = Firebase-Login mit `<name>@tiefenrausch.spiel` (Spieler sehen nur den Namen). Admin = E-Mail `burgergoat44@tiefenrausch.spiel` (in Regeln und Code `FB_OWNER`).
 - Sammlungen: `data/users/<uid>/a_<name>` (Konto + Spielstände), `names/<name>`, `players/<uid>` (Admin-Panel), `banned/<uid>`, `daily/<uid>` (Tages-Rangliste), `top/<uid>` (Bestenliste tiefste Ebene), `rooms/<CODE>` (Koop-Verbindung).
-- Der Firebase-Block ersetzt `window.claude` (Artifact-Laufzeit) durch einen Adapter (`fbDb`, `fbPack`: Daten als JSON-Text `_j` + einfache Felder). `FB_ON` nur auf `*.github.io`; lokal als Datei = Gast.
+- Der Firebase-Block ersetzt `window.claude` (Artifact-Laufzeit) durch einen Adapter (`fbDb`, `fbPack`: Daten als JSON-Text `_j` + einfache Felder). `FB_ON` auf jeder https-Seite (GitHub Pages, itch.io …); lokal als Datei = Gast. `EMB` = Spiel läuft in fremdem Rahmen (iframe) → Knopf „Im eigenen Fenster spielen“ (`#bo`, öffnet `HOME_URL`).
 
 ## Aufbau des Codes (Stichworte zum Suchen)
 - Spielschleife `update(dt)`; Angriff `heroAttack()`, Aufheben `pickups(dt)`; Zeichnen `draw()` → `drawWorld`, `drawSorted`, HUD.
@@ -39,6 +39,10 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Änderungen mit Python-Ersetzungen an **eindeutigen** Ankern (`assert s.count(anker)==1`), danach `node --check` und ESLint (`no-undef`, `no-dupe-keys`).
 - Vor dem Push: `bash tests/run.sh` (bei Konten/Koop zusätzlich `--firebase`). Ehrlich sagen, was nur simuliert und nicht auf dem iPad geprüft wurde.
 - Commits auf Deutsch, auf den Branch oben pushen.
+
+## Andere Webseiten
+- **itch.io:** ZIP mit nur `index.html` hochladen (Art: HTML, „This file will be played in the browser“). Nach jedem Update muss die ZIP dort **neu hochgeladen** werden (Update-Hinweis `updCheck` gibt es nur auf GitHub Pages).
+- **CrazyGames** (später): keine eigene Anmeldung erlaubt, CrazyGames-SDK nötig → eigene Version bauen.
 
 ## Bisherige Updates (Kurzfassung)
 1. Fehlerprüfung + Aufräumen (doppelte Funktionen), Tageslauf 1×/Tag, GitHub Pages.
