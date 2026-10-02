@@ -375,7 +375,7 @@ function torch(x,y){g.fillStyle='#2e2219';g.fillRect(x-3,y+6,6,40);g.fillStyle='
 // Ruhige Teile (Himmel, Mond, Berge, Tor, Säulen, Baumkronen) werden einmal in Zwischenbilder gemalt (TBG.back/TBG.mid),
 // bewegte Teile jedes Bild: Wolken, Torleuchten, Fackeln, Nebel, Glühwürmchen, Gras im Wind, fallende Blätter.
 // Zeit = echte Uhr (performance.now), damit es auf 60-Hz- und 120-Hz-Bildschirmen gleich schnell läuft.
-const TBG={k:'',back:null,mid:null,cloud:null,fog:null,fly:null,grass:null,L:null};
+const TBG={sp:[],pd:0,k:'',back:null,mid:null,cloud:null,fog:null,fly:null,grass:null,L:null};
 function tbgLay(){const yg=H*.84,ym=H*.6,cw=Math.max(24,Math.min(66,W*.07)),mr=Math.max(24,Math.min(60,Math.min(W,H)*.065));
   let gw=Math.max(150,Math.min(W*.3,250)),gh=gw*1.02;
   if(TMB>0){gh=Math.min(gh,(yg-TMB-16)/1.24);gw=Math.min(gw,gh/1.02*1.1);}   // Tor unter dem Menü, nicht hinter der Schrift
@@ -459,8 +459,20 @@ function tbgBuild(sx){const L=tbgLay();TBG.L=L;
 function titleBG(){const t=performance.now()/1000;
   const tr=g.getTransform?g.getTransform():null,sx=tr?Math.hypot(tr.a,tr.b):(devicePixelRatio||1),k=W+'x'+H+'@'+Math.round(sx*100)+'|'+Math.round(TLY)+'|'+Math.round(TMB);
   if(TBG.k!==k){TBG.k=k;tbgBuild(sx);}
+  const q0=uiOn?uiS:1,fx=ptx/q0,fy=pty/q0,fOn=ptx>=0&&(ptd||seenTouch===false);
+  if(ptd&&!TBG.pd&&ptx>=0){for(let i=0;i<22;i++){const a=Math.random()*TAU,v=80+Math.random()*200;TBG.sp.push({x:fx,y:fy,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,l:1,lf:i%3===0,c:['#ffd98a','#ffe9b0','#c9b6ff','#d89a3a'][i%4],r:Math.random()*6});}if(TBG.sp.length>120)TBG.sp.splice(0,TBG.sp.length-120);}
+  TBG.pd=ptd;
   const L=TBG.L,wind=.6*Math.sin(t*.35)+.4*Math.sin(t*.93+1);
   g.drawImage(TBG.back,0,0,W,H);
+  // Mondstrahlen (langsam drehend)
+  {const{mx,my,mr}=L;g.save();g.globalCompositeOperation='lighter';for(let i=0;i<7;i++){const a=i/7*TAU+t*.03,w=.07+.04*Math.sin(t*.4+i),len=mr*(5+2*Math.sin(t*.3+i*2));
+    const q=g.createRadialGradient(mx,my,mr,mx,my,len);q.addColorStop(0,'rgba(255,225,170,.09)');q.addColorStop(1,'rgba(255,225,170,0)');g.fillStyle=q;g.beginPath();g.moveTo(mx,my);g.arc(mx,my,len,a-w,a+w);g.closePath();g.fill();}g.restore();}
+  // Sternschnuppe etwa alle 6 Sekunden
+  {const P=6,n=Math.floor(t/P),u=(t%P)/1.1;if(u<1){const x0=hs(n,951)*W*.8+W*.1,y0=hs(n,952)*L.ym*.35,dx=-(.5+hs(n,953)*.4)*W*.35,dy=W*.12,x=x0+dx*u,y=y0+dy*u,a=Math.sin(u*Math.PI);
+    const q=g.createLinearGradient(x,y,x-dx*.18,y-dy*.18);q.addColorStop(0,'rgba(255,250,230,'+a+')');q.addColorStop(1,'rgba(255,250,230,0)');g.strokeStyle=q;g.lineWidth=2;g.beginPath();g.moveTo(x,y);g.lineTo(x-dx*.18,y-dy*.18);g.stroke();g.fillStyle='rgba(255,255,240,'+a+')';g.fillRect(x-1.5,y-1.5,3,3);}}
+  // Fledermäuse ziehen am Mond vorbei
+  for(let i=0;i<3;i++){const P=11+i*4,u=((t+i*3.7)%P)/P*1.6-.3;if(u<-.1||u>1.1)continue;const x=-40+u*(W+80),y=L.my+(i-1)*L.mr*.9+Math.sin(u*9+i)*L.mr*.5,fl=Math.sin(t*14+i*2),s=.8+i*.15;
+    g.fillStyle='#0a0612';g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x-6*s,y-7*s*fl,x-13*s,y-3*s*fl);g.quadraticCurveTo(x-8*s,y+1,x-4*s,y+2*s);g.quadraticCurveTo(x,y+4*s,x+4*s,y+2*s);g.quadraticCurveTo(x+8*s,y+1,x+13*s,y-3*s*fl);g.quadraticCurveTo(x+6*s,y-7*s*fl,x,y);g.fill();}
   // Wolken ziehen vor dem Mond vorbei
   for(let i=0;i<4;i++){const cw=260*(1.2+hs(i,511)*.8),ch=90*(1.2+hs(i,511)*.8),sp=6+hs(i,512)*8,x=((t*sp+hs(i,513)*3000)%(W+cw))-cw,y=H*(.08+hs(i,514)*.32);g.globalAlpha=.22+hs(i,515)*.18;g.drawImage(TBG.cloud,x,y,cw,ch);}
   g.globalAlpha=1;
@@ -478,7 +490,7 @@ function titleBG(){const t=performance.now()/1000;
   g.globalAlpha=1;
   // Gras im Wind (3 Farbtöne vorn, 1 hinten am Tor)
   {const C=['#1a2c20','#223a28','#2c4a31','#1a1f28'],P=[[],[],[],[]];const fl=[];
-    for(const b of TBG.grass){const sw=(wind*.32+Math.sin(t*1.7+b.ph)*.1+Math.sin(t*.9+b.x*.012)*.14)*b.h,tx=b.x+sw,ty=b.y-b.h+Math.abs(sw)*.25;P[b.c].push(b,tx,ty);if(b.fl)fl.push(tx,ty,b.fl);}
+    for(const b of TBG.grass){let sw=(wind*.32+Math.sin(t*1.7+b.ph)*.1+Math.sin(t*.9+b.x*.012)*.14)*b.h;if(fOn){const dx=b.x-fx,dy=(b.y-b.h*.5)-fy,d=Math.hypot(dx,dy);if(d<120)sw+=Math.sign(dx||1)*(1-d/120)*b.h*.55;}tx=b.x+sw,ty=b.y-b.h+Math.abs(sw)*.25;P[b.c].push(b,tx,ty);if(b.fl)fl.push(tx,ty,b.fl);}
     for(let c=0;c<4;c++){const A=P[c];if(!A.length)continue;g.fillStyle=C[c];g.beginPath();for(let i=0;i<A.length;i+=3){const b=A[i],tx=A[i+1],ty=A[i+2],mx=(b.x+tx)/2,my=b.y-b.h*.5;g.moveTo(b.x-b.w,b.y);g.quadraticCurveTo(mx-b.w*.4,my,tx,ty);g.quadraticCurveTo(mx+b.w*.4,my,b.x+b.w,b.y);}g.fill();}
     for(let i=0;i<fl.length;i+=3){g.fillStyle=fl[i+2];g.beginPath();g.arc(fl[i],fl[i+1],2.6,0,TAU);g.fill();g.fillStyle='rgba(255,255,255,.5)';g.fillRect(fl[i]-.6,fl[i+1]-.6,1.2,1.2);}}
   // Fallende Herbstblätter aus den Baumkronen
@@ -487,6 +499,13 @@ function titleBG(){const t=performance.now()/1000;
     g.save();g.translate(x,y);g.rotate(a);g.scale(Math.sign(fx||1)*Math.max(.2,Math.abs(fx)),1);g.globalAlpha=Math.min(1,(1-u)*8);
     g.fillStyle=['#c8692a','#d89a3a','#a8402a','#8a8a3a','#e0b050'][i%5];g.beginPath();g.moveTo(0,-s);g.quadraticCurveTo(s*.75,0,0,s);g.quadraticCurveTo(-s*.75,0,0,-s);g.fill();
     g.strokeStyle='rgba(60,25,10,.6)';g.lineWidth=.7;g.beginPath();g.moveTo(0,-s);g.lineTo(0,s*1.25);g.stroke();g.restore();}
+  g.globalAlpha=1;
+  // Funken/Blätter vom Tippen
+  {const dt=Math.min(.05,t-(TBG.lt||t));TBG.lt=t;g.save();g.globalCompositeOperation='lighter';
+    for(const p of TBG.sp){p.l-=dt*(p.lf?.5:.9);p.vy+=(p.lf?40:140)*dt;p.vx*=1-dt*(p.lf?2:1);p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=dt*5;if(p.l<=0)continue;g.globalAlpha=Math.min(1,p.l*1.5);
+      if(p.lf){g.globalCompositeOperation='source-over';g.save();g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle='#c8692a';g.beginPath();g.moveTo(0,-5);g.quadraticCurveTo(4,0,0,5);g.quadraticCurveTo(-4,0,0,-5);g.fill();g.restore();g.globalCompositeOperation='lighter';}
+      else{g.fillStyle=p.c;g.beginPath();g.arc(p.x,p.y,2.4+p.l*2.6,0,TAU);g.fill();g.globalAlpha*=.35;g.beginPath();g.arc(p.x,p.y,7+p.l*6,0,TAU);g.fill();}}
+    g.restore();TBG.sp=TBG.sp.filter(p=>p.l>0);}
   g.globalAlpha=1;}
 function wCard(x,y,w,h,lab,wp,act){rr(x,y,w,h,8);g.fillStyle=act?'rgba(255,209,102,.08)':'rgba(0,0,0,.35)';g.fill();g.strokeStyle=wp?TC[wp.t]:'rgba(255,255,255,.2)';g.lineWidth=act?2.5:1.5;rr(x,y,w,h,8);g.stroke();
   txt(lab,x+w/2,y+18,12,'#ab9e86',600);
