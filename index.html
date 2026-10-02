@@ -125,7 +125,7 @@ function gen0(){
 }
 function say(s){msg=s;msgT=2.2;}
 function newGame0(d,md){if(d)d=JSON.parse(JSON.stringify(d));dashT=0;dashCd=0;bkf=d&&d.bk?d.bk:0;me={x:0,y:0,hp:5,mx:5,atk:0,inv:0,fx:1,fy:0,dx:0,dy:0,w:{i:0,t:0},bob:0,mv:0,db:0,w2:null,pots:{heal:1,rage:0,swift:0},rage:0,swift:0,arm:[null,null,null],acc:[],eq:{h:-1,b:-1,a:-1}};fl=1;gold=0;qst=null;qoff=null;ui=null;shake=0;joy=null;slash=0;if(d){fl=d.fl;gold=d.gold;me.mx=Math.min(HPMAX,d.mx);me.hp=d.hp>0?Math.min(me.mx,d.hp):me.mx;if(d.sn)me.seen=d.sn;me.db=d.db||0;me.w=d.w;me.w2=d.w2||null;me.pots=d.pots||{heal:0,rage:0,swift:0};me.arm=d.arm||[null,null,null];me.acc=d.acc||[];me.eq=d.eq||{h:-1,b:-1,a:-1};qst=d.qst||null;}mode=d?(d.mode||'endless'):(md||'endless');nq=d&&d.nq?d.nq:{};run={kills:0,bosses:0,ended:0,score:0,sub:''};if(mode==='daily')dailySetup();lastGold=gold;gen();if(d&&d.bk===fl)en=en.filter(e=>!e.boss);st='play';if(mode==='daily')say('Tageslauf: '+MODS[dMod].n);}
-function wall(x,y){const i=Math.floor(x/T),j=Math.floor(y/T);return i<0||j<0||i>=N||j>=N||map[j][i]===1;}
+function wall(x,y){if(!map)return false;const i=Math.floor(x/T),j=Math.floor(y/T);return i<0||j<0||i>=N||j>=N||map[j][i]===1;}
 function hit(x,y,r){return wall(x-r,y-r)||wall(x+r,y-r)||wall(x-r,y+r)||wall(x+r,y+r);}
 function move(o,dx,dy,r){if(!hit(o.x+dx,o.y,r))o.x+=dx;if(!hit(o.x,o.y+dy,r))o.y+=dy;}
 function burst(x,y,col,n,v){for(let i=0;i<n;i++){const s=Math.random()*(v||120)+30,a=Math.random()*TAU;pt.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:.5,col});}}
@@ -1347,7 +1347,7 @@ ENM[6]=function(P){const e=P.e,cast=P.at>=0?Math.sin(P.at*Math.PI):0,summ=P.sp>=
 ENM[7]=function(P){const e=P.e,wu=P.mode===1,ch=P.mode===2,roar=P.at>=0?Math.sin(P.at*Math.PI):0,dirx=ch?(e.dx||P.ux):P.ux,diry=ch?(e.dy||P.uy):P.uy,ang=Math.atan2(diry,dirx),fl=dirx<0;
   const N=6,segs=[];let qx=0,qy=0;
   // F-039: Segmente dürfen nicht in Wänden liegen: sonst Kette seitlich falten (Winkel durchprobieren), notfalls auf dem Vorgänger stapeln
-  const okS=(x,y,r)=>!wall(e.x+x,e.y+y)&&!wall(e.x+x+r*.8,e.y+y)&&!wall(e.x+x-r*.8,e.y+y)&&!wall(e.x+x,e.y+y+r*.8)&&!wall(e.x+x,e.y+y-r*.8);
+  const live=!!(map&&en&&en.includes(e)),okS=(x,y,r)=>!live||!wall(e.x+x,e.y+y)&&!wall(e.x+x+r*.8,e.y+y)&&!wall(e.x+x-r*.8,e.y+y)&&!wall(e.x+x,e.y+y+r*.8)&&!wall(e.x+x,e.y+y-r*.8);
   for(let i=1;i<=N;i++){const d=i*(ch?17:14),sway=Math.sin(P.ph*1.4-i*.9)*(ch?2:7)*(i/N+.3),r=19-i*1.9;let x=-dirx*d+diry*sway,y=-diry*d-dirx*sway;
     if(!okS(x,y,r)){const vx=x-qx,vy=y-qy;let f=null;for(const da of[.6,-.6,1.2,-1.2,1.8,-1.8,2.4,-2.4]){const c=Math.cos(da),s2=Math.sin(da),nx=qx+vx*c-vy*s2,ny=qy+vx*s2+vy*c;if(okS(nx,ny,r)){f=[nx,ny];break;}}
       if(!f)for(const k of[.7,.5,.3]){const nx=qx+vx*k,ny=qy+vy*k;if(okS(nx,ny,r)){f=[nx,ny];break;}}
@@ -3074,7 +3074,9 @@ function teamList(){const tl=Q('adtl');if(!tl)return;tl.textContent='';const q=t
   for(const[id,n,p,ti]of L){const w=admEl('div','rw');w.appendChild(admEl('span','k',id));w.appendChild(admEl('span','n',n+(T.tdm&&T.tdm.id===id?' 🏆':'')+(ti?' ⭐ '+ti:'')));if(p)w.appendChild(admEl('span','p',teamFmt(p)));tl.appendChild(w);}}
 teamInit();
 
-const resetTf=()=>{const k=cv.width/W||1;g.setTransform(k,0,0,k,0,0);};
+// Zählt save()/restore() der Haupt-Leinwand, damit nach einem Fehler mitten im Zeichnen kein Zuschnitt hängen bleibt
+const G_MAIN=g;{const sv=g.save.bind(g),rs=g.restore.bind(g);let dep=0;g.save=()=>{dep++;sv();};g.restore=()=>{if(dep>0){dep--;rs();}};g.unwind=()=>{while(dep>0){dep--;rs();}};}
+const resetTf=()=>{if(g!==G_MAIN)g=G_MAIN;g.unwind();const k=cv.width/W||1;g.setTransform(k,0,0,k,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.shadowBlur=0;};
 function draw(){resetTf();ptSync();uiS=1;uiOn=0;
   g.fillStyle='#0a0810';g.fillRect(0,0,W,H);
   if(st==='ready'){scaled(drawTitle);return;}
