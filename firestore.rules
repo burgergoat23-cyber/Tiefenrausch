@@ -43,6 +43,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Koop-Räume: nur zum Austausch der Verbindungsdaten; der Gastgeber löscht den Raum nach dem Verbinden.
+    match /rooms/{code} {
+      allow read: if signedIn();
+      allow create: if signedIn() && code.matches('[A-Z0-9]{4}') && request.resource.data.h == request.auth.uid && small(12);
+      allow update: if signedIn() && request.resource.data.h == resource.data.h && small(12);
+      allow delete: if signedIn() && resource.data.h == request.auth.uid;
+    }
+
     // Tages-Rangliste: für alle lesbar, jeder schreibt nur seinen Eintrag, der Admin darf Einträge löschen.
     match /daily/{uid} {
       allow read: if true;
