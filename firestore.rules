@@ -16,8 +16,9 @@ service cloud.firestore {
     }
 
     // Vergebene Benutzernamen: einmal angelegt, gehört der Name diesem Spieler.
+    // Lesbar für alle, damit die Anmeldung „Konto gibt es nicht“ von „Passwort falsch“ unterscheiden kann.
     match /names/{name} {
-      allow read: if signedIn();
+      allow read: if true;
       allow create: if signedIn() && name.matches('[a-z0-9_]{3,16}') && request.resource.data.id == request.auth.uid;
     }
 
@@ -31,6 +32,15 @@ service cloud.firestore {
     match /banned/{uid} {
       allow read: if self(uid) || isAdmin();
       allow write: if isAdmin();
+    }
+
+    // Bestenliste (tiefste Ebene): für alle lesbar, jeder schreibt nur seinen Eintrag, der Admin darf löschen.
+    match /top/{uid} {
+      allow read: if true;
+      allow write: if self(uid) && !banned() && small(8)
+        && request.resource.data.fl is int && request.resource.data.fl >= 1 && request.resource.data.fl < 100000
+        && request.resource.data.u is string && request.resource.data.u.size() <= 16;
+      allow delete: if isAdmin();
     }
 
     // Tages-Rangliste: für alle lesbar, jeder schreibt nur seinen Eintrag, der Admin darf Einträge löschen.
