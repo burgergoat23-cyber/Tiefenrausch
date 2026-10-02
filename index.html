@@ -352,7 +352,7 @@ const FB_ON=!window.claude&&(FB_LIVE&&/\.github\.io$/.test(location.hostname)||!
 let fbP=null;
 function fbLoad(){if(fbP)return fbP;
   fbP=new Promise((res,rej)=>{const L=['app','auth','firestore'];let i=0;
-    const next=()=>{if(i<L.length){const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/'+FB_V+'/firebase-'+L[i++]+'-compat.js';s.onload=next;s.onerror=()=>rej(new Error('Firebase konnte nicht geladen werden'));document.head.appendChild(s);return;}
+    const next=()=>{if(i<L.length){const s=document.createElement('script');s.crossOrigin='anonymous';s.src='https://www.gstatic.com/firebasejs/'+FB_V+'/firebase-'+L[i++]+'-compat.js';s.onload=next;s.onerror=()=>rej(new Error('Firebase konnte nicht geladen werden'));document.head.appendChild(s);return;}
       try{firebase.initializeApp(FB_CFG);const a=firebase.auth(),db=firebase.firestore();if(window.FB_TEST)window.FB_TEST(a,db);
         a.onAuthStateChanged(u=>{try{isAdm=!!(u&&u.email===FB_OWNER);}catch(e){}});
         const un=a.onAuthStateChanged(()=>{un();res({a,db});});}catch(e){rej(e);}};
@@ -3047,7 +3047,8 @@ function teamList(){const tl=Q('adtl');if(!tl)return;tl.textContent='';const q=t
   for(const[id,n,p,ti]of L){const w=admEl('div','rw');w.appendChild(admEl('span','k',id));w.appendChild(admEl('span','n',n+(T.tdm&&T.tdm.id===id?' 🏆':'')+(ti?' ⭐ '+ti:'')));if(p)w.appendChild(admEl('span','p',teamFmt(p)));tl.appendChild(w);}}
 teamInit();
 
-function draw(){ptSync();uiS=1;uiOn=0;
+const resetTf=()=>{const k=cv.width/W||1;g.setTransform(k,0,0,k,0,0);};
+function draw(){resetTf();ptSync();uiS=1;uiOn=0;
   g.fillStyle='#0a0810';g.fillRect(0,0,W,H);
   if(st==='ready'){scaled(drawTitle);return;}
   if(st==='bye'){scaled(drawBye);return;}
@@ -3114,7 +3115,7 @@ function admRender(){const D=admData,box=Q('adl'),sb=Q('ads');if(!D||!box||!sb)r
 async function admShow(){if(!(await isOwner()))return;admOpen=1;admConf='';admT=0;Q('adm').style.display='block';admLoad();}
 function admHide(){admOpen=0;Q('adm').style.display='none';}
 let last=performance.now();
-let errT='',errU=0;addEventListener('error',e=>{errT=String(e.message||e).slice(0,90);});
+let errT='',errU=0;addEventListener('error',e=>{const f=e.filename||'';if(!f||!f.startsWith(location.origin)||e.message==='Script error.'){try{console.warn('Fremder Fehler:',e.message,f,e.error);}catch(_){}return;}errT=String(e.message||e).slice(0,90);});
 function loop(n){requestAnimationFrame(loop);const dt=Math.min(.05,(n-last)/1000||0);last=n;
   try{if(st==='play'&&!ui)update(dt);}catch(e){errT='update: '+e.message;}
   try{if(st==='play'||st==='over')metaTick(dt);}catch(e){errT='meta: '+e.message;}
@@ -3122,9 +3123,9 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min(.05,(n-last)/1000
   try{lgShow();}catch(e){}
   fadeT=Math.max(0,fadeT-dt);
   try{if(acct&&!banned&&Date.now()-lastPing>60000)pingPlayer();if(admOpen){admT+=dt;if(admT>15){admT=0;admLoad();}}}catch(e){}
-  try{draw();}catch(e){g.setTransform(1,0,0,1,0,0);errT='draw: '+e.message;}
+  try{draw();}catch(e){resetTf();errT='draw: '+e.message;}
   if(errT&&!errU)errU=setTimeout(()=>{errT='';errU=0;},6000);
-  if(errT){g.setTransform(1,0,0,1,0,0);g.fillStyle='rgba(120,0,20,.85)';g.fillRect(0,H-26,W,26);g.fillStyle='#fff';g.font='12px system-ui,sans-serif';g.textAlign='left';g.fillText('Fehler: '+errT,8,H-9);}}
+  if(errT){resetTf();g.fillStyle='rgba(120,0,20,.85)';g.fillRect(0,H-26,W,26);g.fillStyle='#fff';g.font='12px system-ui,sans-serif';g.textAlign='left';g.fillText('Fehler: '+errT,8,H-9);}}
 initLang();requestAnimationFrame(loop);
 // Als lokale Datei gibt es keine Konten: direkt als Gast starten. (GitHub Pages nutzt Firebase, siehe oben.)
 if(!FB_ON&&(/\.github\.io$/.test(location.hostname)||location.protocol==='file:'))guest=true;
