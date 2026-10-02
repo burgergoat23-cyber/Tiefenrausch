@@ -29,6 +29,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Konten/Login: `doAuth0`, `fbSign`, `initAuth`, `cloudSync`; Admin `admLoad`/`admRender`.
 - **Koop** (`CO`): Gastgeber rechnet alles, zweiter Held `CO.p2`; Gegner zielen über `nearH`; Gast nutzt `guestUpdate` + Schnappschüsse (`coSnap`/`coRecv`). WebRTC-Datenkanäle `r` (zuverlässig) und `u` (schnell), Signalisierung über `rooms/<CODE>`. Lobby `drawLobby`. Koop-Läufe werden nicht gespeichert.
 - **Antik-Stil (UI):** Schriften `FN` (Buchschrift Palatino/Georgia) und `FD` (eingebettete Zierschrift „Cinzel“, SIL OFL, als Base64 im Code). Bausteine: `chamf` (Ecken-Schnitt), `brz` (Bronze-Verlauf), `aqPat`/`texIn` (Stein-Muster), `orn` (Eck-Schnörkel), `gem`, `dmd`, `medal` (runde HUD-Plakette), `stoneBtn` (Knopf-Hintergrund für `btn`/`padBtn`), `potIcon` (Trank-Flaschen: Herz/Flamme/Blitz). `glass`, `stoneBtn`, `frame` zeichnen über den Zwischenspeicher `uiCache` (`UIC`, große Rahmen in `UIF`). Neutrale Knopffarben werden über `BTNC` zu warmem Stein. Fenster sind auf hohen Bildschirmen begrenzt (`mBox`, max. 780) und per `uiCenter` senkrecht mittig (verschiebt Trefferflächen mit, `UIOY` in `inBox`). Galerie aller Bildschirme: `node tests/gal.js <Ordner>`.
+- **Titel-Hintergrund** `titleBG` (auch Ladebildschirm, „Bis bald“): Tempeltor vor Bergen bei Mondlicht. Ruhige Teile als Zwischenbilder `TBG.back`/`TBG.mid` (neu gebaut bei anderer Größe oder Menü-Lage `TLY`/`TMB`), bewegt: Wolken, Torleuchten, Fackeln, Nebel, Glühwürmchen, Gras im Wind, Herbstblätter. Zeit über `performance.now()`. Tor entfällt, wenn unter dem Menü kein Platz ist (`tbgLay`).
 - **Ladebildschirm** beim Start (~7 s, `LOADD`, Zähler `loadT`): zufällige Story-Szene (`LSC`, zeichnet Held + Boss mit `drawHero`/`drawEnemy`) und Tipp (`TIPS`), Funktionen `drawLoad`/`loadScene`. Sperrt Eingaben und Anmeldefenster. Testprogramme (Playwright) überspringen ihn, außer mit `#lade` in der Adresse (`tests/lade.js`).
 - Update-Hinweis `updCheck` (vergleicht eigenen Code mit der Online-Version). **Achtung:** im Spielcode nie wörtlich `</script>` schreiben (sonst bricht die Seite) – z. B. `'</scr'+'ipt>'`.
 - Übersetzung: alle Texte deutsch im Code, Englisch in `LANGS.en.d` (Schlüssel = deutscher Text). Neue Texte dort ergänzen (doppelte Schlüssel vermeiden).
@@ -47,6 +48,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 5. Leistung (Culling, Tönungs-Cache), Bosse fairer (Rückstoß bei Berührung, Warnkreise), Koop für 2 Spieler.
 6. Ladebildschirm beim Start mit Story-Szene und Tipp.
 7. Antik-Stil für alle Menüs, HUD und Anmeldung; neue Trank-Symbole; Fenster auf dem iPad mittig.
+8. Bewegter Hauptmenü-Hintergrund (Tempeltor, Mond, Gras, Blätter, Glühwürmchen).
 
 ## Offene Ideen / bekannte Grenzen
 - Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
