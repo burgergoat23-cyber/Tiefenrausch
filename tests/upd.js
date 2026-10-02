@@ -1,0 +1,15 @@
+const {chromium}=(()=>{try{return require('playwright')}catch(e){return require('/opt/node-tools/node_modules/playwright')}})();const fs=require('fs');
+let fail=0;const ok=(c,m)=>{console.log((c?'  OK  ':'  FAIL ')+m);if(!c)fail++;};
+(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,hasTouch:true});
+ let body=fs.readFileSync('cur.html','utf8');const errs=[];
+ await ctx.route('https://burgergoat23-cyber.github.io/**',r=>r.fulfill({contentType:'text/html',body}));
+ await ctx.route('https://www.gstatic.com/firebasejs/**',r=>{const f=r.request().url().split('/').pop();r.fulfill({contentType:'text/javascript',body:fs.readFileSync('fb/node_modules/firebase/'+f)});});
+ const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
+ await p.goto('https://burgergoat23-cyber.github.io/Tiefenrausch/');await p.waitForTimeout(800);await p.click('#bg');
+ await p.waitForTimeout(4500);ok(!(await p.isVisible('#upd')),'gleiche Version: kein Hinweis');
+ body=body.replace('const HPMAX=12;','const HPMAX=12;/*neu*/');
+ await p.evaluate(()=>updCheck());await p.waitForTimeout(600);ok(await p.isVisible('#upd'),'neue Version online: Hinweis im Menü sichtbar');
+ await p.evaluate(()=>{newGame(undefined,'endless');});await p.waitForTimeout(200);ok(!(await p.isVisible('#upd')),'während des Spielens versteckt');
+ await p.evaluate(()=>{st='ready';});await p.waitForTimeout(200);await p.screenshot({path:'upd.png'});
+ await p.click('#upd');await p.waitForTimeout(1500);ok(await p.evaluate(()=>typeof HPMAX)==='number'&&!(await p.isVisible('#upd')),'Tippen lädt die neue Version, Hinweis weg');
+ ok(!errs.length,'keine JS-Fehler '+JSON.stringify(errs));console.log(fail?'FEHLER':'ALLE OK');await b.close();})();

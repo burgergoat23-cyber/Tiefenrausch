@@ -13,3 +13,6 @@ Dungeon-Crawler im Browser (Canvas, eine einzige HTML-Datei).
 
 Settings → Pages → Source: „Deploy from a branch“ → Branch `claude/tiefen-raush-code-review-jb306f`, Ordner `/ (root)` → Save.
 Nach 1–2 Minuten ist das Spiel unter dem Link oben erreichbar. Jeder neue Push aktualisiert es automatisch.
+
+## Für Entwickler
+Siehe `UEBERGABE.md` (Aufbau, Firebase, Koop) und `tests/run.sh` (Testprogramme).

@@ -1,0 +1,10 @@
+const {chromium}=(()=>{try{return require('playwright')}catch(e){return require('/opt/node-tools/node_modules/playwright')}})();
+(async()=>{const b=await chromium.launch();const p=await (await b.newContext({viewport:{width:1024,height:768},deviceScaleFactor:2})).newPage();
+ await p.goto('file://'+process.cwd()+'/'+(process.env.F||'cur.html'));await p.waitForTimeout(400);
+ const r=await p.evaluate(()=>{const o={};newGame(undefined,'endless');
+  const run=(lab,setup)=>{fl=40;gen();ui=null;setup();for(const e of en)e.age=5;me.inv=999;
+    for(let i=0;i<20;i++){update(.016);draw();}const t0=performance.now();let n=0;for(let i=0;i<120;i++){me.hp=me.mx;update(.016);draw();n++;}o[lab]=((performance.now()-t0)/n).toFixed(2)+' ms/Bild, Gegner '+en.length;};
+  run('normal gen Ebene 40',()=>{});
+  run('20 alte Gegner nah',()=>{en=en.filter(e=>e.boss);for(let i=0;i<20;i++)en.push(mkE(i%5,me.x+rnd(-200,200),me.y+rnd(-150,150)));});
+  run('20 neue (getönt) nah',()=>{en=en.filter(e=>e.boss);for(let i=0;i<20;i++)en.push(mkV(i%10,me.x+rnd(-200,200),me.y+rnd(-150,150)));});
+  return o;});console.log(r);await b.close();})();

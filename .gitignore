@@ -1,0 +1,6 @@
+tests/cur.html
+tests/*.png
+tests/fb/node_modules/
+tests/fb/emu.log
+tests/fb/*-debug.log
+tests/fb/firestore.rules

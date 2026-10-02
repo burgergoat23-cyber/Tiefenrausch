@@ -1,0 +1,50 @@
+# Tiefenrausch – Übergabe für neue Sitzungen
+
+Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die Datei ist ~430 KB, sehr lange Zeilen).
+
+## Der Nutzer
+- Spricht Deutsch, ist kein Programmierer. Antworten **kurz, einfach, auf Deutsch**; Klick-Anleitungen **Schritt für Schritt** (eine Aktion pro Nachricht, Screenshots erbitten).
+- Spielt auf dem **iPad** (Home-Bildschirm-App). Freunde spielen mit.
+- GitHub-Konto `burgergoat23-cyber`, Admin-Name im Spiel `BurgerGoat44` (wird intern klein geschrieben: `burgergoat44`).
+
+## Wo was liegt
+- **Spiel online:** https://burgergoat23-cyber.github.io/Tiefenrausch/ (GitHub Pages, Branch `claude/tiefen-raush-code-review-jb306f`, Ordner `/`). Jeder Push ist nach ~2 Min. live.
+- `index.html` – das ganze Spiel (eine Datei, Canvas, kein Build-Schritt). Ursprünglich aus dem claude.ai-Artifact „Tiefenrausch“ kopiert; das Artifact wird **nicht** mehr aktualisiert.
+- `firestore.rules` – Firebase-Sicherheitsregeln. Nach jeder Änderung muss der **Nutzer** sie in der Konsole einfügen und veröffentlichen: https://console.firebase.google.com/project/tiefenrausch/firestore/rules (ganzen Text ersetzen → „Veröffentlichen“).
+- `tests/` – Testprogramme (Playwright). `bash tests/run.sh` bzw. `bash tests/run.sh --firebase`.
+
+## Firebase (Projekt `tiefenrausch`)
+- Konfiguration steht im Code (`FB_CFG`), ist öffentlich und nicht geheim.
+- Aktiv: **Authentication → E-Mail/Passwort**, **Firestore** (Standort europe-west3, Produktionsmodus + eigene Regeln). Gratis-Tarif (Spark).
+- Konto = Firebase-Login mit `<name>@tiefenrausch.spiel` (Spieler sehen nur den Namen). Admin = E-Mail `burgergoat44@tiefenrausch.spiel` (in Regeln und Code `FB_OWNER`).
+- Sammlungen: `data/users/<uid>/a_<name>` (Konto + Spielstände), `names/<name>`, `players/<uid>` (Admin-Panel), `banned/<uid>`, `daily/<uid>` (Tages-Rangliste), `top/<uid>` (Bestenliste tiefste Ebene), `rooms/<CODE>` (Koop-Verbindung).
+- Der Firebase-Block ersetzt `window.claude` (Artifact-Laufzeit) durch einen Adapter (`fbDb`, `fbPack`: Daten als JSON-Text `_j` + einfache Felder). `FB_ON` nur auf `*.github.io`; lokal als Datei = Gast.
+
+## Aufbau des Codes (Stichworte zum Suchen)
+- Spielschleife `update(dt)`; Angriff `heroAttack()`, Aufheben `pickups(dt)`; Zeichnen `draw()` → `drawWorld`, `drawSorted`, HUD.
+- Gegner: Grundtypen `k` 0–4, Bosse `k` 5–11 (`bossAI`). **Varianten** `VAR` (Feld `e.v`): eigener Name/Farbe/Fähigkeit (`varTick`), `pickEnemy` wählt nach Tiefe, `bossV`/`mkBoss` für neue Bosse ab Ebene 24. Warnkreis-Einschläge `zp`/`zap`.
+- Waffen `WP` (nur **hinten anhängen**, Indizes stecken in Spielständen!), Feld `b` = Zeichenvorlage, `u` Einzelstück, `g` Göttlich, `x` Kosmisch. Seltenheiten `TN/TM/TC` (0 Gewöhnlich … 7 Kosmisch). Boss-Beute `bossTier`.
+- Story: `STORY`, `SD`, `STN`; Dorfbewohner `VILL`, `placeVillager`, `rescueVillager` (Spielstand `rv`).
+- Meta/Bestiarium: `meta` (`k`, `v`, `ach` …), `ACH`, `bookUI`.
+- Konten/Login: `doAuth0`, `fbSign`, `initAuth`, `cloudSync`; Admin `admLoad`/`admRender`.
+- **Koop** (`CO`): Gastgeber rechnet alles, zweiter Held `CO.p2`; Gegner zielen über `nearH`; Gast nutzt `guestUpdate` + Schnappschüsse (`coSnap`/`coRecv`). WebRTC-Datenkanäle `r` (zuverlässig) und `u` (schnell), Signalisierung über `rooms/<CODE>`. Lobby `drawLobby`. Koop-Läufe werden nicht gespeichert.
+- Update-Hinweis `updCheck` (vergleicht eigenen Code mit der Online-Version). **Achtung:** im Spielcode nie wörtlich `</script>` schreiben (sonst bricht die Seite) – z. B. `'</scr'+'ipt>'`.
+- Übersetzung: alle Texte deutsch im Code, Englisch in `LANGS.en.d` (Schlüssel = deutscher Text). Neue Texte dort ergänzen (doppelte Schlüssel vermeiden).
+- Bildschirm-Sicherungen: `resetTf()` setzt jedes Bild Maßstab/`save()`-Ebenen zurück; Figuren außerhalb des Bildes werden nicht gezeichnet; getönte Varianten über `spriteC` (Zwischenbild).
+
+## Arbeitsweise
+- Änderungen mit Python-Ersetzungen an **eindeutigen** Ankern (`assert s.count(anker)==1`), danach `node --check` und ESLint (`no-undef`, `no-dupe-keys`).
+- Vor dem Push: `bash tests/run.sh` (bei Konten/Koop zusätzlich `--firebase`). Ehrlich sagen, was nur simuliert und nicht auf dem iPad geprüft wurde.
+- Commits auf Deutsch, auf den Branch oben pushen.
+
+## Bisherige Updates (Kurzfassung)
+1. Fehlerprüfung + Aufräumen (doppelte Funktionen), Tageslauf 1×/Tag, GitHub Pages.
+2. Firebase-Konten, Rangliste, Admin-Panel, Bestenliste, Update-Hinweis.
+3. Balance: Boss-Beute nach Tiefe, Lebensgrenze 12 Herzen, neue Waffen, Stufen Göttlich und Kosmisch.
+4. 16 Gegner-Varianten, 6 neue Bosse, Dorfbewohner in der Story, Endlos tiefer schwerer.
+5. Leistung (Culling, Tönungs-Cache), Bosse fairer (Rückstoß bei Berührung, Warnkreise), Koop für 2 Spieler.
+
+## Offene Ideen / bekannte Grenzen
+- Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
+- Bosse sind umgefärbte Varianten der vorhandenen Zeichnungen.
+- Rangliste/Bestenliste werden im Browser berechnet (theoretisch fälschbar).
