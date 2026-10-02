@@ -28,6 +28,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Meta/Bestiarium: `meta` (`k`, `v`, `ach` …), `ACH`, `bookUI`.
 - Konten/Login: `doAuth0`, `fbSign`, `initAuth`, `cloudSync`; Admin `admLoad`/`admRender`.
 - **Koop** (`CO`): Gastgeber rechnet alles, zweiter Held `CO.p2`; Gegner zielen über `nearH`; Gast nutzt `guestUpdate` + Schnappschüsse (`coSnap`/`coRecv`). WebRTC-Datenkanäle `r` (zuverlässig) und `u` (schnell), Signalisierung über `rooms/<CODE>`. Lobby `drawLobby`. Koop-Läufe werden nicht gespeichert.
+- **Ladebildschirm** beim Start (~7 s, `LOADD`, Zähler `loadT`): zufällige Story-Szene (`LSC`, zeichnet Held + Boss mit `drawHero`/`drawEnemy`) und Tipp (`TIPS`), Funktionen `drawLoad`/`loadScene`. Sperrt Eingaben und Anmeldefenster. Testprogramme (Playwright) überspringen ihn, außer mit `#lade` in der Adresse (`tests/lade.js`).
 - Update-Hinweis `updCheck` (vergleicht eigenen Code mit der Online-Version). **Achtung:** im Spielcode nie wörtlich `</script>` schreiben (sonst bricht die Seite) – z. B. `'</scr'+'ipt>'`.
 - Übersetzung: alle Texte deutsch im Code, Englisch in `LANGS.en.d` (Schlüssel = deutscher Text). Neue Texte dort ergänzen (doppelte Schlüssel vermeiden).
 - Bildschirm-Sicherungen: `resetTf()` setzt jedes Bild Maßstab/`save()`-Ebenen zurück; Figuren außerhalb des Bildes werden nicht gezeichnet; getönte Varianten über `spriteC` (Zwischenbild).
@@ -43,6 +44,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 3. Balance: Boss-Beute nach Tiefe, Lebensgrenze 12 Herzen, neue Waffen, Stufen Göttlich und Kosmisch.
 4. 16 Gegner-Varianten, 6 neue Bosse, Dorfbewohner in der Story, Endlos tiefer schwerer.
 5. Leistung (Culling, Tönungs-Cache), Bosse fairer (Rückstoß bei Berührung, Warnkreise), Koop für 2 Spieler.
+6. Ladebildschirm beim Start mit Story-Szene und Tipp.
 
 ## Offene Ideen / bekannte Grenzen
 - Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
