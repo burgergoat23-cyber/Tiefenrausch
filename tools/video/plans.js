@@ -106,6 +106,34 @@ const SH={
     {sec:3,setup:run('endless',80,'mkW(50,7)')+H,cap:[x.ch3],vo:sv(l,'ch3'),zoom:1.2},
     {sec:3.5,setup:run('endless',90,'mkW(50,7)')+H,cap:[x.ch4],vo:sv(l,'ch4'),zoom:1.25},
     {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];}};
+
+// ===== Trauriger Edit: 1-Sekunden-Schnitte auf den Takt (eigene Musik, 60 BPM), erster/letzter Clip länger mit Ein-/Ausblenden =====
+const ED={de:{a:'Er war der letzte Wächter …',z:'… und er gab niemals auf.'},en:{a:'He was the last guardian …',z:'… and he never gave up.'}};
+const boss=(f,m,w)=>run(m||'endless',f,w||'{i:10,t:3}')+'VAP.toBoss();',
+  story=n=>`ui={type:'story',t:STORY[${n}][0],l:STORY[${n}].slice(1)};`,
+  die="VAP.god=0;me.inv=0;me.hp=1;hurt(9);",
+  low="VAP.god=0;me.hp=1;me.inv=0;";
+const EDIT=l=>{const e=ED[l];const c=(setup,o)=>Object.assign({sec:1,setup,pre:40,zoom:1.15,flash:false},o||{});return[
+  {sec:3,setup:run('story',1)+'VAP.god=1;',pre:50,slow:.5,zoom:1.3,cap:[e.a],cy:.16,flash:false},
+  c(boss(3,'story')),
+  c(run('story',6),{pre:25,after:story(6),zoom:1.05}),
+  c(boss(6),{zoom:1.3}),
+  c(boss(20,'endless','{i:10,t:4}'),{after:low,zoom:1.35}),
+  c(boss(9)),
+  c(run('endless',70,'{i:35,t:6}'),{pre:60,zoom:1.1}),
+  c(boss(33,'endless','{i:10,t:4}'),{pre:50,after:'dash();',slow:.6}),
+  c(boss(12),{pre:45,after:die,zoom:1.05}),
+  c(boss(30,'endless','{i:10,t:4}'),{pre:50,zoom:1.3}),
+  c(run('story',12),{pre:25,after:story(12),zoom:1.05}),
+  c(boss(36,'endless','{i:10,t:4}'),{pre:60}),
+  c(run('story',4),{pre:20,after:"it=[];{const n=npcs.find(n=>n.t==='d');if(n){const q=freeNear(n.x-40,n.y,12);me.x=q.x;me.y=q.y;interact();}}",zoom:1.3}),
+  c(boss(15),{pre:30,after:"{const b=en.find(e=>e.boss);if(b)b.hp=1;}",zoom:1.25}),
+  c(boss(39,'endless','{i:10,t:4}'),{pre:50}),
+  c(boss(27,'endless','{i:10,t:4}'),{pre:45,after:die,zoom:1.05}),
+  c(boss(15,'story','{i:10,t:4}'),{pre:50,zoom:1.3}),
+  c(boss(15,'story','{i:10,t:4}')+"{const b=en.find(e=>e.boss);if(b)b.hp=Math.round(b.mx*.45);}",{pre:55,zoom:1.2}),
+  c(boss(15,'story','{i:10,t:4}'),{pre:50,after:low,slow:.5,zoom:1.4}),
+  {sec:4.5,setup:"newGame(undefined,'story');me.rv=[0,1,2,3,4,5,6,7,8];st='end';",pre:10,zoom:1.15,cap:[e.z],cy:.8,flash:false}];};
 module.exports={
   shorts:{view:{width:432,height:768},dpr:2.5,file:l=>`youtube_short_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
     {sec:2.4,setup:run('endless',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.hook],hook:1,vo:v.s1,zoom:1.18},     // Aufhänger mit Action
@@ -135,3 +163,5 @@ module.exports={
     {sec:9,setup:title,cap:[t.play,t.url],vo:v.t10}];}}};
 // Hinweis: Rangliste/Name-Knopf gibt es nur online (LB_ON) → rec.js lädt das Spiel unter der GitHub-Adresse (ohne Netz).
 for(const k in SH)module.exports[k]={view:{width:432,height:768},dpr:2.5,file:l=>`${k}_${l}.mp4`,scenes:SH[k]};
+module.exports.edit_traurig={view:{width:432,height:768},dpr:2.5,file:l=>`edit_traurig_${l}.mp4`,music:1,fade:1,
+  vf:'eq=saturation=0.7:contrast=1.06:brightness=-0.02,colorbalance=bs=0.07:bm=0.04:rs=-0.02,vignette=PI/4.2',scenes:EDIT};

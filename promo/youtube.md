@@ -140,3 +140,9 @@ Chapters:
 
 #tiefenrausch #indiegame #browsergame #dungeoncrawler #roguelike
 ```
+
+## Trauriger Edit (edit_traurig_de / _en)
+- DE Titel: `Er war der letzte Wächter … 🥀 #shorts` · EN Title: `He was the last guardian … 🥀 #shorts`
+- DE (≤100 Zeichen): `Er gab niemals auf 🥀 Tiefenrausch – gratis im Browser: burgergoat44.itch.io/tiefenrausch`
+- EN (≤100): `He never gave up 🥀 Tiefenrausch – free in your browser: burgergoat44.itch.io/tiefenrausch`
+- Musik: selbst erzeugt (tools/video/musik.py), kein fremdes Urheberrecht.

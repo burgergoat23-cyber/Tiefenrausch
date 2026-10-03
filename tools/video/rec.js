@@ -13,7 +13,7 @@ const VO_IN=.15,NOVO=!!process.env.NOVO;   // NOVO=1: gleicher Schnitt (SzenenlÃ
 {const L=scenes.map(s=>s.vo||'');fs.writeFileSync(path.join(tmp,'vo.json'),JSON.stringify(L));
   const d=JSON.parse(execSync(`python3 ${path.join(__dirname,'tts.py')} ${LANG} ${tmp} ${path.join(tmp,'vo.json')}`).toString().trim().split('\n').pop());
   scenes.forEach((s,i)=>{s.voDur=d[i];if(d[i])s.sec=Math.max(s.sec,Math.ceil((d[i]+VO_IN+.45)*FPS)/FPS);});}
-const DUR=scenes.reduce((a,s)=>a+s.sec,0)+1;
+const DUR=scenes.reduce((a,s)=>a+s.sec+(s.pre||0)/FPS,0)+1;
 
 function lufs(inp){const o=execSync(`ffmpeg -hide_banner -nostats ${inp} -af ebur128=framelog=quiet -f null - 2>&1`).toString();
   const m=/I:\s+(-?[\d.]+) LUFS/.exec(o.split('Summary')[1]||'');return m?+m[1]:-70;}
@@ -72,6 +72,9 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   for(const [si,sc] of scenes.entries()){
     if(sc.setup)await p.evaluate(sc.setup);
     await p.evaluate(c=>{CAP=c?{a:c[0],b:c[1]||'',len:c[2],y:c[3],hook:c[4],col:c[5]}:null;},sc.cap?[sc.cap[0],sc.cap[1],sc.capLen||(sc.voDur?Math.min(sc.sec,sc.voDur+1.4):sc.sec),sc.cy||0,sc.hook||0,sc.capCol||'']:null);
+    await p.evaluate(v=>{window.__slow=v;},sc.slow||1);
+    for(let k=0;k<(sc.pre||0);k++)await p.evaluate(async()=>{VAP.tick();await __V.step();});   // Vorlauf (nicht im Video): Szene kommt in Gang
+    if(sc.after)await p.evaluate(sc.after);
     const n=Math.round(sc.sec*FPS);sc.t0=fr/FPS;
     for(let i=0;i<n;i++){
       await p.evaluate(async([e,i,n,z,f])=>{try{if(e)(0,eval)(e);}catch(x){}VAP.tick();await __V.step();try{FXS(i,n,z,f);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0]);
@@ -93,9 +96,11 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
     vos.forEach((v,k)=>{ins+=` -i ${v.f}`;const ms=Math.round(v.t*1000);fc+=`[${k+2}:a]aresample=48000,aformat=channel_layouts=stereo,highpass=f=90,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,volume=${gV}dB,adelay=${ms}|${ms}[v${k}];`;});
     fc+=vos.map((v,k)=>`[v${k}]`).join('')+`amix=inputs=${vos.length}:normalize=0:dropout_transition=0,apad[vo];[vo]asplit[vo1][vo2];[g][vo1]sidechaincompress=threshold=0.02:ratio=5:attack=20:release=400[dk];[dk][vo2]amix=inputs=2:normalize=0:duration=first[mx]`;}
   else fc+='[g]anull[mx]';
-  execSync(`ffmpeg -y -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo ${RAW}${ins} -filter_complex "${fc}" -map "[mx]" -t ${(fr/FPS).toFixed(3)} ${tmp}/mix.wav`);
+  if(P.music)execSync(`python3 ${path.join(__dirname,'musik.py')} ${tmp}/mix.wav ${(fr/FPS).toFixed(3)} ${scenes[0].sec}`);   // eigene Musik statt Spielton
+  else execSync(`ffmpeg -y -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo ${RAW}${ins} -filter_complex "${fc}" -map "[mx]" -t ${(fr/FPS).toFixed(3)} ${tmp}/mix.wav`);
   const gain=lufsGain(`-i ${tmp}/mix.wav`);
-  execSync(`ffmpeg -y -loglevel error -framerate ${FPS} -i ${tmp}/f%05d.jpg -i ${tmp}/mix.wav `+
+  const T=fr/FPS,VF=[P.vf,P.fade?`fade=t=in:st=0:d=${P.fade},fade=t=out:st=${(T-P.fade*1.5).toFixed(2)}:d=${(P.fade*1.5).toFixed(2)}`:''].filter(Boolean).join(',');
+  execSync(`ffmpeg -y -loglevel error -framerate ${FPS} -i ${tmp}/f%05d.jpg -i ${tmp}/mix.wav `+(VF?`-vf "${VF}" `:'')+
     `-af "afade=t=in:d=0.3,afade=t=out:st=${(fr/FPS-1.2).toFixed(2)}:d=1.2,volume=${gain}dB,alimiter=limit=0.89:level=false" `+
     `-c:v libx264 -preset slow -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart -shortest ${out}`);
   if(!process.env.KEEP)fs.rmSync(tmp,{recursive:true,force:true});else console.log('tmp',tmp);
