@@ -172,3 +172,4 @@ Die Langvideos liegen wegen der Größe nicht im Repo; sie wurden im Chat in Tei
 - Wachsend: „best browser games“ (+29 %), „web games“ (+43 %, wenig Konkurrenz), „browser games to play with friends“ (~3.600/Monat → Koop betonen!).
 - Erfolgreiche kleine Indie-Shorts (10–30 s) heißen z. B. „This Indie Game Lets You … 😳“, „This indie game is PEAK“, „Exploring a dungeon, then…“ – kurze Neugier-Titel.
 - Titel-Ideen: `This FREE browser game is PEAK 🔥 #shorts` · `Best browser game to play with friends? ⚔️ #shorts` · `Dieses Gratis-Browserspiel ist krank 😳 #shorts`
+- Traurige Edits `edit_traurig*_slowed_*`: Musik von vidIQ (Slowed + Reverb, lizenzfrei, KI-erzeugt). Nutzer mochte die selbst gebaute Phonk-Musik nicht.
