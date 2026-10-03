@@ -5,3 +5,4 @@ tests/fb/emu.log
 tests/fb/*-debug.log
 tests/fb/firestore.rules
 dist/
+tools/video/voice/

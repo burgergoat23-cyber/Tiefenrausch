@@ -2,11 +2,11 @@
 
 Videos (online unter https://burgergoat23-cyber.github.io/Tiefenrausch/promo/…):
 - `youtube_short_de.mp4` / `youtube_short_en.mp4` – Shorts (hochkant, 33 s)
-- `youtube_trailer_de.mp4` / `youtube_trailer_en.mp4` – Trailer (quer, ~2 min)
+- `youtube_trailer_de.mp4` / `youtube_trailer_en.mp4` – Trailer (quer, ~1,5 min), beide mit KI-Sprecher
 - `youtube_thumbnail_1280x720.jpg` – Vorschaubild für den Trailer
 
 Beim Hochladen: „Nein, es ist nicht speziell für Kinder“ nur wählen, wenn das stimmt – sonst „Ja, speziell für Kinder“.
-Unter „Veränderte oder synthetische Inhalte“: Nein (echte Spielaufnahme). Musik ist aus dem Spiel selbst (kein fremdes Urheberrecht).
+Die Videos haben eine **KI-Stimme** (Piper, Stimme „Joe“, frei nutzbar CC0) – sie klingt nicht wie eine echte bekannte Person. Zur Sicherheit unter „Veränderte oder synthetische Inhalte“ **Ja** wählen und in die Beschreibung schreiben: „Sprecher: KI-Stimme“ / „Narration: AI voice“. Spielszenen sind echte Aufnahmen (Autopilot). Musik ist aus dem Spiel selbst (kein fremdes Urheberrecht).
 
 ---
 
@@ -17,6 +17,7 @@ Unter „Veränderte oder synthetische Inhalte“: Nein (echte Spielaufnahme). M
 Tiefenrausch – ein Dungeon-Abenteuer, das direkt im Browser läuft. Kostenlos, ohne Download, auf PC, Tablet und Handy.
 ⚔️ Über 50 Waffen · 👑 Bosse · ♾️ Endlos-Modus · 🏆 Tages-Rangliste · 👥 Koop für 2
 ▶️ Jetzt spielen: https://burgergoat44.itch.io/tiefenrausch
+Sprecher: KI-Stimme
 
 #shorts #indiegame #browsergame #dungeoncrawler #roguelike #gaming #kostenlosspielen
 
@@ -27,6 +28,7 @@ Tiefenrausch – ein Dungeon-Abenteuer, das direkt im Browser läuft. Kostenlos,
 Tiefenrausch – a dungeon adventure that runs right in your browser. Free, no download, on PC, tablet and phone.
 ⚔️ 50+ weapons · 👑 Bosses · ♾️ Endless mode · 🏆 Daily leaderboard · 👥 2-player co-op
 ▶️ Play now: https://burgergoat44.itch.io/tiefenrausch
+Narration: AI voice
 
 #shorts #indiegame #browsergame #dungeoncrawler #roguelike #gaming #freegames
 
@@ -49,7 +51,7 @@ Tiefenrausch läuft direkt im Browser: kostenlos, ohne Download, auf PC, Tablet 
 
 ▶️ Jetzt kostenlos spielen: https://burgergoat44.itch.io/tiefenrausch
 
-Ein kleines Solo-Projekt, entwickelt mit Hilfe von KI-Werkzeugen.
+Ein kleines Solo-Projekt, entwickelt mit Hilfe von KI-Werkzeugen. Sprecher: KI-Stimme.
 
 #indiegame #browsergame #dungeoncrawler #roguelike #gamedev
 
@@ -72,7 +74,7 @@ Tiefenrausch runs right in your browser: free, no download, on PC, tablet and ph
 
 ▶️ Play free now: https://burgergoat44.itch.io/tiefenrausch
 
-A small solo project made with the help of AI tools.
+A small solo project made with the help of AI tools. Narration: AI voice.
 
 #indiegame #browsergame #dungeoncrawler #roguelike #gamedev
 
