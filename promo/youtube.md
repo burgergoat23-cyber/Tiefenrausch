@@ -165,3 +165,10 @@ Die Langvideos liegen wegen der Größe nicht im Repo; sie wurden im Chat in Tei
 
 - DE (≤100 Zeichen): `Tiefenrausch 🔥 Gratis im Browser: burgergoat44.itch.io/tiefenrausch #shorts #phonk`
 - EN (≤100): `Tiefenrausch 🔥 Free in your browser: burgergoat44.itch.io/tiefenrausch #shorts #phonk`
+- `_ki_musik`: Musik von vidIQ „Generate Music“ (lizenzfrei, KI-erzeugt), Drop auf Sekunde 2, Spielgeräusche leise darunter. Mischen: `ffmpeg -i X_ohne_musik.mp4 -ss 14.05 -t 16 -i vidiq.wav …` (siehe Verlauf).
+
+## vidIQ-Erkenntnisse (3.10.2026)
+- „browser games“: ~56.000 Suchen/Monat, **Deutschland ist das größte Land (25 %)** → deutsche Titel lohnen sich.
+- Wachsend: „best browser games“ (+29 %), „web games“ (+43 %, wenig Konkurrenz), „browser games to play with friends“ (~3.600/Monat → Koop betonen!).
+- Erfolgreiche kleine Indie-Shorts (10–30 s) heißen z. B. „This Indie Game Lets You … 😳“, „This indie game is PEAK“, „Exploring a dungeon, then…“ – kurze Neugier-Titel.
+- Titel-Ideen: `This FREE browser game is PEAK 🔥 #shorts` · `Best browser game to play with friends? ⚔️ #shorts` · `Dieses Gratis-Browserspiel ist krank 😳 #shorts`

@@ -11,7 +11,7 @@ NAMEN = {'clip_kosmische_waffe': 'Clip: Kosmische Waffe', 'youtube_short': 'Shor
 def titel(f):
     b = os.path.basename(f)[:-4]
     sp = '🇬🇧 Englisch (mit KI-Stimme)' if b.endswith('_en') else '🇩🇪 Deutsch'
-    if b.startswith('edit_phonk'): sp = '🔇 Ohne Musik (Trend-Sound in der App wählen)' if b.endswith('_ohne_musik') else '🎵 Mit Phonk-Musik'
+    if b.startswith('edit_phonk'): sp = '🔇 Ohne Musik (Trend-Sound in der App wählen)' if b.endswith('_ohne_musik') else '🔥 Mit KI-Phonk (vidIQ)' if b.endswith('_ki_musik') else '🎵 Mit Phonk-Musik (selbst gebaut)'
     for k, v in NAMEN.items():
         if b.startswith(k): return v, sp
     return b, sp
