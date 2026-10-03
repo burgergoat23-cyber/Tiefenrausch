@@ -571,7 +571,7 @@ function dash(){if(CO.on&&CO.role==='guest')coSend({t:'c',c:'dash'},1);if(dashCd
 function heart(x,y,q,c){g.fillStyle=c;g.beginPath();g.moveTo(x,y+q*.35);g.bezierCurveTo(x,y-q*.2,x-q*.6,y-q*.2,x-q*.6,y+q*.3);g.bezierCurveTo(x-q*.6,y+q*.7,x,y+q*.9,x,y+q*1.1);g.bezierCurveTo(x,y+q*.9,x+q*.6,y+q*.7,x+q*.6,y+q*.3);g.bezierCurveTo(x+q*.6,y-q*.2,x,y-q*.2,x,y+q*.35);g.fill();}
 function saveGame(){if(fl<2||mode==='daily'||CO.on)return;const d={fl,gold,mx:me.mx,db:me.db,w:me.w,w2:me.w2,pots:me.pots,arm:me.arm,acc:me.acc,eq:me.eq,nq,mode,qst,best,hp:me.hp,bk:bkf===fl?fl:0,sn:me.seen||null,rv:me.rv||[],sd:lvSeed||0,oc:chOpen(),gc:goldTaken(),t:Date.now()};saves[mode==='story'?'story':'endless']=d;persistSaves();}
 function persistSaves(){try{localStorage.setItem('dg_saves',JSON.stringify(saves))}catch(e){}
-  cloudSync();}
+  try{if(mcT){clearTimeout(mcT);mcT=0;}}catch(e){}cloudSync();}
 const Q=id=>document.getElementById(id);
 function lgMsg(t,c){Q('lm').textContent=t;Q('lm').style.color=c||'#ff8f9e';}
 function lgShow(){{const su=!(loadT>0)&&updNew&&(st==='ready'||st==='over'||st==='end')&&!admOpen;if(su!==updV){updV=su;const b=Q('upd');b.textContent=LTR('🔄 Neue Version – tippen zum Laden');b.style.display=su?'block':'none';}}const sa=!(loadT>0)&&isAdm&&st==='ready'&&!admOpen;if(sa!==admv){admv=sa;Q('admb').style.display=sa?'block':'none';}const sv=!(loadT>0)&&st==='ready'&&!acct&&!guest;if(sv!==lgv){lgv=sv;Q('lg').style.display=sv?'block':'none';if(!sv){try{const ae=document.activeElement;if(ae&&ae!==document.body)ae.blur();}catch(e){}}}}
@@ -747,13 +747,13 @@ function mergeMeta(x){if(!x)return;const mx=(a,b)=>Math.max(a||0,b||0);
  if(x.dplay&&(!meta.dplay||x.dplay>meta.dplay))meta.dplay=x.dplay;
  (x.v||[]).forEach((c,i)=>{meta.v=meta.v||[];meta.v[i]=Math.max(meta.v[i]||0,c||0);});}
 try{mergeMeta(JSON.parse(localStorage.getItem('dg_meta')||'null'));}catch(e){}
-function saveMeta(){try{localStorage.setItem('dg_meta',JSON.stringify(meta));}catch(e){}if(acct&&!mcT){try{mcT=setTimeout(()=>{mcT=0;cloudSync();},3000);}catch(e){}}}
+function saveMeta(){try{localStorage.setItem('dg_meta',JSON.stringify(meta));}catch(e){}if(acct&&!mcT){try{mcT=setTimeout(()=>{mcT=0;cloudSync();},60000);}catch(e){}}}   // Firebase sparen: Statistik nur 1×/Minute in die Cloud
 // Cloud-Sync: erst lesen und zusammenführen (neuerer Spielstand gewinnt, Meta = Maximum/Vereinigung), dann schreiben – so überschreibt ein veraltetes Gerät nichts.
 function cloudSync(){if(!acct)return;if(cwBusy){cwAgain=1;return;}cwBusy=1;const a=acct;
  (async()=>{let ok=0;try{const sn=await a.ref.get();
    if(acct===a){if(sn&&sn.exists)absorb(sn.data());await a.ref.set({u:a.u,salt:a.salt,hash:a.hash,saves,best,meta,t:Date.now()});}
    ok=1;}catch(e){}
-  cwBusy=0;if(ok){cwFail=0;if(Date.now()-lastPing>15000)pingPlayer();}else if(acct===a&&cwFail++<4&&!mcT){try{mcT=setTimeout(()=>{mcT=0;cloudSync();},15000);}catch(e){}}
+  cwBusy=0;if(ok){cwFail=0;if(Date.now()-lastPing>110000)pingPlayer();}else if(acct===a&&cwFail++<4&&!mcT){try{mcT=setTimeout(()=>{mcT=0;cloudSync();},15000);}catch(e){}}
   if(cwAgain){cwAgain=0;cloudSync();}})();}
 function mkill(e){meta.k[e.k]++;if(e.v!=null){meta.v=meta.v||[];meta.v[e.v]=(meta.v[e.v]||0)+1;}if(e.el)meta.el++;run.kills++;if(e.boss)run.bosses++;mDirty=1;}
 function metaTick(dt){if(!me)return;if(!ui){if(toasts[0])toasts[0].t-=dt*Math.min(3,toasts.length);toasts=toasts.filter(t=>t.t>0);}
@@ -2614,7 +2614,8 @@ function swapSlots(){if(CO.on&&CO.role==='guest'){coSend({t:'c',c:'swap'},1);ret
 function dropW2(){if(CO.on&&CO.role==='guest'){coSend({t:'c',c:'dropw2'},1);return;}if(!me.w2)return;it.push({t:'weapon',w:me.w2,x:me.x+rnd(-8,8),y:me.y+rnd(6,12)});me.w2=null;say('Reserve abgelegt');saveGame();}
 // Boss-Kill-Merker (Fortsetzen: Boss nicht erneut plündern)
 let bkf=0;
-addEventListener('visibilitychange',()=>{try{if(document.hidden&&st==='play')saveGame();}catch(e){}});addEventListener('pagehide',()=>{try{if(st==='play')saveGame();}catch(e){}});
+function cloudFlush(){try{if(acct&&mcT){clearTimeout(mcT);mcT=0;cloudSync();}}catch(e){}}
+addEventListener('visibilitychange',()=>{try{if(document.hidden&&st==='play')saveGame();if(document.hidden)cloudFlush();}catch(e){}});addEventListener('pagehide',()=>{try{if(st==='play')saveGame();cloudFlush();}catch(e){}});
 // ===== CA Welle 1: Spielstand-Validierung (F-001), Ebenen-Seed (F-042), Endlos-Rückfrage (F-041), Audio (F-028/029/030) =====
 const vN=(x,lo,hi,df)=>Number.isFinite(x)?Math.max(lo,Math.min(hi,Math.floor(x))):df;
 function vW(w){
@@ -3582,7 +3583,7 @@ function loop(n){requestAnimationFrame(loop);try{cgTick();}catch(e){}const dt=Ma
   try{musicTick(dt);}catch(e){}
   try{lgShow();}catch(e){}
   fadeT=Math.max(0,fadeT-dt);if(loadT>0)loadT=Math.max(0,loadT-dt);
-  try{if(acct&&!banned&&Date.now()-lastPing>60000)pingPlayer();if(admOpen){admT+=dt;if(admT>15){admT=0;admLoad();}}}catch(e){}
+  try{if(acct&&!banned&&Date.now()-lastPing>120000)pingPlayer();if(admOpen){admT+=dt;if(admT>15){admT=0;admLoad();}}}catch(e){}
   try{draw();}catch(e){resetTf();errT='draw: '+e.message;}
   if(errT&&!errU)errU=setTimeout(()=>{errT='';errU=0;},6000);
   if(errT){resetTf();g.fillStyle='rgba(120,0,20,.85)';g.fillRect(0,H-26,W,26);g.fillStyle='#fff';g.font='12px system-ui,sans-serif';g.textAlign='left';g.fillText('Fehler: '+errT,8,H-9);}}
