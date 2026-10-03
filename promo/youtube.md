@@ -118,7 +118,7 @@ Kapitel-Marken: jeweils `<name>_<de|en>_kapitel.txt` – einfach in die Beschrei
 |---|---|---|
 | endlos100 | Schafft ein Autopilot Ebene 100? Tiefenrausch Endlos-Modus (ohne Unverwundbarkeit) | Can an autopilot reach floor 100? Tiefenrausch endless mode (no invincibility) |
 | story_komplett | Tiefenrausch – Story-Modus komplett durchgespielt (alle 15 Ebenen + Endboss) | Tiefenrausch – full story mode playthrough (all 15 floors + final boss) |
-| bosse | Alle Bosse in Tiefenrausch – jeder Kampf ehrlich gespielt | Every boss in Tiefenrausch – every fight played fair |
+| alle_bosse | Alle 14 Bosse in Tiefenrausch – 92 Tode bis zum Sieg | All 14 bosses in Tiefenrausch – 92 deaths to victory |
 
 Beschreibung Langvideos (DE):
 ```
@@ -146,3 +146,9 @@ Chapters:
 - DE (≤100 Zeichen): `Er gab niemals auf 🥀 Tiefenrausch – gratis im Browser: burgergoat44.itch.io/tiefenrausch`
 - EN (≤100): `He never gave up 🥀 Tiefenrausch – free in your browser: burgergoat44.itch.io/tiefenrausch`
 - Musik: selbst erzeugt (tools/video/musik.py), kein fremdes Urheberrecht.
+
+## Langvideos – Stand
+- Endlos bis 100: 11:24, Ebene 101 erreicht, 0 Tode → Kapitel `endlos100_*_kapitel.txt`
+- Story komplett: 4:40, 15 Ebenen, 5 Dorfbewohner, 0 Tode → `story_komplett_*_kapitel.txt`
+- Alle Bosse: 5:47 (aus 21 min geschnitten: kurze Niederlagen + Sieg-Versuch), 92 Tode → `alle_bosse_*_kapitel.txt`
+Die Langvideos liegen wegen der Größe nicht im Repo; sie wurden im Chat in Teilen geschickt (in CapCut hintereinander setzen).
