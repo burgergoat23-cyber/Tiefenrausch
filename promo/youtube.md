@@ -1,8 +1,10 @@
 # YouTube: Texte zum Kopieren
 
 Videos (online unter https://burgergoat23-cyber.github.io/Tiefenrausch/promo/…):
-- `youtube_short_de.mp4` / `youtube_short_en.mp4` – Shorts (hochkant, ~23 s, KI-Sprecher)
-- `youtube_trailer_de.mp4` / `youtube_trailer_en.mp4` – Trailer (quer, ~1,5 min), beide mit KI-Sprecher
+- `clip_kosmische_waffe_en.mp4` (KI-Sprecher) / `clip_kosmische_waffe_de_ohne_stimme.mp4` – Clip für Shorts/TikTok (hochkant, 18 s)
+- `youtube_short_en.mp4` (KI-Sprecher) / `youtube_short_de_ohne_stimme.mp4` – Shorts (hochkant, ~23 s)
+- `youtube_trailer_en.mp4` (KI-Sprecher) / `youtube_trailer_de_ohne_stimme.mp4` – Trailer (quer, ~1:40)
+- `*_sprechtext.txt` – Sätze mit Sekunden, falls du auf Deutsch eine Stimme (z. B. CapCut-KI-Stimme) dazulegen willst
 - `youtube_thumbnail_1280x720.jpg` – Vorschaubild für den Trailer
 
 Beim Hochladen: „Nein, es ist nicht speziell für Kinder“ nur wählen, wenn das stimmt – sonst „Ja, speziell für Kinder“.
@@ -79,3 +81,16 @@ A small solo project made with the help of AI tools. Narration: AI voice.
 #indiegame #browsergame #dungeoncrawler #roguelike #gamedev
 
 **Tags:** Tiefenrausch, dungeon crawler, browser game, indie game, roguelike, free game, HTML5 game, co-op game
+
+---
+
+## Clip „Kosmische Waffe“ (Deutsch)
+**Titel:** Boss mit dem schwächsten Schwert … dann das! 😱 #shorts
+**Beschreibung:** Aus der Boss-Truhe fällt eine KOSMISCHE Waffe. Tiefenrausch – kostenlos im Browser: https://burgergoat44.itch.io/tiefenrausch
+#shorts #gaming #indiegame #dungeoncrawler #roguelike
+
+## Clip „Cosmic weapon“ (English)
+**Title:** Boss fight with the weakest sword… then THIS 😱 #shorts
+**Description:** A COSMIC weapon drops from the boss chest. Tiefenrausch – free in your browser: https://burgergoat44.itch.io/tiefenrausch
+Narration: AI voice
+#shorts #gaming #indiegame #dungeoncrawler #roguelike

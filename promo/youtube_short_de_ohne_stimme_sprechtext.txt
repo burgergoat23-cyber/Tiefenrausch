@@ -1,0 +1,6 @@
+0,1 s  Wie tief kommst du in diesem Dungeon?
+2,9 s  Besiege riesige Bosse – mit Wutphase und seltener Beute!
+7,1 s  Über fünfzig Waffen, von gewöhnlich bis kosmisch.
+10,7 s  Im Endlos-Modus wird jede Ebene härter.
+13,8 s  Jeden Tag ein neues Dungeon, für alle gleich. Schaffst du Platz eins?
+18,7 s  Kostenlos im Browser, ohne Download. Der Link ist in der Beschreibung!

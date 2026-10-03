@@ -58,7 +58,7 @@ VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return
   if(VAP.wig>0){VAP.wig--;keys[VAP.wx>0?'d':'a']=1;keys[VAP.wy>0?'s':'w']=1;return;}
   const dd=Math.hypot(tg.x-me.x,tg.y-me.y),see=los(me.x,me.y,tg.x,tg.y);
   if(!VAP.god&&tg.hp&&P.proj&&see&&dd<120){VAP.go(tg.x,tg.y,1);return;}          // Fernkampf: Abstand halten
-  if(!tg.hp&&tg!==stairs){if(tg!==VAP.pt){VAP.pt=tg;VAP.pd=dd;VAP.pn=0;}else if(dd<VAP.pd-2){VAP.pd=dd;VAP.pn=0;}else if(++VAP.pn>45){VAP.skip.add(tg);VAP.ot=null;VAP.pt=null;}}   // kommt nicht näher → liegen lassen
+  if(!VAP.god&&!tg.hp&&tg!==stairs){if(tg!==VAP.pt){VAP.pt=tg;VAP.pd=dd;VAP.pn=0;}else if(dd<VAP.pd-2){VAP.pd=dd;VAP.pn=0;}else if(++VAP.pn>45){VAP.skip.add(tg);VAP.ot=null;VAP.pt=null;}}   // kommt nicht näher → liegen lassen
   if(!tg.hp&&tg!==stairs&&dd<16){if(++VAP.at>20){VAP.skip.add(tg);VAP.ot=null;VAP.at=0;}}else VAP.at=0;   // erreicht, aber nicht aufhebbar → liegen lassen
   if(dd<=rng&&(!tg.hp||see))return;
   const n=(see&&dd<160)?tg:(VAP.path(tg.x,tg.y)||tg);VAP.go(n.x,n.y,0,n!==tg);VAP.dbg=[tg.t||(tg.hp?'en':tg===stairs?'stairs':'ch'),tg.x|0,tg.y|0,n.x|0,n.y|0,dd|0,see];

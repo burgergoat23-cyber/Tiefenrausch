@@ -1,0 +1,4 @@
+0,1 s  Ein Boss, aber ich habe nur das schwächste Schwert im Spiel.
+4,3 s  Mal sehen, was in der Boss-Truhe ist …
+9,3 s  Okay. Jetzt wird es lustig.
+15,3 s  Wie tief kommst du? Der Link ist in der Beschreibung!

@@ -1,0 +1,10 @@
+0,1 s  Der Schattenfürst Vorath hat das Kristallherz gestohlen.
+7,2 s  Du bist der letzte Wächter von Aldenheim. Steig hinab in die Tiefe!
+13,2 s  Im Story-Modus kämpfst du dich durch fünfzehn Ebenen und rettest die Dorfbewohner.
+25,1 s  Über fünfzig Waffen: Schwerter, Bögen und Zauberstäbe, von gewöhnlich bis kosmisch.
+37,1 s  Jede dritte Ebene wartet ein Boss. Weich den Warnkreisen aus, sonst wird es eng!
+53,1 s  Im Endlos-Modus tauchen immer neue Gegner-Varianten auf.
+64,2 s  Und je tiefer du kommst, desto härter wird es. Wie weit schaffst du es?
+76,2 s  Im Bestiarium sammelst du jeden Gegner und jeden Erfolg.
+82,2 s  Beim Tageslauf spielen alle dasselbe Dungeon. Die Rangliste geht sogar ohne Konto.
+90,2 s  Tiefenrausch. Kostenlos im Browser, allein oder zu zweit im Koop. Den Link findest du in der Beschreibung!
