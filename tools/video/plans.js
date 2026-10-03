@@ -167,3 +167,22 @@ for(const k in SH)module.exports[k]={view:{width:432,height:768},dpr:2.5,file:l=
 module.exports.edit_traurig={view:{width:432,height:768},dpr:2.5,file:l=>`edit_traurig_${l}.mp4`,music:1,fade:1,
   vf:'eq=saturation=0.7:contrast=1.06:brightness=-0.02,colorbalance=bs=0.07:bm=0.04:rs=-0.02,vignette=PI/4.2',scenes:EDIT};
 module.exports.edit_traurig_kurz=Object.assign({},module.exports.edit_traurig,{file:l=>`edit_traurig_16s_${l}.mp4`,scenes:l=>EDIT(l,1)});
+// ===== Phonk-Edits (sprachneutral, 120 BPM, Takt-Effekte: Zoom-Schlag, Wackeln, Farbverschiebung, Blitz, Glitch) =====
+const BOSSES=[[3],[6],[9],[12],[15],[18],[21],[24],[27],[30],[33],[36],[39],[15,'story']];
+const bs=(f,m,w)=>boss(f,m||'endless',w||'{i:10,t:4}')+H;
+const END={sec:2,setup:"st='ready';bk=null;ui=null;CO.lob=null;",zoom:1.1};
+const PH={
+  edit_phonk_bosse:()=>{const a=[{sec:2,setup:bs(15,'story'),pre:40,ramp:[.3,.3],zoom:1.35}];
+    for(let k=0;k<24;k++){const [f,m]=BOSSES[k%BOSSES.length];a.push({sec:.5,setup:bs(f,m)+(k%5===4?"{const b=en.find(e=>e.boss);if(b)b.hp=1;}":''),pre:35+(k*7)%30,zoom:1.15+(k%3)*.08,flash:false});}
+    a.push(END);return a;},
+  edit_phonk_speedramp:()=>{const a=[{sec:2,setup:run('endless',60,'{i:35,t:6}')+H,pre:50,ramp:[.25,.25],zoom:1.3}];
+    const S=[()=>bs(33),()=>run('endless',70,'mkW(50,7)')+H,()=>bs(30),()=>run('endless',85,'mkW(49,7)')+H,()=>bs(15,'story'),()=>bs(36),()=>run('endless',95,'mkW(48,7)')+H,()=>bs(24),()=>bs(39),()=>run('endless',100,'mkW(50,7)')+H,()=>bs(27),()=>bs(21)];
+    S.forEach((f,k)=>a.push({sec:1,setup:f(),pre:45,ramp:[.2,1.8],zoom:1.25,flash:false}));a.push(END);return a;},
+  edit_phonk_glowup:()=>{const a=[{sec:2,setup:run('endless',1,'{i:0,t:0}')+'VAP.god=1;',pre:40,ramp:[.4,.4],zoom:1.3,cap:['1'],hook:1}];
+    const F=[2,4,6,8,10,13,16,20,25,30,35,40,45,50,55,60,66,72,78,84,90,95,98,100];
+    F.forEach((f,k)=>{const t=Math.min(7,Math.floor(f/14)),w=t>=7?'mkW(50,7)':`{i:${[0,10,19,24,35][Math.min(4,Math.floor(f/25))]},t:${t}}`;
+      a.push({sec:.5,setup:run('endless',f,w)+(f>20?H:'VAP.god=1;'),pre:40,zoom:1.2,flash:false,cap:[String(f)],hook:1,capLen:.5});});
+    a.push(END);return a;}};
+for(const k in PH){module.exports[k]={view:{width:432,height:768},dpr:2.5,file:()=>`${k}.mp4`,music:'phonk',bpm:120,beatfx:1,fade:.3,
+  vf:'eq=contrast=1.05:saturation=1.2,vignette=PI/5',scenes:PH[k]};
+  module.exports[k+'_ohne_musik']=Object.assign({},module.exports[k],{file:()=>`${k}_ohne_musik.mp4`,music:'keine'});}

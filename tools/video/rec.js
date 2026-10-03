@@ -43,10 +43,19 @@ window.CAP=null;
 // Effekt-Ebene über dem Spiel (wird nicht mitgezoomt): Untertitel, Übergangsblitz
 window.OC=document.createElement('canvas');OC.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:50';document.body.appendChild(OC);
 OC.width=innerWidth*devicePixelRatio;OC.height=innerHeight*devicePixelRatio;window.OX=OC.getContext('2d');
-window.FXS=function(i,n,z,fl){const k=n>1?i/(n-1):1,e=k*k*(3-2*k),zz=1+(z-1)*e;
+window.FXS=function(i,n,z,fl,bf){const k=n>1?i/(n-1):1,e=k*k*(3-2*k);let zz=1+(z-1)*e,sx=0,sy=0,ca=0,fa=0,gl=0;
+  // Takt-Effekte (Edits): Zoom-Schlag, Wackeln, Farbverschiebung, Blitz auf der Eins, Glitch jeden 8. Schlag
+  if(bf&&bf.t>=bf.intro){const q=(bf.t-bf.intro)/bf.beat,bn=Math.floor(q+1e-6),bp=(q-bn)*bf.beat;zz*=1+.13*Math.exp(-bp*9);
+    const sh=Math.exp(-bp*13)*16;sx=(Math.random()-.5)*sh;sy=(Math.random()-.5)*sh;ca=Math.exp(-bp*9);if(bn%4===0)fa=.22*Math.exp(-bp*20);if(bn%8===7&&bp<.12)gl=1;}
   OX.setTransform(1,0,0,1,0,0);OX.clearRect(0,0,OC.width,OC.height);
-  if(zz>1.001){const w=cv.width/zz,h=cv.height/zz;OX.imageSmoothingQuality='high';OX.drawImage(cv,(cv.width-w)/2,(cv.height-h)/2,w,h,0,0,OC.width,OC.height);}   // Heranzoomen: Ausschnitt des Spielbilds
+  if(zz>1.001||bf){const w=cv.width/zz,h=cv.height/zz,ox=(cv.width-w)/2-sx,oy=(cv.height-h)/2-sy;OX.imageSmoothingQuality='high';OX.drawImage(cv,ox,oy,w,h,0,0,OC.width,OC.height);   // Heranzoomen: Ausschnitt des Spielbilds
+    if(ca>.05){const d=Math.round(ca*6*devicePixelRatio);OX.globalAlpha=.16*ca;
+      OX.filter='grayscale(1) sepia(1) saturate(8) hue-rotate(-40deg)';OX.drawImage(cv,ox,oy,w,h,d,0,OC.width,OC.height);
+      OX.filter='grayscale(1) sepia(1) saturate(8) hue-rotate(160deg)';OX.drawImage(cv,ox,oy,w,h,-d,0,OC.width,OC.height);
+      OX.filter='none';OX.globalAlpha=1;OX.globalCompositeOperation='source-over';}
+    if(gl){for(let j=0;j<7;j++){const y=Math.random()*OC.height,hh=(8+Math.random()*40)*devicePixelRatio,dx=(Math.random()-.5)*60*devicePixelRatio;OX.drawImage(OC,0,y,OC.width,hh,dx,y,OC.width,hh);}}}
   OX.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  if(fa>.02){OX.fillStyle='rgba(255,255,255,'+fa+')';OX.fillRect(0,0,innerWidth,innerHeight);}
   if(fl&&i<9){OX.fillStyle='rgba(255,246,220,'+(.7*(1-i/9))+')';OX.fillRect(0,0,innerWidth,innerHeight);}};
 window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Math.min(1,c.t*5,Math.max(0,(c.len-c.t)*4));if(a<=0)return;
   const g=OX,W=innerWidth,H=innerHeight;g.save();g.globalAlpha=a;const L=W>H,big=Math.min(L?40:30,W/(L?24:14.5))*(c.hook?1.45:1),y0=H*(c.y||(L?.80:.15));
@@ -77,7 +86,7 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
     if(sc.after)await p.evaluate(sc.after);
     const n=Math.round(sc.sec*FPS);sc.t0=fr/FPS;
     for(let i=0;i<n;i++){
-      await p.evaluate(async([e,i,n,z,f])=>{try{if(e)(0,eval)(e);}catch(x){}VAP.tick();await __V.step();try{FXS(i,n,z,f);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0]);
+      await p.evaluate(async([e,i,n,z,f,bf,rp])=>{try{if(e)(0,eval)(e);}catch(x){}if(rp)window.__slow=rp[0]+(rp[1]-rp[0])*(n>1?i/(n-1):1);VAP.tick();await __V.step();try{FXS(i,n,z,f,bf);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0,P.beatfx?{t:fr/FPS,beat:60/(P.bpm||120),intro:scenes[0].sec}:null,sc.ramp||null]);
       await p.screenshot({path:path.join(tmp,'f'+String(fr++).padStart(5,'0')+'.jpg'),type:'jpeg',quality:92});
       if(fr%150===0)console.log('  Bild',fr,'/',total);
       if(process.env.DBG2&&fr%10===0)console.log(fr,await p.evaluate(()=>JSON.stringify({st,bk:!!bk,ui:ui&&ui.type,cvT:cv.style.transform,W,H,ld:loadT,fade:fadeT,err:typeof errT!=='undefined'?errT:''})));
@@ -96,7 +105,9 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
     vos.forEach((v,k)=>{ins+=` -i ${v.f}`;const ms=Math.round(v.t*1000);fc+=`[${k+2}:a]aresample=48000,aformat=channel_layouts=stereo,highpass=f=90,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,volume=${gV}dB,adelay=${ms}|${ms}[v${k}];`;});
     fc+=vos.map((v,k)=>`[v${k}]`).join('')+`amix=inputs=${vos.length}:normalize=0:dropout_transition=0,apad[vo];[vo]asplit[vo1][vo2];[g][vo1]sidechaincompress=threshold=0.02:ratio=5:attack=20:release=400[dk];[dk][vo2]amix=inputs=2:normalize=0:duration=first[mx]`;}
   else fc+='[g]anull[mx]';
-  if(P.music)execSync(`python3 ${path.join(__dirname,'musik.py')} ${tmp}/mix.wav ${(fr/FPS).toFixed(3)} ${scenes[0].sec}`);   // eigene Musik statt Spielton
+  if(P.music==='keine')execSync(`ffmpeg -y -loglevel error -f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw -t ${(fr/FPS).toFixed(3)} ${tmp}/mix.wav`);   // nur Spielton (Trend-Sound kommt in der App dazu)
+  else if(P.music==='phonk')execSync(`python3 ${path.join(__dirname,'phonk.py')} ${tmp}/mix.wav ${(fr/FPS).toFixed(3)} ${scenes[0].sec} ${P.bpm||120}`);
+  else if(P.music)execSync(`python3 ${path.join(__dirname,'musik.py')} ${tmp}/mix.wav ${(fr/FPS).toFixed(3)} ${scenes[0].sec}`);   // eigene Musik statt Spielton
   else execSync(`ffmpeg -y -loglevel error -f lavfi -i anullsrc=r=48000:cl=stereo ${RAW}${ins} -filter_complex "${fc}" -map "[mx]" -t ${(fr/FPS).toFixed(3)} ${tmp}/mix.wav`);
   const gain=lufsGain(`-i ${tmp}/mix.wav`);
   const T=fr/FPS,VF=[P.vf,P.fade?`fade=t=in:st=0:d=${P.fade},fade=t=out:st=${(T-P.fade*1.5).toFixed(2)}:d=${(P.fade*1.5).toFixed(2)}`:''].filter(Boolean).join(',');

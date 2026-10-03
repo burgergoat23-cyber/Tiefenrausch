@@ -152,3 +152,16 @@ Chapters:
 - Story komplett: 4:40, 15 Ebenen, 5 Dorfbewohner, 0 Tode → `story_komplett_*_kapitel.txt`
 - Alle Bosse: 5:47 (aus 21 min geschnitten: kurze Niederlagen + Sieg-Versuch), 92 Tode → `alle_bosse_*_kapitel.txt`
 Die Langvideos liegen wegen der Größe nicht im Repo; sie wurden im Chat in Teilen geschickt (in CapCut hintereinander setzen).
+
+## Phonk-Edits (hochkant, 16 s, mit Takt-Effekten)
+- `edit_phonk_bosse` – Bosskämpfe im Takt · `edit_phonk_speedramp` – Zeitlupe → schnell · `edit_phonk_glowup` – Ebene 1 bis 100
+- Je zwei Versionen: mit eigener Phonk-Musik (tools/video/phonk.py, kein fremdes Urheberrecht) und `_ohne_musik` – dort in der YouTube-Shorts- oder TikTok-App einen Trend-Sound auswählen.
+
+| Video | Titel Deutsch | Title English |
+|---|---|---|
+| edit_phonk_bosse | Jeder Boss fällt 💀🔥 #shorts | Every boss falls 💀🔥 #shorts |
+| edit_phonk_speedramp | Wenn der Beat droppt … ⚡ #shorts | When the beat drops… ⚡ #shorts |
+| edit_phonk_glowup | Ebene 1 → Ebene 100 📈 #shorts | Floor 1 → Floor 100 📈 #shorts |
+
+- DE (≤100 Zeichen): `Tiefenrausch 🔥 Gratis im Browser: burgergoat44.itch.io/tiefenrausch #shorts #phonk`
+- EN (≤100): `Tiefenrausch 🔥 Free in your browser: burgergoat44.itch.io/tiefenrausch #shorts #phonk`
