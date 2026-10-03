@@ -44,6 +44,15 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - **itch.io:** ZIP mit nur `index.html` hochladen (Art: HTML, „This file will be played in the browser“). Nach jedem Update muss die ZIP dort **neu hochgeladen** werden (Update-Hinweis `updCheck` gibt es nur auf GitHub Pages).
 - **CrazyGames:** eigene Version mit `python3 tools/build_crazygames.py [Ordner]` (setzt `window.TR_CG`, lädt `crazygames-sdk-v3.js`, erzeugt ZIP). Im Code `CG`: kein Firebase/Anmeldung, kein Koop, keine Ranglisten-/Beenden-Knöpfe, kein Fremd-Link, Ladebildschirm 4 s. SDK-Aufrufe in `cgTick` (loadingStart/Stop, gameplayStart/Stop) und `cgHappy` (Boss besiegt). Werbung noch nicht eingebaut. Test: `node tests/crazy.js` (SDK-Attrappe). Das echte SDK konnte in der Sitzung nicht geladen werden (Netz gesperrt) → nach dem Hochladen im CrazyGames-Entwicklerportal mit deren Prüf-Werkzeug testen.
 
+## Stand Werbung & Plattformen (3.10.2026)
+- **itch.io:** https://burgergoat44.itch.io/tiefenrausch (öffentlich, Devlog + Forum-Beitrag „Release Announcements“). Noch nicht in der itch-Suche (neue Konten werden erst indexiert). Hochgeladene ZIP ist **älter** als die Firebase-Sparänderung → bei Gelegenheit neue ZIP (nur index.html) bauen und hochladen.
+- **CrazyGames:** eingereicht am 3.10., Status „Awaiting review“ (Basic Launch). Build: `python3 tools/build_crazygames.py`. QA-Werkzeug zeigte Loading Start/Stop grün. Titelbilder/Videos unter `promo/` (online: …/Tiefenrausch/promo/). Developer-Portal geht am iPad schlecht → Nutzer nimmt den PC.
+- **X:** Konto @promoter4you4, Posten über Typefully scheitert (X sperrt Links bzw. Konto nicht freigegeben) → Nutzer postet selbst in der App.
+- **E-Mails an Spiele-Seiten (Gmail-Connector, nur geprüfte Einsende-Adressen, max. ~5/Tag, nie zweimal an dieselbe):** Alpha Beta Gamer, Indie Games Plus, Indie Game Buzz, Gamezebo, Indie Game Magazine, Destructoid, GameGrin, GameRamble, Twinfinite, DarkZero, ZTGD, The Reticule (unzustellbar), 1ndieWorld, Games Aktuell, The Indie Game Website (pr@), indiegames.ch, GAME60 Magazine, Indie Game Atlas, Fix Gaming Channel, RETRONUKE, Indie Game of the Week, BrewOtaku. Noch keine Antworten.
+- **Nicht machen:** Massen-Mails an ungeprüfte Adressen, Bots/Auto-Posts in fremde Gruppen (Konto-Sperre, Spam). Nutzer ist vermutlich minderjährig → bei Konten/Verträgen/Geld auf Eltern hinweisen.
+- **Firebase:** Statistik-Sync nur noch 1×/Minute (`saveMeta` 60 s, `cloudFlush` beim Verlassen), Ping 120 s. Gratis-Tarif ~20 000 Schreibvorgänge/Tag – Nutzer hatte 8 000 an einem Tag.
+- **Ideen für später:** Teilen-Knopf nach Tageslauf, Koop-Einladung per Link, Link-Vorschaubild (og:image), CrazyGames-Werbung (SDK ads) nach Freigabe, Game Jolt/Newgrounds.
+
 ## Bisherige Updates (Kurzfassung)
 1. Fehlerprüfung + Aufräumen (doppelte Funktionen), Tageslauf 1×/Tag, GitHub Pages.
 2. Firebase-Konten, Rangliste, Admin-Panel, Bestenliste, Update-Hinweis.
@@ -53,6 +62,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 6. Ladebildschirm beim Start mit Story-Szene und Tipp.
 7. Antik-Stil für alle Menüs, HUD und Anmeldung; neue Trank-Symbole; Fenster auf dem iPad mittig.
 8. Bewegter Hauptmenü-Hintergrund (Tempeltor, Mond, Gras, Blätter, Glühwürmchen).
+9. Andere Webseiten (itch.io, CrazyGames-Version), Werbe-Bilder/Videos, Firebase sparsamer.
 
 ## Offene Ideen / bekannte Grenzen
 - Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
