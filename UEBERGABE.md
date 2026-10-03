@@ -42,7 +42,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 
 ## Andere Webseiten
 - **itch.io:** ZIP mit nur `index.html` hochladen (Art: HTML, „This file will be played in the browser“). Nach jedem Update muss die ZIP dort **neu hochgeladen** werden (Update-Hinweis `updCheck` gibt es nur auf GitHub Pages).
-- **CrazyGames** (später): keine eigene Anmeldung erlaubt, CrazyGames-SDK nötig → eigene Version bauen.
+- **CrazyGames:** eigene Version mit `python3 tools/build_crazygames.py [Ordner]` (setzt `window.TR_CG`, lädt `crazygames-sdk-v3.js`, erzeugt ZIP). Im Code `CG`: kein Firebase/Anmeldung, kein Koop, keine Ranglisten-/Beenden-Knöpfe, kein Fremd-Link, Ladebildschirm 4 s. SDK-Aufrufe in `cgTick` (loadingStart/Stop, gameplayStart/Stop) und `cgHappy` (Boss besiegt). Werbung noch nicht eingebaut. Test: `node tests/crazy.js` (SDK-Attrappe). Das echte SDK konnte in der Sitzung nicht geladen werden (Netz gesperrt) → nach dem Hochladen im CrazyGames-Entwicklerportal mit deren Prüf-Werkzeug testen.
 
 ## Bisherige Updates (Kurzfassung)
 1. Fehlerprüfung + Aufräumen (doppelte Funktionen), Tageslauf 1×/Tag, GitHub Pages.

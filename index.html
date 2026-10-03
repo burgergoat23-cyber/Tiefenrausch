@@ -183,7 +183,7 @@ function update(dt){
     move(e,(vx+e.kx)*dt,(vy+e.ky)*dt,e.boss?18:10);e.kx*=.85;e.ky*=.85;
     enemyEvents(e,c0,t0,x0,y0,d,m0);if(d<20+e.k*2&&los(e.x,e.y,me.x,me.y)){const h0=me.hp;hurt((e.boss?Math.min(3,1+Math.floor(fl/20)):e.k>=2&&e.k!==3?2:1)+(e.boss?0:Math.min(4,Math.floor(fl/30))));if(e.boss&&me.hp<h0&&me.hp>0){const ux=(me.x-e.x)/(d||1),uy=(me.y-e.y)/(d||1);for(let i=0;i<6;i++)move(me,ux*10,uy*10,11);me.inv=Math.max(me.inv,1.2);}if(me.hp<h0&&e.v!=null&&VAR[e.v].ab==='drain'&&e.hp>0){e.hp=Math.min(e.mx,e.hp+2);fx.push({x:e.x,y:e.y-20,v:'+2',l:.8,c:0});}}
     if(e.hp<=0){e.dead=1;vfDeath(e);burst(e.x,e.y,e.v!=null?VAR[e.v].ec:EC[e.k],12,170);if(e.v!=null&&VAR[e.v].ab==='split'&&!e.mini)varSplit(e);shake=Math.max(shake,3);qadd('kill',1);mkill(e);sfx('kill');if(!e.boss)accDrop(e);if(e.el){qadd('elite',1);if(Math.random()<.25)it.push({t:'armor',ar:{s:rnd(0,2),t:Math.min(3,Math.floor(fl/4)+1)},x:e.x,y:e.y+10});it.push({t:['heal','rage','swift'][rnd(0,2)],x:e.x,y:e.y});for(let q=0;q<4;q++)it.push({t:'gold',x:e.x+rnd(-20,20),y:e.y+rnd(-20,20)});}kc++;kt=3;if(kc%5===0){say('Serie x'+kc+'!');for(let q=0;q<3;q++)it.push({t:'gold',x:e.x+rnd(-20,20),y:e.y+rnd(-20,20)});}
-      if(e.boss){shake=20;burst(e.x,e.y,'#ffd166',60,300);for(let q=0;q<10;q++)it.push({t:'gold',x:e.x+rnd(-40,40),y:e.y+rnd(-40,40)});{const p=freeNear(e.x,e.y,14);ch.push({x:p.x,y:p.y,o:0,boss:1});}bkf=fl;say('Boss besiegt! Treppe frei');qadd('boss',1);bossLoot(e);if(mode==='story'&&SD[fl]){ui={type:'story',t:SD[fl][0],l:SD[fl].slice(1),done:fl===15?()=>{st='end';saves.story=null;saves.cl=Object.assign({},saves.cl,{story:Date.now()});meta.story++;mDirty=1;persistSaves();}:null};joy=null;}}
+      if(e.boss){shake=20;burst(e.x,e.y,'#ffd166',60,300);for(let q=0;q<10;q++)it.push({t:'gold',x:e.x+rnd(-40,40),y:e.y+rnd(-40,40)});{const p=freeNear(e.x,e.y,14);ch.push({x:p.x,y:p.y,o:0,boss:1});}bkf=fl;say('Boss besiegt! Treppe frei');cgHappy();qadd('boss',1);bossLoot(e);if(mode==='story'&&SD[fl]){ui={type:'story',t:SD[fl][0],l:SD[fl].slice(1),done:fl===15?()=>{st='end';saves.story=null;saves.cl=Object.assign({},saves.cl,{story:Date.now()});meta.story++;mDirty=1;persistSaves();}:null};joy=null;}}
       if(Math.random()<.5)it.push({t:'gold',x:e.x,y:e.y});if(Math.random()<.1)it.push({t:'heal',x:e.x,y:e.y});}
   }finally{me=_sv;}}
   en=en.filter(e=>!e.dead);
@@ -584,7 +584,9 @@ const FB_MAIL='@tiefenrausch.spiel',FB_OWNER='burgergoat44'+FB_MAIL,FB_V='10.12.
 // FB_LIVE erst auf true setzen, wenn die Regeln (firestore.rules) in der Firebase-Konsole veröffentlicht sind.
 const FB_LIVE=true;
 // Firebase läuft auf jeder https-Seite (GitHub Pages, itch.io, Game Jolt …); als lokale Datei = Gast.
-const FB_ON=!window.claude&&(FB_LIVE&&location.protocol==='https:'||!!window.FB_TEST);
+// CG: CrazyGames-Version (Build setzt window.TR_CG). Dort keine eigene Anmeldung/Firebase, kein Koop/Rangliste; CrazyGames-SDK statt dessen.
+const CG=!!window.TR_CG;
+const FB_ON=!window.claude&&!CG&&(FB_LIVE&&location.protocol==='https:'||!!window.FB_TEST);
 // EMB: Spiel läuft eingebettet in einer fremden Seite (Rahmen/iframe, z. B. itch.io)
 const EMB=(()=>{try{return window.top!==window.self;}catch(e){return true;}})(),HOME_URL='https://burgergoat23-cyber.github.io/Tiefenrausch/';
 let fbP=null;
@@ -3219,14 +3221,15 @@ function drawTitle(){btns=[];tm+=.016;titleBG();
   const fnList=[];
   if(hasE)fnList.push(['▶ Fortsetzen: Endlos – Ebene '+saves.endless.fl+' · '+saves.endless.gold+' Gold',()=>newGame(saves.endless),'#2b6b5f']);
   if(hasS)fnList.push(['▶ Fortsetzen: Story – Ebene '+saves.story.fl,()=>newGame(saves.story),'#2b6b5f']);
-  fnList.push(['📖 Story-Modus (neu)',()=>newGame(undefined,'story'),'#5a2f6b'],['♾ Endlos-Modus (neu)',()=>newGame(undefined,'endless'),'#3a3055'],['👥 Koop (2 Spieler)',()=>{CO.lob={st:'menu'};},'#1f5a7a']);
+  fnList.push(['📖 Story-Modus (neu)',()=>newGame(undefined,'story'),'#5a2f6b'],['♾ Endlos-Modus (neu)',()=>newGame(undefined,'endless'),'#3a3055']);if(!CG)fnList.push(['👥 Koop (2 Spieler)',()=>{CO.lob={st:'menu'};},'#1f5a7a']);
   const fT=['🏆 Ranglisten',()=>{dKey=dayKey();bk={tab:3,pg:0,lt:1};lbLoad();topLoad(1);},'#7a5a1f'],fB=['📕 Bestiarium '+na+'/'+ACH.length,()=>{bk={tab:0,pg:0};},'#3a3055'],fA=[acct?'Abmelden':'Anmelden',()=>logout(),'#2a2538'],fX=['🚪 Beenden',byeStart,'#4a2431'];
   const textBlock=y=>{const kl=wrap(ktxt,W-32-(qf?sl+sr:0),14,500).slice(0,2);kl.forEach((s,i)=>txt(s,W/2,y+i*18,14,kcol,500));txt('Rekord: Ebene '+best,W/2,y+kl.length*18+6,14,'rgba(244,239,230,.6)',500);TMB=y+kl.length*18+12;};
   if(qf){   // Querformat-Handy: 2-Spalten-Raster, Höhe 44
-    const BW=Math.min(W-sl-sr-48,680),cw=(BW-12)/2,x0=W/2-BW/2,all=[...fnList,fT,fB,fA,fX];let y=yS+6;
+    const BW=Math.min(W-sl-sr-48,680),cw=(BW-12)/2,x0=W/2-BW/2,all=CG?[...fnList,fB]:[...fnList,fT,fB,fA,fX];let y=yS+6;
     all.forEach((b,i)=>btn(x0+(i%2)*(cw+12),y+Math.floor(i/2)*54,cw,44,b[0],b[1],b[2]));
     textBlock(y+Math.ceil(all.length/2)*54+16);return;}
   const bw=Math.min(W-60,420),bx=W/2-bw/2;let y=Math.max(H*.26,yS+6);
+  if(CG){const nb=fnList.length+1,bh=Math.max(36,Math.min(54,(H-y-74)/nb-10)),gp=bh+10;y=Math.max(y,yS+(H-yS-nb*gp-40)*.3);[...fnList,fB].forEach(b=>{btn(bx,y,bw,bh,b[0],b[1],b[2]);y+=gp;});textBlock(y+12);return;}
   const nb=fnList.length+4,bh=Math.max(36,Math.min(54,(H-y-74)/nb-10)),gp=bh+10,stk=fnList.length*gp+gp+Math.min(44,bh)+62;y=Math.max(y,yS+(H-yS-stk)*.3);
   fnList.forEach(b=>{btn(bx,y,bw,bh,b[0],b[1],b[2]);y+=gp;});
   {const hw=(bw-10)/2;btn(bx,y,hw,bh,fT[0],fT[1],fT[2]);btn(bx+hw+10,y,hw,bh,fB[0],fB[1],fB[2]);y+=gp;
@@ -3432,7 +3435,7 @@ const G_MAIN=g;{const sv=g.save.bind(g),rs=g.restore.bind(g);let dep=0;g.save=()
 const resetTf=()=>{if(g!==G_MAIN)g=G_MAIN;g.unwind();const k=cv.width/W||1;g.setTransform(k,0,0,k,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.shadowBlur=0;};
 // ===== Ladebildschirm beim Start (ca. 7 Sekunden): zufällige Story-Szene + Tipp =====
 // Läuft vor dem Titelbild. Testprogramme (navigator.webdriver) überspringen ihn, außer die Adresse endet auf #lade.
-const LOADD=7;
+const LOADD=window.TR_CG?4:7;
 let loadT=(navigator.webdriver&&!/lade/.test(location.hash))?0:LOADD;
 const LSC=[{s:1,k:10,a:'#2a2050',b:'#0b0816',p:0,gh:1},{s:3,k:5,a:'#17442c',b:'#06120b',p:1},{s:6,k:8,a:'#1e4268',b:'#070f1c',p:2},
   {s:9,k:7,a:'#5c1d0c',b:'#160604',p:3},{s:12,k:9,a:'#2e3c1c',b:'#0a0e06',p:4},{s:15,k:10,a:'#351a54',b:'#0a0414',p:5}];
@@ -3565,7 +3568,15 @@ async function admShow(){if(!(await isOwner()))return;admOpen=1;admConf='';admT=
 function admHide(){admOpen=0;Q('adm').style.display='none';}
 let last=performance.now();
 let errT='',errU=0;addEventListener('error',e=>{const f=e.filename||'';if(!f||!f.startsWith(location.origin)||e.message==='Script error.'){try{console.warn('Fremder Fehler:',e.message,f,e.error);}catch(_){}return;}errT=String(e.message||e).slice(0,90);});
-function loop(n){requestAnimationFrame(loop);const dt=Math.min(.05,(n-last)/1000||0);last=n;
+// ===== CrazyGames-SDK (nur in der CrazyGames-Version) =====
+// Meldet Laden (loadingStart/Stop) und ob gerade gespielt wird (gameplayStart/Stop), happytime bei Boss-Sieg. Fehlt das SDK, läuft das Spiel normal weiter.
+let cgSDK=null,cgPlay=false,cgLoad=false;
+function cgCall(f){try{if(cgSDK)f(cgSDK);}catch(e){}}
+if(CG){try{const S=window.CrazyGames&&window.CrazyGames.SDK;if(S&&S.init){Promise.resolve(S.init()).then(()=>{cgSDK=S;cgLoad=true;cgCall(x=>x.game.loadingStart());}).catch(()=>{});}}catch(e){}}
+function cgHappy(){cgCall(x=>x.game.happytime());}
+function cgTick(){if(!cgSDK)return;if(cgLoad&&!(loadT>0)){cgLoad=false;cgCall(x=>x.game.loadingStop());}
+  const p=st==='play'&&!ui&&!(loadT>0)&&!document.hidden;if(p!==cgPlay){cgPlay=p;cgCall(x=>p?x.game.gameplayStart():x.game.gameplayStop());}}
+function loop(n){requestAnimationFrame(loop);try{cgTick();}catch(e){}const dt=Math.min(.05,(n-last)/1000||0);last=n;
   try{if(CO.on&&CO.role==='guest'){if(st==='play')guestUpdate(dt);}else if(st==='play'&&(!ui||CO.on))update(dt);}catch(e){errT='update: '+e.message;}
   try{if(st==='play'||st==='over')metaTick(dt);}catch(e){errT='meta: '+e.message;}
   try{musicTick(dt);}catch(e){}
@@ -3578,7 +3589,7 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min(.05,(n-last)/1000
 initLang();requestAnimationFrame(loop);
 // Als lokale Datei gibt es keine Konten: direkt als Gast starten. (GitHub Pages nutzt Firebase, siehe oben.)
 if(!FB_ON&&!window.claude)guest=true;
-if(EMB){const b=Q('bo');b.style.display='block';b.onclick=()=>{try{window.open(HOME_URL,'_blank','noopener');}catch(e){}};}
+if(EMB&&!CG){const b=Q('bo');b.style.display='block';b.onclick=()=>{try{window.open(HOME_URL,'_blank','noopener');}catch(e){}};}
 Q('bl').onclick=()=>doAuth(0);Q('br').onclick=()=>doAuth(1);Q('bg').onclick=()=>{guest=true;};Q('pw').addEventListener('keydown',ev=>{if(ev.key==='Enter')doAuth(0);});
 // ===== Koop (2 Spieler, Version 1) =====
 // Gastgeber (host) rechnet die ganze Welt wie im Einzelspiel und hat einen zweiten Helden CO.p2 für den Gast.
