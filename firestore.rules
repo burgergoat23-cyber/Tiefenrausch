@@ -7,7 +7,7 @@ service cloud.firestore {
     function self(uid) { return signedIn() && request.auth.uid == uid; }
     function isAdmin() { return signedIn() && request.auth.token.email == 'burgergoat44@tiefenrausch.spiel'; }
     function banned() { return exists(/databases/$(database)/documents/banned/$(request.auth.uid)); }
-    function small(n) { return request.resource.size() <= n; }
+    function small(n) { return request.resource.data.size() <= n; }   // höchstens n Felder
     // Gäste (auch CrazyGames) melden sich unsichtbar anonym an und dürfen nur in die Ranglisten schreiben.
     function anon() { return signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
     // Gast-Einträge müssen g == true tragen, Konto-Einträge dürfen es nicht (so kann kein Gast ein Konto nachahmen).
