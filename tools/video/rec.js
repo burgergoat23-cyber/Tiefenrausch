@@ -96,7 +96,7 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   const gain=lufsGain(`-f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw`);
   execSync(`ffmpeg -y -loglevel error -framerate ${FPS} -i ${tmp}/f%05d.jpg -f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw `+
     `-af "afade=t=in:d=0.4,afade=t=out:st=${(fr/FPS-1.2).toFixed(2)}:d=1.2,volume=${gain}dB,alimiter=limit=0.89:level=false" `+
-    `-c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart -shortest ${out}`);
+    `-c:v libx264 -preset slow -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart -shortest ${out}`);
   fs.rmSync(tmp,{recursive:true,force:true});
   console.log('fertig:',out,(fs.statSync(out).size/1e6).toFixed(1)+' MB,',(fr/FPS).toFixed(1)+' s',errs.length?'JS-Fehler: '+errs.join(' | '):'');
 })();
