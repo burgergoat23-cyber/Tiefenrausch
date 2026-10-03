@@ -36,6 +36,18 @@ const T={
 const title="st='ready';bk=null;ui=null;CO.lob=null;",
   run=(md,f,w)=>`newGame(undefined,'${md}');${f>1?`fl=${f};gen();`:''}me.mx=Math.max(me.mx,${Math.min(12,4+Math.floor(f/3))});me.hp=me.mx;${w?`me.w=${w};`:''}ui=null;VAP.wig=0;`,
   rank=l=>`st='ready';ui=null;dKey=dayKey();gName='${l==='en'?'You':'Du'}';bk={tab:3,pg:0,lt:0};lb={st:'ok',rows:[],t:Date.now()+9e9,d:dayKey(),rank:0};`;
+// Clip „Kosmische Waffe“: schwächstes Schwert gegen Boss → Boss-Truhe → kosmische Waffe in Zeitlupe → Ebene abräumen.
+// Der Fund ist inszeniert (Waffe Sternenschmiede, Stufe Kosmisch, wird beim Fallen eingesetzt) – die Waffe gibt es im Spiel wirklich.
+const CL={de:{a:'Boss mit dem schwächsten Schwert?',b:'Die Boss-Truhe …',c:'KOSMISCH?!',d:'Jetzt wird’s lustig',e:'Wie tief kommst du?',f:'Link in der Beschreibung ↓',
+    va:'Ein Boss, aber ich habe nur das schwächste Schwert im Spiel.',vb:'Mal sehen, was in der Boss-Truhe ist …',vd:'Okay. Jetzt wird es lustig.',ve:'Wie tief kommst du? Der Link ist in der Beschreibung!'},
+  en:{a:'Boss fight with the weakest sword?',b:'The boss chest …',c:'COSMIC?!',d:'Now it gets fun',e:'How deep can you go?',f:'Link in the description ↓',
+    va:'A boss fight, and all I have is the weakest sword in the game.',vb:"Let's see what's in the boss chest …",vd:'Okay. Now this gets fun.',ve:'How deep can you go? The link is in the description!'}};
+const NOI="it=it.filter(i=>i.t!=='armor'&&i.t!=='weapon');";   // keine Ausrüstungs-Hinweise im Bild
+const RIG=`window.__sf=(window.__sf||0)+1;const b=en.find(e=>e.boss);if(b&&window.__sf>25)b.hp=0;
+  for(const i of it)if(i.t==='weapon'&&!i._v&&!window.__rig){i._v=1;window.__rig=1;i.w=mkW(48,7);window.__slow=.3;window.__sl=40;window.__rt=0;
+    CAP={a:CAP_C,b:'',len:2.2,y:.15,hook:1};}
+  if(window.__sl>0&&--window.__sl===0)window.__slow=1;if(window.__rig)window.__rt=(window.__rt||0)+1;const nw=nearW();if(nw&&nw.w&&nw.w.i===48&&window.__rt>50){swapW(nw);window.__slow=1;}
+  if(window.__rig)it=it.filter(i=>i.t!=='armor'&&!(i.t==='weapon'&&!(i.w&&i.w.i===48)));`;
 module.exports={
   shorts:{view:{width:432,height:768},dpr:2.5,file:l=>`youtube_short_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
     {sec:2.4,setup:run('endless',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.hook],hook:1,vo:v.s1,zoom:1.18},     // Aufhänger mit Action
@@ -44,6 +56,12 @@ module.exports={
     {sec:3,setup:run('endless',26,'{i:35,t:7}'),cap:[t.deep,t.deepS],vo:v.s4,zoom:1.2},
     {sec:3,setup:rank(l),cap:[t.rank,t.rankS],cy:.09,vo:v.s5},
     {sec:3.5,setup:title,cap:[t.play,t.url],cy:.84,vo:v.s6}];}},
+  clip_kosmisch:{view:{width:432,height:768},dpr:2.5,file:l=>`clip_kosmische_waffe_${l}.mp4`,scenes:l=>{const c=CL[l];return[
+    {sec:3,setup:run('endless',21,'{i:0,t:0}')+"VAP.toBoss();en=en.filter(e=>e.boss);{const b=en.find(e=>e.boss);if(b){b.hp=b.mx=Math.round(b.mx*.3);}}window.__rig=0;window.__sf=0;window.__slow=1;",
+      cap:[c.a],hook:1,vo:c.va,zoom:1.3},
+    {sec:5,setup:`window.CAP_C=${JSON.stringify(c.c)};window.__sf=0;en=en.filter(e=>e.boss);`,each:RIG,cap:[c.b],vo:c.vb,zoom:1.35,flash:false},
+    {sec:6,setup:"window.__slow=1;window.__W=me.w;"+run('endless',22,'__W'),each:NOI,cap:[c.d],vo:c.vd,zoom:1.15},
+    {sec:3.5,each:NOI,cap:[c.e,c.f],vo:c.ve,flash:false,zoom:1.2}];}},
   probe:{view:{width:432,height:768},dpr:2.5,file:l=>`probe_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
     {sec:2,setup:run('endless',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.hook],hook:1,vo:v.s1,zoom:1.2},{sec:1.5,setup:title,cap:[t.play,t.url],cy:.84}];}},
   lang:{view:{width:960,height:540},dpr:2,hash:'#lade',file:l=>`youtube_trailer_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[

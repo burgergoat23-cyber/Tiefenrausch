@@ -31,7 +31,7 @@ function init(cfg){
   window.__V={OFF,
     async step(){                       // ein Bild: Ton bis zum nächsten Zeitpunkt rechnen, dann Spiel 1/30 s weiter
       k++;const p=OFF.suspend(tq(k));if(!rendering)rendering=OFF.startRendering();else realResume();await p;
-      now+=1000/cfg.fps;if(raf){const f=raf;raf=null;f(now);}},
+      now+=1000/cfg.fps*(window.__slow||1);if(raf){const f=raf;raf=null;f(now);}},
     async finish(){realResume();const b=await rendering;const n=b.length,L=b.getChannelData(0),R=b.getChannelData(1),o=new Int16Array(n*2);
       for(let i=0;i<n;i++){o[2*i]=Math.max(-1,Math.min(1,L[i]))*32767;o[2*i+1]=Math.max(-1,Math.min(1,R[i]))*32767;}
       window.__pcm=new Uint8Array(o.buffer);return window.__pcm.length;},
@@ -53,7 +53,7 @@ VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return
   for(const e of en){const d=Math.hypot(e.x-me.x,e.y-me.y);if(d<bd&&(d<520||e.boss)){bd=d;tg=e;}}
   if(tg)rng=Math.max(34,Math.min(P.rng*.75,P.proj?200:P.rng*.7));
   else{for(const c of ch)if(!c.o){const d=Math.hypot(c.x-me.x,c.y-me.y);if(d<bd){bd=d;tg=c;}}
-    for(const i of it){const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<bd&&d<300){bd=d;tg=i;}}
+    for(const i of it){if(i.t==='weapon'&&!(i.w&&i.w.t>=7)||i.t==='armor')continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<bd&&d<300){bd=d;tg=i;}}   // Rüstung/normale Waffen liegen lassen (keine Hinweis-Kästen)
     if(!tg){tg=stairs;}rng=4;}
   if(VAP.wig>0){VAP.wig--;keys[VAP.wx>0?'d':'a']=1;keys[VAP.wy>0?'s':'w']=1;return;}
   const dd=Math.hypot(tg.x-me.x,tg.y-me.y);if(dd<=rng&&(!tg.hp||los(me.x,me.y,tg.x,tg.y)))return;
