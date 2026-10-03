@@ -12,8 +12,8 @@ Indie Game of the Week, BrewOtaku. Antworten bis 3.10.: keine.
 ## Neue E-Mail-Adressen (gefunden 3.10.2026, noch nicht angeschrieben)
 | Seite | Adresse | Passt, weil |
 |---|---|---|
-| Rogueliker | editor@rogueliker.com | Seite nur über Roguelikes/Roguelites |
-| Jupiter Hadley (YouTube, itch.io-Spiele) | Jupi@JupiterHadley.com | zeigt kleine kostenlose itch.io-Spiele |
+| Rogueliker ✅ 3.10. | editor@rogueliker.com | Seite nur über Roguelikes/Roguelites |
+| Jupiter Hadley ✅ 3.10. (YouTube, itch.io-Spiele) | Jupi@JupiterHadley.com | zeigt kleine kostenlose itch.io-Spiele |
 | Free Game Planet | admin@freegameplanet.com | eigene Rubrik „Browser Games“, nur Gratisspiele |
 | Indie Hive | admin@indie-hive.com | wöchentliche Indie-Reviews |
 | RPG Site | staff@rpgsite.net | RPG-News (allgemeiner Kontakt) |
