@@ -4,16 +4,17 @@ const {chromium}=(()=>{try{return require('playwright')}catch(e){return require(
 const fs=require('fs'),path=require('path');
 const MODE=process.argv[2]||'endless',GOAL=+(process.argv[3]||100),MAXMIN=+(process.argv[4]||90),ROOT=path.join(__dirname,'..','..');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:960,height:540}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+  if(process.env.SND)await p.addInitScript(()=>{window.__SND=1;});
   await p.addInitScript(()=>{let now=0,raf=null;performance.now=()=>now;window.requestAnimationFrame=cb=>{raf=cb;return 1;};
     window.__run=n=>{for(let i=0;i<n;i++){now+=1000/30;if(raf){const f=raf;raf=null;f(now);}}};
-    try{localStorage.setItem('dg_cfg',JSON.stringify({snd:0,mus:0}));}catch(e){}});
+    try{localStorage.setItem('dg_cfg',JSON.stringify(window.__SND?{snd:1,mus:1}:{snd:0,mus:0}));}catch(e){}});
   const URL='https://burgergoat23-cyber.github.io/Tiefenrausch/',HTML=fs.readFileSync(path.join(ROOT,'index.html'));
   await p.route('**/*',r=>{const u=r.request().url();if(u.startsWith(URL))r.fulfill({contentType:'text/html',body:HTML});else r.abort();});
   await p.goto(URL);await p.evaluate(require('./ai.js'));
   await p.evaluate(m=>{guest=true;VAP.god=0;newGame(undefined,m);},MODE);
   if(process.env.SEED)await p.evaluate(x=>{Math.random=(()=>{let a=x;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();},+process.env.SEED);
   // draw() abschalten spart Zeit (nur Spiellogik)
-  await p.evaluate(()=>{window.draw=()=>{};});
+  if(!process.env.DRAW)await p.evaluate(()=>{window.draw=()=>{};});
   let t=0,lastFl=0,flT=0;const log=[];
   while(t<MAXMIN*60*30){
     const s=await p.evaluate(()=>{let r=null;for(let i=0;i<300;i++){VAP.tick();__run(1);if(st==='over'){r='tot';VAP.revive();}else if(st==='end'){r='ende';break;}}

@@ -19,7 +19,13 @@ VAP.danger=function(){let fx=0,fy=0,h=0;
   return h?{x:fx,y:fy,h}:null;};
 VAP.buy=function(o){if(!o||o.s||gold<o.p||(o.cap&&me.mx>=HPMAX))return 0;gold-=o.p;o.f();if(o.one)o.s=1;else o.p=Math.round(o.p*o.g);return 1;};
 VAP.shopping=function(){if(!shop||!shop.length)return;const F=n=>shop.find(o=>o.n.startsWith(n));
-  for(let i=0;i<3&&me.pots.heal<3;i++)if(!VAP.buy(F('Heiltrank')))break;
+  for(let i=0;i<2&&me.pots.heal<2;i++)if(!VAP.buy(F('Heiltrank')))break;
+  // Waffen/Rüstung beim Händler: nur wenn deutlich besser (Name → Waffe/Rüstung, Stufe aus der Klammer)
+  const TI={'(Selten)':2,'(Episch)':3,'(Legendär)':4};
+  for(const o of shop){if(o.s||!o.one||gold<o.p)continue;const tk=Object.keys(TI).find(k=>o.n.endsWith(k));if(!tk)continue;const t=TI[tk];
+    const wi=WP.findIndex(w=>o.n===w.n+' '+tk);if(wi>=0){if(wsc({i:wi,t,a:[]})>wsc(me.w)*1.2)VAP.buy(o);continue;}
+    const ai=ARN.findIndex(n=>o.n===n+' '+tk);if(ai>=0){const c=me.arm[ai];if(!c||t>c.t)VAP.buy(o);}}
+  if(me.w2&&wsc(me.w2)>wsc(me.w)){const x=me.w;me.w=me.w2;me.w2=x;}   // stärkere Waffe in die Hand
   if(me.mx<HPMAX)VAP.buy(F('Herz'));VAP.buy(F('Schleifstein'));
   for(let i=0;i<4&&me.pots.heal<6;i++)if(!VAP.buy(F('Heiltrank')))break;
   if(me.pots.rage<2)VAP.buy(F('Wuttrank'));};
@@ -37,7 +43,7 @@ VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return
   const P=WP[me.w.i];let tg=null,rng=0,bd=1e9;VAP.fr++;
   // Zielsperre: aktuelles Ziel behalten (kein Hin-und-her an der Reichweitengrenze); unerreichbare Gegner eine Weile ignorieren
   if(VAP.cur&&(!en.includes(VAP.cur)||VAP.cur.hp<=0))VAP.cur=null;
-  if(VAP.cur&&++VAP.curT>(VAP.cur.boss?900:240)){VAP.ign.set(VAP.cur,VAP.fr+1800);VAP.cur=null;}
+  if(VAP.cur&&!VAP.cur.boss&&++VAP.curT>240){VAP.ign.set(VAP.cur,VAP.fr+1800);VAP.cur=null;}   // Boss nie ignorieren (Treppe bleibt sonst zu)
   if(VAP.cur){tg=VAP.cur;bd=Math.hypot(tg.x-me.x,tg.y-me.y);if(!VAP.god&&!tg.boss){if(los(me.x,me.y,tg.x,tg.y))VAP.nl=0;else if(++VAP.nl>45)bd=1e9;}if(bd>620){VAP.cur=null;tg=null;bd=1e9;}}
   {const B=en.find(e=>e.boss);if(B&&!VAP.god&&tg!==B&&Math.hypot(B.x-me.x,B.y-me.y)<650&&!(tg&&Math.hypot(tg.x-me.x,tg.y-me.y)<55)){tg=B;VAP.cur=B;VAP.curT=0;bd=Math.hypot(B.x-me.x,B.y-me.y);}}   // Boss-Ebene: Boss zuerst (Diener ruft er immer neu)
   if(!tg){for(const e of en){if((VAP.ign.get(e)||0)>VAP.fr)continue;const d=Math.hypot(e.x-me.x,e.y-me.y);if(d<bd&&(VAP.god?d<520:(d<300&&los(me.x,me.y,e.x,e.y)))||e.boss&&d<bd){bd=d;tg=e;}}if(tg){VAP.cur=tg;VAP.curT=0;VAP.nl=0;}}   // ehrlich: nur sichtbare Gegner jagen, sonst weiter zur Treppe
