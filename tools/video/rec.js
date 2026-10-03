@@ -10,6 +10,8 @@ const P=require('./plans.js')[PLAN];if(!P)throw new Error('Unbekannter Plan '+PL
 const scenes=P.scenes(LANG),DUR=scenes.reduce((a,s)=>a+s.sec,0)+1;
 const tmp=fs.mkdtempSync(path.join(require('os').tmpdir(),'vid-'));
 
+function lufsGain(inp){const o=execSync(`ffmpeg -hide_banner -nostats ${inp} -af ebur128=framelog=quiet -f null - 2>&1`).toString();
+  const m=/I:\s+(-?[\d.]+) LUFS/.exec(o.split('Summary')[1]||'');const I=m?+m[1]:-30;return Math.max(0,Math.min(24,-14-I)).toFixed(1);}
 // --- läuft im Spiel, bevor dessen Skript startet ---
 function init(cfg){
   let now=0,raf=null;const SR=48000;
@@ -90,8 +92,10 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   const pcm=Buffer.concat(parts);fs.writeFileSync(path.join(tmp,'a.raw'),pcm);
   await b.close();
   const name=P.file(LANG),out=path.join(OUT,name);fs.mkdirSync(OUT,{recursive:true});
+  // Lautheit messen und auf ~-14 LUFS (YouTube) bringen, Spitzen mit Limiter abfangen
+  const gain=lufsGain(`-f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw`);
   execSync(`ffmpeg -y -loglevel error -framerate ${FPS} -i ${tmp}/f%05d.jpg -f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw `+
-    `-af "afade=t=in:d=0.4,afade=t=out:st=${(fr/FPS-1.2).toFixed(2)}:d=1.2,volume=${P.gain||9}dB,alimiter=limit=0.89:level=false" `+
+    `-af "afade=t=in:d=0.4,afade=t=out:st=${(fr/FPS-1.2).toFixed(2)}:d=1.2,volume=${gain}dB,alimiter=limit=0.89:level=false" `+
     `-c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart -shortest ${out}`);
   fs.rmSync(tmp,{recursive:true,force:true});
   console.log('fertig:',out,(fs.statSync(out).size/1e6).toFixed(1)+' MB,',(fr/FPS).toFixed(1)+' s',errs.length?'JS-Fehler: '+errs.join(' | '):'');
