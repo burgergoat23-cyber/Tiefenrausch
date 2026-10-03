@@ -65,6 +65,17 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
  await G.p.evaluate(()=>lbLoad(1));await wait(1500);
  const l3=await G.p.evaluate(()=>lb.rows.map(r=>lbNm(r)));ok(l3.includes('tom')&&l3.includes('LenaNeu (Gast)'),'Konto und Gast nebeneinander '+JSON.stringify(l3));
 
+ console.log('3b) Admin: Ranglisten aufräumen (auch Gäste)');
+ {const A=await page();await A.p.fill('#un','BurgerGoat44');await A.p.fill('#pw','adminpw1');await A.p.click('#br');
+  for(let i=0;i<40;i++){await wait(200);if(await A.p.evaluate(()=>!!acct&&isAdm))break;}
+  await A.p.evaluate(()=>{st='ready';admShow();});await wait(2500);
+  const t=await A.p.textContent('#adl');ok(/Bestenliste \(Top 30\)/.test(t)&&/LenaNeu \(Gast\)/.test(t),'Admin sieht Gast in den Ranglisten');
+  const del=async(kind,u)=>A.p.evaluate(async([k,u])=>{const x=(k==='top'?admData.top:admData.dr).find(r=>r.u===u);await admAct(k,{id:x.id,u});await admAct(k,{id:x.id,u});},[kind,u]);
+  await A.p.evaluate(async()=>{const x=admData.dr.find(r=>r.u==='LenaNeu');await admAct('ban',{id:x.id,u:'LenaNeu'});await admAct('ban',{id:x.id,u:'LenaNeu'});});await wait(1200);
+  await del('top','LenaNeu');await wait(1200);await del('lb','LenaNeu');await wait(1500);
+  const r=await A.p.evaluate(()=>({top:admData.top.map(x=>x.u),dr:admData.dr.map(x=>x.u),ban:admData.ban.size}));
+  ok(!r.top.includes('LenaNeu')&&!r.dr.includes('LenaNeu')&&r.ban===1,'Gast gesperrt, Einträge gelöscht '+JSON.stringify(r));
+  await A.ctx.close();}
  console.log('4) CrazyGames-Version: keine Konten, aber Ranglisten');
  for(const vp of [{width:820,height:1180},{width:844,height:390}]){
   const C=await page(CGAME,vp);await wait(4500);

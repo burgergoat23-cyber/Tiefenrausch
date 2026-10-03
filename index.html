@@ -3588,13 +3588,14 @@ function admRow(x){return{id:String(x.id),u:admS(x.u)||'?',t:+x.t||0,cr:+x.cr||0
 function admMsg(t){const m=Q('adg');if(m)m.textContent=t||'';}
 async function admLoad(){if(admBusy||!admOpen)return;admBusy=1;
   try{const d=await getDb();if(!d){admMsg('Datenbank nicht erreichbar.');return;}
-    const[ps,bs,ds]=await Promise.all([d.collection('players').limit(300).get(),d.collection('banned').limit(300).get(),d.collection('daily').where('d','==',dayKey()).limit(300).get()]);
-    admData={rows:ps.docs.map(x=>admRow(Object.assign({},x.data(),{id:x.id}))),ban:new Set(bs.docs.map(x=>x.id)),day:Object.fromEntries(ds.docs.map(x=>[x.id,admN((x.data()||{}).s)])),t:Date.now()};
+    const[ps,bs,ds,ts]=await Promise.all([d.collection('players').limit(300).get(),d.collection('banned').limit(300).get(),d.collection('daily').where('d','==',dayKey()).limit(300).get(),d.collection('top').orderBy('fl','desc').limit(30).get()]);
+    const dr=ds.docs.map(x=>Object.assign({},x.data(),{id:x.id}));
+    admData={rows:ps.docs.map(x=>admRow(Object.assign({},x.data(),{id:x.id}))),ban:new Set(bs.docs.map(x=>x.id)),day:Object.fromEntries(dr.map(x=>[x.id,admN(x.s)])),dr:dr.sort((a,b)=>admN(b.s)-admN(a.s)),top:ts.docs.map(x=>Object.assign({},x.data(),{id:x.id})),t:Date.now()};
     admMsg('');admRender();}
   catch(e){admMsg('Fehler beim Laden: '+((e&&e.message)||e));}
   admBusy=0;}
 async function admAct(kind,r){const key=kind+':'+r.id;if(admConf!==key){admConf=key;admRender();return;}admConf='';
-  try{const d=await getDb();if(kind==='ban')await d.doc('banned/'+r.id).set({u:r.u,t:Date.now()});else if(kind==='unban')await d.doc('banned/'+r.id).delete();else if(kind==='lb')await d.doc('daily/'+r.id).delete();}
+  try{const d=await getDb();if(kind==='ban')await d.doc('banned/'+r.id).set({u:r.u,t:Date.now()});else if(kind==='unban')await d.doc('banned/'+r.id).delete();else if(kind==='lb')await d.doc('daily/'+r.id).delete();else if(kind==='top')await d.doc('top/'+r.id).delete();}
   catch(e){admMsg('Aktion fehlgeschlagen: '+((e&&e.message)||e));}
   admBusy=0;admLoad();}
 function admRender(){const D=admData,box=Q('adl'),sb=Q('ads');if(!D||!box||!sb)return;box.textContent='';sb.textContent='';
@@ -3617,7 +3618,15 @@ function admRender(){const D=admData,box=Q('adl'),sb=Q('ads');if(!D||!box||!sb)r
       if(r.id!==myId){bb(banned1?'Entsperren':'Sperren',banned1?'unban':'ban',banned1?'':'bad');}
       if(D.day[r.id]!==undefined)bb('Tageslauf-Eintrag löschen','lb','bad');
       p.appendChild(dt);}
-    box.appendChild(p);}}
+    box.appendChild(p);}
+  // Ranglisten (auch Gäste, die nicht in der Spielerliste stehen): Einträge löschen, Schreiber sperren
+  const lsec=(title,list,val,kind)=>{const h=admEl('div','nm',title);h.style.margin='18px 0 8px';box.appendChild(h);
+    if(!list.length)box.appendChild(admEl('div','sub','Keine Einträge.'));
+    list.forEach((x,i)=>{const p=admEl('div','pr'),nm=admEl('div','',(i+1)+'. '+lbNm(x)+' – '+val(x)+(D.ban.has(x.id)?'  ⛔ gesperrt':''));p.appendChild(nm);
+      const bb=(t,k,cls)=>{const b=admEl('button',cls||'',admConf===k+':'+x.id?'Wirklich? Nochmal tippen':t);b.style.margin='8px 8px 0 0';b.onclick=()=>admAct(k,{id:x.id,u:lbNm(x)});p.appendChild(b);};
+      bb('Eintrag löschen',kind,'bad');if(x.id!==myId)bb(D.ban.has(x.id)?'Entsperren':'Sperren',D.ban.has(x.id)?'unban':'ban',D.ban.has(x.id)?'':'bad');box.appendChild(p);});};
+  lsec('🏅 Bestenliste (Top 30)',D.top||[],x=>'Ebene '+admN(x.fl),'top');lsec('📅 Tageslauf heute',D.dr||[],x=>admN(x.s)+' Pkt','lb');
+  box.appendChild(admEl('div','sub','Tipp: Bei Schummlern erst „Sperren“, dann „Eintrag löschen“ – sonst trägt sich ein Konto beim nächsten Spielen wieder ein.'));}
 async function admShow(){if(!(await isOwner()))return;admOpen=1;admConf='';admT=0;Q('adm').style.display='block';admLoad();}
 function admHide(){admOpen=0;Q('adm').style.display='none';}
 let last=performance.now();
