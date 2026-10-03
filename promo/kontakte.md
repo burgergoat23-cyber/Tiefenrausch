@@ -22,7 +22,7 @@ Indie Game of the Week, BrewOtaku. Antworten bis 3.10.: keine.
 | GameStar (deutsch) | redaktion@gamestar.de | Redaktion, Themenvorschläge |
 
 ## Formulare (selbst im Browser ausfüllen, keine Gmail-Grenze)
-- Jay is Games: https://jayisgames.com/game-submit/ (Browserspiele, sehr passend)
+- Jay is Games: kein Formular mehr → ✅ 3.10. per E-Mail an contact@jayisgames.com (nicht nochmal)
 - Indie Game Reviewer: https://indiegamereviewer.com/contact-indie-game-reviewer/
 - BrowserGamers.gg: https://browsergamers.gg/contact (nur HTML5-Browserspiele)
 - The Best Indie Games: https://www.thebestindiegames.com/contact
