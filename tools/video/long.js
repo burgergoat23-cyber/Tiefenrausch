@@ -45,8 +45,8 @@ function init(cfg){
   // Modus „bosse“: jeder Boss nacheinander (Grundbosse Ebene 3–21, Varianten-Bosse 24–39, Endboss Vorath in der Story),
   // ebenengerechte Ausrüstung, ehrlicher Kampf bis zum Sieg (bei Niederlage: Kampf neu)
   if(MODE==='bosse'){const L=[[3,'endless'],[6,'endless'],[9,'endless'],[12,'endless'],[15,'endless'],[18,'endless'],[21,'endless'],[24,'endless'],[27,'endless'],[30,'endless'],[33,'endless'],[36,'endless'],[39,'endless'],[15,'story']];
-    const setup=(f,m)=>p.evaluate(([f,m])=>{newGame(undefined,m);fl=f;gen();const t=Math.min(5,1+Math.floor(f/8)),a=Math.min(4,Math.floor(f/8));
-      me.w=mkW(24,t);me.mx=Math.min(12,5+Math.floor(f/3));me.hp=me.mx;me.pots.heal=5;me.pots.rage=2;me.arm=[{s:0,t:a},{s:1,t:a},{s:2,t:a}];ui=null;
+    const setup=(f,m)=>p.evaluate(([f,m])=>{newGame(undefined,m);fl=f;gen();const t=Math.min(4,1+Math.floor(f/10)),a=Math.min(4,Math.floor(f/9));
+      me.w=mkW(10,t);   // normales Katana (kein Einzelstück), Stufe nach Ebeneme.mx=Math.min(12,5+Math.floor(f/3));me.hp=me.mx;me.pots.heal=5;me.pots.rage=2;me.arm=[{s:0,t:a},{s:1,t:a},{s:2,t:a}];ui=null;
       VAP.lfl=fl;VAP.cur=null;VAP.ot=null;VAP.toBoss();},[f,m]);
     for(const [f,m] of L){await setup(f,m);const s=await state();ev.push({t:fr/FPS,k:'ebene',fl:f,boss:s.boss,deaths:s.deaths});
       let after=-1;for(let i=0;i<2700;i++){await shot(i);if(i%10)continue;const q=await p.evaluate(()=>({st,b:en.some(e=>e.boss)}));
