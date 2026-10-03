@@ -9,7 +9,8 @@ const OUT=process.argv[4]||path.join(ROOT,'promo');const FPS=30;
 const P=require('./plans.js')[PLAN];if(!P)throw new Error('Unbekannter Plan '+PLAN);
 const scenes=P.scenes(LANG),tmp=fs.mkdtempSync(path.join(require('os').tmpdir(),'vid-'));
 // KI-Sprecher: Sätze vorab erzeugen, Szenen mindestens so lang wie ihr Satz (+ Luft)
-const VO_IN=.15;{const L=scenes.map(s=>s.vo||'');fs.writeFileSync(path.join(tmp,'vo.json'),JSON.stringify(L));
+const VO_IN=.15,NOVO=!!process.env.NOVO;   // NOVO=1: gleicher Schnitt (Szenenlängen nach Sprechertext), aber ohne Stimme – z. B. für eigene Stimme in CapCut
+{const L=scenes.map(s=>s.vo||'');fs.writeFileSync(path.join(tmp,'vo.json'),JSON.stringify(L));
   const d=JSON.parse(execSync(`python3 ${path.join(__dirname,'tts.py')} ${LANG} ${tmp} ${path.join(tmp,'vo.json')}`).toString().trim().split('\n').pop());
   scenes.forEach((s,i)=>{s.voDur=d[i];if(d[i])s.sec=Math.max(s.sec,Math.ceil((d[i]+VO_IN+.45)*FPS)/FPS);});}
 const DUR=scenes.reduce((a,s)=>a+s.sec,0)+1;
@@ -107,10 +108,10 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   for(let i=0;i<n;i+=4e6)parts.push(Buffer.from(await p.evaluate(([i])=>__V.chunk(i,4e6),[i]),'base64'));
   const pcm=Buffer.concat(parts);fs.writeFileSync(path.join(tmp,'a.raw'),pcm);
   await b.close();
-  const name=P.file(LANG),out=path.join(OUT,name);fs.mkdirSync(OUT,{recursive:true});
+  const name=P.file(LANG).replace('.mp4',NOVO?'_ohne_stimme.mp4':'.mp4'),out=path.join(OUT,name);fs.mkdirSync(OUT,{recursive:true});
   // Ton mischen: Spiel leiser (-27 LUFS), Sprecher vorn (-17 LUFS), Spiel duckt sich unter die Stimme; danach gesamt auf ~-14 LUFS
-  const RAW=`-f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw`,vos=scenes.map((s,i)=>s.voDur?{f:path.join(tmp,'vo_'+i+'.wav'),t:s.t0+VO_IN}:null).filter(Boolean);
-  const gG=Math.max(-10,Math.min(24,-27-lufs(RAW))).toFixed(1);let fc=`[1:a]volume=${gG}dB[g];`,ins='';
+  const RAW=`-f s16le -ar 48000 -ac 2 -i ${tmp}/a.raw`,vos=scenes.map((s,i)=>s.voDur&&!NOVO?{f:path.join(tmp,'vo_'+i+'.wav'),t:s.t0+VO_IN}:null).filter(Boolean);
+  const gG=Math.max(-10,Math.min(24,(NOVO?-16:-27)-lufs(RAW))).toFixed(1);let fc=`[1:a]volume=${gG}dB[g];`,ins='';
   if(vos.length){const iv=lufs(`-i ${vos[0].f}`),gV=Math.max(-10,Math.min(24,-17-iv)).toFixed(1);
     vos.forEach((v,k)=>{ins+=` -i ${v.f}`;const ms=Math.round(v.t*1000);fc+=`[${k+2}:a]aresample=48000,aformat=channel_layouts=stereo,highpass=f=90,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,volume=${gV}dB,adelay=${ms}|${ms}[v${k}];`;});
     fc+=vos.map((v,k)=>`[v${k}]`).join('')+`amix=inputs=${vos.length}:normalize=0:dropout_transition=0,apad[vo];[vo]asplit[vo1][vo2];[g][vo1]sidechaincompress=threshold=0.02:ratio=5:attack=20:release=400[dk];[dk][vo2]amix=inputs=2:normalize=0:duration=first[mx]`;}
@@ -121,5 +122,6 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
     `-af "afade=t=in:d=0.3,afade=t=out:st=${(fr/FPS-1.2).toFixed(2)}:d=1.2,volume=${gain}dB,alimiter=limit=0.89:level=false" `+
     `-c:v libx264 -preset slow -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart -shortest ${out}`);
   if(!process.env.KEEP)fs.rmSync(tmp,{recursive:true,force:true});else console.log('tmp',tmp);
+  if(NOVO)fs.writeFileSync(out.replace('.mp4','_sprechtext.txt'),scenes.filter(s=>s.vo).map(s=>`${(s.t0+VO_IN).toFixed(1).replace('.',',')} s  ${s.vo}`).join('\n')+'\n');
   console.log('fertig:',out,(fs.statSync(out).size/1e6).toFixed(1)+' MB,',(fr/FPS).toFixed(1)+' s',errs.length?'JS-Fehler: '+errs.join(' | '):'');
 })();
