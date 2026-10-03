@@ -19,7 +19,10 @@ h = ['<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="vie
      '<style>body{margin:0;background:#140f0b;color:#f4efe6;font:17px Georgia,serif;padding:16px}h1{color:#ffd166}h2{color:#ffd98a;margin:28px 0 6px}',
      '.k{background:#221a13;border:1px solid #5a4630;border-radius:8px;padding:12px;margin:10px 0}video{width:100%;max-height:70vh;background:#000;border-radius:6px}',
      'a.b{display:inline-block;margin:8px 0;padding:12px 18px;background:#c8913f;color:#140f0b;border-radius:6px;text-decoration:none;font-weight:bold}small{color:#ab9e86}</style></head><body>',
-     '<h1>🎬 Tiefenrausch – Videos</h1><div class="k"><b>So speicherst du ein Video auf dem iPad:</b><br>1. Auf „⬇ Speichern“ tippen.<br>2. Das Video öffnet sich. Unten/oben auf das Teilen-Symbol (Quadrat mit Pfeil) tippen.<br>3. „Video sichern“ wählen → es liegt in der Fotos-App.<br><small>Titel und Beschreibungen zum Kopieren: <a style="color:#ffd166" href="https://github.com/burgergoat23-cyber/Tiefenrausch/blob/claude/tiefen-raush-code-review-jb306f/promo/youtube.md">youtube.md</a></small></div>']
+     '<h1>🎬 Tiefenrausch – Videos</h1><div class="k"><b>So speicherst du ein Video auf dem iPad:</b><br>1. Auf „⬇ Speichern“ tippen.<br>2. Das Video öffnet sich. Unten/oben auf das Teilen-Symbol (Quadrat mit Pfeil) tippen.<br>3. „Video sichern“ wählen → es liegt in der Fotos-App.<br><b>Bilder:</b> lange auf das Bild drücken → „Zu Fotos hinzufügen“.<br><small>Titel und Beschreibungen zum Kopieren: <a style="color:#ffd166" href="https://github.com/burgergoat23-cyber/Tiefenrausch/blob/claude/tiefen-raush-code-review-jb306f/promo/youtube.md">youtube.md</a></small></div>']
+h.append('<h2>🖼️ Hintergrundbilder</h2>')
+for f, t in [('youtube_banner_2560x1440.jpg', 'YouTube-Kanalbanner (2560×1440)'), ('hintergrund_ipad_2048x2732.jpg', 'iPad-Hintergrund (hochkant)'), ('hintergrund_pc_1920x1080.jpg', 'PC-Hintergrund (1920×1080)'), ('youtube_thumbnail_1280x720.jpg', 'Vorschaubild für Videos (1280×720)')]:
+    if os.path.exists(os.path.join(P, f)): h.append(f'<div class="k">{t}<img src="{f}" style="width:100%;border-radius:6px"><a class="b" href="{f}">⬇ Speichern</a></div>')
 last = None
 for v in vids:
     t, sp = titel(v); f = os.path.basename(v); mb = os.path.getsize(v) / 1e6
