@@ -94,3 +94,49 @@ A small solo project made with the help of AI tools. Narration: AI voice.
 **Description:** A COSMIC weapon drops from the boss chest. Tiefenrausch – free in your browser: https://burgergoat44.itch.io/tiefenrausch
 Narration: AI voice
 #shorts #gaming #indiegame #dungeoncrawler #roguelike
+
+---
+
+# Neue Shorts (je Deutsch ohne Stimme + Englisch mit KI-Stimme)
+Kurz-Beschreibung (max. 100 Zeichen) für alle Shorts:
+- DE: `Kostenloses Dungeon-Spiel im Browser ⚔️ Spiel jetzt: burgergoat44.itch.io/tiefenrausch #shorts`
+- EN: `Free dungeon crawler in your browser ⚔️ Play: burgergoat44.itch.io/tiefenrausch #shorts`
+
+| Video | Titel Deutsch | Title English |
+|---|---|---|
+| short_ebene1_vs_100 | Ebene 1 vs. Ebene 100 😳 #shorts | Floor 1 vs. Floor 100 😳 #shorts |
+| short_seltenheiten | Von Gewöhnlich bis KOSMISCH ✨ #shorts | From Common to COSMIC ✨ #shorts |
+| short_ausweichen | Weich den Warnkreisen aus! ☄️ #shorts | Dodge the warning circles! ☄️ #shorts |
+| short_truhen | Was ist in den Truhen? 🎁 #shorts | What's in the chests? 🎁 #shorts |
+| short_tageslauf | Gleiches Dungeon für alle – jeden Tag 📅 #shorts | Same dungeon for everyone – every day 📅 #shorts |
+| short_endlos_chaos | Endlos-Modus ab Ebene 60 🔥 #shorts | Endless mode, floor 60+ 🔥 #shorts |
+
+# Langvideos (quer, 720p, Deutsch und Englisch mit Einblendungen)
+Kapitel-Marken: jeweils `<name>_<de|en>_kapitel.txt` – einfach in die Beschreibung kopieren, YouTube macht daraus Kapitel.
+
+| Video | Titel Deutsch | Title English |
+|---|---|---|
+| endlos100 | Schafft ein Autopilot Ebene 100? Tiefenrausch Endlos-Modus (ohne Unverwundbarkeit) | Can an autopilot reach floor 100? Tiefenrausch endless mode (no invincibility) |
+| story_komplett | Tiefenrausch – Story-Modus komplett durchgespielt (alle 15 Ebenen + Endboss) | Tiefenrausch – full story mode playthrough (all 15 floors + final boss) |
+| bosse | Alle Bosse in Tiefenrausch – jeder Kampf ehrlich gespielt | Every boss in Tiefenrausch – every fight played fair |
+
+Beschreibung Langvideos (DE):
+```
+Ein Autopilot spielt Tiefenrausch – ehrlich, ohne Unverwundbarkeit. Ausweichen, Tränke, bessere Ausrüstung: alles selbst.
+▶️ Selbst spielen (kostenlos im Browser): https://burgergoat44.itch.io/tiefenrausch
+
+Kapitel:
+<hier die Zeilen aus der Kapitel-Datei einfügen>
+
+#tiefenrausch #indiegame #browsergame #dungeoncrawler #roguelike
+```
+Description long videos (EN):
+```
+An autopilot plays Tiefenrausch – fair, no invincibility. Dodging, potions, better gear: all on its own.
+▶️ Play it yourself (free in your browser): https://burgergoat44.itch.io/tiefenrausch
+
+Chapters:
+<paste the lines from the chapter file here>
+
+#tiefenrausch #indiegame #browsergame #dungeoncrawler #roguelike
+```
