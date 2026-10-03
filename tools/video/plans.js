@@ -48,6 +48,64 @@ const RIG=`window.__sf=(window.__sf||0)+1;const b=en.find(e=>e.boss);if(b&&windo
     CAP={a:CAP_C,b:'',len:2.2,y:.15,hook:1};}
   if(window.__sl>0&&--window.__sl===0)window.__slow=1;if(window.__rig)window.__rt=(window.__rt||0)+1;const nw=nearW();if(nw&&nw.w&&nw.w.i===48&&window.__rt>50){swapW(nw);window.__slow=1;}
   if(window.__rig)it=it.filter(i=>i.t!=='armor'&&!(i.t==='weapon'&&!(i.w&&i.w.i===48)));`;
+// ===== Weitere Shorts (ehrlicher Autopilot VAP.god=0, aber mit vorgegebener Ausrüstung für die Szene) =====
+const H="VAP.god=0;me.mx=12;me.hp=12;me.pots.heal=9;me.pots.rage=3;me.arm=[{s:0,t:5},{s:1,t:5},{s:2,t:5}];";
+const TNL={de:['Gewöhnlich','Ungewöhnlich','Selten','Episch','Legendär','Mythisch','Göttlich','Kosmisch'],en:['Common','Uncommon','Rare','Epic','Legendary','Mythic','Divine','Cosmic']},
+  TCOL=['#cfd3e6','#7be495','#5cb8ff','#c77dff','#ffb347','#ff5df0','#fff3b0','#7cf5ff'];
+const near1="{const c=ch.find(c=>!c.o);if(c){const q=freeNear(c.x-70,c.y,12);me.x=q.x;me.y=q.y;}}en=[];";
+const S={de:{end:'Wie tief kommst du?',url:'Link in der Beschreibung ↓',
+    e1:'Ebene 1',e1b:'Ein paar Schleime, ein rostiges Schwert',e100:'Ebene 100',e100b:'Totales Chaos',
+    sel:'Von Gewöhnlich bis Kosmisch',
+    aus:'Weich den Warnkreisen aus!',aus2:'Lavatitan: Meteorhagel',aus3:'Jetzt wird er wütend',
+    tr:'Was ist in den Truhen?',tr2:'Noch eine …',tr3:'Und jetzt die Boss-Truhe!',
+    ta:'Tageslauf',taS:'Gleiches Dungeon für alle',ta2:'Jeden Tag neu – mit Rangliste',ta3:'Auch ohne Konto',
+    ch:'Endlos-Modus ab Ebene 60',ch2:'Ebene 70',ch3:'Ebene 80',ch4:'Ebene 90'},
+  en:{end:'How deep can you go?',url:'Link in the description ↓',
+    e1:'Floor 1',e1b:'A few slimes, a rusty sword',e100:'Floor 100',e100b:'Total chaos',
+    sel:'From Common to Cosmic',
+    aus:'Dodge the warning circles!',aus2:'Lava Titan: meteor storm',aus3:'Now he gets angry',
+    tr:"What's in the chests?",tr2:'Another one …',tr3:'And now the boss chest!',
+    ta:'Daily run',taS:'Same dungeon for everyone',ta2:'New every day – with a leaderboard',ta3:'No account needed',
+    ch:'Endless mode, floor 60 and up',ch2:'Floor 70',ch3:'Floor 80',ch4:'Floor 90',
+    v:{e1:'Floor one. A few slimes and a rusty sword.',e2:'Easy, right?',e100:'Floor one hundred.',e100b:'Total chaos.',end:'How deep can you go? The link is in the description!',
+      sel:'Every weapon comes in eight rarities.',aus:'Dodge the warning circles!',aus2:'The Lava Titan rains meteors.',aus3:'And now he gets angry.',
+      tr:"What's in the chests?",tr2:'Another one.',tr3:'And now, the boss chest!',
+      ta:'The daily run. The same dungeon for everyone.',ta2:'A new one every day, with a leaderboard.',ta3:'No account needed.',
+      ch:'Endless mode, floor sixty and up.',ch2:'Floor seventy.',ch3:'Floor eighty.',ch4:'Floor ninety.'}}};
+S.de.v={};   // Deutsch ohne Stimme (Texte im Bild)
+const sv=(l,k)=>l==='en'?S.en.v[k]:'';
+const SH={
+  short_ebene1_vs_100:l=>{const x=S[l];return[
+    {sec:3.2,setup:run('endless',1,'{i:0,t:0}')+'VAP.god=0;',cap:[x.e1],hook:1,vo:sv(l,'e1'),zoom:1.2},
+    {sec:2.5,cap:[x.e1b],vo:sv(l,'e2'),flash:false,zoom:1.25},
+    {sec:3.5,setup:run('endless',100,'mkW(49,7)')+H,cap:[x.e100],hook:1,vo:sv(l,'e100'),zoom:1.15},
+    {sec:4.5,cap:[x.e100b],vo:sv(l,'e100b'),flash:false,zoom:1.3},
+    {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];},
+  short_seltenheiten:l=>{const x=S[l],L=TNL[l];const a=[{sec:2.4,setup:run('endless',8,'{i:19,t:0}')+H,cap:[x.sel],hook:1,vo:sv(l,'sel'),zoom:1.15}];
+    for(let t=0;t<8;t++)a.push({sec:t===7?3.2:2.1,setup:`me.w=mkW(19,${t});burst(me.x,me.y,TC[${t}],${20+t*6},${160+t*20});shake=${t*1.5};`,cap:[L[t]],capCol:TCOL[t],hook:t===7?1:0,vo:l==='en'?L[t]+(t===7?'!':'.'):'',zoom:1.2+t*.03,flash:t===7});
+    a.push({sec:3.2,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.3});return a;},
+  short_ausweichen:l=>{const x=S[l];return[
+    {sec:4,setup:run('endless',33,'{i:24,t:5}')+H+'VAP.toBoss();',cap:[x.aus],hook:1,vo:sv(l,'aus'),zoom:1.15},
+    {sec:5,cap:[x.aus2],vo:sv(l,'aus2'),flash:false,zoom:1.2},
+    {sec:5,setup:"{const b=en.find(e=>e.boss);if(b)b.hp=Math.min(b.hp,Math.round(b.mx*.49));}",cap:[x.aus3],vo:sv(l,'aus3'),flash:false,zoom:1.3},
+    {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];},
+  short_truhen:l=>{const x=S[l];return[
+    {sec:3,setup:run('endless',20,'{i:24,t:4}')+H+near1,cap:[x.tr],hook:1,vo:sv(l,'tr'),zoom:1.3},
+    {sec:2.6,setup:near1,cap:[x.tr2],vo:sv(l,'tr2'),zoom:1.3},
+    {sec:2.6,setup:near1,cap:[x.tr2],vo:sv(l,'tr2'),zoom:1.3},
+    {sec:6,setup:run('endless',45,'{i:24,t:5}')+H+"VAP.toBoss();{const b=en.find(e=>e.boss);if(b)b.hp=1;}en=en.filter(e=>e.boss);",cap:[x.tr3],hook:1,vo:sv(l,'tr3'),zoom:1.3},
+    {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];},
+  short_tageslauf:l=>{const x=S[l];return[
+    {sec:3.2,setup:rank(l),cap:[x.ta,x.taS],cy:.09,vo:sv(l,'ta')},
+    {sec:5,setup:"meta.dplay=null;newGame(undefined,'daily');VAP.god=0;ui=null;",cap:[x.ta2],vo:sv(l,'ta2'),zoom:1.15},
+    {sec:4,cap:[x.ta3],vo:sv(l,'ta3'),flash:false,zoom:1.25},
+    {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];},
+  short_endlos_chaos:l=>{const x=S[l];return[
+    {sec:3.6,setup:run('endless',60,'{i:35,t:6}')+H,cap:[x.ch],hook:1,vo:sv(l,'ch'),zoom:1.15},
+    {sec:3,setup:run('endless',70,'{i:35,t:6}')+H,cap:[x.ch2],vo:sv(l,'ch2'),zoom:1.2},
+    {sec:3,setup:run('endless',80,'mkW(50,7)')+H,cap:[x.ch3],vo:sv(l,'ch3'),zoom:1.2},
+    {sec:3.5,setup:run('endless',90,'mkW(50,7)')+H,cap:[x.ch4],vo:sv(l,'ch4'),zoom:1.25},
+    {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];}};
 module.exports={
   shorts:{view:{width:432,height:768},dpr:2.5,file:l=>`youtube_short_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
     {sec:2.4,setup:run('endless',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.hook],hook:1,vo:v.s1,zoom:1.18},     // Aufhänger mit Action
@@ -76,3 +134,4 @@ module.exports={
     {sec:8,setup:rank(l),cap:[t.rank,t.rankS],vo:v.t9},
     {sec:9,setup:title,cap:[t.play,t.url],vo:v.t10}];}}};
 // Hinweis: Rangliste/Name-Knopf gibt es nur online (LB_ON) → rec.js lädt das Spiel unter der GitHub-Adresse (ohne Netz).
+for(const k in SH)module.exports[k]={view:{width:432,height:768},dpr:2.5,file:l=>`${k}_${l}.mp4`,scenes:SH[k]};

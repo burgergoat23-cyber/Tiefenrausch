@@ -54,7 +54,7 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   g.font='700 '+big+'px '+FD;const lines=[];{let cur='';for(const w of c.a.split(' ')){const t=cur?cur+' '+w:w;if(cur&&g.measureText(t).width>W*.84){lines.push(cur);cur=w;}else cur=t;}if(cur)lines.push(cur);}const h=lines.length*big*1.18+(c.b?big*.95:0)+big*.7;
   const gr=g.createLinearGradient(0,y0-h*.62,0,y0+h*.62);gr.addColorStop(0,'rgba(8,5,12,0)');gr.addColorStop(.25,'rgba(8,5,12,.78)');gr.addColorStop(.75,'rgba(8,5,12,.78)');gr.addColorStop(1,'rgba(8,5,12,0)');
   g.fillStyle=gr;g.fillRect(0,y0-h*.62,W,h*1.24);let y=y0-h/2+big*.95;g.textAlign='center';
-  for(const l of lines){g.font='700 '+big+'px '+FD;g.lineWidth=big*.16;g.strokeStyle='rgba(0,0,0,.85)';g.strokeText(l,W/2,y);g.fillStyle='#ffd98a';g.fillText(l,W/2,y);y+=big*1.18;}
+  for(const l of lines){g.font='700 '+big+'px '+FD;g.lineWidth=big*.16;g.strokeStyle='rgba(0,0,0,.85)';g.strokeText(l,W/2,y);g.fillStyle=c.col||'#ffd98a';g.fillText(l,W/2,y);y+=big*1.18;}
   if(c.b){const sm=big*.58;g.font='600 '+sm+'px '+FN;g.lineWidth=sm*.18;g.strokeText(c.b,W/2,y+sm*.2);g.fillStyle='#f4efe6';g.fillText(c.b,W/2,y+sm*.2);}
   g.restore();};
 `;
@@ -71,7 +71,7 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   let fr=0;const total=scenes.reduce((a,s)=>a+Math.round(s.sec*FPS),0);
   for(const [si,sc] of scenes.entries()){
     if(sc.setup)await p.evaluate(sc.setup);
-    await p.evaluate(c=>{CAP=c?{a:c[0],b:c[1]||'',len:c[2],y:c[3],hook:c[4]}:null;},sc.cap?[sc.cap[0],sc.cap[1],sc.capLen||(sc.voDur?Math.min(sc.sec,sc.voDur+1.4):sc.sec),sc.cy||0,sc.hook||0]:null);
+    await p.evaluate(c=>{CAP=c?{a:c[0],b:c[1]||'',len:c[2],y:c[3],hook:c[4],col:c[5]}:null;},sc.cap?[sc.cap[0],sc.cap[1],sc.capLen||(sc.voDur?Math.min(sc.sec,sc.voDur+1.4):sc.sec),sc.cy||0,sc.hook||0,sc.capCol||'']:null);
     const n=Math.round(sc.sec*FPS);sc.t0=fr/FPS;
     for(let i=0;i<n;i++){
       await p.evaluate(async([e,i,n,z,f])=>{try{if(e)(0,eval)(e);}catch(x){}VAP.tick();await __V.step();try{FXS(i,n,z,f);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0]);

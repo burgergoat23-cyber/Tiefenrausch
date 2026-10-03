@@ -4,7 +4,8 @@
 // Aufruf: node tools/video/long.js [Zielordner] [Ziel-Ebene=100]
 const {chromium}=(()=>{try{return require('playwright')}catch(e){return require('/opt/node-tools/node_modules/playwright')}})();
 const fs=require('fs'),path=require('path'),{execSync}=require('child_process');
-const ROOT=path.join(__dirname,'..','..'),OUT=process.argv[2]||path.join(ROOT,'promo'),GOAL=+(process.argv[3]||100),FPS=30,SR=32000,CHUNK=60;
+const ROOT=path.join(__dirname,'..','..'),OUT=process.argv[2]||path.join(ROOT,'promo'),GOAL=+(process.argv[3]||100),MODE=process.argv[4]||'endless',FPS=30,SR=32000,CHUNK=60;
+const NAME=MODE==='story'?'story_komplett':'endlos100',NORM=MODE==='story'?600:120;   // Story: 20 s je Ebene, Endlos: 4 s
 const tmp=fs.mkdtempSync(path.join(require('os').tmpdir(),'long-'));
 function init(cfg){
   let now=0,raf=null,OFF=null,real=null,rendering=null,k=0;
@@ -30,35 +31,36 @@ function init(cfg){
   const URL='https://burgergoat23-cyber.github.io/Tiefenrausch/',HTML=fs.readFileSync(path.join(ROOT,'index.html'));
   await ctx.route('**/*',r=>{const u=r.request().url();if(u.startsWith(URL))r.fulfill({contentType:'text/html',body:HTML});else r.abort();});
   await p.goto(URL);await p.evaluate(require('./ai.js'));
-  await p.evaluate(()=>{guest=true;VAP.god=0;try{au();}catch(e){}newGame(undefined,'endless');
+  await p.evaluate(m=>{window.MODE_=m;},MODE);
+  await p.evaluate(()=>{guest=true;VAP.god=0;try{au();}catch(e){}newGame(undefined,MODE_);
     window.FL=document.createElement('canvas');FL.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:50';document.body.appendChild(FL);
     FL.width=innerWidth*devicePixelRatio;FL.height=innerHeight*devicePixelRatio;window.FLX=FL.getContext('2d');
     window.__flash=i=>{FLX.clearRect(0,0,FL.width,FL.height);if(i<8){FLX.fillStyle='rgba(255,246,220,'+(.6*(1-i/8))+')';FLX.fillRect(0,0,FL.width,FL.height);}};});
   const raw=fs.openSync(path.join(tmp,'a.raw'),'w');let fr=0,inChunk=0;const ev=[];
-  const state=()=>p.evaluate(()=>({fl,st,boss:(en.find(e=>e.boss)||null)&&bossTitle(en.find(e=>e.boss)),bossAlive:en.some(e=>e.boss),w:WP[me.w.i].n,wt:me.w.t,hp:me.hp,mx:me.mx,deaths:VAP.deaths,pots:me.pots.heal}));
+  const state=()=>p.evaluate(()=>({rv:(me.rv||[]).length,fl,st,boss:(en.find(e=>e.boss)||null)&&bossTitle(en.find(e=>e.boss)),bossAlive:en.some(e=>e.boss),w:WP[me.w.i].n,wt:me.w.t,hp:me.hp,mx:me.mx,deaths:VAP.deaths,pots:me.pots.heal}));
   async function flushAudio(){const n=await p.evaluate(()=>__V.cut());for(let i=0;i<n;i+=4e6)fs.writeSync(raw,Buffer.from(await p.evaluate(([i])=>__V.chunk(i,4e6),[i]),'base64'));inChunk=0;}
   async function shot(fi){await p.evaluate(async i=>{VAP.tick();await __V.step();__flash(i);},fi);
     await p.screenshot({path:path.join(tmp,'f'+String(fr++).padStart(6,'0')+'.jpg'),type:'jpeg',quality:88});if(++inChunk>=CHUNK*FPS)await flushAudio();}
   let lastW='',lastT=-1,overShown=0;const t0=Date.now();
   while(true){
-    const s=await state();if(s.fl>GOAL)break;
+    const s=await state();if(s.fl>GOAL||s.st==='end')break;
     if(s.w!==lastW||s.wt!==lastT){if(lastW)ev.push({t:fr/FPS,k:'waffe',w:s.w,wt:s.wt});lastW=s.w;lastT=s.wt;}
     ev.push({t:fr/FPS,k:'ebene',fl:s.fl,boss:s.boss,deaths:s.deaths,hp:s.hp,mx:s.mx});
     // Aufnahme: normale Ebene 4 s, Boss-Ebene bis zum Sieg (+1,5 s, höchstens 20 s); bricht ab, wenn die Ebene wechselt
-    const f0=s.fl,max=s.bossAlive?600:120;let i=0,after=-1;
+    const f0=s.fl,max=s.bossAlive?Math.max(600,NORM):NORM;let rv0=s.rv;let i=0,after=-1;
     for(;i<max;i++){await shot(i);
-      if(i%10===0){const q=await p.evaluate(()=>({fl,st,b:en.some(e=>e.boss)}));
+      if(i%10===0){const q=await p.evaluate(()=>({fl,st,b:en.some(e=>e.boss),rv:(me.rv||[]).length}));if(q.rv>rv0){ev.push({t:fr/FPS,k:'gerettet',n:q.rv});rv0=q.rv;}
         if(q.st==='over'){ev.push({t:fr/FPS,k:'tod'});for(let j=0;j<75;j++)await shot(99);await p.evaluate(()=>VAP.revive());break;}
-        if(q.fl!==f0)break;if(s.bossAlive&&!q.b&&after<0)after=i;if(after>=0&&i-after>45)break;}}
+        if(q.st==='end')break;if(q.fl!==f0)break;if(s.bossAlive&&!q.b&&after<0)after=i;if(after>=0&&i-after>45)break;}}
     // Rest der Ebene stumm im Schnelldurchlauf
-    const r=await p.evaluate(f0=>{const keep=cfg.snd;cfg.snd=0;let n=0,d=0;while(fl===f0&&n<30*60*20){VAP.tick();__V.fast();n++;if(st==='over'){d++;VAP.revive();}}cfg.snd=keep;return{n,d,fl};},f0);
+    const r=await p.evaluate(f0=>{const keep=cfg.snd;cfg.snd=0;let n=0,d=0;while(fl===f0&&st!=='end'&&n<30*60*20){VAP.tick();__V.fast();n++;if(st==='over'){d++;VAP.revive();}}cfg.snd=keep;return{n,d,fl,st};},f0);
     if(r.d)ev.push({t:fr/FPS,k:'tod',n:r.d});
-    if(r.fl===f0){console.log('hängt auf Ebene',f0,'– Abbruch');break;}
+    if(r.fl===f0&&r.st!=='end'){console.log('hängt auf Ebene',f0,'– Abbruch');break;}
     if(f0%5===0)console.log(`Ebene ${f0} · Video ${(fr/FPS/60).toFixed(1)} min · ${((Date.now()-t0)/60000).toFixed(0)} min Laufzeit · Tode ${s.deaths}`);
   }
-  for(let j=0;j<90;j++)await shot(99);ev.push({t:fr/FPS,k:'ende',fl:(await state()).fl,deaths:(await state()).deaths});
+  {const e0=(await state()).st==='end';for(let j=0;j<(e0?240:90);j++)await shot(99);}ev.push({t:fr/FPS,k:'ende',fl:(await state()).fl,deaths:(await state()).deaths});
   await flushAudio();fs.closeSync(raw);await b.close();
-  fs.mkdirSync(OUT,{recursive:true});const base=path.join(OUT,'endlos100');
+  fs.mkdirSync(OUT,{recursive:true});const base=path.join(OUT,NAME);
   execSync(`ffmpeg -y -loglevel error -framerate ${FPS} -i ${tmp}/f%06d.jpg -f s16le -ar ${SR} -ac 2 -i ${tmp}/a.raw -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -c:a pcm_s16le -shortest ${base}_roh.mkv`);
   fs.writeFileSync(base+'_ereignisse.json',JSON.stringify({dur:fr/FPS,ev},null,1));fs.rmSync(tmp,{recursive:true,force:true});
   console.log('fertig:',base+'_roh.mkv',(fr/FPS/60).toFixed(1)+' min',errs.length?'JS-Fehler: '+errs.slice(0,3).join(' | '):'');

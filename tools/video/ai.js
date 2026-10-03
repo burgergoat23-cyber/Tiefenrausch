@@ -32,7 +32,9 @@ VAP.shopping=function(){if(!shop||!shop.length)return;const F=n=>shop.find(o=>o.
 VAP.better=function(i){if(i.d)return 0;if(i.t==='weapon'&&i.w)return wsc(i.w)>wsc(me.w)*1.12;if(i.t==='armor'&&i.ar){const c=me.arm[i.ar.s];return !c||i.ar.t>c.t;}return 0;};
 VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return;
   if(VAP.god){if(me.hp<Math.max(2,me.mx*.5))me.hp=me.mx;}
-  if(ui){if(ui.type==='story'){ui.tt=(ui.tt||0)+1;if(ui.tt>75){const d=ui.done;ui=null;if(d)d();}}else ui=null;return;}
+  if(ui){if(ui.type==='story'){ui.tt=(ui.tt||0)+1;if(ui.tt>75){const d=ui.done;ui=null;if(d)d();}}
+    else if(ui.type==='npc'&&ui.n&&ui.n.t==='d'){ui.tt=(ui.tt||0)+1;if(ui.tt>70){const n=ui.n;ui=null;rescueVillager(n);}}   // Dorfbewohner: Gespräch kurz zeigen, dann retten
+    else ui=null;return;}
   if(!VAP.god){
     if(VAP.lfl!==fl){VAP.lfl=fl;VAP.shopping();}
     if(me.hp<=Math.max(1,Math.ceil(me.mx*.4))&&me.pots.heal>0&&me.hp<me.mx)usePot('heal');
@@ -50,7 +52,8 @@ VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return
   if(!VAP.god&&(!tg||bd>160))for(const i of it){if(!VAP.better(i))continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<380&&d<bd){bd=d;tg=i;tg._g=1;}}
   if(tg&&tg.hp)rng=Math.max(34,Math.min(P.rng*.75,P.proj?200:P.rng*.7));
   else if(!tg){const o=VAP.ot,ok=o&&(o===stairs||(ch.includes(o)&&!o.o)||it.includes(o))&&++VAP.otT<300;   // Sachziel behalten, bis erreicht
-    if(ok){tg=o;}else{if(o&&o!==stairs&&VAP.otT>=300)VAP.skip.add(o);VAP.ot=null;
+    const vil=(npcs||[]).find(n=>n.t==='d');
+    if(vil){tg=vil;if(Math.hypot(vil.x-me.x,vil.y-me.y)<60){interact();return;}}else if(ok){tg=o;}else{if(o&&o!==stairs&&VAP.otT>=300)VAP.skip.add(o);VAP.ot=null;
       for(const c of ch)if(!c.o&&!VAP.skip.has(c)){const d=Math.hypot(c.x-me.x,c.y-me.y);if(d<bd){bd=d;tg=c;}}
       for(const i of it){if(i.t==='weapon'&&!(i.w&&i.w.t>=7)||i.t==='armor'||VAP.skip.has(i)||(me.pots[i.t]>=9))continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<bd&&d<300){bd=d;tg=i;}}
       if(!tg){tg=stairs;}if(tg!==o||!o){VAP.ot=tg;VAP.otT=0;}else{VAP.ot=null;}}

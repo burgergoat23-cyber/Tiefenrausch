@@ -18,10 +18,10 @@ const MODE=process.argv[2]||'endless',GOAL=+(process.argv[3]||100),MAXMIN=+(proc
   let t=0,lastFl=0,flT=0;const log=[];
   while(t<MAXMIN*60*30){
     const s=await p.evaluate(()=>{let r=null;for(let i=0;i<300;i++){VAP.tick();__run(1);if(st==='over'){r='tot';VAP.revive();}else if(st==='end'){r='ende';break;}}
-      return{fl,hp:me.hp,mx:me.mx,pots:me.pots.heal,gold,w:WP[me.w.i].n+'/'+TN[me.w.t],deaths:VAP.deaths,st,r,arm:me.arm.map(a=>a?a.t:-1).join('')};});
+      return{fl,hp:me.hp,mx:me.mx,pots:me.pots.heal,gold,w:WP[me.w.i].n+'/'+TN[me.w.t],deaths:VAP.deaths,rv:(me.rv||[]).length,st,r,arm:me.arm.map(a=>a?a.t:-1).join('')};});
     t+=300;
-    if(s.fl!==lastFl){log.push(`Ebene ${s.fl} nach ${(t/30/60).toFixed(1)} min · Tode ${s.deaths} · ${s.hp}/${s.mx}♥ · ${s.pots} Heiltr. · ${s.w} · Rüstung ${s.arm}`);console.log(log[log.length-1]);lastFl=s.fl;flT=t;}
-    if(t-flT>30*60*4){console.log('hängt auf Ebene',s.fl);for(let k=0;k<12;k++){console.log(await p.evaluate(()=>{const bs=en.filter(e=>e.boss).map(e=>[e.x|0,e.y|0,e.hp]);VAP.tick();const r=JSON.stringify({me:[me.x|0,me.y|0,me.hp],ui:ui&&ui.type,keys:[keys.w,keys.a,keys.s,keys.d],en:en.length,near:en.map(e=>Math.hypot(e.x-me.x,e.y-me.y)|0).sort((a,b)=>a-b).slice(0,3),bs,stairs:[stairs.x|0,stairs.y|0],ch:ch.filter(c=>!c.o).length,it:it.map(i=>i.t).join(','),zp:zp.length,eb:eb.length,dash:dashCd,dbg:VAP.dbg});__run(1);return r;}));}break;}
+    if(s.fl!==lastFl){log.push(`Ebene ${s.fl} nach ${(t/30/60).toFixed(1)} min · Tode ${s.deaths} · ${s.hp}/${s.mx}♥ · ${s.pots} Heiltr. · ${s.w} · Rüstung ${s.arm} · Gerettet ${s.rv}`);console.log(log[log.length-1]);lastFl=s.fl;flT=t;}
+    if(t-flT>30*60*4){console.log('hängt auf Ebene',s.fl);for(let k=0;k<12;k++){console.log(await p.evaluate(()=>{const bs=en.filter(e=>e.boss).map(e=>[e.x|0,e.y|0,e.hp]);VAP.tick();const r=JSON.stringify({me:[me.x|0,me.y|0,me.hp],ui:ui&&ui.type,keys:[keys.w,keys.a,keys.s,keys.d],en:en.length,near:en.map(e=>Math.hypot(e.x-me.x,e.y-me.y)|0).sort((a,b)=>a-b).slice(0,3),bs,stairs:[stairs.x|0,stairs.y|0],ch:ch.filter(c=>!c.o).length,it:it.map(i=>i.t).join(','),zp:zp.length,eb:eb.length,dash:dashCd,dbg:VAP.dbg,npcs:(npcs||[]).map(n=>[n.t,n.x|0,n.y|0])});__run(1);return r;}));}break;}
     if(s.fl>=GOAL||s.r==='ende'||s.st==='end'){console.log('ZIEL erreicht',s.fl,s.st);break;}
   }
   console.log('Fehler:',errs.slice(0,3));await b.close();})();
