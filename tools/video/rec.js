@@ -38,30 +38,7 @@ function init(cfg){
     chunk(i,sz){const a=window.__pcm.subarray(i,i+sz);let s='';for(let j=0;j<a.length;j+=8192)s+=String.fromCharCode.apply(null,a.subarray(j,j+8192));return btoa(s);}};
 }
 // --- Autopilot + Untertitel (im Spiel) ---
-const HELP=`
-window.VAP={stuck:0,lx:0,ly:0,wig:0,wx:0,wy:0,on:1,god:1};
-VAP.path=function(tx,ty){const sx=Math.floor(me.x/T),sy=Math.floor(me.y/T),gx=Math.floor(tx/T),gy=Math.floor(ty/T);
-  if(sx===gx&&sy===gy)return null;const prev=new Int32Array(N*N).fill(-1),q=[sy*N+sx];prev[sy*N+sx]=sy*N+sx;
-  for(let h=0;h<q.length;h++){const c=q[h],x=c%N,y=(c/N)|0;if(x===gx&&y===gy)break;
-    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=N||ny>=N||map[ny][nx]===1)continue;
-      if(dx&&dy&&(map[y][nx]===1||map[ny][x]===1))continue;const ni=ny*N+nx;if(prev[ni]>=0)continue;prev[ni]=c;q.push(ni);}}
-  let c=gy*N+gx;if(prev[c]<0)return null;let nx=c;while(prev[c]!==sy*N+sx&&prev[c]!==c){nx=c;c=prev[c];}nx=c;return{x:(nx%N+.5)*T,y:(((nx/N)|0)+.5)*T};};
-VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return;
-  if(VAP.god){if(me.hp<Math.max(2,me.mx*.5))me.hp=me.mx;}
-  if(ui){if(ui.type==='story'){ui.tt=(ui.tt||0)+1;if(ui.tt>75){const d=ui.done;ui=null;if(d)d();}}else ui=null;return;}
-  const P=WP[me.w.i];let tg=null,rng=0,bd=1e9;
-  for(const e of en){const d=Math.hypot(e.x-me.x,e.y-me.y);if(d<bd&&(d<520||e.boss)){bd=d;tg=e;}}
-  if(tg)rng=Math.max(34,Math.min(P.rng*.75,P.proj?200:P.rng*.7));
-  else{for(const c of ch)if(!c.o){const d=Math.hypot(c.x-me.x,c.y-me.y);if(d<bd){bd=d;tg=c;}}
-    for(const i of it){if(i.t==='weapon'&&!(i.w&&i.w.t>=7)||i.t==='armor')continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<bd&&d<300){bd=d;tg=i;}}   // Rüstung/normale Waffen liegen lassen (keine Hinweis-Kästen)
-    if(!tg){tg=stairs;}rng=4;}
-  if(VAP.wig>0){VAP.wig--;keys[VAP.wx>0?'d':'a']=1;keys[VAP.wy>0?'s':'w']=1;return;}
-  const dd=Math.hypot(tg.x-me.x,tg.y-me.y);if(dd<=rng&&(!tg.hp||los(me.x,me.y,tg.x,tg.y)))return;
-  const n=(los(me.x,me.y,tg.x,tg.y)&&dd<160)?tg:(VAP.path(tg.x,tg.y)||tg);let dx=n.x-me.x,dy=n.y-me.y;
-  if(Math.abs(dx)>6)keys[dx>0?'d':'a']=1;if(Math.abs(dy)>6)keys[dy>0?'s':'w']=1;
-  if(Math.hypot(me.x-VAP.lx,me.y-VAP.ly)<.6){if(++VAP.stuck>20){VAP.stuck=0;VAP.wig=12;VAP.wx=Math.random()-.5;VAP.wy=Math.random()-.5;}}else VAP.stuck=0;VAP.lx=me.x;VAP.ly=me.y;};
-VAP.toBoss=function(){const b=en.find(e=>e.boss);if(!b)return;for(const r of[150,120,190,90])for(let a=0;a<8;a++){const x=b.x+Math.cos(a*Math.PI/4)*r,y=b.y+Math.sin(a*Math.PI/4)*r;
-  if(!hit(x,y,12)&&los(x,y,b.x,b.y)){me.x=x;me.y=y;const ci=Math.floor(x/T),cj=Math.floor(y/T);for(let i=-7;i<=7;i++)for(let j=-7;j<=7;j++){const X=ci+i,Y=cj+j;if(X>=0&&Y>=0&&X<N&&Y<N)vis[Y*N+X]=1;}return;}}};
+const HELP=require('./ai.js')+`
 window.CAP=null;
 // Effekt-Ebene über dem Spiel (wird nicht mitgezoomt): Untertitel, Übergangsblitz
 window.OC=document.createElement('canvas');OC.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:50';document.body.appendChild(OC);
