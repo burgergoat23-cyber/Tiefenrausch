@@ -113,8 +113,8 @@ const boss=(f,m,w)=>run(m||'endless',f,w||'{i:10,t:3}')+'VAP.toBoss();',
   story=n=>`ui={type:'story',t:STORY[${n}][0],l:STORY[${n}].slice(1)};`,
   die="VAP.god=0;me.inv=0;me.hp=1;hurt(9);",
   low="VAP.god=0;me.hp=1;me.inv=0;";
-const EDIT=l=>{const e=ED[l];const c=(setup,o)=>Object.assign({sec:1,setup,pre:40,zoom:1.15,flash:false},o||{});return[
-  {sec:3,setup:run('story',1)+'VAP.god=1;',pre:50,slow:.5,zoom:1.3,cap:[e.a],cy:.16,flash:false},
+const EDIT=(l,K)=>{const e=ED[l],cs=K?.5:1;const c=(setup,o)=>Object.assign({sec:cs,setup,pre:40,zoom:1.15,flash:false},o||{});const A=[
+  {sec:K?2.5:3,setup:run('story',1)+'VAP.god=1;',pre:50,slow:.5,zoom:1.3,cap:[e.a],cy:.16,flash:false},
   c(boss(3,'story')),
   c(run('story',6),{pre:25,after:story(6),zoom:1.05}),
   c(boss(6),{zoom:1.3}),
@@ -133,7 +133,8 @@ const EDIT=l=>{const e=ED[l];const c=(setup,o)=>Object.assign({sec:1,setup,pre:4
   c(boss(15,'story','{i:10,t:4}'),{pre:50,zoom:1.3}),
   c(boss(15,'story','{i:10,t:4}')+"{const b=en.find(e=>e.boss);if(b)b.hp=Math.round(b.mx*.45);}",{pre:55,zoom:1.2}),
   c(boss(15,'story','{i:10,t:4}'),{pre:50,after:low,slow:.5,zoom:1.4}),
-  {sec:4.5,setup:"newGame(undefined,'story');me.rv=[0,1,2,3,4,5,6,7,8];st='end';",pre:10,zoom:1.15,cap:[e.z],cy:.8,flash:false}];};
+  ...(K?[c(run('endless',90,'mkW(50,7)')+H,{pre:60,zoom:1.2}),c(boss(24,'endless','{i:10,t:4}'),{pre:50,zoom:1.3})]:[]),
+  {sec:K?3.5:4.5,setup:"newGame(undefined,'story');me.rv=[0,1,2,3,4,5,6,7,8];st='end';",pre:10,zoom:1.15,cap:[e.z],cy:.8,flash:false}];return A;};
 module.exports={
   shorts:{view:{width:432,height:768},dpr:2.5,file:l=>`youtube_short_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
     {sec:2.4,setup:run('endless',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.hook],hook:1,vo:v.s1,zoom:1.18},     // Aufhänger mit Action
@@ -165,3 +166,4 @@ module.exports={
 for(const k in SH)module.exports[k]={view:{width:432,height:768},dpr:2.5,file:l=>`${k}_${l}.mp4`,scenes:SH[k]};
 module.exports.edit_traurig={view:{width:432,height:768},dpr:2.5,file:l=>`edit_traurig_${l}.mp4`,music:1,fade:1,
   vf:'eq=saturation=0.7:contrast=1.06:brightness=-0.02,colorbalance=bs=0.07:bm=0.04:rs=-0.02,vignette=PI/4.2',scenes:EDIT};
+module.exports.edit_traurig_kurz=Object.assign({},module.exports.edit_traurig,{file:l=>`edit_traurig_16s_${l}.mp4`,scenes:l=>EDIT(l,1)});

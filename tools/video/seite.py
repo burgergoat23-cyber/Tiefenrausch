@@ -6,7 +6,7 @@ NAMEN = {'clip_kosmische_waffe': 'Clip: Kosmische Waffe', 'youtube_short': 'Shor
          'short_ebene1_vs_100': 'Short: Ebene 1 gegen Ebene 100', 'short_seltenheiten': 'Short: Alle Seltenheiten',
          'short_ausweichen': 'Short: Ausweichen im Boss-Hagel', 'short_truhen': 'Short: Truhen-Glück', 'short_tageslauf': 'Short: Tageslauf',
          'short_endlos_chaos': 'Short: Endlos-Chaos ab Ebene 60', 'endlos100': 'Langvideo: Endlos bis Ebene 100',
-         'story_komplett': 'Langvideo: Story-Modus komplett', 'edit_traurig': 'Edit: Trauriger Edit (Musik, 1-Sekunden-Schnitte)', 'bosse': 'Langvideo: Alle Bosse'}
+         'story_komplett': 'Langvideo: Story-Modus komplett', 'edit_traurig_16s': 'Edit: Trauriger Edit 16 s (0,5-s-Schnitte)', 'edit_traurig': 'Edit: Trauriger Edit (Musik, 1-Sekunden-Schnitte)', 'bosse': 'Langvideo: Alle Bosse'}
 def titel(f):
     b = os.path.basename(f)[:-4]
     sp = '🇬🇧 Englisch (mit KI-Stimme)' if b.endswith('_en') else '🇩🇪 Deutsch'
