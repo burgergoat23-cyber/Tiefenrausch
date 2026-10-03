@@ -1,6 +1,6 @@
 # Tiefenrausch – Übergabe für neue Sitzungen
 
-Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die Datei ist ~430 KB, sehr lange Zeilen).
+Stand: 2026-10-03. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die Datei ist ~430 KB, sehr lange Zeilen).
 
 ## Der Nutzer
 - Spricht Deutsch, ist kein Programmierer. Antworten **kurz, einfach, auf Deutsch**; Klick-Anleitungen **Schritt für Schritt** (eine Aktion pro Nachricht, Screenshots erbitten).
@@ -31,6 +31,8 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - **Antik-Stil (UI):** Schriften `FN` (Buchschrift Palatino/Georgia) und `FD` (eingebettete Zierschrift „Cinzel“, SIL OFL, als Base64 im Code). Bausteine: `chamf` (Ecken-Schnitt), `brz` (Bronze-Verlauf), `aqPat`/`texIn` (Stein-Muster), `orn` (Eck-Schnörkel), `gem`, `dmd`, `medal` (runde HUD-Plakette), `stoneBtn` (Knopf-Hintergrund für `btn`/`padBtn`), `potIcon` (Trank-Flaschen: Herz/Flamme/Blitz). `glass`, `stoneBtn`, `frame` zeichnen über den Zwischenspeicher `uiCache` (`UIC`, große Rahmen in `UIF`). Neutrale Knopffarben werden über `BTNC` zu warmem Stein. Fenster sind auf hohen Bildschirmen begrenzt (`mBox`, max. 780) und per `uiCenter` senkrecht mittig (verschiebt Trefferflächen mit, `UIOY` in `inBox`). Galerie aller Bildschirme: `node tests/gal.js <Ordner>`.
 - **Titel-Hintergrund** `titleBG` (auch Ladebildschirm, „Bis bald“): Tempeltor vor Bergen bei Mondlicht. Ruhige Teile als Zwischenbilder `TBG.back`/`TBG.mid` (neu gebaut bei anderer Größe oder Menü-Lage `TLY`/`TMB`), bewegt: Mondstrahlen, Sternschnuppe (~6 s), Fledermäuse, Wolken, Torleuchten, Fackeln, Nebel, Glühwürmchen, Gras im Wind (weicht dem Finger aus), Herbstblätter, Funken beim Tippen (`TBG.sp`). Zeit über `performance.now()`. Tor entfällt, wenn unter dem Menü kein Platz ist (`tbgLay`).
 - **Ladebildschirm** beim Start (~7 s, `LOADD`, Zähler `loadT`): zufällige Story-Szene (`LSC`, zeichnet Held + Boss mit `drawHero`/`drawEnemy`) und Tipp (`TIPS`), Funktionen `drawLoad`/`loadScene`. Sperrt Eingaben und Anmeldefenster. Testprogramme (Playwright) überspringen ihn, außer mit `#lade` in der Adresse (`tests/lade.js`).
+- **Gast-Rangliste** (auch CrazyGames): `LB_ON` = Ranglisten erreichbar (GitHub Pages und CrazyGames über https). Gäste melden sich unsichtbar **anonym** bei Firebase an (`gUid`, Firebase-Anbieter „Anonym“ muss in der Konsole aktiv sein) und wählen einen Namen im HTML-Fenster `#gn` (`gnAsk`, `gnCheck` mit Schimpfwort-Filter `GBAD` und `RES`). Name in `dg_gname`. Einträge in `daily/<uid>` und `top/<uid>` mit `g:true`, Anzeige „Name (Gast)“ (`lbNm`, `lbMe`). Regeln: `anon()`/`guestMark()` – Gäste dürfen nur in die Ranglisten, Konten dürfen kein `g` setzen. Gast-Rekord `gTop` (nur bei neuem Rekord, `dg_gtb`). CrazyGames schlägt den Namen aus dem CrazyGames-Konto vor (`cgSDK.user.getUser`).
+- **Teilen** nach dem Tageslauf (`shareRun`, `shareTxt`: Systemmenü, sonst Zwischenablage; nicht auf CrazyGames). **Koop-Einladung per Link** `…/Tiefenrausch/#koop=CODE` (`coInv`, `coInvGo`, Knopf in der Lobby `coShare`). **Link-Vorschau** über `og:image` = `promo/og.jpg` (1200×630).
 - Update-Hinweis `updCheck` (vergleicht eigenen Code mit der Online-Version). **Achtung:** im Spielcode nie wörtlich `</script>` schreiben (sonst bricht die Seite) – z. B. `'</scr'+'ipt>'`.
 - Übersetzung: alle Texte deutsch im Code, Englisch in `LANGS.en.d` (Schlüssel = deutscher Text). Neue Texte dort ergänzen (doppelte Schlüssel vermeiden).
 - Bildschirm-Sicherungen: `resetTf()` setzt jedes Bild Maßstab/`save()`-Ebenen zurück; Figuren außerhalb des Bildes werden nicht gezeichnet; getönte Varianten über `spriteC` (Zwischenbild).
@@ -41,8 +43,8 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Commits auf Deutsch, auf den Branch oben pushen.
 
 ## Andere Webseiten
-- **itch.io:** ZIP mit nur `index.html` hochladen (Art: HTML, „This file will be played in the browser“). Nach jedem Update muss die ZIP dort **neu hochgeladen** werden (Update-Hinweis `updCheck` gibt es nur auf GitHub Pages).
-- **CrazyGames:** eigene Version mit `python3 tools/build_crazygames.py [Ordner]` (setzt `window.TR_CG`, lädt `crazygames-sdk-v3.js`, erzeugt ZIP). Im Code `CG`: kein Firebase/Anmeldung, kein Koop, keine Ranglisten-/Beenden-Knöpfe, kein Fremd-Link, Ladebildschirm 4 s. SDK-Aufrufe in `cgTick` (loadingStart/Stop, gameplayStart/Stop) und `cgHappy` (Boss besiegt). Werbung noch nicht eingebaut. Test: `node tests/crazy.js` (SDK-Attrappe). Das echte SDK konnte in der Sitzung nicht geladen werden (Netz gesperrt) → nach dem Hochladen im CrazyGames-Entwicklerportal mit deren Prüf-Werkzeug testen.
+- **itch.io:** ZIP bauen mit `python3 tools/build_itch.py` → `downloads/tiefenrausch_itch.zip` (online unter …/Tiefenrausch/downloads/). ZIP mit nur `index.html` hochladen (Art: HTML, „This file will be played in the browser“). Nach jedem Update muss die ZIP dort **neu hochgeladen** werden (Update-Hinweis `updCheck` gibt es nur auf GitHub Pages).
+- **CrazyGames:** eigene Version mit `python3 tools/build_crazygames.py [Ordner]` (setzt `window.TR_CG`, lädt `crazygames-sdk-v3.js`, erzeugt ZIP). Im Code `CG`: kein Firebase/Anmeldung, kein Koop, keine Ranglisten-/Beenden-Knöpfe, kein Fremd-Link, Ladebildschirm 4 s. SDK-Aufrufe in `cgTick` (loadingStart/Stop, gameplayStart/Stop) und `cgHappy` (Boss besiegt). Werbung noch nicht eingebaut. Test: `node tests/crazy.js` (SDK-Attrappe), Gast-Rangliste auf CrazyGames in `tests/fb/gast_t.js`. Fertige ZIP zum Herunterladen: `downloads/tiefenrausch_crazygames.zip`. Das echte SDK konnte in der Sitzung nicht geladen werden (Netz gesperrt) → nach dem Hochladen im CrazyGames-Entwicklerportal mit deren Prüf-Werkzeug testen.
 
 ## Stand Werbung & Plattformen (3.10.2026)
 - **itch.io:** https://burgergoat44.itch.io/tiefenrausch (öffentlich, Devlog + Forum-Beitrag „Release Announcements“). Noch nicht in der itch-Suche (neue Konten werden erst indexiert). Hochgeladene ZIP ist **älter** als die Firebase-Sparänderung → bei Gelegenheit neue ZIP (nur index.html) bauen und hochladen.
@@ -51,7 +53,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - **E-Mails an Spiele-Seiten (Gmail-Connector, nur geprüfte Einsende-Adressen, max. ~5/Tag, nie zweimal an dieselbe):** Alpha Beta Gamer, Indie Games Plus, Indie Game Buzz, Gamezebo, Indie Game Magazine, Destructoid, GameGrin, GameRamble, Twinfinite, DarkZero, ZTGD, The Reticule (unzustellbar), 1ndieWorld, Games Aktuell, The Indie Game Website (pr@), indiegames.ch, GAME60 Magazine, Indie Game Atlas, Fix Gaming Channel, RETRONUKE, Indie Game of the Week, BrewOtaku. Noch keine Antworten.
 - **Nicht machen:** Massen-Mails an ungeprüfte Adressen, Bots/Auto-Posts in fremde Gruppen (Konto-Sperre, Spam). Nutzer ist vermutlich minderjährig → bei Konten/Verträgen/Geld auf Eltern hinweisen.
 - **Firebase:** Statistik-Sync nur noch 1×/Minute (`saveMeta` 60 s, `cloudFlush` beim Verlassen), Ping 120 s. Gratis-Tarif ~20 000 Schreibvorgänge/Tag – Nutzer hatte 8 000 an einem Tag.
-- **Ideen für später:** Teilen-Knopf nach Tageslauf, Koop-Einladung per Link, Link-Vorschaubild (og:image), CrazyGames-Werbung (SDK ads) nach Freigabe, Game Jolt/Newgrounds.
+- **Ideen für später:** CrazyGames-Werbung (SDK ads) nach Freigabe, Game Jolt/Newgrounds. (Teilen, Koop-Link, Vorschaubild sind seit Update 10 drin.)
 
 ## Bisherige Updates (Kurzfassung)
 1. Fehlerprüfung + Aufräumen (doppelte Funktionen), Tageslauf 1×/Tag, GitHub Pages.
@@ -63,6 +65,7 @@ Stand: 2026-10-02. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 7. Antik-Stil für alle Menüs, HUD und Anmeldung; neue Trank-Symbole; Fenster auf dem iPad mittig.
 8. Bewegter Hauptmenü-Hintergrund (Tempeltor, Mond, Gras, Blätter, Glühwürmchen).
 9. Andere Webseiten (itch.io, CrazyGames-Version), Werbe-Bilder/Videos, Firebase sparsamer.
+10. Gast-Rangliste mit frei wählbarem Namen (auch CrazyGames), Teilen-Knopf, Koop-Einladung per Link, Link-Vorschaubild, ZIPs unter `downloads/`.
 
 ## Offene Ideen / bekannte Grenzen
 - Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).

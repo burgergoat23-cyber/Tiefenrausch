@@ -8,24 +8,28 @@ service cloud.firestore {
     function isAdmin() { return signedIn() && request.auth.token.email == 'burgergoat44@tiefenrausch.spiel'; }
     function banned() { return exists(/databases/$(database)/documents/banned/$(request.auth.uid)); }
     function small(n) { return request.resource.size() <= n; }
+    // Gäste (auch CrazyGames) melden sich unsichtbar anonym an und dürfen nur in die Ranglisten schreiben.
+    function anon() { return signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
+    // Gast-Einträge müssen g == true tragen, Konto-Einträge dürfen es nicht (so kann kein Gast ein Konto nachahmen).
+    function guestMark() { return request.resource.data.get('g', false) == anon(); }
 
     // Spielkonto mit Speicherständen: nur der Spieler selbst.
     match /data/users/{uid}/{acc} {
       allow read: if self(uid);
-      allow write: if self(uid) && acc.matches('a_[a-z0-9_]{3,16}');
+      allow write: if self(uid) && !anon() && acc.matches('a_[a-z0-9_]{3,16}');
     }
 
     // Vergebene Benutzernamen: einmal angelegt, gehört der Name diesem Spieler.
     // Lesbar für alle, damit die Anmeldung „Konto gibt es nicht“ von „Passwort falsch“ unterscheiden kann.
     match /names/{name} {
       allow read: if true;
-      allow create: if signedIn() && name.matches('[a-z0-9_]{3,16}') && request.resource.data.id == request.auth.uid;
+      allow create: if signedIn() && !anon() && name.matches('[a-z0-9_]{3,16}') && request.resource.data.id == request.auth.uid;
     }
 
     // Spielerliste für das Admin-Panel: jeder schreibt nur seinen Eintrag, lesen darf nur der Admin.
     match /players/{uid} {
       allow read: if isAdmin();
-      allow write: if self(uid) && !banned() && small(20);
+      allow write: if self(uid) && !anon() && !banned() && small(20);
     }
 
     // Sperrliste: nur der Admin schreibt; jeder darf nachsehen, ob er selbst gesperrt ist.
@@ -34,10 +38,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Bestenliste (tiefste Ebene): für alle lesbar, jeder schreibt nur seinen Eintrag, der Admin darf löschen.
+    // Bestenliste (tiefste Ebene): für alle lesbar (auch Gäste mit g == true), jeder schreibt nur seinen Eintrag, der Admin darf löschen.
     match /top/{uid} {
       allow read: if true;
-      allow write: if self(uid) && !banned() && small(8)
+      allow write: if self(uid) && !banned() && small(8) && guestMark()
         && request.resource.data.fl is int && request.resource.data.fl >= 1 && request.resource.data.fl < 100000
         && request.resource.data.u is string && request.resource.data.u.size() <= 16;
       allow delete: if isAdmin();
@@ -46,7 +50,7 @@ service cloud.firestore {
     // Koop-Räume: nur zum Austausch der Verbindungsdaten; der Gastgeber löscht den Raum nach dem Verbinden.
     match /rooms/{code} {
       allow read: if signedIn();
-      allow create: if signedIn() && code.matches('[A-Z0-9]{4}') && request.resource.data.h == request.auth.uid && small(12);
+      allow create: if signedIn() && !anon() && code.matches('[A-Z0-9]{4}') && request.resource.data.h == request.auth.uid && small(12);
       allow update: if signedIn() && request.resource.data.h == resource.data.h && small(12);
       allow delete: if signedIn() && resource.data.h == request.auth.uid;
     }
@@ -54,7 +58,7 @@ service cloud.firestore {
     // Tages-Rangliste: für alle lesbar, jeder schreibt nur seinen Eintrag, der Admin darf Einträge löschen.
     match /daily/{uid} {
       allow read: if true;
-      allow create, update: if self(uid) && !banned() && small(10)
+      allow create, update: if self(uid) && !banned() && small(10) && guestMark()
         && request.resource.data.s is int && request.resource.data.s >= 0 && request.resource.data.s < 1000000
         && request.resource.data.d is string && request.resource.data.u is string && request.resource.data.u.size() <= 16;
       allow delete: if self(uid) || isAdmin();

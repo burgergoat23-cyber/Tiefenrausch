@@ -11,6 +11,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'  OK  ':'  FAIL ')+m);if(!c)fail++;}
  const H=await page(),G=await page();ok(await reg(H,'hosti'),'Gastgeber angemeldet');ok(await reg(G,'gasti'),'Gast angemeldet');
  await H.evaluate(()=>{CO.lob={st:'menu'};coopHost();});
  let code=null;for(let i=0;i<40&&!code;i++){await wait(300);code=await H.evaluate(()=>CO.lob&&CO.lob.code);}ok(!!code,'Raum-Code erzeugt: '+code);
+ ok(await H.evaluate(()=>{const L=[];const o=btn;btn=function(x,y,w,h,l){L.push(l);return o.apply(this,arguments);};try{draw();}finally{btn=o;}return L.includes('🔗 Einladungs-Link senden');}),'Gastgeber hat Einladungs-Link-Knopf');
  await H.screenshot({path:'../coop_lobby.png'});
  await G.evaluate(c=>coopJoin(c),code);
  let both=false;for(let i=0;i<60&&!both;i++){await wait(500);both=await H.evaluate(()=>CO.on&&st==='play')&&await G.evaluate(()=>CO.on&&st==='play');}
