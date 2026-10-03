@@ -5,7 +5,7 @@
 const {chromium}=(()=>{try{return require('playwright')}catch(e){return require('/opt/node-tools/node_modules/playwright')}})();
 const fs=require('fs'),path=require('path'),{execSync}=require('child_process');
 const ROOT=path.join(__dirname,'..','..'),OUT=process.argv[2]||path.join(ROOT,'promo'),GOAL=+(process.argv[3]||100),MODE=process.argv[4]||'endless',FPS=30,SR=32000,CHUNK=60;
-const NAME=MODE==='story'?'story_komplett':'endlos100',NORM=MODE==='story'?600:120;   // Story: 20 s je Ebene, Endlos: 4 s
+const NAME=MODE==='story'?'story_komplett':MODE==='bosse'?'bosse':'endlos100',NORM=MODE==='story'?600:120;   // Story: 20 s je Ebene, Endlos: 4 s
 const tmp=fs.mkdtempSync(path.join(require('os').tmpdir(),'long-'));
 function init(cfg){
   let now=0,raf=null,OFF=null,real=null,rendering=null,k=0;
@@ -32,7 +32,7 @@ function init(cfg){
   await ctx.route('**/*',r=>{const u=r.request().url();if(u.startsWith(URL))r.fulfill({contentType:'text/html',body:HTML});else r.abort();});
   await p.goto(URL);await p.evaluate(require('./ai.js'));
   await p.evaluate(m=>{window.MODE_=m;},MODE);
-  await p.evaluate(()=>{guest=true;VAP.god=0;try{au();}catch(e){}newGame(undefined,MODE_);
+  await p.evaluate(()=>{guest=true;VAP.god=0;try{au();}catch(e){}newGame(undefined,MODE_==='bosse'?'endless':MODE_);
     window.FL=document.createElement('canvas');FL.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:50';document.body.appendChild(FL);
     FL.width=innerWidth*devicePixelRatio;FL.height=innerHeight*devicePixelRatio;window.FLX=FL.getContext('2d');
     window.__flash=i=>{FLX.clearRect(0,0,FL.width,FL.height);if(i<8){FLX.fillStyle='rgba(255,246,220,'+(.6*(1-i/8))+')';FLX.fillRect(0,0,FL.width,FL.height);}};});
@@ -42,7 +42,18 @@ function init(cfg){
   async function shot(fi){await p.evaluate(async i=>{VAP.tick();await __V.step();__flash(i);},fi);
     await p.screenshot({path:path.join(tmp,'f'+String(fr++).padStart(6,'0')+'.jpg'),type:'jpeg',quality:88});if(++inChunk>=CHUNK*FPS)await flushAudio();}
   let lastW='',lastT=-1,overShown=0;const t0=Date.now();
-  while(true){
+  // Modus „bosse“: jeder Boss nacheinander (Grundbosse Ebene 3–21, Varianten-Bosse 24–39, Endboss Vorath in der Story),
+  // ebenengerechte Ausrüstung, ehrlicher Kampf bis zum Sieg (bei Niederlage: Kampf neu)
+  if(MODE==='bosse'){const L=[[3,'endless'],[6,'endless'],[9,'endless'],[12,'endless'],[15,'endless'],[18,'endless'],[21,'endless'],[24,'endless'],[27,'endless'],[30,'endless'],[33,'endless'],[36,'endless'],[39,'endless'],[15,'story']];
+    const setup=(f,m)=>p.evaluate(([f,m])=>{newGame(undefined,m);fl=f;gen();const t=Math.min(5,1+Math.floor(f/8)),a=Math.min(4,Math.floor(f/8));
+      me.w=mkW(24,t);me.mx=Math.min(12,5+Math.floor(f/3));me.hp=me.mx;me.pots.heal=5;me.pots.rage=2;me.arm=[{s:0,t:a},{s:1,t:a},{s:2,t:a}];ui=null;
+      VAP.lfl=fl;VAP.cur=null;VAP.ot=null;VAP.toBoss();},[f,m]);
+    for(const [f,m] of L){await setup(f,m);const s=await state();ev.push({t:fr/FPS,k:'ebene',fl:f,boss:s.boss,deaths:s.deaths});
+      let after=-1;for(let i=0;i<2700;i++){await shot(i);if(i%10)continue;const q=await p.evaluate(()=>({st,b:en.some(e=>e.boss)}));
+        if(q.st==='over'){ev.push({t:fr/FPS,k:'tod'});for(let j=0;j<60;j++)await shot(99);await setup(f,m);await p.evaluate(()=>{VAP.deaths++;});continue;}
+        if(!q.b&&after<0)after=i;if(after>=0&&i-after>60)break;}
+      console.log('Boss',s.boss,'fertig · Video',(fr/FPS/60).toFixed(1),'min');}}
+  while(MODE!=='bosse'){
     const s=await state();if(s.fl>GOAL||s.st==='end')break;
     if(s.w!==lastW||s.wt!==lastT){if(lastW)ev.push({t:fr/FPS,k:'waffe',w:s.w,wt:s.wt});lastW=s.w;lastT=s.wt;}
     ev.push({t:fr/FPS,k:'ebene',fl:s.fl,boss:s.boss,deaths:s.deaths,hp:s.hp,mx:s.mx});
