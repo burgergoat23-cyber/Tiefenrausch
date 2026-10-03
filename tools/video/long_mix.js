@@ -36,8 +36,8 @@ for(const l of LANGS_){const x=X[l],L=[];const D=(a,b,st,txt)=>L.push(`Dialogue:
     if(e.k==='tod')D(e.t,e.t+2.6,'Tod',`${x.dead}${e.n>1?' ×'+e.n:''}\\N{\\fs24\\c&Hf4efe6&}${x.deadS}`);
     if(e.k==='gerettet')D(e.t,e.t+2.6,'Waffe',`{\\c&H66d1ff&}${esc(x.vil(e.n))}`);}
   const T0=x[NAME]||[NAME,''];D(0.2,4.6,'Titel',`${esc(T0[0])}\\N{\\fs30\\c&Hf4efe6&}${esc(T0[1])}`);
-  const end=ev.find(e=>e.k==='ende')||{t:dur-3,fl:0,deaths:0};chap.push([end.t,x.chap.end]);
-  D(end.t,dur,'Titel',`${esc(x.done[NAME]?x.done[NAME](end.fl):'')}\\N{\\fs28\\c&Hf4efe6&}${x.deaths}: ${end.deaths}\\N{\\fs30\\c&H8ad9ff&}${x.play}: ${x.url}`);
+  const end=ev.find(e=>e.k==='ende')||{t:dur-3,fl:0,deaths:0};chap.push([Math.min(end.t,dur-4),x.chap.end]);
+  D(Math.max(0,Math.min(end.t,dur-4)),dur,'Titel',`${esc(x.done[NAME]?x.done[NAME](end.fl):'')}\\N{\\fs28\\c&Hf4efe6&}${x.deaths}: ${end.deaths}\\N{\\fs30\\c&H8ad9ff&}${x.play}: ${x.url}`);
   const ass=`[Script Info]
 ScriptType: v4.00+
 PlayResX: 1280

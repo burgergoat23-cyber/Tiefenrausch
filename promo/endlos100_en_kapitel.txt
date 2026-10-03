@@ -1,0 +1,11 @@
+0:00 Start
+1:12 Floor 10
+2:22 Floor 20
+3:07 Floor 30
+4:18 Floor 40
+5:14 Floor 50
+6:05 Floor 60
+7:17 Floor 70
+8:33 Floor 80
+9:48 Floor 90
+11:16 Floor 100

@@ -52,7 +52,8 @@ VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return
   if(!VAP.god&&(!tg||bd>160))for(const i of it){if(!VAP.better(i))continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<380&&d<bd){bd=d;tg=i;tg._g=1;}}
   if(tg&&tg.hp)rng=Math.max(34,Math.min(P.rng*.75,P.proj?200:P.rng*.7));
   else if(!tg){const o=VAP.ot,ok=o&&(o===stairs||(ch.includes(o)&&!o.o)||it.includes(o))&&++VAP.otT<300;   // Sachziel behalten, bis erreicht
-    const vil=(npcs||[]).find(n=>n.t==='d');
+    const vil=(npcs||[]).find(n=>n.t==='d'&&!VAP.skip.has(n));
+    if(vil){if(vil!==VAP.vt){VAP.vt=vil;VAP.vd=1e9;VAP.vn=0;}const d=Math.hypot(vil.x-me.x,vil.y-me.y);if(d<VAP.vd-2){VAP.vd=d;VAP.vn=0;}else if(++VAP.vn>120){VAP.skip.add(vil);}}   // unerreichbarer Dorfbewohner → weiter
     if(vil){tg=vil;if(Math.hypot(vil.x-me.x,vil.y-me.y)<60){interact();return;}}else if(ok){tg=o;}else{if(o&&o!==stairs&&VAP.otT>=300)VAP.skip.add(o);VAP.ot=null;
       for(const c of ch)if(!c.o&&!VAP.skip.has(c)){const d=Math.hypot(c.x-me.x,c.y-me.y);if(d<bd){bd=d;tg=c;}}
       for(const i of it){if(i.t==='weapon'&&!(i.w&&i.w.t>=7)||i.t==='armor'||VAP.skip.has(i)||(me.pots[i.t]>=9))continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<bd&&d<300){bd=d;tg=i;}}
