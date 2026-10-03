@@ -1,7 +1,7 @@
 # YouTube: Texte zum Kopieren
 
 Videos (online unter https://burgergoat23-cyber.github.io/Tiefenrausch/promo/…):
-- `youtube_short_de.mp4` / `youtube_short_en.mp4` – Shorts (hochkant, 33 s)
+- `youtube_short_de.mp4` / `youtube_short_en.mp4` – Shorts (hochkant, ~23 s, KI-Sprecher)
 - `youtube_trailer_de.mp4` / `youtube_trailer_en.mp4` – Trailer (quer, ~1,5 min), beide mit KI-Sprecher
 - `youtube_thumbnail_1280x720.jpg` – Vorschaubild für den Trailer
 

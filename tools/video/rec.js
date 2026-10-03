@@ -93,7 +93,7 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   let fr=0;const total=scenes.reduce((a,s)=>a+Math.round(s.sec*FPS),0);
   for(const [si,sc] of scenes.entries()){
     if(sc.setup)await p.evaluate(sc.setup);
-    await p.evaluate(c=>{CAP=c?{a:c[0],b:c[1]||'',len:c[2],y:c[3],hook:c[4]}:null;},sc.cap?[sc.cap[0],sc.cap[1],sc.capLen||sc.sec,sc.cy||0,sc.hook||0]:null);
+    await p.evaluate(c=>{CAP=c?{a:c[0],b:c[1]||'',len:c[2],y:c[3],hook:c[4]}:null;},sc.cap?[sc.cap[0],sc.cap[1],sc.capLen||(sc.voDur?Math.min(sc.sec,sc.voDur+1.4):sc.sec),sc.cy||0,sc.hook||0]:null);
     const n=Math.round(sc.sec*FPS);sc.t0=fr/FPS;
     for(let i=0;i<n;i++){
       await p.evaluate(async([e,i,n,z,f])=>{try{if(e)(0,eval)(e);}catch(x){}VAP.tick();await __V.step();try{FXS(i,n,z,f);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0]);

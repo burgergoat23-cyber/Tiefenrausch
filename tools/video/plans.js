@@ -47,14 +47,14 @@ module.exports={
   probe:{view:{width:432,height:768},dpr:2.5,file:l=>`probe_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
     {sec:2,setup:run('endless',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.hook],hook:1,vo:v.s1,zoom:1.2},{sec:1.5,setup:title,cap:[t.play,t.url],cy:.84}];}},
   lang:{view:{width:960,height:540},dpr:2,hash:'#lade',file:l=>`youtube_trailer_${l}.mp4`,scenes:l=>{const t=T[l],v=t.vo;return[
-    {sec:5,cap:[t.title,t.titleS],vo:v.t1,flash:false},                    // Ladebildschirm mit Story-Szene
-    {sec:4,setup:title,cap:[t.free,t.freeS],vo:v.t2},
-    {sec:6,setup:run('story',1),cap:[t.story,t.storyS],vo:v.t3,zoom:1.12},
-    {sec:6,setup:"me.w={i:19,t:4};",cap:[t.fight,t.fightS],vo:v.t4,zoom:1.15,flash:false},
-    {sec:8,setup:run('story',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.boss,t.bossS],vo:v.t5,zoom:1.25},
-    {sec:6,setup:run('endless',12,'{i:24,t:6}'),cap:[t.var,t.varS],vo:v.t6,zoom:1.15},
-    {sec:6,setup:run('endless',30,'{i:35,t:7}'),cap:[t.deep,t.deepS],vo:v.t7,zoom:1.2},
-    {sec:4,setup:"st='ready';ui=null;bk={tab:0,pg:0};",cap:[t.book,t.bookS],vo:v.t8},
-    {sec:5,setup:rank(l),cap:[t.rank,t.rankS],vo:v.t9},
-    {sec:6,setup:title,cap:[t.play,t.url],vo:v.t10}];}}};
+    {sec:7,cap:[t.title,t.titleS],vo:v.t1,flash:false},                    // Ladebildschirm mit Story-Szene
+    {sec:6,setup:title,cap:[t.free,t.freeS],vo:v.t2},
+    {sec:12,setup:run('story',1),cap:[t.story,t.storyS],vo:v.t3,zoom:1.12},
+    {sec:12,setup:"me.w={i:19,t:4};",cap:[t.fight,t.fightS],vo:v.t4,zoom:1.15,flash:false},
+    {sec:16,setup:run('story',3,'{i:10,t:3}')+'VAP.toBoss();',cap:[t.boss,t.bossS],vo:v.t5,zoom:1.25},
+    {sec:11,setup:run('endless',12,'{i:24,t:6}'),cap:[t.var,t.varS],vo:v.t6,zoom:1.15},
+    {sec:12,setup:run('endless',30,'{i:35,t:7}'),cap:[t.deep,t.deepS],vo:v.t7,zoom:1.2},
+    {sec:6,setup:"st='ready';ui=null;bk={tab:0,pg:0};",cap:[t.book,t.bookS],vo:v.t8},
+    {sec:8,setup:rank(l),cap:[t.rank,t.rankS],vo:v.t9},
+    {sec:9,setup:title,cap:[t.play,t.url],vo:v.t10}];}}};
 // Hinweis: Rangliste/Name-Knopf gibt es nur online (LB_ON) → rec.js lädt das Spiel unter der GitHub-Adresse (ohne Netz).
