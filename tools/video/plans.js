@@ -85,7 +85,7 @@ const SH={
     for(let t=0;t<8;t++)a.push({sec:t===7?3.2:2.1,setup:`me.w=mkW(19,${t});burst(me.x,me.y,TC[${t}],${20+t*6},${160+t*20});shake=${t*1.5};`,cap:[L[t]],capCol:TCOL[t],hook:t===7?1:0,vo:l==='en'?L[t]+(t===7?'!':'.'):'',zoom:1.2+t*.03,flash:t===7});
     a.push({sec:3.2,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.3});return a;},
   short_ausweichen:l=>{const x=S[l];return[
-    {sec:4,setup:run('endless',33,'{i:24,t:5}')+H+'VAP.toBoss();',cap:[x.aus],hook:1,vo:sv(l,'aus'),zoom:1.15},
+    {sec:4,setup:run('endless',33,'{i:24,t:3}')+H+'VAP.toBoss();{const b=en.find(e=>e.boss);if(b){b.mx*=3;b.hp=b.mx;}}',cap:[x.aus],hook:1,vo:sv(l,'aus'),zoom:1.15},
     {sec:5,cap:[x.aus2],vo:sv(l,'aus2'),flash:false,zoom:1.2},
     {sec:5,setup:"{const b=en.find(e=>e.boss);if(b)b.hp=Math.min(b.hp,Math.round(b.mx*.49));}",cap:[x.aus3],vo:sv(l,'aus3'),flash:false,zoom:1.3},
     {sec:3.5,cap:[x.end,x.url],vo:sv(l,'end'),flash:false,zoom:1.2}];},
