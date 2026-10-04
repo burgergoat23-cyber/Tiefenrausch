@@ -62,6 +62,14 @@ const DAY='2026-10-20T12:00:00+02:00';   // mitten im Halloween-Event
   ok(pass.c===15&&pass.cl===10&&pass.ex&&pass.gw,'Bonbons zählen, Pass vergibt alle 10 Stufen inkl. exklusivem Skin '+JSON.stringify(pass));
   ok(!pass.saved,'Halloween-Lauf wird nicht gespeichert');
   ok(await p.evaluate(()=>{const ok1=!(best>30&&false);return meta.hw.q.hwd>=1&&meta.hw.c.h1;}),'Event-Aufgabe „Betritt den Dungeon“ erledigt');
+  // Halloween-Gegner: im Halloween-Dungeon nur Halloween-Gegner/-Bosse, sonst nie
+  const hg=await p.evaluate(()=>{const r={};newGame(undefined,'hw');let all=[];for(const f of[1,2,3,5,6,9,12]){fl=f;gen();all=all.concat(en);}
+   r.hwOnly=all.every(e=>e.v!=null&&VAR[e.v].hw);r.boss=[3,6,9].map(f=>{fl=f;gen();const b=en.find(e=>e.boss);return b&&VAR[b.v].n;});
+   const m=mkEn({x:me.x,y:me.y},0,me.x,me.y);r.minion=m.v!=null&&VAR[m.v].hw;
+   newGame(undefined,'endless');all=[];for(const f of[1,5,20,40,80]){fl=f;gen();all=all.concat(en);}r.endNo=all.every(e=>e.v==null||!VAR[e.v].hw);
+   r.book=VNORM.concat(VBOSS).every(i=>!VAR[i].hw);r.ev=hwOn();return r;});
+  ok(hg.hwOnly&&hg.minion&&hg.endNo&&hg.book&&hg.boss.join()==='Kürbiskönig,Hexenkönigin,Kopfloser Reiter','Halloween-Dungeon: nur Halloween-Gegner und -Bosse, Endlos/Bestiarium unverändert '+JSON.stringify(hg));
+  ok(await p.evaluate(()=>{const d0=Date;const t=k=>{window.Date=class extends d0{constructor(...a){super(...(a.length?a:[k]));}static now(){return new d0(k).getTime();}};const r=hwOn();window.Date=d0;return r;};return t('2026-11-02T20:00:00+01:00')&&!t('2026-11-03T08:00:00+01:00');}),'Event endet nach dem 2. November');
   // Zusammenführen: Maximum/Vereinigung
   ok(await p.evaluate(()=>{const e=meta.tk.e,s=meta.tk.s;u11Merge({tk:{e:e+500,s:s},own:{a:[0,3],w:[0,2]},hw:{xp:1,cl:[],q:{},c:{},dy:[]}});return meta.tk.e===e+500&&meta.own.a.includes(3)&&meta.own.w.includes(2)&&meta.hw.xp>=1000;}),'Cloud-Zusammenführung (Maximum + Vereinigung)');
   await p.evaluate(()=>{saveMeta();});await p.reload();await p.waitForTimeout(700);
