@@ -186,3 +186,29 @@ const PH={
 for(const k in PH){module.exports[k]={view:{width:432,height:768},dpr:2.5,file:()=>`${k}.mp4`,music:'phonk',bpm:120,beatfx:1,fade:.3,
   vf:'eq=contrast=1.05:saturation=1.2,vignette=PI/5',scenes:PH[k]};
   module.exports[k+'_ohne_musik']=Object.assign({},module.exports[k],{file:()=>`${k}_ohne_musik.mp4`,music:'keine'});}
+// ===== Halloween-Clips (Update 11): Event-Menü, Skins, Pass, Halloween-Dungeon, Glücksrad – alles echt im Spiel =====
+const HW={de:{a:'HALLOWEEN-UPDATE 🎃',b:'Neue Skins',c:'Halloween-Dungeon',d:'Event-Pass',d2:'Am Ende: exklusiver Skin',e:'Glücksrad – 1× am Tag gratis',end:'Kostenlos im Browser',url:'Link in der Bio ↓',
+    k1:'Kürbiskopf gegen den Boss?',k2:'Bonbons sammeln 🍬',k3:'Stufe 10 …',k4:'GEISTERWÄCHTER?!',k5:'Nur im Halloween-Pass',w1:'Gratis-Dreh am Glücksrad',w2:'Was gibt es heute?'},
+  en:{a:'HALLOWEEN UPDATE 🎃',b:'New skins',c:'Halloween dungeon',d:'Event pass',d2:'Final tier: exclusive skin',e:'Lucky wheel – 1 free spin a day',end:'Free in your browser',url:'Link in bio ↓',
+    k1:'Pumpkin head vs boss?',k2:'Collect candy 🍬',k3:'Tier 10 …',k4:'GHOST GUARDIAN?!',k5:'Only in the Halloween pass',w1:'Free lucky wheel spin',w2:'What do I get today?'}};
+const HWM="u11Fix();meta.tk={e:2400,s:0};",HWD=(f,a,w)=>`${HWM}meta.sk={a:${a},w:${w}};meta.own.a.push(${a});meta.own.w.push(${w});`+run('hw',f,'{i:10,t:4}')+H;
+const HWC={
+  clip_halloween_update:l=>{const x=HW[l];return[
+    {sec:3,setup:title+HWM,cap:[x.a],hook:1,zoom:1.15},
+    {sec:3.2,setup:HWM+"shopOpen(0);shp.sel=8;",cap:[x.b],zoom:1.12},
+    {sec:4,setup:HWD(3,8,7)+'VAP.toBoss();',cap:[x.c],hook:1,zoom:1.25},
+    {sec:3.2,setup:"st='ready';ui=null;"+HWM+"meta.hw.xp=640;shopOpen(4);",cap:[x.d,x.d2],cy:.86,zoom:1.08},
+    {sec:4.2,setup:HWM+"meta.wh={d:'',n:0};shopOpen(2);window.__ws=0;",each:"if(++window.__ws===20)whSpin();",cap:[x.e],cy:.86,zoom:1.06},
+    {sec:3,setup:title,cap:[x.end,x.url],cy:.84,flash:false,zoom:1.1}];},
+  clip_halloween_geist:l=>{const x=HW[l];return[
+    {sec:3.6,setup:HWD(6,8,7)+"VAP.toBoss();",cap:[x.k1],hook:1,zoom:1.3},
+    {sec:3.4,cap:[x.k2],flash:false,zoom:1.35},
+    {sec:2.6,setup:"st='ready';ui=null;"+HWM+"meta.hw.xp=880;meta.hw.cl=[0,1,2,3,4,5,6,7];meta.own.a=meta.own.a.filter(a=>a!==10);shopOpen(4);window.__ws=0;",each:"if(++window.__ws===25)hwXp(150,1);",cap:[x.k3],zoom:1.12},
+    {sec:4.5,setup:HWD(9,10,9)+"VAP.toBoss();burst(me.x,me.y,'#bfffe8',40,220);shake=6;",cap:[x.k4],hook:1,capCol:'#ff5df0',zoom:1.3},
+    {sec:3,cap:[x.k5,x.url],flash:false,zoom:1.35}];},
+  clip_halloween_rad:l=>{const x=HW[l];return[
+    {sec:2.6,setup:title+HWM,cap:[x.w1],hook:1,zoom:1.12},
+    {sec:5.2,setup:HWM+"meta.wh={d:'',n:0};shopOpen(2);window.__ws=0;",each:"if(++window.__ws===15)whSpin();",cap:[x.w2],cy:.86,zoom:1.08},
+    {sec:3.6,setup:HWD(4,3,5),cap:[x.c],zoom:1.25},
+    {sec:3,setup:title,cap:[x.end,x.url],cy:.84,flash:false,zoom:1.1}];}};
+for(const k in HWC)module.exports[k]={view:{width:432,height:768},dpr:2.5,file:l=>`${k}_${l}.mp4`,scenes:HWC[k]};
