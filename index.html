@@ -3753,7 +3753,7 @@ function whFree(){u11Fix();return meta.wh.d!==dayKey();}
 function whSpin(){if(!shp||shp.wh&&shp.wh.t<1)return;const free=whFree();if(!free&&!tkPay(WHC)){shp.msg='Nicht genug Marken';return;}if(free){meta.wh={d:dayKey(),n:1};mDirty=1;saveMeta();}
  let r=Math.random()*100,k=0;for(;k<WHL.length-1;k++){if(r<WHL[k].p)break;r-=WHL[k].p;}
  let a0=0;for(let i=0;i<k;i++)a0+=WHL[i].p;const mid=(a0+WHL[k].p*(.2+Math.random()*.6))/100*TAU,from=(shp.wa||0)%TAU;
- const d=(((-Math.PI/2-mid)-from)%TAU+TAU)%TAU;shp.wh={t:0,k,from,to:from+TAU*5+d};shp.msg='';sfx('chest');}
+ const d=(((-Math.PI/2-mid)-from)%TAU+TAU)%TAU;shp.wh={t:0,st:performance.now(),k,from,to:from+TAU*5+d};shp.msg='';sfx('chest');}
 function whDone(k){const q=WHL[k];if(q.m){tkGive(q.m,'Glücksrad');shp.msg='Gewonnen: '+q.m+' Marken!';return;}
  const typ=Math.random()<.5?'a':'w',L=typ==='a'?SKA:SKW,cand=[];L.forEach((s,i)=>{if(q.s.includes(s.r)&&!s.free&&!s.excl&&(!s.ev||hwOn()))cand.push(i);});
  if(!cand.length){tkGive(60,'Glücksrad');shp.msg='Gewonnen: 60 Marken!';return;}const i=cand[Math.floor(Math.random()*cand.length)],S=L[i];
@@ -3799,7 +3799,7 @@ function skinGrid(B,typ,y0,y1){const S=shp,L=typ==='a'?SKA:SKW,ev=hwOn(),bx=B.bx
  else if(s.ev&&!s.shop)txt('Belohnung im Halloween-Pass oder Glücksrad',W/2,dy2+44,13,'#ff9e3d',600);
  else{const p=RAR[s.r].p,ok=tkBal()>=p;btn(W/2-110,dy2+22,220,42,'Kaufen: '+p+' 🪙',()=>{if(!tkPay(p)){S.msg='Nicht genug Marken';return;}meta.own[typ].push(S.sel);meta.sk[typ]=S.sel;mDirty=1;saveMeta();S.msg='Gekauft: '+s.n+'!';sfx('heal');},ok?'#7a5a1f':'#3a3040');}}
 function wheelUI(B,y0,y1){const S=shp,bw=B.bw,R=Math.max(60,Math.min(bw*.36,(y1-y0-120)/2,150)),cx=W/2,cy=y0+R+12;
- if(S.wh){S.wh.t=Math.min(1,S.wh.t+.016/3.2);S.wa=S.wh.from+(S.wh.to-S.wh.from)*eo(S.wh.t);if(S.wh.t>=1&&!S.wh.done){S.wh.done=1;whDone(S.wh.k);}}
+ if(S.wh){S.wh.t=Math.min(1,(performance.now()-S.wh.st)/3200);S.wa=S.wh.from+(S.wh.to-S.wh.from)*eo(S.wh.t);if(S.wh.t>=1&&!S.wh.done){S.wh.done=1;whDone(S.wh.k);}}
  let a=S.wa||0;g.save();for(const q of WHL){const da=q.p/100*TAU;g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,R,a,a+da);g.closePath();g.fillStyle=q.c;g.fill();g.strokeStyle='#170d05';g.lineWidth=2;g.stroke();
   if(q.p>=5){g.save();g.translate(cx,cy);g.rotate(a+da/2);g.fillStyle='#f6e9cc';g.font='700 '+Math.max(10,Math.min(14,R/9))+'px '+FN;g.textAlign='right';g.fillText(q.m?q.m+' 🪙':'Skin',R-8,4);g.restore();}a+=da;}
  g.beginPath();g.arc(cx,cy,R,0,TAU);g.strokeStyle=brz(cx-R,cy-R,R*2,R*2);g.lineWidth=5;g.stroke();circ(cx,cy,R*.16,gr(cx-3,cy-3,1,R*.16,'#fff3b0','#a8741a'),OLC,1.5);

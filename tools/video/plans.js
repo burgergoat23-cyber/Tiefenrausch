@@ -195,7 +195,7 @@ const HWM="u11Fix();meta.tk={e:2400,s:0};",HWD=(f,a,w)=>`${HWM}meta.sk={a:${a},w
 const HWC={
   clip_halloween_update:l=>{const x=HW[l];return[
     {sec:3,setup:title+HWM,cap:[x.a],hook:1,zoom:1.15},
-    {sec:3.2,setup:HWM+"shopOpen(0);shp.sel=8;",cap:[x.b],zoom:1.12},
+    {sec:3.2,setup:HWM+"shopOpen(0);shp.pg=1;shp.sel=8;",cap:[x.b],zoom:1.12},
     {sec:4,setup:HWD(3,8,7)+'VAP.toBoss();',cap:[x.c],hook:1,zoom:1.25},
     {sec:3.2,setup:"st='ready';ui=null;"+HWM+"meta.hw.xp=640;shopOpen(4);",cap:[x.d,x.d2],cy:.86,zoom:1.08},
     {sec:4.2,setup:HWM+"meta.wh={d:'',n:0};shopOpen(2);window.__ws=0;",each:"if(++window.__ws===20)whSpin();",cap:[x.e],cy:.86,zoom:1.06},

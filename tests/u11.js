@@ -31,7 +31,7 @@ const DAY='2026-10-20T12:00:00+02:00';   // mitten im Halloween-Event
   await p.evaluate(()=>{shp.tab=2;shp.msg='';meta.wh={d:'',n:0};meta.tk={e:1000,s:0};});
   ok((await grab(p)).some(l=>/Gratis drehen/.test(l)),tag+': Gratis-Dreh angeboten');
   const before=await p.evaluate(()=>({b:tkBal(),a:meta.own.a.length,w:meta.own.w.length}));
-  await press(p,/Gratis drehen/);for(let i=0;i<260;i++)await p.evaluate(()=>draw());
+  await press(p,/Gratis drehen/);await p.waitForTimeout(3400);for(let i=0;i<3;i++)await p.evaluate(()=>draw());
   const aft=await p.evaluate(()=>({b:tkBal(),a:meta.own.a.length,w:meta.own.w.length,m:shp.msg,free:whFree()}));
   ok(!aft.free&&(aft.b>before.b||aft.a>before.a||aft.w>before.w)&&aft.m,tag+': Gratis-Dreh gibt etwas '+JSON.stringify(aft));
   await p.screenshot({path:path.join(__dirname,'u11_rad_'+vp.width+'.png')});
