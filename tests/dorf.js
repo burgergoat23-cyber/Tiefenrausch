@@ -26,6 +26,18 @@ const clock=d=>{const T=new Date(d).getTime(),D=Date;window.Date=class extends D
   await p.screenshot({path:path.join(__dirname,'dorf_tor_'+vp.width+'.png')});
   await press(p,/Endlos-Modus/);ok(await p.evaluate(()=>st==='play'&&mode==='endless'&&!vPanel),tag+': Endlos startet aus dem Tor');
   await p.evaluate(()=>{st='ready';ui=null;});
+  // Dorfbewohner: laufen, plaudern, ansprechbar
+  const nn=await p.evaluate(async()=>{const r={n:VN.length};const w=VN.find(n=>n.id==='post'),x0=w.x;await new Promise(f=>setTimeout(f,2500));r.walk=Math.abs(w.x-x0)>5||w.wait>0;
+   r.bub=VN.some(n=>n.bub);const h=VN.find(n=>n.id==='haendler');VL.x=h.x-40;VL.cam=-1;vTalkTo(h);r.talk=!!vTalk&&vTalk.n===h;return r;});
+  ok(nn.n>=12&&nn.walk&&nn.bub&&nn.talk,tag+': Dorfbewohner laufen, plaudern und sind ansprechbar '+JSON.stringify(nn));
+  let TL=await grab(p);ok(TL.includes('Weiter ▶')&&TL.includes('Tschüss'),tag+': Gesprächsfenster mit Weiter/Tschüss');
+  await p.screenshot({path:path.join(__dirname,'dorf_npc_'+vp.width+'.png')});
+  await press(p,/^Weiter/);ok(await p.evaluate(()=>vTalk&&vTalk.i===1),tag+': Weiter blättert');
+  await press(p,/^Tschüss/);ok(await p.evaluate(()=>!vTalk),tag+': Tschüss beendet das Gespräch');
+  // Antippen eines entfernten Bewohners: Held läuft hin, dann Gespräch
+  await p.evaluate(()=>{const n=VN.find(n=>n.id==='bgm');VL.x=n.x-170;VL.cam=-1;});const np=await p.evaluate(()=>{draw();let r=null;scaled(()=>{const L=vLay(),n=VN.find(n=>n.id==='bgm'),q=uiOn?uiS:1;r={x:vX(L,n.x)*q,y:vY(L,VGY+30+n.d)*q-8};});return r;});
+  await p.mouse.click(np.x,np.y);for(let i=0;i<40&&await p.evaluate(()=>!vTalk);i++)await p.waitForTimeout(100);ok(await p.evaluate(()=>vTalk&&vTalk.n.id==='bgm'),tag+': Bewohner antippen → hinlaufen → reden');
+  await p.evaluate(()=>{vTalk=null;});
   // ☰-Menü
   await p.evaluate(()=>{draw();const q=uiOn?uiS:1;window.__m={x:SI.l/q+38,y:SI.t/q+80};});const m=await p.evaluate(()=>window.__m);
   const sc=vp.height<560?Math.max(.8,vp.height/560):1;await p.mouse.click(m.x*sc,m.y*sc);await p.waitForTimeout(100);
@@ -38,7 +50,8 @@ const clock=d=>{const T=new Date(d).getTime(),D=Date;window.Date=class extends D
  {const ctx=await b.newContext({viewport:{width:820,height:1180}});await ctx.addInitScript(clock,'2026-12-01T12:00:00+01:00');const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
   await p.goto(F+'#dorf');await p.waitForTimeout(800);ok(!(await spot(p,'hw'))&&!!(await spot(p,'shop')),'nach dem Event kein Halloween-Haus');
   await p.evaluate(()=>{window.__lscan=new Set();setLang('en');draw();vPanel='tor';draw();vPanel='menu';draw();vPanel=null;});
-  const miss=await p.evaluate(()=>[...window.__lscan].filter(s=>/Dungeon|Shop|Bestiarium|Ranglisten|Tippe|Menü|Tageslauf|Halloween/.test(s)));
+  await p.evaluate(()=>{for(const n of VN){vTalk={n,i:0};for(let i=0;i<n.l.length;i++){vTalk.i=i;draw();}n.bub={s:'',t:0};}vTalk=null;for(const k in VCHAT)for(const[w,t]of VCHAT[k]){const n=VN.find(q=>q.id===w);if(n){n.bub={s:t,t:1};VL.x=n.x;VL.cam=-1;draw();}}});
+  const miss=await p.evaluate(()=>{const V=Object.values(LANGS.en.d).concat(Object.values(LANGS.en.x||{}));return[...window.__lscan].filter(s=>/[a-zäöüß]{3}/.test(s)&&!/^(Shop|Dungeon|⚔ Dungeon|🛒 Shop|Halloween|Tiefenrausch|🌐 English)$/.test(s)&&!V.some(v=>typeof v==='string'&&v.includes(s.trim())));});
   ok(miss.filter(s=>!['Dungeon','⚔ Dungeon','🛒 Shop'].includes(s)).length===0,'Englisch vollständig '+JSON.stringify(miss));
   await p.screenshot({path:path.join(__dirname,'dorf_en.png')});await ctx.close();}
  ok(errs.length===0,'keine JS-Fehler '+errs.join(' | '));
