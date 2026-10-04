@@ -9,12 +9,12 @@ const clock=d=>{const T=new Date(d).getTime(),D=Date;window.Date=class extends D
  const grab=p=>p.evaluate(()=>{const L=[];const o=btn;btn=function(x,y,w,h,l){L.push(String(l));return o.apply(this,arguments);};try{draw();}finally{btn=o;}return L;});
  const press=(p,re)=>p.evaluate(src=>{const rx=new RegExp(src);let f=null;const o=btn;btn=function(x,y,w,h,l,fn){if(!f&&rx.test(String(l)))f=fn;return o.apply(this,arguments);};try{draw();}finally{btn=o;}if(f){f();return true;}return false;},re.source);
  // Mitte eines Gebäudes in Bildschirm-Pixeln (wie drawVillage)
- const spot=(p,k)=>p.evaluate(k=>{draw();let r=null;scaled(()=>{const q=uiOn?uiS:1,L=vLay(Math.max(TLY+4,SI.t/q+60)),B=L.B.find(x=>x.k===k);if(!B)return;const [x,y]=v2s(L,B.x,B.y-B.h*.4);r={x:x*q,y:y*q};});return r;},k);
- const walk=async(p,k)=>{const s=await spot(p,k);await p.mouse.click(s.x,s.y);for(let i=0;i<40&&await p.evaluate(()=>!shp&&!bk&&!vPanel);i++)await p.waitForTimeout(150);};
+ const spot=(p,k,go)=>p.evaluate(([k,go])=>{if(go){const b=vBld().B.find(q=>q.k===k);if(b){VL.x=b.x-120;VL.cam=-1;VL.tx=null;}}draw();let r=null;scaled(()=>{r=vSpot(k);});return r;},[k,go]);
+ const walk=async(p,k)=>{const s=await spot(p,k,1);await p.mouse.click(s.x,s.y);for(let i=0;i<60&&await p.evaluate(()=>!shp&&!bk&&!vPanel);i++)await p.waitForTimeout(150);};
  for(const vp of [{width:820,height:1180},{width:390,height:844},{width:1180,height:820},{width:844,height:390}]){const tag=vp.width+'x'+vp.height;
   const ctx=await b.newContext({viewport:vp});await ctx.addInitScript(clock,'2026-10-20T12:00:00+02:00');const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
   await p.goto(F+'#dorf');await p.waitForTimeout(800);
-  ok(await p.evaluate(()=>vilOn()&&st==='ready'&&VL.x>0),tag+': Dorf statt Menü');
+  ok(await p.evaluate(()=>vilOn()&&st==='ready'&&VL.x>0),tag+': Dorf statt Menü');await p.waitForTimeout(600);
   ok(!(await grab(p)).includes('📖 Story-Modus (neu)'),tag+': keine alten Menü-Knöpfe');
   await p.screenshot({path:path.join(__dirname,'dorf_'+vp.width+'.png')});
   await walk(p,'shop');ok(await p.evaluate(()=>shp&&shp.tab===0),tag+': Held läuft zum Shop, Shop öffnet');
@@ -36,7 +36,7 @@ const clock=d=>{const T=new Date(d).getTime(),D=Date;window.Date=class extends D
   await ctx.close();}
  // Englisch + nach dem Event kein Halloween-Haus
  {const ctx=await b.newContext({viewport:{width:820,height:1180}});await ctx.addInitScript(clock,'2026-12-01T12:00:00+01:00');const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
-  await p.goto(F+'#dorf');await p.waitForTimeout(800);ok(!(await spot(p,'hw'))&&(await spot(p,'shop')),'nach dem Event kein Halloween-Haus');
+  await p.goto(F+'#dorf');await p.waitForTimeout(800);ok(!(await spot(p,'hw'))&&!!(await spot(p,'shop')),'nach dem Event kein Halloween-Haus');
   await p.evaluate(()=>{window.__lscan=new Set();setLang('en');draw();vPanel='tor';draw();vPanel='menu';draw();vPanel=null;});
   const miss=await p.evaluate(()=>[...window.__lscan].filter(s=>/Dungeon|Shop|Bestiarium|Ranglisten|Tippe|Menü|Tageslauf|Halloween/.test(s)));
   ok(miss.filter(s=>!['Dungeon','⚔ Dungeon','🛒 Shop'].includes(s)).length===0,'Englisch vollständig '+JSON.stringify(miss));
