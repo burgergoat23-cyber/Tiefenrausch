@@ -81,6 +81,15 @@ const DAY='2026-10-20T12:00:00+02:00';   // mitten im Halloween-Event
   ok(miss2.length===0&&await p.evaluate(()=>LTR('Zurück')!=='Zurück'),'Englisch: keine fehlenden Texte '+JSON.stringify(miss2.slice(0,20)));
   await p.evaluate(()=>{shopOpen(4);draw();});await p.screenshot({path:path.join(__dirname,'u11_event_en.png')});
   await ctx.close();}
+ // „Was ist neu?“-Fenster: einmal pro Spieler
+ {const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.addInitScript(d=>{const T=new Date(d).getTime(),D=Date;window.Date=class extends D{constructor(...a){super(...(a.length?a:[T]));}static now(){return T;}};},DAY);
+  const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(F+'#neu');await p.waitForTimeout(700);
+  let L=await grab(p);ok(L.includes('Los geht’s!')&&L.includes('🎃 Zum Halloween-Event')&&await p.evaluate(()=>{draw();return btns.length===2;}),'Neu-Fenster erscheint und sperrt das Menü '+JSON.stringify(L));
+  await p.screenshot({path:path.join(__dirname,'u11_neu_390.png')});
+  await press(p,/^Los geht/);L=await grab(p);ok(L.includes('📖 Story-Modus (neu)')&&!L.includes('Los geht’s!'),'nach „Los geht’s“ normales Menü');
+  await p.reload();await p.waitForTimeout(700);ok(!(await grab(p)).includes('Los geht’s!')&&await p.evaluate(()=>meta.nws===NEWS.v),'nach Neuladen nicht noch einmal (auch im Konto-Speicher gemerkt)');
+  await p.evaluate(()=>{try{localStorage.removeItem('dg_news');}catch(e){}meta.nws=0;u11Merge({nws:NEWS.v});});ok(!(await grab(p)).includes('Los geht’s!'),'auf anderem Gerät: Konto-Stand reicht');
+  await ctx.close();}
  // Nach dem Event: kein Event-Knopf, Event-Skins nicht im Shop
  {const {ctx,p}=await open({width:820,height:1180},'2026-12-01T12:00:00+01:00');
   const L=await grab(p);ok(!L.includes('🎃 Halloween-Event')&&L.includes('🛒 Shop & Aufgaben'),'nach dem Event kein Event-Knopf');
