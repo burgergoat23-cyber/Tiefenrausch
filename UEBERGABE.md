@@ -1,6 +1,6 @@
 # Tiefenrausch – Übergabe für neue Sitzungen
 
-Stand: 2026-10-03. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die Datei ist ~430 KB, sehr lange Zeilen).
+Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die Datei ist ~430 KB, sehr lange Zeilen).
 
 ## Der Nutzer
 - Spricht Deutsch, ist kein Programmierer. Antworten **kurz, einfach, auf Deutsch**; Klick-Anleitungen **Schritt für Schritt** (eine Aktion pro Nachricht, Screenshots erbitten).
@@ -37,6 +37,8 @@ Stand: 2026-10-03. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Übersetzung: alle Texte deutsch im Code, Englisch in `LANGS.en.d` (Schlüssel = deutscher Text). Neue Texte dort ergänzen (doppelte Schlüssel vermeiden).
 - Bildschirm-Sicherungen: `resetTf()` setzt jedes Bild Maßstab/`save()`-Ebenen zurück; Figuren außerhalb des Bildes werden nicht gezeichnet; getönte Varianten über `spriteC` (Zwischenbild).
 
+- **Update 11 – Marken, Aufgaben, Skins, Glücksrad, Halloween** (Modul vor `function loop(n)`, Stichwort „Update 11“): Marken `meta.tk={e,s}` (verdient/ausgegeben, nur wachsend → Cloud-Merge per Maximum, `tkBal`/`tkGive`/`tkPay`). Tagesaufgaben `QD` (3 pro Tag, fest per `daySeed`, `qdToday`), Meilensteine `QM`, Fortschritt über `tqa(k,v)` (wird aus `qadd`, Ebenenwechsel, `dailyEnd`, `rescueVillager`, Teilen aufgerufen). Skins: Avatar `SKA` (Umhang/Haare/Augen/Kleidung, Kopf `skHead`, Aura `skAura`), Waffen `SKW` (Klingenfarbe `wskCol`, Leuchten `wskGlow`, Schwungspur `wskTrail`); Preise nach Seltenheit `RAR`. Besitz `meta.own`, ausgerüstet `meta.sk`. Glücksrad `WHL` (Chancen im Fenster sichtbar, 1× täglich gratis, sonst 100 Marken). Fenster `shp`/`shopUI` (Reiter Avatar, Waffen, Glücksrad, Aufgaben, Event), Menüknöpfe `u11Btns`. **Halloween-Event** `hwOn()` vom 1.10. bis 8.11.2026: Modus `mode==='hw'` (wie Endlos, Thema 4 in `TH`/`WPAL`, Kürbisse `hwWorld`, wird nicht gespeichert, zählt nicht für Rekord), Bonbons = Pass-Punkte (`hwXp`, 1 pro Gegner, 10 pro Boss), Pass `PASS` 10 Stufen à 100, letzte Stufe exklusiver Skin „Geisterwächter“ (SKA 10), Event-Aufgaben `EVQ`, Menü-Hintergrund `hwBG`. Hinweise unten `u11Note`/`u11Draw`. Zusammenführen `u11Merge` (aus `mergeMeta`). Test: `node tests/u11.js`. Bewusst **nicht** gebaut: unechte „Bot-Spieler“ in der Rangliste (Täuschung echter Spieler, verstößt gegen Plattform-Regeln) – Alternative wäre klar markierte Computer-Rivalen.
+
 ## Arbeitsweise
 - Änderungen mit Python-Ersetzungen an **eindeutigen** Ankern (`assert s.count(anker)==1`), danach `node --check` und ESLint (`no-undef`, `no-dupe-keys`).
 - Vor dem Push: `bash tests/run.sh` (bei Konten/Koop zusätzlich `--firebase`). Ehrlich sagen, was nur simuliert und nicht auf dem iPad geprüft wurde.
@@ -70,6 +72,7 @@ Stand: 2026-10-03. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 8. Bewegter Hauptmenü-Hintergrund (Tempeltor, Mond, Gras, Blätter, Glühwürmchen).
 9. Andere Webseiten (itch.io, CrazyGames-Version), Werbe-Bilder/Videos, Firebase sparsamer.
 10. Gast-Rangliste mit frei wählbarem Namen (auch CrazyGames), Teilen-Knopf, Koop-Einladung per Link, Link-Vorschaubild, ZIPs unter `downloads/`.
+11. Marken + Aufgaben, Skin-Shop (Avatar/Waffe, Seltenheiten), Glücksrad, Halloween-Event (Dungeon, Pass mit exklusivem Skin, Halloween-Menü).
 
 ## Offene Ideen / bekannte Grenzen
 - Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
