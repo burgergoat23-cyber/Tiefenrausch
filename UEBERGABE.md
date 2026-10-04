@@ -83,7 +83,8 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 9. Andere Webseiten (itch.io, CrazyGames-Version), Werbe-Bilder/Videos, Firebase sparsamer.
 10. Gast-Rangliste mit frei wählbarem Namen (auch CrazyGames), Teilen-Knopf, Koop-Einladung per Link, Link-Vorschaubild, ZIPs unter `downloads/`.
 11. Marken + Aufgaben, Skin-Shop (Avatar/Waffe, Seltenheiten), Glücksrad, Halloween-Event (Dungeon mit Halloween-Gegnern, Pass mit exklusivem Skin, Halloween-Menü), „Was ist neu?“-Fenster.
-12. Dorf als Hauptmenü: lebendiges Dorf im Retro-Pixel-Look (Wind, Tiere, 18 Bewohner mit Stimme), sprechende Dungeon-Figuren (live 4.10.). 13. Neue Dorf-Steuerung, Betreten-Szenen mit Innenräumen, coolere Skins mit Effekten („Was ist neu?“ v13). **Offen:** neue ZIPs bei itch.io und CrazyGames am PC hochladen.
+12. Dorf als Hauptmenü: lebendiges Dorf im Retro-Pixel-Look (Wind, Tiere, 18 Bewohner mit Stimme), sprechende Dungeon-Figuren (live 4.10.).
+13. Neue Dorf-Steuerung, Betreten-Szenen mit Innenräumen, coolere Skins mit Effekten („Was ist neu?“ v13). **Offen:** neue ZIPs bei itch.io und CrazyGames am PC hochladen.
 
 ## Offene Ideen / bekannte Grenzen
 - Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
