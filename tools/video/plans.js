@@ -187,7 +187,7 @@ for(const k in PH){module.exports[k]={view:{width:432,height:768},dpr:2.5,file:(
   vf:'eq=contrast=1.05:saturation=1.2,vignette=PI/5',scenes:PH[k]};
   module.exports[k+'_ohne_musik']=Object.assign({},module.exports[k],{file:()=>`${k}_ohne_musik.mp4`,music:'keine'});}
 // ===== Halloween-Clips (Update 11): Event-Menü, Skins, Pass, Halloween-Dungeon, Glücksrad – alles echt im Spiel =====
-const HW={de:{a:'HALLOWEEN-UPDATE 🎃',b:'Neue Skins',c:'Halloween-Dungeon',d:'Event-Pass',d2:'Am Ende: exklusiver Skin',e:'Glücksrad – 1× am Tag gratis',end:'Kostenlos im Browser',url:'Link in der Bio ↓',
+const HW={de:{a:'HALLOWEEN 🎃',b:'Neue Skins',c:'Halloween-Dungeon',d:'Event-Pass',d2:'Am Ende: exklusiver Skin',e:'Glücksrad – 1× am Tag gratis',end:'Kostenlos im Browser',url:'Link in der Bio ↓',
     k1:'Kürbiskopf gegen den Boss?',k2:'Bonbons sammeln 🍬',k3:'Stufe 10 …',k4:'GEISTERWÄCHTER?!',k5:'Nur im Halloween-Pass',w1:'Gratis-Dreh am Glücksrad',w2:'Was gibt es heute?'},
   en:{a:'HALLOWEEN UPDATE 🎃',b:'New skins',c:'Halloween dungeon',d:'Event pass',d2:'Final tier: exclusive skin',e:'Lucky wheel – 1 free spin a day',end:'Free in your browser',url:'Link in bio ↓',
     k1:'Pumpkin head vs boss?',k2:'Collect candy 🍬',k3:'Tier 10 …',k4:'GHOST GUARDIAN?!',k5:'Only in the Halloween pass',w1:'Free lucky wheel spin',w2:'What do I get today?'}};
@@ -196,7 +196,7 @@ const HWC={
   clip_halloween_update:l=>{const x=HW[l];return[
     {sec:3,setup:title+HWM,cap:[x.a],hook:1,zoom:1.15},
     {sec:3.2,setup:HWM+"shopOpen(0);shp.pg=1;shp.sel=8;",cap:[x.b],zoom:1.12},
-    {sec:4,setup:HWD(3,8,7)+'VAP.toBoss();',cap:[x.c],hook:1,zoom:1.25},
+    {sec:4,setup:HWD(3,8,7)+'VAP.toBoss();',cap:[x.c],zoom:1.25},
     {sec:3.2,setup:"st='ready';ui=null;"+HWM+"meta.hw.xp=640;shopOpen(4);",cap:[x.d,x.d2],cy:.86,zoom:1.08},
     {sec:4.2,setup:HWM+"meta.wh={d:'',n:0};shopOpen(2);window.__ws=0;",each:"if(++window.__ws===20)whSpin();",cap:[x.e],cy:.86,zoom:1.06},
     {sec:3,setup:title,cap:[x.end,x.url],cy:.84,flash:false,zoom:1.1}];},
