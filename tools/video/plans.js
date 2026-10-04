@@ -33,7 +33,7 @@ const T={
       t6:'In endless mode, new enemy variants keep showing up.',t7:'And the deeper you go, the harder it gets. How far can you make it?',
       t8:'In the bestiary, you collect every enemy and every achievement.',t9:'In the daily run, everyone plays the same dungeon. The leaderboard even works without an account.',
       t10:'Tiefenrausch. Free in your browser, solo or with a friend in co-op. You will find the link in the description!'}}};
-const title="st='ready';bk=null;ui=null;CO.lob=null;",
+const title="st='ready';bk=null;ui=null;CO.lob=null;shp=null;",
   run=(md,f,w)=>`newGame(undefined,'${md}');${f>1?`fl=${f};gen();`:''}me.mx=Math.max(me.mx,${Math.min(12,4+Math.floor(f/3))});me.hp=me.mx;${w?`me.w=${w};`:''}ui=null;VAP.wig=0;`,
   rank=l=>`st='ready';ui=null;dKey=dayKey();gName='${l==='en'?'You':'Du'}';bk={tab:3,pg:0,lt:0};lb={st:'ok',rows:[],t:Date.now()+9e9,d:dayKey(),rank:0};`;
 // Clip „Kosmische Waffe“: schwächstes Schwert gegen Boss → Boss-Truhe → kosmische Waffe in Zeitlupe → Ebene abräumen.
