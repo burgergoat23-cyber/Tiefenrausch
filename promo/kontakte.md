@@ -9,17 +9,17 @@ GameRamble, Twinfinite, DarkZero, ZTGD, The Reticule (unzustellbar), 1ndieWorld,
 The Indie Game Website, indiegames.ch, GAME60 Magazine, Indie Game Atlas, Fix Gaming Channel, RETRONUKE,
 Indie Game of the Week, BrewOtaku. Antworten bis 3.10.: keine.
 
-## Neue E-Mail-Adressen (gefunden 3.10.2026, noch nicht angeschrieben)
+## Neue E-Mail-Adressen (gefunden 3.10.2026; ✅ = angeschrieben)
 | Seite | Adresse | Passt, weil |
 |---|---|---|
 | Rogueliker ✅ 3.10. | editor@rogueliker.com | Seite nur über Roguelikes/Roguelites |
 | Jupiter Hadley ✅ 3.10. (YouTube, itch.io-Spiele) | Jupi@JupiterHadley.com | zeigt kleine kostenlose itch.io-Spiele |
-| Free Game Planet | admin@freegameplanet.com | eigene Rubrik „Browser Games“, nur Gratisspiele |
-| Indie Hive | admin@indie-hive.com | wöchentliche Indie-Reviews |
-| RPG Site | staff@rpgsite.net | RPG-News (allgemeiner Kontakt) |
+| Free Game Planet ✅ 4.10. | admin@freegameplanet.com | eigene Rubrik „Browser Games“, nur Gratisspiele |
+| Indie Hive ✅ 4.10. | admin@indie-hive.com | wöchentliche Indie-Reviews |
+| RPG Site ✅ 4.10. | staff@rpgsite.net | RPG-News (allgemeiner Kontakt) |
 | Indie Gamer Team | darkmikasonfire@aol.com | offizieller Review-Kontakt (Aki) laut ihrer Team-Seite |
-| PC Games (deutsch) | redaktion@pcgames.de | Redaktion, Themenhinweise |
-| GameStar (deutsch) | redaktion@gamestar.de | Redaktion, Themenvorschläge |
+| PC Games (deutsch) ✅ 4.10. | redaktion@pcgames.de | Redaktion, Themenhinweise |
+| GameStar (deutsch) ✅ 4.10. | redaktion@gamestar.de | Redaktion, Themenvorschläge |
 
 ## Formulare (selbst im Browser ausfüllen, keine Gmail-Grenze)
 - Jay is Games: kein Formular mehr → ✅ 3.10. per E-Mail an contact@jayisgames.com (nicht nochmal)
