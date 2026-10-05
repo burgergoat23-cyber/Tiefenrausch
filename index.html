@@ -3998,6 +3998,8 @@ const VBF={buch:bLib,haus1:bHaus1,shop:bShop2,platz:bPlaza,brett:bHall,haus2:bBa
 // Kürbisse vor den Türen (nur im Event): [Gebäude, x-Versatz, Größe]
 const VPUMP=[['buch',-70,1.3],['buch',72,1.1],['haus1',8,1.2],['shop',-150,1.4],['shop',132,1.1],['brett',-84,1.3],['brett',84,1.3],['haus2',-104,1.2],['tor',-120,1.4],['tor',122,1.2]];
 // ---------- Bild ----------
+// Tastendruck merken: keyup kann vor dem nächsten Bild kommen (langsames Gerät) – dann ginge „Betreten“ verloren
+addEventListener('keydown',e=>{if(e.repeat||(e.target&&/^(INPUT|TEXTAREA)$/.test(e.target.tagName)))return;const k=(e.key||'').toLowerCase();if(k==='e'||k==='enter'||k===' '||k==='w'||k==='arrowup')VL.kA=performance.now();else if(k==='escape')VL.kE=performance.now();});
 function vScene(){const L=vLay(),S=L.S,now=performance.now()/1000,dt=Math.min(.05,VL.t?now-VL.t:0);VL.t=now;
  // Bewegung (Tippen-Ziel oder Tasten)
  const blk=!!(VL.sc&&VL.sc.ph<3),kk=blk?[0,0]:kv();let mx=kk[0]||(blk?0:vHold());
@@ -4006,8 +4008,9 @@ function vScene(){const L=vLay(),S=L.S,now=performance.now()/1000,dt=Math.min(.0
  const spd=VL.tx!=null?vSpd(VL.tx-VL.x):320*(1+Math.min(.45,VL.hold*.5));   // gedrückt halten: wird schneller
  if(mx){VL.x=clamp(VL.x+mx*spd*dt,60,L.WW-40);VL.F=mx>0?1:-1;VL.bob+=dt*11;VL.dq-=dt;if(VL.dq<=0){VL.dq=.16;VL.dust.push({x:VL.x-VL.F*8,t:0});if(Math.random()<.45&&VLF.length<44)VLF.push({p:1,x:VL.x-VL.F*6,y:VGY+40,vx:-VL.F*(30+Math.random()*50),vy:-60-Math.random()*50,gr:140,life:1.3,t:0,w:2,r:Math.random()*6,s:3+Math.random()*2,c:VLC[Math.floor(Math.random()*VLC.length)]});}}VL.mv+=((mx?1:0)-VL.mv)*Math.min(1,dt*10);
  for(const d of VL.dust)d.t+=dt;VL.dust=VL.dust.filter(d=>d.t<.6);
- if(keys.escape&&VL.sc&&VL.sc.ph<2){keys.escape=0;vScMenu();}
- if(!mx&&(keys.e||keys.enter||keys.w||keys.arrowup||keys[' '])){keys.e=keys.enter=keys.w=keys.arrowup=keys[' ']=0;if(VL.sc&&VL.sc.ph<2)vScMenu();else if(!vTalk&&!vPanel&&!VL.sc){const a=vNearAct(L);if(a)vEnter(a.k);}}
+ const kNow=performance.now(),kAct=VL.kA&&kNow-VL.kA<400,kEsc=VL.kE&&kNow-VL.kE<400;VL.kA=VL.kE=0;   // kurze Tastendrücke zwischen zwei Bildern nicht verlieren (vKeyLatch)
+ if((keys.escape||kEsc)&&VL.sc&&VL.sc.ph<2){keys.escape=0;vScMenu();}
+ if(!mx&&(keys.e||keys.enter||keys.w||keys.arrowup||keys[' ']||kAct)){keys.e=keys.enter=keys.w=keys.arrowup=keys[' ']=0;if(VL.sc&&VL.sc.ph<2)vScMenu();else if(!vTalk&&!vPanel&&!VL.sc){const a=vNearAct(L);if(a)vEnter(a.k);}}
  vScTick(dt);
  // Kamera folgt mit etwas Vorausschau in Laufrichtung
  const look=VL.F*Math.min(L.vw*.16,150)*Math.min(1,VL.mv*1.4),camT=clamp(VL.x-L.vw/2+look,0,Math.max(0,L.WW-L.vw));VL.cam+=(camT-VL.cam)*Math.min(1,dt*4);
