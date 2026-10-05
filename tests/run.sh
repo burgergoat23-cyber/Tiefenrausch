@@ -11,7 +11,7 @@ if [ "${1:-}" = "--firebase" ]; then
   cd fb; [ -d node_modules ] || npm i --silent; cp ../../firestore.rules .
   (npx firebase emulators:start --project tiefenrausch > emu.log 2>&1 &)
   for i in $(seq 1 60); do grep -q "All emulators ready" emu.log && break; sleep 2; done
-  for t in e2e coop_t gast_t; do curl -s -X DELETE "http://127.0.0.1:8080/emulator/v1/projects/tiefenrausch/databases/(default)/documents" >/dev/null
+  for t in e2e coop_t coop_spaet gast_t; do curl -s -X DELETE "http://127.0.0.1:8080/emulator/v1/projects/tiefenrausch/databases/(default)/documents" >/dev/null
     curl -s -X DELETE http://127.0.0.1:9099/emulator/v1/projects/tiefenrausch/accounts >/dev/null; echo "== $t"; timeout 400 node $t.js 2>&1 | grep -E "FAIL|BESTANDEN|FEHLGESCHLAGEN|JS-Fehler"; done
   pkill -f "emulators:start" 2>/dev/null; pkill -f "cloud-firestore-emulator" 2>/dev/null   # Emulator beenden (sonst alte Daten beim nächsten Lauf)
   cd ..; echo "== upd (Update-Hinweis)"; timeout 200 node upd.js 2>&1 | tail -2

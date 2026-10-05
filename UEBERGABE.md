@@ -87,6 +87,6 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 13. Neue Dorf-Steuerung, Betreten-Szenen mit Innenräumen, coolere Skins mit Effekten, Innenräume mit eigenem Maßstab („Was ist neu?“ v13; live 4.10.). 5.10.: Kreisblende beim Betreten repariert (`vIris` zeichnete wegen `arc(…,0,TAU,true)` kein Loch → kurz schwarzer Bildschirm; jetzt `fill('evenodd')`, Test in `steuerung.js`), Halbmond am Blutmond-Griff ebenso. **Offen:** neue ZIPs (Version 13) bei itch.io und CrazyGames am PC hochladen.
 
 ## Offene Ideen / bekannte Grenzen
-- Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren).
+- Koop v1: nur Gastgeber kann Händler/NPCs nutzen; nur Endlos; kein TURN-Server (manche Netze blockieren). 5.10. repariert: die 25-s-Uhr der Verbindung lief schon ab dem Erstellen des Raums – wer später beitrat (Code abtippen, per WhatsApp schicken …), bekam immer „WLAN blockiert“. Jetzt startet sie erst beim Verbinden (`coOpen`), ICE-Fehler werden sofort erkannt, Meldungen über `coErrMsg`; Test `tests/fb/coop_spaet.js` (Beitritt nach 40 s). Klappt es in manchen Netzen trotzdem nicht (z. B. Handy-Hotspot), bräuchte es einen TURN-Server (Konto nötig → Eltern).
 - Bosse sind umgefärbte Varianten der vorhandenen Zeichnungen.
 - Rangliste/Bestenliste werden im Browser berechnet (theoretisch fälschbar).
