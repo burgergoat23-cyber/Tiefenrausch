@@ -212,3 +212,6 @@ const HWC={
     {sec:3.6,setup:HWD(4,3,5),cap:[x.c],zoom:1.25},
     {sec:3,setup:title,cap:[x.end,x.url],cy:.84,flash:false,zoom:1.1}];}};
 for(const k in HWC)module.exports[k]={view:{width:432,height:768},dpr:2.5,file:l=>`${k}_${l}.mp4`,scenes:HWC[k]};
+
+// Edits zu Update 12/13 (Dorf, Innenräume, Skins, Vorher/Nachher): eigene Datei
+Object.assign(module.exports,require('./plans_dorf.js'));

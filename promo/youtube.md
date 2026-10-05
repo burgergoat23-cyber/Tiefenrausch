@@ -167,6 +167,23 @@ Die Langvideos liegen wegen der Größe nicht im Repo; sie wurden im Chat in Tei
 - EN (≤100): `Tiefenrausch 🔥 Free in your browser: burgergoat44.itch.io/tiefenrausch #shorts #phonk`
 - `_ki_musik`: Musik von vidIQ „Generate Music“ (lizenzfrei, KI-erzeugt), Drop auf Sekunde 2, Spielgeräusche leise darunter. Mischen: `ffmpeg -i X_ohne_musik.mp4 -ss 14.05 -t 16 -i vidiq.wav …` (siehe Verlauf).
 
+## Edits zu Update 13 (hochkant, 15–16 s, Schnitte auf 80 BPM) – 5.10.2026
+- `edit_dorf` – Kamerafahrt durchs Dorf, Bewohner sprechen, Portal · `edit_innen` – Tür geht im Takt auf, Innenräume mit Begrüßung
+- `edit_skins` – ein Skin pro Schlag, Name in Seltenheits-Farbe, Schluss im Shop · `edit_glowup` – altes Menü (Update 11) → Dorf (Update 13) auf dem Drop
+- Je zwei Versionen: `_ki_musik` (vidIQ „Generate Music“, Slowed-Stil, lizenzfrei, KI-erzeugt; eine Spur, je Edit ein anderer Abschnitt) und `_ohne_musik` (nur Spielgeräusche → Trend-Sound in der App).
+- Werkzeuge: Drehbücher `tools/video/plans_dorf.js`, Aufnahme `node tools/video/rec.js edit_dorf`, Musik drunter `python3 tools/video/musik_mix.py <video> <musik.wav> <ab-Sekunde> <ziel.mp4>` (ab-Sekunde = `M0` im Plan).
+
+| Video | Titel Deutsch | Title English |
+|---|---|---|
+| edit_dorf | Mein Browser-Spiel hat jetzt ein Dorf 🏘️ #shorts | My browser game has a village now 🏘️ #shorts |
+| edit_innen | Was ist hinter der Tür? 🚪 #shorts | What's behind the door? 🚪 #shorts |
+| edit_skins | Welcher Skin ist der beste? 👇 #shorts | Which skin is the best? 👇 #shorts |
+| edit_glowup | Update 11 → Update 13 🔥 #shorts | Update 11 → Update 13 🔥 #shorts |
+
+- DE (≤100 Zeichen): `Tiefenrausch – gratis im Browser: burgergoat44.itch.io/tiefenrausch · Musik: KI-generiert #shorts`
+- EN (≤100): `Tiefenrausch – free in your browser: burgergoat44.itch.io/tiefenrausch · Music: AI-generated #shorts`
+- Die Schrift im Bild ist Deutsch (Aufhänger-Zeile, Skin-Namen).
+
 ## vidIQ-Erkenntnisse (3.10.2026)
 - „browser games“: ~56.000 Suchen/Monat, **Deutschland ist das größte Land (25 %)** → deutsche Titel lohnen sich.
 - Wachsend: „best browser games“ (+29 %), „web games“ (+43 %, wenig Konkurrenz), „browser games to play with friends“ (~3.600/Monat → Koop betonen!).

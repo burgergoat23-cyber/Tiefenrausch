@@ -7,10 +7,13 @@ NAMEN = {'clip_kosmische_waffe': 'Clip: Kosmische Waffe', 'youtube_short': 'Shor
          'short_ausweichen': 'Short: Ausweichen im Boss-Hagel', 'short_truhen': 'Short: Truhen-Glück', 'short_tageslauf': 'Short: Tageslauf',
          'short_endlos_chaos': 'Short: Endlos-Chaos ab Ebene 60', 'endlos100': 'Langvideo: Endlos bis Ebene 100',
          'story_komplett': 'Langvideo: Story-Modus komplett', 'edit_traurig_16s_slowed': 'Edit: Trauriger Edit 16 s – Slowed (KI-Musik)', 'edit_traurig_slowed': 'Edit: Trauriger Edit 25 s – Slowed (KI-Musik)', 'edit_traurig_16s': 'Edit: Trauriger Edit 16 s (0,5-s-Schnitte)', 'edit_traurig': 'Edit: Trauriger Edit (Musik, 1-Sekunden-Schnitte)', 'bosse': 'Langvideo: Alle Bosse',
-         'edit_phonk_bosse': 'Phonk-Edit: Bosse im Takt', 'edit_phonk_speedramp': 'Phonk-Edit: Speedramp', 'edit_phonk_glowup': 'Phonk-Edit: Ebene 1 bis 100'}
+         'edit_phonk_bosse': 'Phonk-Edit: Bosse im Takt', 'edit_phonk_speedramp': 'Phonk-Edit: Speedramp', 'edit_phonk_glowup': 'Phonk-Edit: Ebene 1 bis 100',
+         'edit_dorf': 'Edit: Das Dorf (Update 13)', 'edit_innen': 'Edit: Was ist hinter der Tür? (Innenräume)', 'edit_skins': 'Edit: Welcher Skin ist der beste?', 'edit_glowup': 'Edit: Update 11 → Update 13'}
 def titel(f):
     b = os.path.basename(f)[:-4]
     sp = '🇬🇧 Englisch (mit KI-Stimme)' if b.endswith('_en') else '🇩🇪 Deutsch'
+    if b.endswith('_ohne_musik'): sp = '🔇 Ohne Musik (Trend-Sound in der App wählen)'
+    elif b.endswith('_ki_musik'): sp = '🎵 Mit KI-Musik (vidIQ, lizenzfrei)'
     if b.startswith('edit_phonk'): sp = '🔇 Ohne Musik (Trend-Sound in der App wählen)' if b.endswith('_ohne_musik') else '🔥 Mit KI-Phonk (vidIQ)' if b.endswith('_ki_musik') else '🎵 Mit Phonk-Musik (selbst gebaut)'
     for k, v in NAMEN.items():
         if b.startswith(k): return v, sp

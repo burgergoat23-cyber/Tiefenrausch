@@ -37,6 +37,9 @@ const clock=d=>{const T=new Date(d).getTime(),D=Date;window.Date=class extends D
  // Skin-Effekte: alle Skins in der Vorschau zeichnen (Dorf, Dungeon, Shop) ohne Fehler
  {const ctx=await b.newContext({viewport:{width:1180,height:820}});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(F);await p.waitForTimeout(700);
   const k=await p.evaluate(()=>{const fa=SKA.filter(s=>s.fx).length,fw=SKW.filter(s=>s.fx).length;newGame(undefined,'endless');for(let a=0;a<SKA.length;a++){SKO={a,w:a%SKW.length};for(let i=0;i<3;i++){tm+=.3;draw();heroPrev(200,200,1.5,a,a%SKW.length);wepPrev(300,200,1.4,a%SKW.length);}}SKO=null;return{fa,fw,n:SKA.length,m:SKW.length};});
-  ok(k.fa===k.n-1&&k.fw===k.m-1,'jeder Skin außer Standard hat einen eigenen Effekt '+JSON.stringify(k));await ctx.close();}
+  ok(k.fa===k.n-1&&k.fw===k.m-1,'jeder Skin außer Standard hat einen eigenen Effekt '+JSON.stringify(k));
+  // Kreisblende beim Betreten: innen bleibt das Bild sichtbar, nur außen wird es dunkel (früher war alles schwarz)
+  const ir=await p.evaluate(()=>{const c=document.createElement('canvas');c.width=W;c.height=H;const g0=g;g=c.getContext('2d');try{g.fillStyle='#fff';g.fillRect(0,0,W,H);vIris(W/2,H/2,Math.min(W,H)/4);const px=(x,y)=>g.getImageData(x,y,1,1).data[0];return{mid:px(W/2,H/2),ecke:px(3,3)};}finally{g=g0;}});
+  ok(ir.mid===255&&ir.ecke<20,'Kreisblende: Mitte sichtbar, Rand dunkel '+JSON.stringify(ir));await ctx.close();}
  ok(errs.length===0,'keine JS-Fehler '+errs.join(' | '));
  console.log(fail?'FEHLGESCHLAGEN ('+fail+')':'ALLE OK');await b.close();process.exit(fail?1:0);})();

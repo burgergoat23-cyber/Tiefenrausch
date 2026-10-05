@@ -3818,7 +3818,7 @@ function wskFx(L){if(!WSKON)return;const s=SKWc(),f=s.fx;if(!f)return;g.save();g
  else if(f==='flame'){for(let i=0;i<5;i++){const fx=8+i*(L-8)/5,h=4.5+Math.sin(tm*12+i*1.7)*2;g.fillStyle=i%2?'#ffb347':'#ff6b00';g.globalAlpha=.88;g.beginPath();g.moveTo(fx-1.9,-1.5);g.quadraticCurveTo(fx-.6,-1.5-h*.6,fx,-1.5-h);g.quadraticCurveTo(fx+.6,-1.5-h*.6,fx+1.9,-1.5);g.closePath();g.fill();}}
  else if(f==='spirit'){g.globalAlpha=.3+.15*Math.sin(tm*4);g.strokeStyle='#7cffb8';g.lineWidth=2;g.beginPath();g.moveTo(4,-2);g.quadraticCurveTo(L*.6,-6-Math.sin(tm*3)*2,L+4,-1);g.stroke();for(let i=0;i<3;i++){const p=skP(i,.5,.33);g.globalAlpha=(1-p)*.75;dot(8+p*L,-3-p*8,1.3,'#c8fff0');}}
  else if(f==='blood'){for(let i=0;i<3;i++){const p=skP(i,.4,.33),px=10+i*(L-14)/2,py=1.5+p*7;g.globalAlpha=1-p;g.fillStyle='#d4002a';g.beginPath();g.ellipse(px,py,.9,1.5+p,0,0,TAU);g.fill();}g.globalAlpha=1;glw(L*.5,0,L*.6,'#ff2040',.12+.06*Math.sin(tm*3));
-  g.fillStyle='#ffe0e0';g.beginPath();g.arc(-2,0,2.6,0,TAU);g.arc(-1,-.8,2.3,0,TAU,true);g.fill('evenodd');}
+  g.fillStyle='#ffe0e0';g.beginPath();g.arc(-2,0,2.6,0,TAU);g.moveTo(1.3,-.8);g.arc(-1,-.8,2.3,0,TAU);g.fill('evenodd');}
  g.restore();g.globalAlpha=1;}
 // Shop-Karten: Glanz je Seltenheit (Hintergrund-Leuchten, Lichtstreifen ab Episch, Regenbogen-Rand bei Mythisch)
 function skCardBg(x,y,w,h,r){const c=RAR[r].c;g.fillStyle=gr(x+w/2,y+h*.55,2,Math.max(w,h)*.7,ca(c,.12+r*.05),ca(c,0));g.fillRect(x,y,w,h);
@@ -5054,7 +5054,7 @@ function vDoorOpen(k,o){const c=VSCN[k];if(!c||k==='tor')return;const x=c.dx-c.d
  g.save();if(k==='hw')g.transform(1,0,-.05,1,0,0);sh();g.fillStyle=gv(-h,0,'#ffe9a8','#c8641c');g.fill();g.save();sh();g.clip();g.fillStyle='rgba(60,30,10,'+(.5-o*.3)+')';g.fillRect(x,-h,w,h);g.restore();
  const pw=w*Math.max(.08,1-o*.92);g.fillStyle='#4a2c16';g.beginPath();g.moveTo(x,0);g.lineTo(x,-h+4);g.lineTo(x+pw,-h+8+o*6);g.lineTo(x+pw,-2);g.closePath();g.fill();g.strokeStyle=OLC;g.lineWidth=1.2;g.stroke();g.restore();
  glw(x+w/2,-h*.45,90,'#ffcf7a',.35*o);}
-function vIris(x,y,r){g.save();g.fillStyle='#05030a';g.beginPath();g.rect(-5,-5,W+10,H+10);g.arc(x,y,Math.max(0,r),0,TAU,true);g.fill();g.restore();}
+function vIris(x,y,r){r=Math.max(0,r);g.save();g.fillStyle='#05030a';g.beginPath();g.rect(-5,-5,W+10,H+10);g.moveTo(x+r,y);g.arc(x,y,r,0,TAU);g.fill('evenodd');g.restore();}   // Loch per evenodd (arc 0→TAU gegen den Uhrzeigersinn wäre leer)
 // über dem Logo, unter den Menüs: Blende, Innenraum, Herauskommen
 function vSceneOver(){const s=VL.sc;if(!s)return;const L=vLay(),S=L.S,b=L.B.find(q=>q.k===s.k),c=VSCN[s.k]||{},dxs=b?vX(L,b.x+(c.dx||0)):W/2,dys=vY(L,VGY-(c.dh||120)*.45),R=Math.hypot(W,H);
  if(s.ph===0){const u=clamp((s.t-.45)/.4,0,1);if(u>0)vIris(dxs,dys,(1-u*u)*R);}

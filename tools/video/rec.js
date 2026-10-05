@@ -10,7 +10,7 @@ const P=require('./plans.js')[PLAN];if(!P)throw new Error('Unbekannter Plan '+PL
 const scenes=P.scenes(LANG),tmp=fs.mkdtempSync(path.join(require('os').tmpdir(),'vid-'));
 // KI-Sprecher: Sätze vorab erzeugen, Szenen mindestens so lang wie ihr Satz (+ Luft)
 const VO_IN=.15,NOVO=!!process.env.NOVO;   // NOVO=1: gleicher Schnitt (Szenenlängen nach Sprechertext), aber ohne Stimme – z. B. für eigene Stimme in CapCut
-{const L=scenes.map(s=>s.vo||'');fs.writeFileSync(path.join(tmp,'vo.json'),JSON.stringify(L));
+if(scenes.some(s=>s.vo)){const L=scenes.map(s=>s.vo||'');fs.writeFileSync(path.join(tmp,'vo.json'),JSON.stringify(L));   // nur mit Sprechertext (Edits ohne Stimme brauchen kein TTS)
   const d=JSON.parse(execSync(`python3 ${path.join(__dirname,'tts.py')} ${LANG} ${tmp} ${path.join(tmp,'vo.json')}`).toString().trim().split('\n').pop());
   scenes.forEach((s,i)=>{s.voDur=d[i];if(d[i])s.sec=Math.max(s.sec,Math.ceil((d[i]+VO_IN+.45)*FPS)/FPS);});}
 const DUR=scenes.reduce((a,s)=>a+s.sec+(s.pre||0)/FPS,0)+1;
@@ -43,12 +43,12 @@ window.CAP=null;
 // Effekt-Ebene über dem Spiel (wird nicht mitgezoomt): Untertitel, Übergangsblitz
 window.OC=document.createElement('canvas');OC.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:50';document.body.appendChild(OC);
 OC.width=innerWidth*devicePixelRatio;OC.height=innerHeight*devicePixelRatio;window.OX=OC.getContext('2d');
-window.FXS=function(i,n,z,fl,bf){const k=n>1?i/(n-1):1,e=k*k*(3-2*k);let zz=1+(z-1)*e,sx=0,sy=0,ca=0,fa=0,gl=0;
+window.FXS=function(i,n,z,fl,bf,zc,z0){const k=n>1?i/(n-1):1,e=k*k*(3-2*k);let zz=(z0||1)+(z-(z0||1))*e,sx=0,sy=0,ca=0,fa=0,gl=0;   // zc = Zoom-Mittelpunkt [0..1, 0..1], z0 = Start-Zoom
   // Takt-Effekte (Edits): Zoom-Schlag, Wackeln, Farbverschiebung, Blitz auf der Eins, Glitch jeden 8. Schlag
-  if(bf&&bf.t>=bf.intro){const q=(bf.t-bf.intro)/bf.beat,bn=Math.floor(q+1e-6),bp=(q-bn)*bf.beat;zz*=1+.13*Math.exp(-bp*9);
-    const sh=Math.exp(-bp*13)*16;sx=(Math.random()-.5)*sh;sy=(Math.random()-.5)*sh;ca=Math.exp(-bp*9);if(bn%4===0)fa=.22*Math.exp(-bp*20);if(bn%8===7&&bp<.12)gl=1;}
+  if(bf&&bf.t>=bf.intro){const K=bf.k==null?1:bf.k,q=(bf.t-bf.intro)/bf.beat,bn=Math.floor(q+1e-6),bp=(q-bn)*bf.beat;zz*=1+.13*K*Math.exp(-bp*9);   // K = Stärke (ruhige Edits < 1)
+    const sh=Math.exp(-bp*13)*16*K;sx=(Math.random()-.5)*sh;sy=(Math.random()-.5)*sh;ca=Math.exp(-bp*9)*K;if(bn%4===0)fa=.22*K*Math.exp(-bp*20);if(K>=.8&&bn%8===7&&bp<.12)gl=1;}
   OX.setTransform(1,0,0,1,0,0);OX.clearRect(0,0,OC.width,OC.height);
-  if(zz>1.001||bf){const w=cv.width/zz,h=cv.height/zz,ox=(cv.width-w)/2-sx,oy=(cv.height-h)/2-sy;OX.imageSmoothingQuality='high';OX.drawImage(cv,ox,oy,w,h,0,0,OC.width,OC.height);   // Heranzoomen: Ausschnitt des Spielbilds
+  if(zz>1.001||bf){const w=cv.width/zz,h=cv.height/zz,cl=(v,a,b)=>Math.max(a,Math.min(b,v)),ox=(zc?cl(zc[0]*cv.width-w/2,0,cv.width-w):(cv.width-w)/2)-sx,oy=(zc?cl(zc[1]*cv.height-h/2,0,cv.height-h):(cv.height-h)/2)-sy;OX.imageSmoothingQuality='high';OX.drawImage(cv,ox,oy,w,h,0,0,OC.width,OC.height);   // Heranzoomen: Ausschnitt des Spielbilds
     if(ca>.05){const d=Math.round(ca*6*devicePixelRatio);OX.globalAlpha=.16*ca;
       OX.filter='grayscale(1) sepia(1) saturate(8) hue-rotate(-40deg)';OX.drawImage(cv,ox,oy,w,h,d,0,OC.width,OC.height);
       OX.filter='grayscale(1) sepia(1) saturate(8) hue-rotate(160deg)';OX.drawImage(cv,ox,oy,w,h,-d,0,OC.width,OC.height);
@@ -77,16 +77,16 @@ window.capDraw=function(){const c=CAP;if(!c)return;c.t=(c.t||0)+1/30;const a=Mat
   await ctx.route('**/*',r=>{const u=r.request().url();if(u.startsWith(URL))r.fulfill({contentType:'text/html',body:HTML});else r.abort();});
   await p.goto(URL+(P.hash||''));
   await p.evaluate(HELP);await p.evaluate(()=>{guest=true;try{au();}catch(e){}});
-  let fr=0;const total=scenes.reduce((a,s)=>a+Math.round(s.sec*FPS),0);
+  let fr=0,tAcc=0;const total=scenes.reduce((a,s)=>a+Math.round(s.sec*FPS),0);
   for(const [si,sc] of scenes.entries()){
     if(sc.setup)await p.evaluate(sc.setup);
     await p.evaluate(c=>{CAP=c?{a:c[0],b:c[1]||'',len:c[2],y:c[3],hook:c[4],col:c[5]}:null;},sc.cap?[sc.cap[0],sc.cap[1],sc.capLen||(sc.voDur?Math.min(sc.sec,sc.voDur+1.4):sc.sec),sc.cy||0,sc.hook||0,sc.capCol||'']:null);
     await p.evaluate(v=>{window.__slow=v;},sc.slow||1);
     for(let k=0;k<(sc.pre||0);k++)await p.evaluate(async()=>{VAP.tick();await __V.step();});   // Vorlauf (nicht im Video): Szene kommt in Gang
     if(sc.after)await p.evaluate(sc.after);
-    const n=Math.round(sc.sec*FPS);sc.t0=fr/FPS;
+    const n=Math.round((tAcc+sc.sec)*FPS)-Math.round(tAcc*FPS);tAcc+=sc.sec;sc.t0=fr/FPS;   // Bildzahl über die Summe runden: Schnitte bleiben auf dem Takt
     for(let i=0;i<n;i++){
-      await p.evaluate(async([e,i,n,z,f,bf,rp])=>{try{if(e)(0,eval)(e);}catch(x){}if(rp)window.__slow=rp[0]+(rp[1]-rp[0])*(n>1?i/(n-1):1);VAP.tick();await __V.step();try{FXS(i,n,z,f,bf);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0,P.beatfx?{t:fr/FPS,beat:60/(P.bpm||120),intro:scenes[0].sec}:null,sc.ramp||null]);
+      await p.evaluate(async([e,i,n,z,f,bf,rp,zc,z0])=>{try{if(e)(0,eval)(e);}catch(x){}if(rp)window.__slow=rp[0]+(rp[1]-rp[0])*(n>1?i/(n-1):1);VAP.tick();await __V.step();try{FXS(i,n,z,f,bf,zc,z0);capDraw();}catch(x){}},[sc.each||'',i,n,sc.zoom||1,sc.flash!==false&&si>0,P.beatfx?{t:fr/FPS,beat:60/(P.bpm||120)*(P.beatn||1),intro:scenes[0].sec,k:P.beatk}:null,sc.ramp||null,sc.zc||null,sc.z0||1]);
       await p.screenshot({path:path.join(tmp,'f'+String(fr++).padStart(5,'0')+'.jpg'),type:'jpeg',quality:92});
       if(fr%150===0)console.log('  Bild',fr,'/',total);
       if(process.env.DBG2&&fr%10===0)console.log(fr,await p.evaluate(()=>JSON.stringify({st,bk:!!bk,ui:ui&&ui.type,cvT:cv.style.transform,W,H,ld:loadT,fade:fadeT,err:typeof errT!=='undefined'?errT:''})));
