@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "relay": {
+      "$code": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider != 'anonymous' && $code.matches(/^[A-Z0-9]{4}$/)",
+        ".write": "auth != null && auth.token.firebase.sign_in_provider != 'anonymous' && $code.matches(/^[A-Z0-9]{4}$/)"
+      }
+    }
+  }
+}

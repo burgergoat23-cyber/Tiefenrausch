@@ -26,7 +26,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'  OK  ':'  FAIL ')+m);if(!c)fail++;}
  await H.evaluate(()=>{const p=CO.p2;en=en.filter(e=>e.boss);const e=mkE(0,p.x+30,p.y);e.hp=e.mx=1;e.age=5;en.push(e);CO.me1.x=stairs.x+400;});
  await wait(1500);ok(await H.evaluate(()=>run.kills)>kills0,'Gast besiegt Gegner (beim Gastgeber gezählt)');
  // Gast bekommt Schaden
- await H.evaluate(()=>{const p=CO.p2;p.inv=0;const e=mkE(4,p.x+5,p.y);e.age=5;en.push(e);p.arm=[null,null,null];});await wait(1500);
+ await H.evaluate(()=>{const p=CO.p2;p.inv=0;const e=mkE(4,p.x+5,p.y);e.age=5;e.hp=e.mx=999;en.push(e);p.arm=[null,null,null];});await wait(1500);   // Gegner mit viel Leben: bleibt für „Gast sieht Gegner“ stehen
  const ghp=await G.evaluate(()=>[me.hp,me.mx]);ok(ghp[0]<ghp[1],'Gast nimmt Schaden: '+ghp);
  // Gegner beim Gast sichtbar
  ok(await G.evaluate(()=>en.length)>0,'Gast sieht Gegner');

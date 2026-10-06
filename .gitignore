@@ -6,3 +6,4 @@ tests/fb/*-debug.log
 tests/fb/firestore.rules
 dist/
 tools/video/voice/
+tests/fb/database.rules.json

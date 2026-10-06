@@ -67,18 +67,20 @@ let fail=0;const ok=(c,m)=>{console.log((c?'  OK  ':'  FAIL ')+m);if(!c)fail++;}
  const panel=await C.p.textContent('#adl');ok(/alice/.test(panel)&&/bob/.test(panel),'Admin sieht alice und bob');
  ok(!/Fehler/.test(await C.p.textContent('#adg')),'kein Fehler im Admin-Panel');
  // alice sperren (zweimal tippen = bestätigen)
- await C.p.evaluate(async aId=>{const r=admData.rows.find(x=>x.id===aId);await admAct('ban',r);await admAct('ban',r);},aId);await wait(1500);
- ok(await C.p.evaluate(aId=>admData.ban.has(aId),aId),'alice gesperrt');
- await C.p.evaluate(async aId=>{const r=admData.rows.find(x=>x.id===aId);await admAct('lb',r);await admAct('lb',r);},aId);await wait(1500);
- ok(await C.p.evaluate(aId=>admData.day[aId]===undefined,aId),'alices Ranglisten-Eintrag gelöscht');
+ await C.p.evaluate(async aId=>{const r=admData.rows.find(x=>x.id===aId);await admAct('ban',r);await admAct('ban',r);},aId);
+ let banW=false;for(let i=0;i<30&&!banW;i++){await wait(300);banW=await C.p.evaluate(aId=>!admBusy&&admData.ban.has(aId),aId);}
+ ok(banW,'alice gesperrt');
+ await C.p.evaluate(async aId=>{const r=admData.rows.find(x=>x.id===aId);await admAct('lb',r);await admAct('lb',r);},aId);
+ let lbW=false;for(let i=0;i<30&&!lbW;i++){await wait(300);lbW=await C.p.evaluate(aId=>!admBusy&&admData.day[aId]===undefined,aId);}   // bei voller Rechenlast dauert das Neuladen länger
+ ok(lbW,'alices Ranglisten-Eintrag gelöscht');
 
  console.log('6) Gesperrte alice');
  const A3=await page();r=await auth(A3.p,'alice','geheim1',false);ok(!r.a&&/gesperrt/.test(r.m),'gesperrt: '+r.m);
 
  console.log('7) Automatisch angemeldet nach Neuladen, Abmelden');
- await B.p.reload();await wait(2500);ok(await B.p.evaluate(()=>acct&&acct.u)==='bob','bob nach Neuladen noch angemeldet');
- await B.p.evaluate(()=>logout());await wait(800);
- ok(await B.p.evaluate(async()=>{const u=await claude.use('user');return await u.id();})===null,'nach Abmelden bei Firebase abgemeldet');
+ await B.p.reload();let bobW=null;for(let i=0;i<40&&bobW!=='bob';i++){await wait(300);bobW=await B.p.evaluate(()=>acct&&acct.u);}ok(bobW==='bob','bob nach Neuladen noch angemeldet');
+ await B.p.evaluate(()=>logout());let outW='x';for(let i=0;i<30&&outW!==null;i++){await wait(300);outW=await B.p.evaluate(async()=>{const u=await claude.use('user');return await u.id();});}   // Abmelden wartet ggf. auf das letzte Hochladen
+ ok(outW===null,'nach Abmelden bei Firebase abgemeldet');
  ok(await B.p.isVisible('#lg'),'Anmeldefenster wieder da');
  const G=await page();await G.p.click('#bg');await wait(300);
  ok(await G.p.evaluate(()=>{newGame(undefined,'endless');return st==='play';}),'Gast kann ohne Konto spielen');

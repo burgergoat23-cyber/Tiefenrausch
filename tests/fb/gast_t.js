@@ -73,7 +73,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const del=async(kind,u)=>A.p.evaluate(async([k,u])=>{const x=(k==='top'?admData.top:admData.dr).find(r=>r.u===u);await admAct(k,{id:x.id,u});await admAct(k,{id:x.id,u});},[kind,u]);
   await A.p.evaluate(async()=>{const x=admData.dr.find(r=>r.u==='LenaNeu');await admAct('ban',{id:x.id,u:'LenaNeu'});await admAct('ban',{id:x.id,u:'LenaNeu'});});await wait(1200);
   await del('top','LenaNeu');await wait(1200);await del('lb','LenaNeu');await wait(1500);
-  const r=await A.p.evaluate(()=>({top:admData.top.map(x=>x.u),dr:admData.dr.map(x=>x.u),ban:admData.ban.size}));
+  let r=null;for(let i=0;i<30;i++){r=await A.p.evaluate(()=>({top:admData.top.map(x=>x.u),dr:admData.dr.map(x=>x.u),ban:admData.ban.size,busy:admBusy}));if(!r.busy&&!r.top.includes('LenaNeu')&&!r.dr.includes('LenaNeu')&&r.ban===1)break;await wait(300);}   // bei voller Rechenlast dauert das Neuladen länger
   ok(!r.top.includes('LenaNeu')&&!r.dr.includes('LenaNeu')&&r.ban===1,'Gast gesperrt, Einträge gelöscht '+JSON.stringify(r));
   await A.ctx.close();}
  console.log('4) CrazyGames-Version: keine Konten, aber Ranglisten');
