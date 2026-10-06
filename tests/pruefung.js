@@ -62,5 +62,45 @@ const DAY='2026-10-20T12:00:00+02:00';   // mitten im Halloween-Event
  // 8) Datum (Berlin) mit festem Formatierer
  ok(await p.evaluate(()=>dayKey()==='2026-10-20'&&dayKey()===dayKey()),'dayKey liefert den Berliner Tag');
 
+ // 9) Koop: Lauf, der als Koop begann, überschreibt nie den echten Endlos-Spielstand (auch nicht, wenn der Partner weg ist)
+ const r9=await p.evaluate(()=>{newGame(undefined,'endless');fl=40;saveGame();const solo=saves.endless.fl;
+   newGame(undefined,'endless');CO.on=true;coRun=1;CO.on=false;fl=5;saveGame();const nach=saves.endless.fl;   // Partner weg → allein weiter
+   newGame(undefined,'endless');fl=6;saveGame();return{solo,nach,neu:saves.endless.fl};});
+ ok(r9.solo===40&&r9.nach===40&&r9.neu===6,'Koop-Lauf überschreibt den Endlos-Spielstand nicht '+JSON.stringify(r9));
+
+ // 10) Enter auf dem Game-Over-Bildschirm im Koop beendet die Verbindung (vorher blieb der Gast in einer eingefrorenen Welt)
+ const r10=await p.evaluate(()=>{let n=0;const E=coopEnd;coopEnd=()=>{n++;CO.on=false;};CO.on=true;st='over';endAsk=1;
+   try{dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));dispatchEvent(new KeyboardEvent('keyup',{key:'Enter'}));}finally{coopEnd=E;CO.on=false;}return{n,st,endAsk};});
+ ok(r10.n===1&&r10.st==='ready'&&r10.endAsk===0,'Enter nach Koop-Game-Over beendet Koop '+JSON.stringify(r10));
+
+ // 11) Koop-Gast: Dash nur mit Abklingzeit (Shift halten = vorher dauerhaft unverwundbar beim Gastgeber)
+ const r11=await p.evaluate(()=>{newGame(undefined,'endless');let n=0;const S=coSend;coSend=o=>{if(o&&o.c==='dash')n++;};CO.on=true;CO.role='guest';dashCd=0;ui=null;
+   try{for(let i=0;i<10;i++)dash();}finally{coSend=S;CO.on=false;CO.role=null;}
+   return{n};});
+ ok(r11.n===1,'Gast-Dash: 10× gedrückt → 1 Befehl an den Gastgeber '+JSON.stringify(r11));
+
+ // 12) Händler: Preise/Einzelstücke bleiben nach „Hauptmenü + Fortsetzen“ (vorher wieder Grundpreis)
+ const r12=await p.evaluate(()=>{newGame(undefined,'endless');fl=5;gen();const i=shop.findIndex(o=>/Schleifstein/.test(o.n)),j=shop.findIndex(o=>o.one);
+   const p0=shop[i].p;shop[i].p=Math.round(shop[i].p*shop[i].g);shop[i].p=Math.round(shop[i].p*shop[i].g);const p2=shop[i].p;shop[j].s=1;saveGame();
+   newGame(saves.endless);return{i,j,p0,p2,p:shop[i].p,s:shop[j].s};});
+ ok(r12.i>=0&&r12.p2>r12.p0&&r12.p===r12.p2&&r12.s===1,'Händler-Preise und Einzelstücke bleiben nach Fortsetzen '+JSON.stringify(r12));
+
+ // 13) Story-Ebene 15: „Boss besiegt“ wird nicht gespeichert (sonst nach Neuladen kein Ende, Treppe zu Ebene 16)
+ ok(await p.evaluate(()=>{newGame(undefined,'story');fl=15;bkf=15;saveGame();const a=saves.story.bk;fl=14;bkf=14;saveGame();return a===0&&saves.story.bk===14;}),'Story: Endboss-Sieg wird nicht als „besiegt“ gespeichert, andere Bosse schon');
+
+ // 14) Tageslauf: Boss-Truhe gibt allen dieselbe Beute, egal wo der Boss starb
+ const r14=await p.evaluate(()=>{const loot=(x,y)=>{newGame(undefined,'endless');mode='daily';dKey=dayKey();dSeed=daySeed(dKey);fl=6;const n0=it.length;openChest({x,y,o:0,boss:1});
+   const L=it.slice(n0).map(i=>i.t+':'+(i.w?i.w.i+'/'+i.w.t+'/'+(i.w.a||[]).join('.'):'')+(i.ar?'A'+i.ar.s+'/'+i.ar.t:''));mode='endless';return L.sort().join(',');};
+   return{a:loot(200,300),b:loot(900,1400)};});
+ ok(r14.a===r14.b&&r14.a.length>0,'Tageslauf: Boss-Truhe überall gleich '+JSON.stringify(r14).slice(0,160));
+
+ // 15) Geteilte Mini-Gegner sind nie Elite
+ ok(await p.evaluate(()=>{const R=Math.random;Math.random=()=>0;const n0=en.length;try{varSplit({x:me.x,y:me.y,v:0,mx:20});}finally{Math.random=R;}const m=en.slice(n0);en.length=n0;return m.length===2&&m.every(x=>!x.el);}),'geteilte Mini-Gegner sind keine Elite');
+
+ // 16) Anmeldefenster: Enter auf einem Knopf startet keinen Lauf dahinter
+ const r16=await p.evaluate(()=>{st='ready';const L=Q('lg'),d0=L.style.display;L.style.display='block';const B=L.querySelector('button')||document.body;
+   try{B.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));B.dispatchEvent(new KeyboardEvent('keyup',{key:'Enter',bubbles:true}));}finally{L.style.display=d0;}return{st,tag:B.tagName};});
+ ok(r16.st==='ready'&&r16.tag==='BUTTON','Enter auf Knopf im Anmeldefenster startet keinen Lauf '+JSON.stringify(r16));
+
  console.log('JS-Fehler:',errs.length?errs.slice(0,6):'keine');if(errs.length)fail++;
  console.log(fail?fail+' FEHLGESCHLAGEN':'ALLE TESTS BESTANDEN');await b.close();process.exit(fail?1:0);})();
