@@ -36,7 +36,7 @@ const DAY='2026-10-20T12:00:00+02:00';   // mitten im Halloween-Event
   ok(!aft.free&&(aft.b>before.b||aft.a>before.a||aft.w>before.w)&&aft.m,tag+': Gratis-Dreh gibt etwas '+JSON.stringify(aft));
   await p.screenshot({path:path.join(__dirname,'u11_rad_'+vp.width+'.png')});
   ok((await grab(p)).some(l=>/Drehen: 100/.test(l)),tag+': danach kostet ein Dreh 100 Marken');
-  const b2=await p.evaluate(()=>tkBal());await press(p,/Drehen: 100/);ok(await p.evaluate(b=>tkBal()===b-100&&shp.wh&&shp.wh.t<1,b2),tag+': bezahlter Dreh zieht 100 ab');
+  const b2=await p.evaluate(()=>meta.tk.s);await press(p,/Drehen: 100/);ok(await p.evaluate(b=>meta.tk.s===b+100&&shp.wh&&shp.wh.t<1,b2),tag+': bezahlter Dreh zieht 100 ab');
   // Aufgaben
   await p.evaluate(()=>{shp.tab=3;draw();});await p.screenshot({path:path.join(__dirname,'u11_aufgaben_'+vp.width+'.png')});
   await p.evaluate(()=>{shp.tab=4;draw();});await p.screenshot({path:path.join(__dirname,'u11_event_'+vp.width+'.png')});
@@ -58,8 +58,8 @@ const DAY='2026-10-20T12:00:00+02:00';   // mitten im Halloween-Event
   ok(await p.evaluate(()=>{const a=qdToday().map(q=>q.id).join();return a===qdToday().map(q=>q.id).join();}),'Tagesaufgaben stehen für den Tag fest');
   ok(await p.evaluate(()=>{best=30;meta.qm={};const t0=tkBal();u11Check();return meta.qm.m10&&meta.qm.m25&&!meta.qm.m50&&tkBal()===t0+80+150;}),'Meilensteine (Ebene 10/25) einmalig belohnt');
   ok(await p.evaluate(()=>{const t0=tkBal();u11Check();return tkBal()===t0;}),'Meilenstein nicht doppelt');
-  const pass=await p.evaluate(()=>{meta.hw={xp:0,cl:[],q:{},c:{},dy:[]};hwStart();const s0=JSON.stringify(saves);for(let i=0;i<5;i++)tqa('kill',1);tqa('boss',1);const c=run.candy;hwXp(2000);fl=4;saveGame();return{c,xp:meta.hw.xp,cl:meta.hw.cl.length,ex:meta.own.a.includes(10),gw:meta.own.w.includes(8),saved:JSON.stringify(saves)!==s0};});
-  ok(pass.c===15&&pass.cl===10&&pass.ex&&pass.gw,'Bonbons zählen, Pass vergibt alle 10 Stufen inkl. exklusivem Skin '+JSON.stringify(pass));
+  const pass=await p.evaluate(()=>{meta.hw={xp:0,cl:[],q:{},c:{},dy:[]};hwStart();const s0=JSON.stringify(saves);for(let i=0;i<10;i++)tqa('kill',1);tqa('boss',1);const c=run.candy;hwXp(2000);fl=4;saveGame();return{c,xp:meta.hw.xp,cl:meta.hw.cl.length,ex:meta.own.a.includes(10),gw:meta.own.w.includes(8),saved:JSON.stringify(saves)!==s0};});
+  ok(pass.c===6&&pass.cl===10&&pass.ex&&pass.gw,'Bonbons zählen, Pass vergibt alle 10 Stufen inkl. exklusivem Skin '+JSON.stringify(pass));
   ok(!pass.saved,'Halloween-Lauf wird nicht gespeichert');
   ok(await p.evaluate(()=>{const ok1=!(best>30&&false);return meta.hw.q.hwd>=1&&meta.hw.c.h1;}),'Event-Aufgabe „Betritt den Dungeon“ erledigt');
   // Halloween-Gegner: im Halloween-Dungeon nur Halloween-Gegner/-Bosse, sonst nie

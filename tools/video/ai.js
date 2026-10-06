@@ -46,10 +46,10 @@ VAP.tick=function(){keys.w=keys.a=keys.s=keys.d=0;if(st!=='play'||!VAP.on)return
   // Zielsperre: aktuelles Ziel behalten (kein Hin-und-her an der Reichweitengrenze); unerreichbare Gegner eine Weile ignorieren
   if(VAP.cur&&(!en.includes(VAP.cur)||VAP.cur.hp<=0))VAP.cur=null;
   if(VAP.cur&&!VAP.cur.boss&&++VAP.curT>240){VAP.ign.set(VAP.cur,VAP.fr+1800);VAP.cur=null;}   // Boss nie ignorieren (Treppe bleibt sonst zu)
-  if(VAP.cur){tg=VAP.cur;bd=Math.hypot(tg.x-me.x,tg.y-me.y);if(!VAP.god&&!tg.boss){if(los(me.x,me.y,tg.x,tg.y))VAP.nl=0;else if(++VAP.nl>45)bd=1e9;}if(bd>620){VAP.cur=null;tg=null;bd=1e9;}}
+  if(VAP.cur){tg=VAP.cur;bd=Math.hypot(tg.x-me.x,tg.y-me.y);if(!VAP.god&&!tg.boss){if(los(me.x,me.y,tg.x,tg.y))VAP.nl=0;else if(++VAP.nl>45)bd=1e9;}if(bd>620){if(!VAP.cur.boss)VAP.ign.set(VAP.cur,VAP.fr+1800);VAP.cur=null;tg=null;bd=1e9;}}
   {const B=en.find(e=>e.boss);if(B&&!VAP.god&&tg!==B&&Math.hypot(B.x-me.x,B.y-me.y)<650&&!(tg&&Math.hypot(tg.x-me.x,tg.y-me.y)<55)){tg=B;VAP.cur=B;VAP.curT=0;bd=Math.hypot(B.x-me.x,B.y-me.y);}}   // Boss-Ebene: Boss zuerst (Diener ruft er immer neu)
   if(!tg){for(const e of en){if((VAP.ign.get(e)||0)>VAP.fr)continue;const d=Math.hypot(e.x-me.x,e.y-me.y);if(d<bd&&(VAP.god?d<520:(d<300&&los(me.x,me.y,e.x,e.y)))||e.boss&&d<bd){bd=d;tg=e;}}if(tg){VAP.cur=tg;VAP.curT=0;VAP.nl=0;}}   // ehrlich: nur sichtbare Gegner jagen, sonst weiter zur Treppe
-  if(!VAP.god&&(!tg||bd>160))for(const i of it){if(!VAP.better(i))continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<380&&d<bd){bd=d;tg=i;tg._g=1;}}
+  if(!VAP.god&&(!tg||bd>160))for(const i of it){if(!VAP.better(i)||VAP.skip.has(i))continue;const d=Math.hypot(i.x-me.x,i.y-me.y);if(d<380&&d<bd){bd=d;tg=i;tg._g=1;}}
   if(tg&&tg.hp)rng=Math.max(34,Math.min(P.rng*.75,P.proj?200:P.rng*.7));
   else if(!tg){const o=VAP.ot,ok=o&&(o===stairs||(ch.includes(o)&&!o.o)||it.includes(o))&&++VAP.otT<300;   // Sachziel behalten, bis erreicht
     const vil=(npcs||[]).find(n=>n.t==='d'&&!VAP.skip.has(n));
