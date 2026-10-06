@@ -7,7 +7,7 @@ Formulare zählen nicht zur Gmail-Grenze.
 Alpha Beta Gamer, Indie Games Plus, Indie Game Buzz, Gamezebo, Indie Game Magazine, Destructoid, GameGrin,
 GameRamble, Twinfinite, DarkZero, ZTGD, The Reticule (unzustellbar), 1ndieWorld, Games Aktuell,
 The Indie Game Website, indiegames.ch, GAME60 Magazine, Indie Game Atlas, Fix Gaming Channel, RETRONUKE,
-Indie Game of the Week, BrewOtaku. Antworten bis 5.10.: keine (Indie Game Magazine: Server nimmt die Mail nicht an, Gmail versucht es noch).
+Indie Game of the Week, BrewOtaku. Antworten bis 5.10.: keine (Indie Game Magazine: Server nimmt die Mail nicht an, Gmail versucht es noch). 6.10.: Gamedev.js Weekly (Andrzej) nimmt das Spiel in die Ausgabe vom 16.10. auf. CrazyGames hat am 5.10. abgelehnt (alte Version, „Qualität noch nicht ausreichend“) – Nutzer will CrazyGames vorerst nicht weiter verfolgen.
 
 ## Neue E-Mail-Adressen (gefunden 3.10.2026; ✅ = angeschrieben)
 | Seite | Adresse | Passt, weil |
@@ -24,7 +24,7 @@ Indie Game of the Week, BrewOtaku. Antworten bis 5.10.: keine (Indie Game Magazi
 ## Neue Adressen (gefunden 5.10.2026, Adresse jeweils auf der offiziellen Seite laut Suchindex; Seiten selbst waren hier gesperrt)
 | Seite | Adresse | Passt, weil |
 |---|---|---|
-| Gamedev.js Weekly (Newsletter, EN) ✅ 5.10. | contact@gamedevjsweekly.com | Web-/HTML5-Spiele, Rubrik „Games“ (gamedevjsweekly.com/about) |
+| Gamedev.js Weekly (Newsletter, EN) ✅ 5.10. – **Zusage 6.10.: kommt in die Ausgabe vom Fr. 16.10.2026** | contact@gamedevjsweekly.com | Web-/HTML5-Spiele, Rubrik „Games“ (gamedevjsweekly.com/about) |
 | gamerrepublic.de (DE) ✅ 5.10. | redaktion@gamerrepublic.de | „Indie-Schaukasten“ für deutsche Indie-Projekte (uber-gamerrepublic, Impressum) |
 | Co-Optimus (EN) ✅ 5.10. | tips@co-optimus.com | Koop-Spiele, eigene Kategorie Browser-Spiele (contact.php: „Errors, Tips …“) |
 | The Daily Campus, Kolumne „The Indie Itch“ (EN) ✅ 5.10. | life@dailycampus.com | Kolumne über kostenlose itch.io-Spiele; Adresse = Life-Redaktion (dailycampus.com/staff) |
