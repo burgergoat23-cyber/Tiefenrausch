@@ -677,7 +677,7 @@ async function doAuth0(reg){
   const u=Q('un').value.trim().toLowerCase(),pw=Q('pw').value;
   if(!/^[a-z0-9_]{3,16}$/.test(u))return lgMsg('Benutzername: 3–16 Zeichen (a–z, 0–9, _)');
   if(pw.length<6)return lgMsg('Passwort: mindestens 6 Zeichen');
-  if(reg&&RES.includes(u))return lgMsg('Dieser Name ist reserviert');
+  if(reg&&RES.includes(u)&&u+FB_MAIL!==FB_OWNER)return lgMsg('Dieser Name ist reserviert');   // Besitzer-Konto darf (z. B. neue Datenbank) angelegt werden
   lgMsg('Bitte warten …','#c9b6ff');
   if(FB_ON){const r=await fbSign(u,pw,reg);if(r)return lgMsg(r);}
   const d=await getDb();if(!d)return lgMsg('Konto-Server nicht erreichbar. Öffne das Spiel in claude.ai (angemeldet) oder spiele als Gast.');
