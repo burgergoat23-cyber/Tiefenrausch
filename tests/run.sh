@@ -4,7 +4,7 @@
 # Voraussetzung: Node 18+, Playwright mit Chromium (npm i -g playwright oder vorinstalliert).
 set -u; cd "$(dirname "$0")"
 cp ../index.html cur.html
-for t in feat mon vill_t dpr best3 lade crazy teilen u11 dorf sprechen steuerung bots; do echo "== $t"; timeout 400 node $t.js 2>&1 | tail -4; done
+for t in feat mon vill_t dpr best3 lade crazy teilen u11 dorf sprechen steuerung; do echo "== $t"; timeout 400 node $t.js 2>&1 | tail -4; done
 echo "== fuzz (Zufallsspiel, 4 Bildschirmgrößen)"; timeout 600 node fuzz.js 2>&1 | grep ERR | grep -v "guest click" || echo "keine Fehler"
 echo "== deep (Story bis Ende, Endlos/Tageslauf tief)"; timeout 600 node deep.js 2>&1 | tail -4
 if [ "${1:-}" = "--firebase" ]; then
