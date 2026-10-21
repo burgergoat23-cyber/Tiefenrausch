@@ -42,6 +42,17 @@
   Warnkreis, wartet der Spawn.
 - **Arena leer, aber Gruppen noch geplant**: Die nächste Gruppe kommt spätestens nach 1,5 s (kein Warten).
 - **Mini-Teiler** und geschlüpfte Sprinter zählen nicht zum Budget.
+- **Rakete**: Der direkt getroffene Gegner bekommt 60 + 40 (Fläche), alle anderen im Radius 130 bekommen 40.
+  Raketen- und Explosionsschaden ignoriert den Schild des Schildträgers.
+- **Railgun**: durchschlägt auch den Schild des Schildträgers (sie ist die „schwere“ Waffe); Laden: gedrückt halten,
+  Loslassen bricht ab; danach 1,25 s bis zum nächsten Schuss (= 0,8 Schuss/s inkl. Laden).
+- **Mehrfachschuss** gilt für alle Waffen (Schrotflinte: 3 Fächer, Railgun: 3 Strahlen) und kostet 1 Munition.
+- **Neue Waffe aufheben** rüstet sie sofort aus; eine schon vorhandene gibt nur Munition (kein Wechsel).
+- **Waffenwechsel** zusätzlich mit Q/E. Kurze Wechsel-Verzögerung 0,12 s.
+- **Drops**: Heilung/Power-ups 12 s, Waffen 15 s (wie in der Vorgabe), die letzten 3 s blinkend.
+  Glückspilz rechnet relativ (+30 % von 10 % = 13 %).
+- **Power-ups verlängern** sich beim erneuten Einsammeln um ihre Grunddauer, höchstens auf das Doppelte.
+  Schild wird auf 50 aufgefüllt.
 
 ## Bekannte Probleme / offen
 
@@ -58,3 +69,7 @@
    mit Budget, Gruppen, Spezialwellen; Warnkreise mit Partikeln, höchstens 45 Gegner gleichzeitig (Warteschlange),
    letzte 3 markiert, Pause mit Countdown und Heilung, Pfeile am Rand, Warnstriche für Kugeln von außen.
    Bosswellen laufen bis Meilenstein 6 als normale Wellen. Cheats im Debug-Modus: G, K, N.
+5. Waffen und Drops ✔ – Pistole, Schrotflinte, MG (wachsende Streuung), Raketenwerfer (Spur, Explosion),
+   Railgun (Ladelinie, Strahl). Munition, Wechsel (Mausrad, 1–5, Q/E), automatischer Wechsel wenn leer.
+   Drops (Heilung, Waffe, Power-up) schweben, pulsieren, ziehen sich heran, blinken; Power-ups Schild,
+   Schnellfeuer, Mehrfachschuss, Zeitlupe, Magnet mit Symbolen und Ablauf-Balken im HUD; Waffenleiste unten.

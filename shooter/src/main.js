@@ -15,6 +15,8 @@ import { formatScore } from './utils.js';
 import { killAll, nextWave } from './cheats.js';
 import { createEnemy, addEnemy } from './enemies.js';
 import { startWave } from './waves.js';
+import { spawnPickup } from './pickups.js';
+import { giveWeapon } from './weapons.js';
 
 const canvas = document.getElementById('game');
 const renderer = createRenderer(canvas);
@@ -150,4 +152,4 @@ requestAnimationFrame(loop);
 
 // Für Tests im Browser
 window.__game = game;
-window.__api = { createEnemy, addEnemy, startWave, CONFIG };
+window.__api = { createEnemy, addEnemy, startWave, spawnPickup, giveWeapon, CONFIG };

@@ -3,6 +3,7 @@
 
 import { CONFIG } from './config.js';
 import { TAU } from './utils.js';
+import { drawIcon } from './icons.js';
 
 const sprites = new Map();
 let builtScale = 0;
@@ -186,6 +187,34 @@ function buildDot(color, radius, scale, core = true) {
   return { canvas: c, size: size / scale };
 }
 
+// Drop: Kreis in Power-up-Farbe mit weißem Rand und Symbol
+function buildPickup(id, color, scale) {
+  const r = 15;
+  const ext = r + 12;
+  const size = Math.ceil(ext * 2 * scale);
+  const c = makeCanvas(size, size);
+  const ctx = c.getContext('2d');
+  ctx.translate(size / 2, size / 2);
+  ctx.scale(scale, scale);
+  ctx.shadowColor = color;
+  ctx.shadowBlur = glowEnabled ? 12 * scale : 0;
+  ctx.fillStyle = hexAlpha(color, 0.28);
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, TAU);
+  ctx.fill();
+  ctx.lineWidth = 2.2;
+  ctx.strokeStyle = '#ffffff';
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = color;
+  ctx.beginPath();
+  ctx.arc(0, 0, r - 3, 0, TAU);
+  ctx.stroke();
+  drawIcon(ctx, id, 0, 0, 17, color === '#ffffff' ? '#ffffff' : lighten(color, 0.35), 2.2);
+  return { canvas: c, size: size / scale };
+}
+
 export function hexAlpha(hex, a) {
   const n = parseInt(hex.slice(1), 16);
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
@@ -225,8 +254,11 @@ export function buildSprites(scale, glow = true) {
   sprites.set('glow_white', buildDot('#ffffff', 10, scale, false));
   sprites.set('glow_red', buildDot('#ff3b4d', 10, scale, false));
   for (const [id, def] of Object.entries(CONFIG.powerups)) {
-    if (def.color) sprites.set('glow_' + id, buildDot(def.color, 12, scale, false));
+    if (!def.color) continue;
+    sprites.set('glow_' + id, buildDot(def.color, 12, scale, false));
+    sprites.set('pickup_' + id, buildPickup(id, def.color, scale));
   }
+  for (const id of CONFIG.weapons.order) sprites.set('pickup_' + id, buildPickup(id, '#ffffff', scale));
 }
 
 export function getSprite(name) {

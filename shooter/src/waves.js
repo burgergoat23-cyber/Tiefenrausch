@@ -7,6 +7,7 @@ import { createEnemy, addEnemy, aliveCount } from './enemies.js';
 import { spawnBosses } from './boss.js';
 import { healPlayer } from './player.js';
 import { addBonus, noHitBonus } from './scoring.js';
+import { magnetizeAll } from './pickups.js';
 
 // --- Planung (rein, ohne Zeichnen, Zufall nur aus dem Seed) -------------------------
 
@@ -390,6 +391,6 @@ function waveCleared(run) {
     addBonus(run.score, w.lastBonus);
   }
   healPlayer(run, CONFIG.waves.breakHeal);
+  magnetizeAll(run);
   run.emit('waveClear', w.number, w.lastBonus);
-  run.emit('magnetAll');
 }

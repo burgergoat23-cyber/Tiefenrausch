@@ -136,7 +136,8 @@ function explodeRocket(run, b, direct) {
       crit: dmgOut.crit, weapon: 'rocket', knock: w.knockback, kx: b.vx / sp, ky: b.vy / sp, ignoreShield: true,
     });
   }
-  const hits = run.explodeAt(b.x, b.y, w.splashRadius, w.splash, 'player', 'rocket', direct);
+  // Volltreffer bekommt Direkt- und Flächenschaden (60 + 40)
+  const hits = run.explodeAt(b.x, b.y, w.splashRadius, w.splash, 'player', 'rocket', null);
   if (hits > 0 && !b.counted) {
     b.counted = true;
     run.stats.hits++;

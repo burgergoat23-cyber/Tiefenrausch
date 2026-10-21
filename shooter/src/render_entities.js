@@ -1,7 +1,8 @@
 // Zeichnet Spieler, Gegner, Projektile und Drops (im Weltmaßstab).
 
 import { CONFIG } from './config.js';
-import { drawSprite, hexAlpha } from './sprites.js';
+import { drawSprite, drawSpriteSized, hexAlpha } from './sprites.js';
+import { raycast } from './world.js';
 import { TAU, lerp } from './utils.js';
 import { dashMaxCharges } from './player.js';
 
@@ -81,4 +82,48 @@ export function drawPlayer(ctx, run, alpha, time, settings) {
   drawSprite(ctx, white ? 'player_white' : 'player', 0, 0);
   ctx.globalAlpha = 1;
   ctx.restore();
+}
+
+// Drops: schweben, drehen sich langsam, pulsieren, blinken kurz vor dem Verschwinden
+export function drawPickups(ctx, run, alpha, time, view) {
+  const blinkTime = CONFIG.drops.blinkTime;
+  for (const pk of run.pickups) {
+    const x = lerp(pk.px, pk.x, alpha);
+    const y = lerp(pk.py, pk.y, alpha) + Math.sin(time * 3 + pk.seed) * 3;
+    if (x < view.left || x > view.right || y < view.top || y > view.bottom) continue;
+    const left = pk.life - pk.age;
+    if (left < blinkTime && !pk.magnet && Math.floor(time * (left < 1 ? 14 : 7)) % 2 === 0) continue;
+    const pulse = 1 + Math.sin(time * 5 + pk.seed) * 0.08;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.35;
+    drawSpriteSized(ctx, pk.kind === 'weapon' ? 'glow_white' : 'glow_' + pk.id, x, y, 60 * pulse);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    drawSprite(ctx, 'pickup_' + pk.id, x, y, pk.kind === 'weapon' ? Math.sin(time * 1.2 + pk.seed) * 0.4 : 0, pulse, pulse);
+  }
+}
+
+// Railgun: dünne Linie zeigt beim Aufladen, wohin der Strahl geht
+export function drawRailPreview(ctx, run, alpha) {
+  const ars = run.arsenal;
+  const p = run.player;
+  if (ars.current !== 'rail' || ars.railCharge <= 0 || p.dead) return;
+  const x = lerp(p.px, p.x, alpha);
+  const y = lerp(p.py, p.y, alpha);
+  const dx = Math.cos(p.aim);
+  const dy = Math.sin(p.aim);
+  const len = raycast(run.world, x, y, dx, dy, CONFIG.weapons.rail.range, null);
+  const k = Math.min(1, ars.railCharge / CONFIG.weapons.rail.charge);
+  ctx.strokeStyle = `rgba(159,252,255,${0.25 + 0.6 * k})`;
+  ctx.lineWidth = 1 + k * 1.5;
+  ctx.setLineDash([10, 8]);
+  ctx.lineDashOffset = -k * 60;
+  ctx.beginPath();
+  ctx.moveTo(x + dx * 24, y + dy * 24);
+  ctx.lineTo(x + dx * len, y + dy * len);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalCompositeOperation = 'lighter';
+  drawSpriteSized(ctx, 'glow_white', x + dx * 24, y + dy * 24, 10 + 30 * k);
+  ctx.globalCompositeOperation = 'source-over';
 }

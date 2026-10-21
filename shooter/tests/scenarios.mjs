@@ -142,3 +142,38 @@ export async function evalShot(page, dev, outDir) {
   await page.waitForTimeout(Number(process.env.WAIT || 2000));
   await shot(process.env.NAME || 'eval');
 }
+
+// Alle Drops um den Spieler, danach jede Waffe kurz abfeuern
+export async function arsenal(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  await page.evaluate(() => {
+    const g = window.__game;
+    const { spawnPickup, createEnemy, addEnemy } = window.__api;
+    const run = g.run;
+    run.god = true;
+    run.noWaves = true;
+    const p = run.player;
+    const ids = [['heal', 'heal'], ['power', 'shield'], ['power', 'rapid'], ['power', 'multi'], ['power', 'slow'],
+      ['power', 'magnet'], ['weapon', 'shotgun'], ['weapon', 'mg'], ['weapon', 'rocket'], ['weapon', 'rail']];
+    ids.forEach(([k, id], i) => {
+      const a = (i / ids.length) * Math.PI * 2;
+      const pk = spawnPickup(run, k, id, p.x + Math.cos(a) * 200, p.y + Math.sin(a) * 160);
+      pk.vx = pk.vy = 0;
+    });
+    for (let i = 0; i < 6; i++) {
+      const e = addEnemy(run, createEnemy(run, 'tank', p.x + 380 + (i % 2) * 70, p.y - 150 + i * 60));
+      e.speed = 0; e.hp = e.maxHp = 5000;
+    }
+  });
+  await page.waitForTimeout(400);
+  await shot('drops');
+  await page.mouse.move(dev.width / 2 + 250, dev.height / 2);
+  for (const w of ['shotgun', 'mg', 'rocket', 'rail']) {
+    await page.evaluate((w) => { const r = window.__game.run; window.__api.giveWeapon(r, w); r.arsenal.ammo[w] = 99; }, w);
+    await page.mouse.down();
+    await page.waitForTimeout(w === 'rail' ? 650 : 450);
+    await shot('waffe_' + w);
+    await page.waitForTimeout(400);
+    await page.mouse.up();
+  }
+}

@@ -10,6 +10,7 @@ import { createArsenal, updateWeapons } from './weapons.js';
 import { createProjectilePools, updatePlayerProjectiles, updateEnemyProjectiles } from './projectiles.js';
 import { updateEnemies, rebuildHash, compactEnemies } from './enemies.js';
 import { createWaveState, startWave, updateWaves } from './waves.js';
+import { maybeDrop, updatePickups } from './pickups.js';
 import { explodeAt, updateHazards } from './hazards.js';
 import { createScore, registerKill, comboOnHit, updateCombo } from './scoring.js';
 
@@ -90,7 +91,7 @@ export function createRun(opts = {}) {
     run.emit('score', res.gained, e.x, e.y);
     if (res.tierUp) run.emit('comboTier', res.tier);
   };
-  run.dropFrom = () => {};
+  run.dropFrom = (e) => maybeDrop(run, e);
   run.requestUpgrade = () => {
     run.pendingUpgrade = run.waves.number;
   };
@@ -120,6 +121,7 @@ export function stepRun(run, dt, act) {
   updatePlayerProjectiles(run, dt);
   updateEnemyProjectiles(run, enemyDt);
   updateHazards(run, dt, enemyDt);
+  updatePickups(run, dt);
   updateCombo(run.score, dt);
   updatePowerups(run, dt);
   compactEnemies(run);

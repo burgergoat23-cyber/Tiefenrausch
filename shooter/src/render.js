@@ -4,7 +4,7 @@ import { CONFIG } from './config.js';
 import { cameraView } from './camera.js';
 import { buildSprites } from './sprites.js';
 import { drawGrid, drawFloor, drawWalls, drawObstacles } from './render_world.js';
-import { drawPlayer } from './render_entities.js';
+import { drawPlayer, drawPickups, drawRailPreview } from './render_entities.js';
 import { drawEnemies, drawPlayerProjectiles, drawEnemyProjectiles, drawHazards } from './render_enemies.js';
 import { drawParticlesFloor, drawParticlesTop, drawTexts } from './render_fx.js';
 import { drawSpawnWarnings, drawDarkness } from './render_overlay.js';
@@ -70,6 +70,7 @@ export function renderWorld(r, scene) {
   drawHazards(ctx, run, time);
   if (particles) drawParticlesFloor(ctx, particles, view);
   drawObstacles(ctx, run.world, view, r.glow);
+  drawPickups(ctx, run, alpha, time, view);
   drawEnemies(ctx, run, alpha, time, view);
   drawPlayerProjectiles(ctx, run, alpha, view);
   if (particles) drawParticlesTop(ctx, particles, view);
@@ -83,6 +84,7 @@ export function renderWorld(r, scene) {
   }
   drawSpawnWarnings(ctx, run, time);
   drawEnemyProjectiles(ctx, run, alpha, time, view);
+  drawRailPreview(ctx, run, alpha);
   drawPlayer(ctx, run, alpha, time, settings);
   if (particles && settings.damageNumbers !== false) drawTexts(ctx, particles);
 

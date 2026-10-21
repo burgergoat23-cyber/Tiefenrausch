@@ -6,6 +6,7 @@ import { FONT, MONO } from './ui.js';
 import { clamp, formatScore } from './utils.js';
 import { comboMultiplier } from './scoring.js';
 import { hexAlpha } from './sprites.js';
+import { drawIcon } from './icons.js';
 
 const C = CONFIG.colors;
 
@@ -127,48 +128,60 @@ export function drawHud(ctx, hs, run, layout, time, fx) {
   }
 
   // --- unten Mitte: Waffe und Munition, andere Waffen klein daneben ---
-  drawWeapons(ctx, run, hs, w / 2, bottom, u);
+  drawWeapons(ctx, run, hs, w / 2, bottom - 18 * u, u);
 
   // --- unten links: aktive Power-ups ---
   drawPowerups(ctx, run, left, bottom, u);
 }
 
-const WEAPON_SHORT = { pistol: 'PST', shotgun: 'SCH', mg: 'MG', rocket: 'RAK', rail: 'RAIL' };
+// Waffenleiste: aktuelle Waffe groß mit Name und Munition, die anderen Plätze klein daneben.
+// Liefert die Trefferflächen der Plätze (für Touch-Waffenwechsel).
+export const weaponSlots = [];
 
 function drawWeapons(ctx, run, hs, cx, bottom, u) {
   const ars = run.arsenal;
   const id = ars.current;
   const w = CONFIG.weapons[id];
+  const order = CONFIG.weapons.order;
   const pop = 1 + hs.ammoPop * 0.2;
   const ammo = ars.ammo[id];
   const ammoTxt = ammo === Infinity ? '∞' : String(ammo);
-  text(ctx, w.name.toUpperCase(), cx, bottom - 26 * u, 13 * u, C.hudDim, 'center', 800);
-  text(ctx, ammoTxt, cx, bottom - 2 * u, 22 * u * pop, ammo !== Infinity && ammo <= w.ammo * 0.2 ? '#ff8a5a' : C.hud, 'center', 900, MONO);
+  const low = ammo !== Infinity && ammo <= Math.ceil(w.ammo * 0.2);
+  text(ctx, w.name.toUpperCase(), cx, bottom - 40 * u, 12 * u, C.hudDim, 'center', 800);
+  text(ctx, ammoTxt, cx, bottom - 16 * u, 22 * u * pop, low ? '#ff8a5a' : C.hud, 'center', 900, MONO);
   // Railgun-Ladebalken
   if (id === 'rail' && ars.railCharge > 0) {
-    bar(ctx, cx - 40 * u, bottom + 4 * u, 80 * u, 3 * u, ars.railCharge / CONFIG.weapons.rail.charge, '#9ffcff');
+    bar(ctx, cx - 30 * u, bottom - 10 * u, 60 * u, 3 * u, ars.railCharge / CONFIG.weapons.rail.charge, '#9ffcff');
   }
-  // andere Waffen
-  const order = CONFIG.weapons.order;
-  let x = cx + 70 * u;
-  let xl = cx - 70 * u;
-  let leftSide = false;
-  for (const wid of order) {
-    if (wid === id || !(ars.ammo[wid] > 0)) continue;
-    const label = `${order.indexOf(wid) + 1} ${WEAPON_SHORT[wid]} ${ars.ammo[wid] === Infinity ? '∞' : ars.ammo[wid]}`;
-    if (!leftSide) {
-      text(ctx, label, x, bottom - 4 * u, 11 * u, C.hudDim, 'left', 700, MONO);
-      x += ctx.measureText(label).width + 14 * u;
-    } else {
-      text(ctx, label, xl, bottom - 4 * u, 11 * u, C.hudDim, 'right', 700, MONO);
-      xl -= ctx.measureText(label).width + 14 * u;
+  // Plätze 1-5 als Reihe; vorhandene hell, fehlende nur als Umriss
+  const slot = 30 * u;
+  const gap = 6 * u;
+  const rowW = order.length * slot + (order.length - 1) * gap;
+  let x = cx - rowW / 2;
+  const y = bottom - 4 * u;
+  weaponSlots.length = 0;
+  order.forEach((wid, i) => {
+    const has = ars.ammo[wid] > 0;
+    const cur = wid === id;
+    const sx = x + i * (slot + gap);
+    weaponSlots.push({ id: wid, x: sx, y: y, w: slot, h: slot * 0.62 });
+    ctx.globalAlpha = has ? 1 : 0.25;
+    ctx.strokeStyle = cur ? C.player : 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = cur ? 2 : 1;
+    ctx.strokeRect(sx + 0.5, y + 0.5, slot - 1, slot * 0.62);
+    if (cur) {
+      ctx.fillStyle = 'rgba(63,243,255,0.15)';
+      ctx.fillRect(sx, y, slot, slot * 0.62);
     }
-    leftSide = !leftSide;
-  }
+    drawIcon(ctx, wid, sx + slot * 0.32, y + slot * 0.31, slot * 0.42, cur ? '#ffffff' : C.hudDim, 1.6);
+    const a = ars.ammo[wid];
+    if (has) text(ctx, a === Infinity ? '∞' : String(a), sx + slot - 3 * u, y + slot * 0.5, 8 * u, cur ? '#ffffff' : C.hudDim, 'right', 800, MONO);
+    text(ctx, String(i + 1), sx + 2 * u, y - 2 * u, 7 * u, C.hudDim, 'left', 700, MONO);
+    ctx.globalAlpha = 1;
+  });
 }
 
 const POWER_ORDER = ['shield', 'rapid', 'multi', 'slow'];
-const POWER_ICON = { shield: '◯', rapid: '»', multi: '⋔', slow: '◷' };
 
 function drawPowerups(ctx, run, left, bottom, u) {
   let x = left;
@@ -183,7 +196,7 @@ function drawPowerups(ctx, run, left, bottom, u) {
     ctx.strokeStyle = def.color;
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x + 0.5, bottom - size + 0.5, size - 1, size - 1);
-    text(ctx, POWER_ICON[id], x + size / 2, bottom - size * 0.3, 17 * u, def.color, 'center', 900);
+    drawIcon(ctx, id, x + size / 2, bottom - size / 2, size * 0.62, def.color, 2);
     bar(ctx, x, bottom + 3 * u, size, 3 * u, Math.min(1, frac), def.color);
     x += size + 8 * u;
   }
