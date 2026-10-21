@@ -284,3 +284,44 @@ export async function action(page, dev, outDir) {
   }
   await page.mouse.up();
 }
+
+// Ton-Prüfung: jedes Geräusch offline berechnen und Spitzenpegel/Lautheit messen; Musik kurz laufen lassen
+export async function sound(page, dev) {
+  if (dev.name !== 'pc') return;
+  const res = await page.evaluate(async () => {
+    const { SOUNDS } = await import('./src/sounds.js');
+    const out = {};
+    for (const name of Object.keys(SOUNDS)) {
+      const ctx = new OfflineAudioContext(1, 44100 * 3, 44100);
+      const noise = ctx.createBuffer(1, 88200, 44100);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const a = { ctx, sfx: ctx.destination, noise, stopCharge() {}, charge: null };
+      const dur = SOUNDS[name](a, 0.01, 1, 1);
+      const buf = await ctx.startRendering();
+      const ch = buf.getChannelData(0);
+      let peak = 0;
+      let sum = 0;
+      for (let i = 0; i < ch.length; i++) {
+        const v = Math.abs(ch[i]);
+        if (v > peak) peak = v;
+        sum += ch[i] * ch[i];
+      }
+      const rmsDb = 10 * Math.log10(sum / Math.max(1, Math.round(dur * 44100)) + 1e-12);
+      out[name] = { dur: +dur.toFixed(2), peak: +peak.toFixed(2), rmsDb: +rmsDb.toFixed(1) };
+    }
+    return out;
+  });
+  for (const [k, v] of Object.entries(res)) console.log(k.padEnd(12), JSON.stringify(v));
+  // echtes Abspielen + Musik
+  await page.mouse.click(dev.width / 2, dev.height / 2);
+  await page.waitForTimeout(300);
+  const live = await page.evaluate(async () => {
+    const a = window.__audio;
+    a.setIntensity(2);
+    for (const n of ['pistol', 'explosion', 'playerHit', 'waveStart', 'bossAppear', 'combo', 'pickup']) a.play(n, 1);
+    await new Promise((r) => setTimeout(r, 1500));
+    return { state: a.ctx && a.ctx.state, music: !!a.music, pulse: a.music && a.music.pulse(), bpm: a.music && a.music.bpm };
+  });
+  console.log('live', JSON.stringify(live));
+}

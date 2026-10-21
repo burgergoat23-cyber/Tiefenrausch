@@ -70,6 +70,12 @@
 - **Glow** ohne teures `shadowBlur` im Spiel: Figuren sind vorgezeichnete Sprites (Glow einmal beim Erstellen),
   Wände/Hindernisse bekommen mehrere halbtransparente Striche, Effekte nutzen `lighter`.
 - **Partikel** werden pro Bild (nicht pro Logikschritt) bewegt und frieren beim Hit-Stop mit ein.
+- **Ton**: AudioContext entsteht bei der ersten Berührung/Klick/Taste. Auf iOS 16.4+ wird
+  `navigator.audioSession.type = 'playback'` gesetzt, damit der Ton auch bei eingeschaltetem Stummschalter läuft
+  (ältere iPhones: Stummschalter aus). Stimmen-Limit 12, wichtige Töne (Treffer am Spieler, Boss, Welle) dürfen
+  darüber. Pegel aller Töne werden in `tests/scenarios.mjs` (`SCENARIO=sound`) offline gemessen.
+- **Musik**: a-Moll (Am–F–C–G), 120 BPM, Boss 140 BPM mit Snare und Lead. Tempowechsel immer am Taktanfang.
+  Das Bodengitter pulsiert auf der Kick – auch wenn die Musik stumm ist (Takt läuft weiter).
 
 ## Bekannte Probleme / offen
 
@@ -95,3 +101,6 @@
 7. Juice ✔ – Partikel (Funken, Explosion, Großexplosion mit Rauch/Trümmern/Brandfleck, Mündungsfeuer + Licht,
    Hülsen, Nachbilder, Leuchtspuren, Einsammel-Ring, Spawn-Sog), Trauma-Screenshake, Hit-Stop, gefedertes
    Stauchen, Schadenszahlen, Explosionsserie beim Boss-Tod, Aura bei Power-ups, lila Rand bei Zeitlupe.
+8. Sound und Musik ✔ – 37 erzeugte Geräusche (Waffen, Treffer, Explosionen, Boss, Wellen, Menü, Herzschlag),
+   Mischpult mit Kompressor, prozedurale Musik mit 3 Intensitäten, Gitter-Puls im Takt, M = Musik stumm,
+   Ton aus bei App-Wechsel.

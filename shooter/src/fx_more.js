@@ -92,6 +92,10 @@ export function handleMore(fx, type, a, b, c, d, e) {
     case 'bossTelegraph':
       sound(fx, 'charge', 1);
       break;
+    case 'bossCharge':
+      sound(fx, 'dash');
+      addTrauma(fx.game.cam, 0.15);
+      break;
     case 'bossDeath':
       // Explosionsserie rund um den Boss
       for (let i = 0; i < 7; i++) {

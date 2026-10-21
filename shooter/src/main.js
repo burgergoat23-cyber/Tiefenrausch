@@ -17,6 +17,7 @@ import { healPlayer } from './player.js';
 import { drawOffscreen } from './render_overlay.js';
 import { drawCrosshair, drawDebug, drawCenterText } from './ui.js';
 import { formatScore } from './utils.js';
+import { createAudio } from './audio.js';
 import { killAll, nextWave, bossNow } from './cheats.js';
 import { createEnemy, addEnemy } from './enemies.js';
 import { startWave } from './waves.js';
@@ -29,11 +30,14 @@ const input = createInput(canvas);
 const game = createGame();
 const settings = {
   aimLine: true, showFps: false, damageNumbers: true, vibration: true, colorFx: true, aimAssist: true,
+  musicVolume: CONFIG.audio.musicVolume, sfxVolume: CONFIG.audio.sfxVolume, musicMuted: false, sfxMuted: false,
 };
+const audio = createAudio(settings);
 const particles = createParticles();
 const fx = createFx(particles, game, settings);
+fx.audio = audio;
 let hud = createHudState();
-const menus = createMenus(document.getElementById('ui'));
+const menus = createMenus(document.getElementById('ui'), (name) => audio.play(name));
 const safe = { top: 0, right: 0, bottom: 0, left: 0 };
 
 game.getActions = (g) => resolveAim(pollActions(input), g.cam, g.run.player);
@@ -72,14 +76,28 @@ function newGame() {
 }
 newGame();
 
-// Automatische Pause, wenn der Tab unsichtbar wird
+// Ton erst nach der ersten Berührung / dem ersten Klick / der ersten Taste starten (iPhone, Safari)
+const unlockAudio = () => audio.unlock();
+for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) window.addEventListener(ev, unlockAudio, { passive: true });
+
+// Automatische Pause und Ton aus, wenn der Tab unsichtbar wird (App-Wechsel, Anruf, Bildschirm aus)
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && game.state === 'playing') setState(game, 'paused');
+  if (document.hidden) {
+    if (game.state === 'playing') setState(game, 'paused');
+    audio.suspend();
+  } else {
+    audio.resume();
+  }
 });
+window.addEventListener('pagehide', () => audio.suspend());
 
 function handleUiKeys() {
   for (const code of takeUiKeys(input)) {
     if (code === 'F3' && CONFIG.debug.enabled) game.debug = !game.debug;
+    if (code === 'KeyM') {
+      settings.musicMuted = !settings.musicMuted;
+      audio.applyVolumes();
+    }
     if (code === 'KeyP' || code === 'Escape') {
       if (game.state === 'playing') setState(game, 'paused');
       else if (game.state === 'paused') setState(game, 'playing');
@@ -123,6 +141,10 @@ function openUpgrade() {
   }));
 }
 
+function lowHpNow(run) {
+  return !run.player.dead && run.player.hp / run.player.maxHp < CONFIG.player.lowHpFraction;
+}
+
 // FPS messen (gleitender Mittelwert)
 let fps = 60;
 let darkness = 0;
@@ -146,13 +168,15 @@ function loop(now) {
   fx.comboFlash = Math.max(0, fx.comboFlash - dt * 3);
 
   darkness += ((run.waves.darkness ? 1 : 0) - darkness) * Math.min(1, dt * 2);
+  const pulse = audio.music ? audio.music.pulse() : Math.exp(-((game.time * 2) % 1) * 7);
+  audio.heartbeat(dt, lowHpNow(run) && game.state === 'playing');
   renderWorld(renderer, {
-    run, cam: game.cam, alpha, time: game.time, pulse: 0, settings, particles, darkness,
+    run, cam: game.cam, alpha, time: game.time, pulse, settings, particles, darkness,
   });
   const ctx = renderer.ctx;
   const w = renderer.w;
   const h = renderer.h;
-  const lowHp = !run.player.dead && run.player.hp / run.player.maxHp < CONFIG.player.lowHpFraction;
+  const lowHp = lowHpNow(run);
   slowTint += ((run.power.slow > 0 ? 1 : 0) - slowTint) * Math.min(1, dt * 4);
   drawSlowTint(ctx, w, h, slowTint);
   drawDamageVignette(ctx, w, h, fx.hurt, lowHp, game.time, settings.colorFx);
@@ -186,4 +210,5 @@ requestAnimationFrame(loop);
 
 // Für Tests im Browser
 window.__game = game;
+window.__audio = audio;
 window.__api = { createEnemy, addEnemy, startWave, spawnPickup, giveWeapon, CONFIG };
