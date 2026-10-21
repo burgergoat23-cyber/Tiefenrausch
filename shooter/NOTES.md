@@ -18,7 +18,7 @@
 
 - **Zoom**: die *lange* Bildschirmseite zeigt immer 1200 Welteinheiten. Querformat = 1200 breit,
   Hochformat = 1200 hoch (mehr Höhe sichtbar, wie gewünscht).
-- **Kamera** darf 30 Einheiten über die Arena-Grenze schauen, damit die leuchtende Wand sichtbar bleibt.
+- **Kamera** darf 60 Einheiten über die Arena-Grenze schauen, damit die leuchtende Wand sichtbar bleibt.
 - **Streuung** in der Waffentabelle = gesamter Kegel (2° = ±1°).
 - **Hindernisse**: Blöcke (Rechtecke) und Säulen (Kreise), 4 Layouts mit 8–10 Hindernissen.
 - **Treffer-Erkennung**: Kugeln prüfen die ganze Strecke eines Schritts (Strecke gegen Kreis), nicht nur
@@ -27,6 +27,21 @@
 - **Kontakt-Hitbox** der Gegner = 85 % ihres Radius (fühlt sich fairer an).
 - **Kombo**: Der erste Kill zählt als 1. Bei Treffer wird die Zahl halbiert (abgerundet).
 - **Explosionen, die der Spieler auslöst** (Rakete, Dash-Explosion, getöteter Bomber), schaden ihm nie.
+- **Bomber**: zündet er selbst (1 s Blinken mit sichtbarem Radius), trifft die Explosion nur den Spieler und gibt
+  keine Punkte. Wird er vorher erschossen, explodiert er kurz verzögert und trifft nur andere Gegner (Kettenreaktion).
+- **Spezialwellen ab Welle 8** (nicht schon ab 4): Welle 4 stellt die Bomber vor, Welle 1–3 sind zum Reinkommen.
+  Eine Spezialwelle in Welle 4 hätte den neuen Gegnertyp verdeckt oder überladen. Danach jede 4. Welle ohne Boss
+  (8, 12, 16, 24, 28 …). Reihenfolge gemischt, jede Art einmal pro Durchgang.
+- **Spezialwellen-Budget**: Nur Sprinter 55 %, Bomber-Regen 80 % (70 % davon Bomber), Dunkelheit 85 %,
+  Schützen-Ring 50 % Schützen im Kreis (Abstand 460) + Rest Läufer/Sprinter.
+- **Dunkelheit**: Lichtkreis 270 um den Spieler; Gegner außerhalb als rote Augen sichtbar, Kugeln, Warnkreise und
+  Hindernis-Umrisse bleiben sichtbar (Lesbarkeit geht vor).
+- **Gegner-Leben** steigt linear (+6 % pro Welle), nicht zinseszinsartig; Tempo +1 % pro Welle bis +30 %.
+- **Spawns**: Gruppen am Rand (70 %) oder hinter Hindernissen (30 %); jeder einzelne Gegner liegt mindestens 350 vom
+  Spieler entfernt (auch nach der Streuung der Gruppe). Steht der Spieler beim Ende der Warnung näher als 150 am
+  Warnkreis, wartet der Spawn.
+- **Arena leer, aber Gruppen noch geplant**: Die nächste Gruppe kommt spätestens nach 1,5 s (kein Warten).
+- **Mini-Teiler** und geschlüpfte Sprinter zählen nicht zum Budget.
 
 ## Bekannte Probleme / offen
 
@@ -38,4 +53,8 @@
 2. Grundgerüst ✔ – Canvas, fester Zeitschritt, Eingabe, Kamera, Arena, Spieler mit Dash
 3. Kampf-Kern ✔ – Pistole, Projektile (Pool), Läufer, Kollision über Spatial Hash, Schaden, Tod mit Zeitlupe,
    einfacher Game Over (Enter/Tippen = nochmal). Erste Effekte (Funken, Explosion, Hülsen, Schadenszahlen,
-   roter Rand), HUD mit Leben, Punkten, Kombo und Waffe. Vorläufiger Spawner: Läufer am Rand (wird in M4 ersetzt).
+   roter Rand), HUD mit Leben, Punkten, Kombo und Waffe.
+4. Gegner und Wellen ✔ – alle 7 Gegnertypen (+ Mini-Teiler, Ei für die Brut), `generateWave(nummer, seed)`
+   mit Budget, Gruppen, Spezialwellen; Warnkreise mit Partikeln, höchstens 45 Gegner gleichzeitig (Warteschlange),
+   letzte 3 markiert, Pause mit Countdown und Heilung, Pfeile am Rand, Warnstriche für Kugeln von außen.
+   Bosswellen laufen bis Meilenstein 6 als normale Wellen. Cheats im Debug-Modus: G, K, N.

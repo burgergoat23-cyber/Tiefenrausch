@@ -46,7 +46,7 @@ export function panTo(cam, x, y) {
 }
 
 function clampCamera(cam, world) {
-  const margin = 30;
+  const margin = 60;
   const halfW = cam.viewW / 2;
   const halfH = cam.viewH / 2;
   if (cam.viewW >= world.width + margin * 2) cam.x = world.width / 2;

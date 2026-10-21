@@ -62,7 +62,7 @@ async function main() {
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-    await page.goto(base + (process.env.HASH || ''));
+    await page.goto(base + (process.env.QUERY || '') + (process.env.HASH || ''));
     await page.waitForTimeout(800);
     const mod = await import(path.join(root, 'tests', 'scenarios.mjs'));
     await mod[scenario](page, dev, outDir);

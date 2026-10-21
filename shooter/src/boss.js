@@ -1,5 +1,10 @@
 // Bosse (Meilenstein 6). Vorerst nur die Schnittstellen.
 
+export function spawnBosses(run, info) {
+  void run;
+  void info;
+}
+
 export function updateBoss(run, e, dt) {
   e.vx = 0;
   e.vy = 0;

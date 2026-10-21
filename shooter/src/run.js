@@ -4,11 +4,12 @@
 import { CONFIG } from './config.js';
 import { mulberry32, hashSeed } from './utils.js';
 import { SpatialHash } from './collision.js';
-import { createWorld, edgePoint } from './world.js';
+import { createWorld } from './world.js';
 import { createPlayer, updatePlayer } from './player.js';
 import { createArsenal, updateWeapons } from './weapons.js';
 import { createProjectilePools, updatePlayerProjectiles, updateEnemyProjectiles } from './projectiles.js';
-import { createEnemy, addEnemy, updateEnemies, rebuildHash, compactEnemies, aliveCount } from './enemies.js';
+import { updateEnemies, rebuildHash, compactEnemies } from './enemies.js';
+import { createWaveState, startWave, updateWaves } from './waves.js';
 import { explodeAt, updateHazards } from './hazards.js';
 import { createScore, registerKill, comboOnHit, updateCombo } from './scoring.js';
 
@@ -54,6 +55,7 @@ export function createRun(opts = {}) {
   const layout = opts.layout ?? Math.floor(rng() * 4);
   const world = createWorld(layout);
   const run = {
+    noWaves: !!opts.noWaves,
     seed,
     rng,
     demo: !!opts.demo,
@@ -71,7 +73,8 @@ export function createRun(opts = {}) {
     mods: defaultMods(),
     stats: createStats(),
     power: { shield: { amount: 0, t: 0 }, rapid: 0, multi: 0, slow: 0 },
-    waves: { number: 1, hitThisWave: false, hpScale: 1, speedScale: 1, spawnT: 1 },
+    waves: createWaveState(),
+    pendingUpgrade: 0,     // Welle, nach der Karten gewählt werden dürfen
     listeners: [],
   };
   run.emit = (type, a, b, c, d, e) => {
@@ -88,23 +91,13 @@ export function createRun(opts = {}) {
     if (res.tierUp) run.emit('comboTier', res.tier);
   };
   run.dropFrom = () => {};
+  run.requestUpgrade = () => {
+    run.pendingUpgrade = run.waves.number;
+  };
+  // Bosse kommen erst mit Meilenstein 6
+  run.waves.noBoss = true;
+  if (!opts.noWaves) startWave(run, opts.startWave || 1);
   return run;
-}
-
-// Vorläufiger Spawner (bis zum Wellen-System): Läufer am Rand
-function simpleSpawner(run, dt) {
-  const w = run.waves;
-  w.spawnT -= dt;
-  if (w.spawnT > 0 || aliveCount(run) >= 14) return;
-  w.spawnT = 1.4;
-  for (let tries = 0; tries < 10; tries++) {
-    const pt = edgePoint(run.world, run.rng);
-    const dx = pt.x - run.player.x;
-    const dy = pt.y - run.player.y;
-    if (dx * dx + dy * dy < CONFIG.waves.spawnMinDist ** 2) continue;
-    addEnemy(run, createEnemy(run, 'runner', pt.x, pt.y));
-    return;
-  }
 }
 
 // Ein Logikschritt mit Zeit dt und den Aktionen des Spielers
@@ -118,7 +111,7 @@ export function stepRun(run, dt, act) {
   p.px = p.x;
   p.py = p.y;
   updatePlayer(run, dt, act);
-  if (!run.demoNoSpawn) simpleSpawner(run, dt);
+  if (!run.noWaves) updateWaves(run, dt);
 
   rebuildHash(run);
   updateEnemies(run, enemyDt);

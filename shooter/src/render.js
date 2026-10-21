@@ -7,6 +7,7 @@ import { drawGrid, drawFloor, drawWalls, drawObstacles } from './render_world.js
 import { drawPlayer } from './render_entities.js';
 import { drawEnemies, drawPlayerProjectiles, drawEnemyProjectiles, drawHazards } from './render_enemies.js';
 import { drawParticlesFloor, drawParticlesTop, drawTexts } from './render_fx.js';
+import { drawSpawnWarnings, drawDarkness } from './render_overlay.js';
 
 export function createRenderer(canvas) {
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -72,6 +73,15 @@ export function renderWorld(r, scene) {
   drawEnemies(ctx, run, alpha, time, view);
   drawPlayerProjectiles(ctx, run, alpha, view);
   if (particles) drawParticlesTop(ctx, particles, view);
+  // Dunkelheit verdeckt alles außer Gefahren und Spieler
+  if (scene.darkness > 0.01) {
+    drawDarkness(ctx, run, view, alpha, scene.darkness);
+    // Hindernisse schwach sichtbar lassen, damit man sich orientieren kann
+    ctx.globalAlpha = 0.3 * scene.darkness;
+    drawObstacles(ctx, run.world, view, false);
+    ctx.globalAlpha = 1;
+  }
+  drawSpawnWarnings(ctx, run, time);
   drawEnemyProjectiles(ctx, run, alpha, time, view);
   drawPlayer(ctx, run, alpha, time, settings);
   if (particles && settings.damageNumbers !== false) drawTexts(ctx, particles);

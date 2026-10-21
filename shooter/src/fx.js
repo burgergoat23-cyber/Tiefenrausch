@@ -5,6 +5,7 @@ import { addTrauma } from './camera.js';
 import { PK, burst, emit, emitText, amount } from './particles.js';
 import { paintBurn } from './render_world.js';
 import { TAU } from './utils.js';
+import { handleMore } from './fx_more.js';
 
 const T = CONFIG.trauma;
 
@@ -242,5 +243,5 @@ function handle(fx, type, a, b, c, d, e) {
       break;
   }
   // weitere Ereignisse (Wellen, Drops, Bosse) behandelt fx_more.js
-  if (fx.more) fx.more(fx, type, a, b, c, d, e);
+  handleMore(fx, type, a, b, c, d, e);
 }

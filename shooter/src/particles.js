@@ -106,6 +106,22 @@ export function emitText(ps, x, y, value, color, size, prefix = '') {
   t.pop = 0.12;
 }
 
+// Schwebender Text (z. B. Name eines Drops)
+export function emitLabel(ps, x, y, text, color, size) {
+  const t = ps.texts.spawn();
+  if (!t) return;
+  t.x = x;
+  t.y = y;
+  t.vx = 0;
+  t.vy = -60;
+  t.life = 1.1;
+  t.max = 1.1;
+  t.text = text;
+  t.size = size;
+  t.color = color;
+  t.pop = 0.1;
+}
+
 export function updateParticles(ps, dt) {
   const pool = ps.pool;
   for (let i = pool.count - 1; i >= 0; i--) {

@@ -87,3 +87,58 @@ export async function death(page, dev, outDir) {
   await page.waitForTimeout(300);
   console.log(dev.name, await page.evaluate(() => window.__game.state));
 }
+
+// Alle Gegnertypen um den Spieler (unverwundbar), Bilder machen
+export async function zoo(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  await page.evaluate(() => {
+    const g = window.__game;
+    const { createEnemy, addEnemy } = window.__api;
+    const run = g.run;
+    run.god = true;
+    run.noWaves = true;
+    const p = run.player;
+    const types = ['runner', 'sprinter', 'shooter', 'bomber', 'tank', 'splitter', 'mini', 'shield', 'egg'];
+    types.forEach((t, i) => {
+      const a = (i / types.length) * Math.PI * 2;
+      addEnemy(run, createEnemy(run, t, p.x + Math.cos(a) * 260, p.y + Math.sin(a) * 200));
+    });
+  });
+  await page.waitForTimeout(300);
+  await shot('zoo1');
+  await page.waitForTimeout(1500);
+  await shot('zoo2');
+  await page.mouse.move(dev.width / 2 + 200, dev.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(2500);
+  await shot('zoo3');
+  await page.mouse.up();
+}
+
+// Bestimmte Welle starten (WAVE=8), unverwundbar, Bilder nach ein paar Sekunden
+export async function wave(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  const n = Number(process.env.WAVE || 8);
+  const info = await page.evaluate((n) => {
+    const g = window.__game;
+    g.run.god = true;
+    window.__api.startWave(g.run, n);
+    return { special: g.run.waves.special, boss: !!g.run.waves.boss };
+  }, n);
+  console.log(dev.name, 'Welle', n, JSON.stringify(info));
+  await page.waitForTimeout(1000);
+  await shot(`w${n}_a`);
+  await page.waitForTimeout(3500);
+  await shot(`w${n}_b`);
+  await page.waitForTimeout(3000);
+  await shot(`w${n}_c`);
+}
+
+// Beliebigen Code im Spiel ausführen (EVAL), dann WAIT ms warten und ein Bild machen
+export async function evalShot(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  const res = await page.evaluate(process.env.EVAL || '0');
+  if (res !== undefined) console.log(dev.name, JSON.stringify(res));
+  await page.waitForTimeout(Number(process.env.WAIT || 2000));
+  await shot(process.env.NAME || 'eval');
+}

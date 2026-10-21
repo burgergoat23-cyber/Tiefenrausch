@@ -8,9 +8,13 @@ import { createRenderer, resizeRenderer, renderWorld } from './render.js';
 import { resetFloor, fadeFloor } from './render_world.js';
 import { createParticles, updateParticles, clearParticles } from './particles.js';
 import { createFx, attachFx } from './fx.js';
-import { createHudState, updateHud, drawHud, drawDamageVignette } from './hud.js';
+import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo } from './hud.js';
+import { drawOffscreen } from './render_overlay.js';
 import { drawCrosshair, drawDebug, drawCenterText } from './ui.js';
 import { formatScore } from './utils.js';
+import { killAll, nextWave } from './cheats.js';
+import { createEnemy, addEnemy } from './enemies.js';
+import { startWave } from './waves.js';
 
 const canvas = document.getElementById('game');
 const renderer = createRenderer(canvas);
@@ -47,8 +51,11 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+// Fester Seed über die Adresse (?seed=123), z. B. für Tests
+const urlSeed = new URLSearchParams(location.search).get('seed');
+
 function newGame() {
-  const run = startRun(game, {});
+  const run = startRun(game, urlSeed ? { seed: Number(urlSeed) } : {});
   attachFx(fx, run);
   clearParticles(particles);
   resetFloor(run.world);
@@ -72,7 +79,8 @@ function handleUiKeys() {
     if ((code === 'Enter' || code === 'Space') && game.state === 'gameover') newGame();
     if (game.debug && game.state === 'playing') {
       if (code === 'KeyG') game.run.god = !game.run.god;
-      if (code === 'KeyK') for (const e of game.run.enemies) e.hp = 0.001;
+      if (code === 'KeyK') killAll(game.run);
+      if (code === 'KeyN') nextWave(game.run);
     }
   }
 }
@@ -86,6 +94,7 @@ game.onStateChange = (s) => {
 
 // FPS messen (gleitender Mittelwert)
 let fps = 60;
+let darkness = 0;
 let last = performance.now();
 
 function loop(now) {
@@ -103,15 +112,21 @@ function loop(now) {
   fx.hurt = Math.max(0, fx.hurt - dt * 2.5);
   fx.comboFlash = Math.max(0, fx.comboFlash - dt * 3);
 
+  darkness += ((run.waves.darkness ? 1 : 0) - darkness) * Math.min(1, dt * 2);
   renderWorld(renderer, {
-    run, cam: game.cam, alpha, time: game.time, pulse: 0, settings, particles,
+    run, cam: game.cam, alpha, time: game.time, pulse: 0, settings, particles, darkness,
   });
   const ctx = renderer.ctx;
   const w = renderer.w;
   const h = renderer.h;
   const lowHp = !run.player.dead && run.player.hp / run.player.maxHp < CONFIG.player.lowHpFraction;
   drawDamageVignette(ctx, w, h, fx.hurt, lowHp, game.time, settings.colorFx);
-  if (game.state !== 'gameover') drawHud(ctx, hud, run, { w, h, safe }, game.time, fx);
+  const layout = { w, h, safe };
+  if (game.state !== 'gameover') {
+    drawOffscreen(ctx, run, game.cam, alpha, layout, game.time);
+    drawHud(ctx, hud, run, layout, game.time, fx);
+    drawWaveInfo(ctx, run, layout, game.time);
+  }
   if (game.state === 'paused') drawCenterText(ctx, w, h, 'PAUSE', 'P oder Esc: weiter');
   if (game.state === 'gameover') {
     drawCenterText(ctx, w, h, 'GAME OVER',
@@ -135,3 +150,4 @@ requestAnimationFrame(loop);
 
 // Für Tests im Browser
 window.__game = game;
+window.__api = { createEnemy, addEnemy, startWave, CONFIG };

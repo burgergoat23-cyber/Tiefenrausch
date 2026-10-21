@@ -208,3 +208,69 @@ export function drawDamageVignette(ctx, w, h, hurt, lowHp, time, colorFx) {
   }
 }
 
+
+const SPECIAL_NAMES = {
+  sprinters: 'NUR SPRINTER',
+  bomberRain: 'BOMBER-REGEN',
+  darkness: 'DUNKELHEIT',
+  shooterRing: 'SCHÜTZEN-RING',
+};
+
+// Welle oben Mitte, Schriftzug beim Start, Countdown in der Pause
+export function drawWaveInfo(ctx, run, layout, time) {
+  const { w, h, safe } = layout;
+  const u = hudScale(w, h);
+  const wv = run.waves;
+  const cx = w / 2;
+  const top = safe.top + 14 * u;
+  ctx.textBaseline = 'alphabetic';
+
+  if (wv.state === 'fight' && !hasBossBar(run)) {
+    text(ctx, `WELLE ${wv.number}`, cx, top + 14 * u, 14 * u, C.hud, 'center', 900);
+    const rest = wv.remaining;
+    text(ctx, `${rest} ${rest === 1 ? 'Gegner' : 'Gegner'}`, cx, top + 32 * u, 12 * u, rest <= CONFIG.waves.markLast ? C.combo : C.hudDim, 'center', 700);
+  }
+
+  if (wv.state === 'intro') {
+    // großer Schriftzug fährt ein (2 s)
+    const total = CONFIG.waves.introTime;
+    const k = 1 - wv.t / total;
+    const slide = k < 0.18 ? 1 - k / 0.18 : k > 0.82 ? -(k - 0.82) / 0.18 : 0;
+    const a = clamp(1 - Math.abs(slide), 0, 1);
+    const x = cx + slide * w * 0.6;
+    const y = h * 0.36;
+    ctx.globalAlpha = a;
+    const size = Math.min(w * 0.11, 80 * u);
+    ctx.save();
+    ctx.shadowColor = C.player;
+    ctx.shadowBlur = 18;
+    text(ctx, `WELLE ${wv.number}`, x, y, size, '#ffffff', 'center', 900);
+    ctx.restore();
+    const sub = wv.boss ? 'BOSS: ' + bossNames(wv.boss) : wv.special ? 'SPEZIALWELLE: ' + SPECIAL_NAMES[wv.special] : '';
+    if (sub) text(ctx, sub, x, y + size * 0.6, size * 0.3, wv.boss ? '#ff5a6a' : C.combo, 'center', 800);
+    ctx.globalAlpha = 1;
+  }
+
+  if (wv.state === 'break') {
+    const y = h * 0.3;
+    const t = CONFIG.waves.breakTime - wv.t;
+    const a = clamp(t * 3, 0, 1);
+    ctx.globalAlpha = a;
+    text(ctx, `WELLE ${wv.number} GESCHAFFT`, cx, y, Math.min(w * 0.06, 34 * u), '#ffffff', 'center', 900);
+    if (wv.lastBonus > 0) {
+      text(ctx, `+${formatScore(wv.lastBonus)}  OHNE TREFFER`, cx, y + 30 * u, 15 * u, C.combo, 'center', 800);
+    }
+    const n = Math.ceil(wv.t);
+    text(ctx, `Nächste Welle in ${n}`, cx, y + 56 * u, 15 * u, C.hudDim, 'center', 700);
+    ctx.globalAlpha = 1;
+  }
+  void time;
+}
+
+function bossNames(boss) {
+  return boss.list.map((b) => CONFIG.bosses[b.kind].name).join(' & ');
+}
+
+export function hasBossBar(run) {
+  return run.enemies.some((e) => e.boss && !e.dead);
+}
