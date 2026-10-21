@@ -178,13 +178,16 @@ export const ICONS = {
     ctx.stroke();
   },
   clover(ctx) {
-    ctx.beginPath();
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * TAU + Math.PI / 4;
-      ctx.moveTo(0, 0);
-      ctx.arc(Math.cos(a) * 4.5, Math.sin(a) * 4.5, 4, 0, TAU);
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * 5, Math.sin(a) * 5 - 1, 3.6, 0, TAU);
+      ctx.fill();
     }
-    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(1, 6, 4, 10);
+    ctx.stroke();
   },
   ammo(ctx) {
     ctx.beginPath();

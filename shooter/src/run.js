@@ -11,25 +11,12 @@ import { createProjectilePools, updatePlayerProjectiles, updateEnemyProjectiles 
 import { updateEnemies, rebuildHash, compactEnemies } from './enemies.js';
 import { createWaveState, startWave, updateWaves } from './waves.js';
 import { maybeDrop, updatePickups } from './pickups.js';
+import { computeMods } from './upgrades.js';
 import { explodeAt, updateHazards } from './hazards.js';
 import { createScore, registerKill, comboOnHit, updateCombo } from './scoring.js';
 
 export function defaultMods() {
-  return {
-    speedMult: 1,
-    dmgMult: 1,
-    rateMult: 1,
-    pierce: 0,
-    bounce: 0,
-    vamp: 0,
-    dashExtra: 0,
-    dashBoom: false,
-    dashBoomRadius: 0,
-    dashBoomDamage: 0,
-    luck: 0,
-    ammoMult: 1,
-    crit: 0,
-  };
+  return computeMods({});
 }
 
 export function createStats() {
@@ -72,6 +59,7 @@ export function createRun(opts = {}) {
     time: 0,
     god: false,
     mods: defaultMods(),
+    upgrades: {},          // Stufen der Upgrade-Karten
     stats: createStats(),
     power: { shield: { amount: 0, t: 0 }, rapid: 0, multi: 0, slow: 0 },
     waves: createWaveState(),
@@ -95,8 +83,6 @@ export function createRun(opts = {}) {
   run.requestUpgrade = () => {
     run.pendingUpgrade = run.waves.number;
   };
-  // Bosse kommen erst mit Meilenstein 6
-  run.waves.noBoss = true;
   if (!opts.noWaves) startWave(run, opts.startWave || 1);
   return run;
 }

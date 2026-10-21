@@ -177,3 +177,88 @@ export async function arsenal(page, dev, outDir) {
     await page.mouse.up();
   }
 }
+
+// Upgrade-Auswahl öffnen (nach Welle 3), Karte per Taste wählen
+export async function upgrade(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  await page.evaluate(() => {
+    const g = window.__game;
+    g.run.god = true;
+    window.__api.startWave(g.run, 3);
+    g.run.waves.state = 'break';
+    g.run.waves.t = 6;
+    g.run.waves.upgradeAsked = false;
+  });
+  await page.waitForTimeout(1800);
+  await shot('karten');
+  const st = await page.evaluate(() => window.__game.state);
+  await page.waitForTimeout(500);
+  if (dev.touch) {
+    const box = await page.locator('.card').nth(1).boundingBox();
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(200);
+    await shot('karte_gewaehlt');
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  } else {
+    await page.keyboard.press('Digit2');
+    await page.waitForTimeout(200);
+    await shot('karte_gewaehlt');
+    await page.keyboard.press('Enter');
+  }
+  await page.waitForTimeout(400);
+  const after = await page.evaluate(() => ({ state: window.__game.state, ups: window.__game.run.stats.upgrades }));
+  console.log(dev.name, st, JSON.stringify(after));
+}
+
+// Boss-Kampf: Welle WAVE (5 = Wächter, 10 = Brut), Phasen über Lebenspunkte erzwingen
+export async function boss(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  const n = Number(process.env.WAVE || 5);
+  await page.evaluate((n) => {
+    const g = window.__game;
+    g.run.god = true;
+    window.__api.startWave(g.run, n);
+  }, n);
+  await page.waitForTimeout(2600);
+  await shot(`boss${n}_auftritt`);
+  await page.waitForTimeout(2500);
+  await shot(`boss${n}_phase1`);
+  const setFrac = (f) => page.evaluate((f) => {
+    for (const e of window.__game.run.enemies) if (e.boss && !e.dead) e.hp = e.maxHp * f + 1;
+  }, f);
+  const fireAtBoss = async (ms) => {
+    await page.mouse.down();
+    for (let t = 0; t < ms; t += 100) {
+      const pos = await page.evaluate(() => {
+        const g = window.__game;
+        const e = g.run.enemies.find((o) => o.boss && !o.dead);
+        if (!e) return null;
+        const c = g.cam;
+        return { x: (e.x - c.x) * c.zoom + c.screenW / 2, y: (e.y - c.y) * c.zoom + c.screenH / 2 };
+      });
+      if (pos) await page.mouse.move(pos.x, pos.y);
+      await page.waitForTimeout(100);
+    }
+    await page.mouse.up();
+  };
+  await setFrac(0.67);
+  await fireAtBoss(1500);
+  await page.waitForTimeout(3500);
+  await shot(`boss${n}_phase2`);
+  await setFrac(0.34);
+  await fireAtBoss(1500);
+  await page.waitForTimeout(3000);
+  await shot(`boss${n}_phase3`);
+  const info = await page.evaluate(() => {
+    const r = window.__game.run;
+    return r.enemies.filter((e) => e.boss && !e.dead).map((e) => ({ kind: e.boss.kind, phase: e.boss.phase, hp: Math.round(e.hp), child: e.boss.child }));
+  });
+  console.log(dev.name, JSON.stringify(info));
+  // Boss besiegen
+  await page.evaluate(() => { for (const e of window.__game.run.enemies) if (e.boss) e.hp = 1; });
+  await fireAtBoss(2500);
+  await page.evaluate(() => { for (const e of window.__game.run.enemies) if (e.boss) e.hp = 1; });
+  await fireAtBoss(2000);
+  await shot(`boss${n}_besiegt`);
+  console.log(dev.name, JSON.stringify(await page.evaluate(() => ({ wave: window.__game.run.waves.state, kills: window.__game.run.stats.bossesKilled, score: window.__game.run.score.score }))));
+}

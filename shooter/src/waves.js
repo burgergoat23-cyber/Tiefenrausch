@@ -361,6 +361,16 @@ export function updateWaves(run, dt) {
   }
 }
 
+// Einzelnen Gegner mit Warnkreis erscheinen lassen (z. B. vom Boss gerufen)
+export function queueSpawn(run, type, x, y) {
+  const pt = { x, y };
+  clampToFree(run.world, pt, CONFIG.enemies[type].radius);
+  keepAway(run, pt, CONFIG.enemies[type].radius);
+  const wc = CONFIG.waves;
+  run.waves.warnings.push({ type, x: pt.x, y: pt.y, t: wc.spawnWarn, max: wc.spawnWarn });
+  run.emit('spawnWarn', pt.x, pt.y, type);
+}
+
 function updateWarnings(run, dt) {
   const w = run.waves;
   const p = run.player;

@@ -287,3 +287,35 @@ function bossNames(boss) {
 export function hasBossBar(run) {
   return run.enemies.some((e) => e.boss && !e.dead);
 }
+
+// Große Boss-Lebensleiste oben in der Mitte (mit Name und Phasen-Strichen)
+const barsTmp = [];
+export function drawBossBars(ctx, run, layout, bossBars, time) {
+  const bars = bossBars(run, barsTmp);
+  if (!bars.length) return;
+  const { w, h, safe } = layout;
+  const u = hudScale(w, h);
+  const bw = Math.min(w * 0.5, 520 * u);
+  let y = safe.top + 16 * u;
+  for (const b of bars) {
+    const x = w / 2 - bw / 2;
+    const bh = 10 * u;
+    text(ctx, b.name, w / 2, y + 2 * u, 13 * u, '#ffffff', 'center', 900);
+    y += 8 * u;
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(x, y, bw, bh);
+    const frac = b.intro > 0 ? 1 - b.intro / CONFIG.bosses.introTime : b.frac;
+    ctx.fillStyle = b.color;
+    ctx.fillRect(x, y, bw * clamp(frac, 0, 1), bh);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillRect(x, y, bw * clamp(frac, 0, 1), bh * 0.35);
+    // Phasengrenzen bei 66 % und 33 %
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    for (const t of CONFIG.bosses.phases) ctx.fillRect(x + bw * t - 1, y, 2, bh);
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, bw - 1, bh - 1);
+    y += bh + 14 * u;
+  }
+  void time;
+}

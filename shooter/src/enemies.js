@@ -10,10 +10,11 @@ import { angleDiff, DEG, TAU } from './utils.js';
 
 let nextId = 1;
 
-export function createEnemy(run, type, x, y) {
-  const def = CONFIG.enemies[type];
-  const hpScale = run.waves.hpScale || 1;
-  const speedScale = run.waves.speedScale || 1;
+// defOverride: eigene Werte (für Bosse), dann ohne Wellen-Skalierung
+export function createEnemy(run, type, x, y, defOverride) {
+  const def = defOverride || CONFIG.enemies[type];
+  const hpScale = defOverride ? 1 : run.waves.hpScale || 1;
+  const speedScale = defOverride ? 1 : run.waves.speedScale || 1;
   const hp = def.hp * hpScale;
   const e = {
     id: nextId++,
@@ -31,7 +32,7 @@ export function createEnemy(run, type, x, y) {
     knockResist: def.knockResist || 0,
     angle: Math.atan2(run.player.y - y, run.player.x - x),
     flash: 0, squash: 0, popIn: 0.25,
-    dead: false, spawning: false, noReward: false,
+    dead: false, spawning: false, noReward: false, noDrop: false,
     state: '', stateT: 0, t: 0, timerA: 0, timerB: 0, side: run.rng() < 0.5 ? -1 : 1,
     avoidSide: run.rng() < 0.5 ? -1 : 1, avoidT: 0,
     lockX: 0, lockY: 0,
@@ -41,7 +42,7 @@ export function createEnemy(run, type, x, y) {
     boss: null,
     _t: 0,
   };
-  const init = ENEMY_AI[type] && ENEMY_AI[type].init;
+  const init = !defOverride && ENEMY_AI[type] && ENEMY_AI[type].init;
   if (init) init(run, e);
   return e;
 }

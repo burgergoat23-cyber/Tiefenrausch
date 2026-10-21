@@ -53,6 +53,18 @@
   Glückspilz rechnet relativ (+30 % von 10 % = 13 %).
 - **Power-ups verlängern** sich beim erneuten Einsammeln um ihre Grunddauer, höchstens auf das Doppelte.
   Schild wird auf 50 aufgefüllt.
+- **Bosse**: erscheinen 1,5 s lang (Ringe ziehen sich zusammen, unverwundbar, Kamera schwenkt hin). Boss-Leben
+  wächst multiplikativ (+40 % pro Auftauchen); kommen beide gleichzeitig (ab Welle 20), haben sie je 75 %.
+  Phasenwechsel (66 %/33 %): 0,9 s Brüllen, dabei unverwundbar; ein großer Treffer kann keine Phase überspringen.
+- **Wächter**: Phase 1 ein Ring aus 16 Kugeln mit 3er-Lücke, Phase 2 zwei Ringe (halb versetzt) + Ansturm.
+  Die Warnlinie zeigt den ganzen Weg inkl. Abprallern (wird mit derselben Physik vorausberechnet). Nach dem
+  Ansturm ist er 0,6 s benommen. Phase 3: Spiralen statt Salven, alle 6 s 4 Läufer (höchstens 12 Helfer).
+- **Brut**: Eier (max. 8) schlüpfen nach 3 s zu je 2 Sprintern; Säure-Geschosse zeigen ihren Zielkreis 1 s vorher.
+  Bei 33 % teilt sie sich; die Lebensleiste läuft dann im letzten Drittel weiter.
+- **Boss besiegt**: +5000 × Boss-Nummer (Welle/5), 3 Drops; übrige Helfer zerfallen (ohne Drops).
+- **Upgrade-Karten**: erscheinen 1,2 s nach Wellenende (Pause). Erst Karte wählen (Tippen/Klick/1–3), dann
+  bestätigen (nochmal tippen, Knopf oder Enter); die ersten 0,45 s ist die Auswahl gesperrt.
+  Munitionsgürtel erhöht auch die schon vorhandene Munition. Sind alle Karten voll: +25 Leben statt Auswahl.
 
 ## Bekannte Probleme / offen
 
@@ -73,3 +85,5 @@
    Railgun (Ladelinie, Strahl). Munition, Wechsel (Mausrad, 1–5, Q/E), automatischer Wechsel wenn leer.
    Drops (Heilung, Waffe, Power-up) schweben, pulsieren, ziehen sich heran, blinken; Power-ups Schild,
    Schnellfeuer, Mehrfachschuss, Zeitlupe, Magnet mit Symbolen und Ablauf-Balken im HUD; Waffenleiste unten.
+6. Bosse und Upgrades ✔ – Wächter und Brut mit allen Phasen, Boss-Leiste mit Phasen-Strichen, Kameraschwenk,
+   12 Upgrade-Karten (HTML-Overlay, Maus/Touch/Tasten). Simulationstest: Bot schafft 10 Wellen inkl. 2 Bossen.

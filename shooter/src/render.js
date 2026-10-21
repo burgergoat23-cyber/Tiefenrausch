@@ -8,6 +8,7 @@ import { drawPlayer, drawPickups, drawRailPreview } from './render_entities.js';
 import { drawEnemies, drawPlayerProjectiles, drawEnemyProjectiles, drawHazards } from './render_enemies.js';
 import { drawParticlesFloor, drawParticlesTop, drawTexts } from './render_fx.js';
 import { drawSpawnWarnings, drawDarkness } from './render_overlay.js';
+import { drawBosses } from './render_boss.js';
 
 export function createRenderer(canvas) {
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -72,6 +73,7 @@ export function renderWorld(r, scene) {
   drawObstacles(ctx, run.world, view, r.glow);
   drawPickups(ctx, run, alpha, time, view);
   drawEnemies(ctx, run, alpha, time, view);
+  drawBosses(ctx, run, alpha, time);
   drawPlayerProjectiles(ctx, run, alpha, view);
   if (particles) drawParticlesTop(ctx, particles, view);
   // Dunkelheit verdeckt alles außer Gefahren und Spieler

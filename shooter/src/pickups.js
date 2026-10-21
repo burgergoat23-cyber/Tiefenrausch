@@ -42,7 +42,7 @@ export function spawnPickup(run, kind, id, x, y) {
 
 // Nach einem Kill: vielleicht etwas fallen lassen
 export function maybeDrop(run, e) {
-  if (e.boss) return;
+  if (e.boss || e.noDrop) return;
   const d = rollDrop(run.rng, dropChance(run, e));
   if (d) spawnPickup(run, d.kind, d.id, e.x, e.y);
 }

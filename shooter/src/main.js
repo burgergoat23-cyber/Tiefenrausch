@@ -8,11 +8,16 @@ import { createRenderer, resizeRenderer, renderWorld } from './render.js';
 import { resetFloor, fadeFloor } from './render_world.js';
 import { createParticles, updateParticles, clearParticles } from './particles.js';
 import { createFx, attachFx } from './fx.js';
-import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo } from './hud.js';
+import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo, drawBossBars } from './hud.js';
+import { bossBars } from './boss.js';
+import { createMenus, showMenu, hideMenu, menuOpen } from './menus.js';
+import { upgradePage } from './screens_game.js';
+import { pickCards, applyUpgrade } from './upgrades.js';
+import { healPlayer } from './player.js';
 import { drawOffscreen } from './render_overlay.js';
 import { drawCrosshair, drawDebug, drawCenterText } from './ui.js';
 import { formatScore } from './utils.js';
-import { killAll, nextWave } from './cheats.js';
+import { killAll, nextWave, bossNow } from './cheats.js';
 import { createEnemy, addEnemy } from './enemies.js';
 import { startWave } from './waves.js';
 import { spawnPickup } from './pickups.js';
@@ -28,6 +33,7 @@ const settings = {
 const particles = createParticles();
 const fx = createFx(particles, game, settings);
 let hud = createHudState();
+const menus = createMenus(document.getElementById('ui'));
 const safe = { top: 0, right: 0, bottom: 0, left: 0 };
 
 game.getActions = (g) => resolveAim(pollActions(input), g.cam, g.run.player);
@@ -83,6 +89,7 @@ function handleUiKeys() {
       if (code === 'KeyG') game.run.god = !game.run.god;
       if (code === 'KeyK') killAll(game.run);
       if (code === 'KeyN') nextWave(game.run);
+      if (code === 'KeyB') bossNow(game.run);
     }
   }
 }
@@ -91,8 +98,30 @@ canvas.addEventListener('pointerdown', () => {
 });
 let deathTime = 0;
 game.onStateChange = (s) => {
+  input.enabled = s === 'playing';
   if (s === 'gameover') deathTime = game.time;
+  if (s === 'upgrade') openUpgrade();
 };
+
+// Upgrade-Auswahl nach bestimmten Wellen
+function openUpgrade() {
+  const run = game.run;
+  const cards = pickCards(run.rng, run.upgrades);
+  if (!cards.length) {
+    // alles voll ausgebaut: stattdessen heilen
+    healPlayer(run, 25);
+    run.pendingUpgrade = 0;
+    setState(game, 'playing');
+    return;
+  }
+  input.releaseAll();
+  showMenu(menus, upgradePage(cards, run.upgrades, (id) => {
+    applyUpgrade(run, id);
+    run.pendingUpgrade = 0;
+    hideMenu(menus);
+    setState(game, 'playing');
+  }));
+}
 
 // FPS messen (gleitender Mittelwert)
 let fps = 60;
@@ -127,14 +156,15 @@ function loop(now) {
   if (game.state !== 'gameover') {
     drawOffscreen(ctx, run, game.cam, alpha, layout, game.time);
     drawHud(ctx, hud, run, layout, game.time, fx);
-    drawWaveInfo(ctx, run, layout, game.time);
+    if (!menuOpen(menus)) drawWaveInfo(ctx, run, layout, game.time);
+    drawBossBars(ctx, run, layout, bossBars, game.time);
   }
   if (game.state === 'paused') drawCenterText(ctx, w, h, 'PAUSE', 'P oder Esc: weiter');
   if (game.state === 'gameover') {
     drawCenterText(ctx, w, h, 'GAME OVER',
       `${formatScore(run.score.score)} Punkte · Kills ${run.stats.kills} · Enter oder Tippen: nochmal`);
   }
-  if (input.device === 'mouse' && input.mouseInside && game.state !== 'gameover') {
+  if (input.device === 'mouse' && input.mouseInside && game.state !== 'gameover' && !menuOpen(menus)) {
     drawCrosshair(ctx, input.mouseX, input.mouseY, game.time);
   }
   if (game.debug || settings.showFps) {

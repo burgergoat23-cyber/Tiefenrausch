@@ -19,9 +19,10 @@ export class FixedStepper {
     this.acc += Math.min(Math.max(frameDt, 0), this.maxFrame);
     let n = 0;
     while (this.acc >= this.step && n < this.maxSteps) {
-      fn(this.step);
+      const go = fn(this.step);
       this.acc -= this.step;
       n++;
+      if (go === false) break; // z. B. Zustand gewechselt (Upgrade-Auswahl)
     }
     if (n >= this.maxSteps) this.acc = 0; // zu langsam: Rest verwerfen
     return n;
@@ -121,6 +122,14 @@ export function frame(game, realDt) {
     if (game.state === 'playing' && run.player.dead) {
       setState(game, 'dying');
     }
+    if (run.pendingUpgrade) {
+      if (game.state === 'playing') {
+        setState(game, 'upgrade');
+        return false;
+      }
+      if (game.state === 'menu' && game.onDemoUpgrade) game.onDemoUpgrade(run);
+    }
+    return true;
   });
   return game.stepper.alpha;
 }
