@@ -1,0 +1,11 @@
+{
+  "name": "neon-arena",
+  "private": true,
+  "type": "module",
+  "description": "Top-down-Arena-Shooter im Browser (Canvas 2D, reines JavaScript)",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node tests/logic.test.js",
+    "check": "node tests/browser_check.mjs"
+  }
+}
