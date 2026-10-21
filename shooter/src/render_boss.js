@@ -27,7 +27,7 @@ export function drawBosses(ctx, run, alpha, time) {
       }
     }
     if (b.roar > 0) scale *= 1 + Math.sin(time * 40) * 0.05;
-    if (e.squash > 0) scale *= 1 + e.squash * 0.06;
+    if (e.squash > 0) scale *= 1 + (e.squash / 0.28) * 0.05 * Math.cos((1 - e.squash / 0.28) * Math.PI * 3);
     ctx.globalAlpha = a;
     if (b.kind === 'guardian') drawGuardian(ctx, e, x, y, scale, time);
     else drawBrood(ctx, e, x, y, scale, time);

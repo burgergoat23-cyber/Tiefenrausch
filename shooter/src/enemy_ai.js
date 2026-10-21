@@ -135,7 +135,7 @@ const sprinter = {
       const sp = e.speed * d.sprintMult;
       e.vx = e.lockX * sp;
       e.vy = e.lockY * sp;
-      run.emit('trail', e.x, e.y, e.angle, e.def.color);
+      run.emit('trail', e.x, e.y, e.vx, e.vy, e.def.color);
       if (e.stateT <= 0 || e.hitWall) {
         e.state = 'recover';
         e.stateT = d.recoverTime;

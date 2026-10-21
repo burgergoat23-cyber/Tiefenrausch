@@ -262,3 +262,25 @@ export async function boss(page, dev, outDir) {
   await shot(`boss${n}_besiegt`);
   console.log(dev.name, JSON.stringify(await page.evaluate(() => ({ wave: window.__game.run.waves.state, kills: window.__game.run.stats.bossesKilled, score: window.__game.run.score.score }))));
 }
+
+// Mittendrin: Welle WAVE mit Waffe WEAPON, Bot-artig zielen, mehrere Bilder
+export async function action(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  const n = Number(process.env.WAVE || 7);
+  await page.evaluate(([n, w]) => {
+    const g = window.__game;
+    g.run.god = true;
+    window.__api.startWave(g.run, n);
+    if (w) { window.__api.giveWeapon(g.run, w); g.run.arsenal.ammo[w] = 999; }
+  }, [n, process.env.WEAPON || '']);
+  await page.waitForTimeout(3500);
+  await page.mouse.down();
+  for (let i = 0; i < 60; i++) {
+    const t = await nearestEnemy(page);
+    if (t) await page.mouse.move(t.x, t.y);
+    if (i % 20 === 0) await page.keyboard.press('Space');
+    if (i === 25 || i === 45) await shot('action' + i);
+    await page.waitForTimeout(100);
+  }
+  await page.mouse.up();
+}

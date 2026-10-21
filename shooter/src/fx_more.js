@@ -93,6 +93,12 @@ export function handleMore(fx, type, a, b, c, d, e) {
       sound(fx, 'charge', 1);
       break;
     case 'bossDeath':
+      // Explosionsserie rund um den Boss
+      for (let i = 0; i < 7; i++) {
+        const ang = Math.random() * TAU;
+        const r = 20 + Math.random() * 90;
+        fx.queue.push({ t: 0.12 + i * 0.16, x: a + Math.cos(ang) * r, y: b + Math.sin(ang) * r, r: 90 + Math.random() * 80 });
+      }
       addTrauma(fx.game.cam, CONFIG.trauma.bossDeath);
       fx.game.hitStop = Math.max(fx.game.hitStop, CONFIG.juice.hitStopBoss);
       fx.bossFlash = 1;

@@ -65,6 +65,11 @@
 - **Upgrade-Karten**: erscheinen 1,2 s nach Wellenende (Pause). Erst Karte wählen (Tippen/Klick/1–3), dann
   bestätigen (nochmal tippen, Knopf oder Enter); die ersten 0,45 s ist die Auswahl gesperrt.
   Munitionsgürtel erhöht auch die schon vorhandene Munition. Sind alle Karten voll: +25 Leben statt Auswahl.
+- **Schadenszahlen**: schnelle Treffer am selben Gegner (z. B. MG) werden zu einer Zahl zusammengezählt, sonst
+  flimmert der Bildschirm voller kleiner Zahlen. Kritische Treffer bleiben eigene, größere gelbe Zahlen.
+- **Glow** ohne teures `shadowBlur` im Spiel: Figuren sind vorgezeichnete Sprites (Glow einmal beim Erstellen),
+  Wände/Hindernisse bekommen mehrere halbtransparente Striche, Effekte nutzen `lighter`.
+- **Partikel** werden pro Bild (nicht pro Logikschritt) bewegt und frieren beim Hit-Stop mit ein.
 
 ## Bekannte Probleme / offen
 
@@ -87,3 +92,6 @@
    Schnellfeuer, Mehrfachschuss, Zeitlupe, Magnet mit Symbolen und Ablauf-Balken im HUD; Waffenleiste unten.
 6. Bosse und Upgrades ✔ – Wächter und Brut mit allen Phasen, Boss-Leiste mit Phasen-Strichen, Kameraschwenk,
    12 Upgrade-Karten (HTML-Overlay, Maus/Touch/Tasten). Simulationstest: Bot schafft 10 Wellen inkl. 2 Bossen.
+7. Juice ✔ – Partikel (Funken, Explosion, Großexplosion mit Rauch/Trümmern/Brandfleck, Mündungsfeuer + Licht,
+   Hülsen, Nachbilder, Leuchtspuren, Einsammel-Ring, Spawn-Sog), Trauma-Screenshake, Hit-Stop, gefedertes
+   Stauchen, Schadenszahlen, Explosionsserie beim Boss-Tod, Aura bei Power-ups, lila Rand bei Zeitlupe.

@@ -56,8 +56,17 @@ export function drawParticlesTop(ctx, ps, view) {
         ctx.stroke();
         break;
       }
+      case PK.TRAIL: {
+        ctx.globalAlpha = life * 0.9;
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = p.size * (0.4 + 0.6 * life);
+        ctx.beginPath();
+        ctx.moveTo(p.x2, p.y2);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        break;
+      }
       case PK.DOT:
-      case PK.TRAIL:
       case PK.IMPLODE: {
         ctx.globalAlpha = Math.min(1, life * 1.4);
         ctx.fillStyle = p.color;

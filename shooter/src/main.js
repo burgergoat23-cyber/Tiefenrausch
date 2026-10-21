@@ -7,8 +7,8 @@ import { setViewport } from './camera.js';
 import { createRenderer, resizeRenderer, renderWorld } from './render.js';
 import { resetFloor, fadeFloor } from './render_world.js';
 import { createParticles, updateParticles, clearParticles } from './particles.js';
-import { createFx, attachFx } from './fx.js';
-import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo, drawBossBars } from './hud.js';
+import { createFx, attachFx, updateFx } from './fx.js';
+import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo, drawBossBars, drawSlowTint } from './hud.js';
 import { bossBars } from './boss.js';
 import { createMenus, showMenu, hideMenu, menuOpen } from './menus.js';
 import { upgradePage } from './screens_game.js';
@@ -126,6 +126,7 @@ function openUpgrade() {
 // FPS messen (gleitender Mittelwert)
 let fps = 60;
 let darkness = 0;
+let slowTint = 0;
 let last = performance.now();
 
 function loop(now) {
@@ -138,6 +139,7 @@ function loop(now) {
   const simDt = game.state === 'playing' || game.state === 'dying' ? (game.hitStop > 0 ? 0 : dt) : 0;
   const visDt = game.state === 'dying' ? simDt * CONFIG.juice.deathSlowmo : simDt;
   updateParticles(particles, visDt);
+  updateFx(fx, visDt);
   fadeFloor(visDt);
   updateHud(hud, run, dt);
   fx.hurt = Math.max(0, fx.hurt - dt * 2.5);
@@ -151,6 +153,8 @@ function loop(now) {
   const w = renderer.w;
   const h = renderer.h;
   const lowHp = !run.player.dead && run.player.hp / run.player.maxHp < CONFIG.player.lowHpFraction;
+  slowTint += ((run.power.slow > 0 ? 1 : 0) - slowTint) * Math.min(1, dt * 4);
+  drawSlowTint(ctx, w, h, slowTint);
   drawDamageVignette(ctx, w, h, fx.hurt, lowHp, game.time, settings.colorFx);
   const layout = { w, h, safe };
   if (game.state !== 'gameover') {

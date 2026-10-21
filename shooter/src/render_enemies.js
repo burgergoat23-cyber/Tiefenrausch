@@ -3,6 +3,7 @@
 import { CONFIG } from './config.js';
 import { drawSprite, drawSpriteSized, hexAlpha } from './sprites.js';
 import { TAU, lerp } from './utils.js';
+import { SQUASH_TIME } from './enemies.js';
 
 // Drehung: Formen mit Blickrichtung drehen sich mit, runde/vieleckige langsam von selbst
 const SPIN = { hexagon: 0.4, pentagon: 1.2, bomb: 0, egg: 0 };
@@ -25,8 +26,9 @@ export function drawEnemies(ctx, run, alpha, time, view) {
     let sx = 1;
     let sy = 1;
     if (e.squash > 0) {
-      // Stauchen und zurückfedern
-      const s = CONFIG.juice.squash * e.squash;
+      // Stauchen und zurückfedern (gedämpfte Schwingung)
+      const k = e.squash / SQUASH_TIME;
+      const s = CONFIG.juice.squash * k * Math.cos((1 - k) * Math.PI * 3);
       sx = 1 - s;
       sy = 1 + s * 0.8;
     }

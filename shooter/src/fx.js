@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import { addTrauma } from './camera.js';
-import { PK, burst, emit, emitText, amount } from './particles.js';
+import { PK, burst, emit, emitText, amount, addDamageText } from './particles.js';
 import { paintBurn } from './render_world.js';
 import { TAU } from './utils.js';
 import { handleMore } from './fx_more.js';
@@ -20,9 +20,25 @@ export function createFx(particles, game, settings) {
     afterToggle: 0,
     bossFlash: 0,
     events: 0,
+    queue: [],             // verzögerte Effekte (z. B. Explosionsserie beim Boss-Tod)
   };
   fx.listener = (type, a, b, c, d, e) => handle(fx, type, a, b, c, d, e);
   return fx;
+}
+
+// Verzögerte Effekte abarbeiten (pro Bild, mit sichtbarer Zeit)
+export function updateFx(fx, dt) {
+  const q = fx.queue;
+  for (let i = q.length - 1; i >= 0; i--) {
+    q[i].t -= dt;
+    if (q[i].t <= 0) {
+      const it = q[i];
+      q.splice(i, 1);
+      explosion(fx, it.x, it.y, it.r, true);
+      trauma(fx, 0.25);
+      sound(fx, 'explosion', it.r);
+    }
+  }
 }
 
 export function attachFx(fx, run) {
@@ -85,6 +101,8 @@ function handle(fx, type, a, b, c, d, e) {
       const big = d === 'shotgun' || d === 'rocket';
       const m = emit(ps, PK.MUZZLE, a, b, 0, 0, 0.035, big ? 26 : 16, d === 'rocket' ? '#ffb347' : '#bfffff');
       if (m) m.rot = c;
+      // kurzes Licht am Boden
+      emit(ps, PK.FLASH, a, b, 0, 0, 0.06, big ? 50 : 28, '#3ff3ff');
       if (d !== 'rocket' && d !== 'rail') {
         // Hülse fliegt seitlich weg und bleibt kurz liegen
         const side = c + Math.PI / 2 + (Math.random() - 0.5) * 0.6;
@@ -100,7 +118,7 @@ function handle(fx, type, a, b, c, d, e) {
     case 'enemyHit': {
       const col = enemyColor(e);
       burst(ps, PK.SPARK, a, b, 3 + Math.min(5, c / 6), 120, 360, 0.18, 1.6, col, null, TAU, 6);
-      if (s.damageNumbers) emitText(ps, a, b - 10, Math.round(c), d ? '#ffe23f' : '#ffffff', d ? 20 : 14);
+      if (s.damageNumbers && e) addDamageText(ps, e, a, b - 10, c, d);
       sound(fx, 'hit', d);
       break;
     }
@@ -113,6 +131,7 @@ function handle(fx, type, a, b, c, d, e) {
       if (ring) ring.size2 = d * 2.6;
       emit(ps, PK.FLASH, a, b, 0, 0, 0.07, d * 1.6, col);
       if (big) explosion(fx, a, b, d * 2.2, true);
+      trauma(fx, big ? 0.2 : 0.05);
       sound(fx, 'death', big ? 1 : 0);
       break;
     }
@@ -194,8 +213,10 @@ function handle(fx, type, a, b, c, d, e) {
       if (fx.audio) fx.audio.stopCharge();
       break;
     case 'rocketTrail': {
+      const t = emit(ps, PK.TRAIL, a, b, 0, 0, 0.35, 3.5, '#ffb347');
+      if (t) { t.x2 = a - c / 60; t.y2 = b - d / 60; }
       const p = emit(ps, PK.DOT, a - c * 0.016, b - d * 0.016, -c * 0.1 + (Math.random() - 0.5) * 40,
-        -d * 0.1 + (Math.random() - 0.5) * 40, 0.35, 4, '#ff9a2f');
+        -d * 0.1 + (Math.random() - 0.5) * 40, 0.3, 3, '#ff9a2f');
       if (p) p.drag = 4;
       if (Math.random() < 0.4) {
         const q = emit(ps, PK.SMOKE, a, b, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, 0.6, 5, '#30303f');
@@ -204,8 +225,9 @@ function handle(fx, type, a, b, c, d, e) {
       break;
     }
     case 'trail': {
-      const p = emit(ps, PK.DOT, a, b, 0, 0, 0.25, 3, d);
-      if (p) p.drag = 0;
+      // a, b = Ort, c, d = Geschwindigkeit, e = Farbe: dünne leuchtende Linie
+      const p = emit(ps, PK.TRAIL, a, b, 0, 0, 0.28, 2.5, e);
+      if (p) { p.x2 = a - c / 60; p.y2 = b - d / 60; }
       break;
     }
     case 'stomp': {

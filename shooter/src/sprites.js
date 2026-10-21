@@ -252,6 +252,7 @@ export function buildSprites(scale, glow = true) {
   sprites.set('bullet_boss', buildDot(C.enemyBullet, 11, scale));
   sprites.set('rocket_glow', buildDot('#ff9a2f', 9, scale));
   sprites.set('glow_white', buildDot('#ffffff', 10, scale, false));
+  sprites.set('glow_player', buildDot(C.player, 12, scale, false));
   sprites.set('glow_red', buildDot('#ff3b4d', 10, scale, false));
   for (const [id, def] of Object.entries(CONFIG.powerups)) {
     if (!def.color) continue;

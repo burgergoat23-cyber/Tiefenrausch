@@ -27,7 +27,7 @@ function makeParticle() {
 }
 
 function makeText() {
-  return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 1, text: '', size: 14, color: '#fff', pop: 0 };
+  return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 1, text: '', size: 14, color: '#fff', pop: 0, owner: 0, value: 0 };
 }
 
 export function createParticles() {
@@ -91,9 +91,11 @@ function numText(n) {
   return s;
 }
 
-export function emitText(ps, x, y, value, color, size, prefix = '') {
+export function emitText(ps, x, y, value, color, size, prefix = '', owner = 0) {
   const t = ps.texts.spawn();
-  if (!t) return;
+  if (!t) return null;
+  t.owner = owner;
+  t.value = value;
   t.x = x + (Math.random() - 0.5) * 10;
   t.y = y;
   t.vx = (Math.random() - 0.5) * 60;
@@ -104,6 +106,20 @@ export function emitText(ps, x, y, value, color, size, prefix = '') {
   t.size = size;
   t.color = color;
   t.pop = 0.12;
+  return t;
+}
+
+// Schnelle Treffer am selben Gegner zu einer Zahl zusammenfassen (weniger Gewusel beim MG)
+export function addDamageText(ps, e, x, y, amount, crit) {
+  const last = e.lastNum;
+  if (last && last.owner === e.id && last.life > last.max - 0.3 && !crit && last.size < 20) {
+    last.value += amount;
+    last.text = numText(Math.round(last.value));
+    last.pop = 0.08;
+    last.life = Math.max(last.life, last.max - 0.1);
+    return;
+  }
+  e.lastNum = emitText(ps, x, y, Math.round(amount), crit ? '#ffe23f' : '#ffffff', crit ? 20 : 14, '', e.id);
 }
 
 // Schwebender Text (z. B. Name eines Drops)
@@ -120,6 +136,7 @@ export function emitLabel(ps, x, y, text, color, size) {
   t.size = size;
   t.color = color;
   t.pop = 0.1;
+  t.owner = 0;
 }
 
 export function updateParticles(ps, dt) {

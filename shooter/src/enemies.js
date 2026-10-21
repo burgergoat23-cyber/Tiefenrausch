@@ -9,6 +9,7 @@ import { updateBoss, onBossDamaged, onBossKilled } from './boss.js';
 import { angleDiff, DEG, TAU } from './utils.js';
 
 let nextId = 1;
+export const SQUASH_TIME = 0.28; // Dauer des Stauchens und Zurückfederns
 
 // defOverride: eigene Werte (für Bosse), dann ohne Wellen-Skalierung
 export function createEnemy(run, type, x, y, defOverride) {
@@ -39,6 +40,7 @@ export function createEnemy(run, type, x, y, defOverride) {
     charging: false,
     hitWall: false, wallNX: 0, wallNY: 0,
     marked: false,
+    lastNum: null,           // letzte Schadenszahl (zum Zusammenfassen)
     boss: null,
     _t: 0,
   };
@@ -69,7 +71,7 @@ export function damageEnemy(run, e, amount, opts) {
   const dealt = Math.min(e.hp, amount);
   e.hp -= amount;
   e.flash = CONFIG.juice.flashTime;
-  e.squash = 1;
+  e.squash = SQUASH_TIME;
   run.stats.damageDealt += dealt;
   // Vampir: Anteil des Schadens heilt
   if (run.mods.vamp > 0 && !run.player.dead) {
@@ -132,7 +134,7 @@ export function updateEnemies(run, dt) {
     e.py = e.y;
     e.t += dt;
     if (e.flash > 0) e.flash -= dt;
-    if (e.squash > 0) e.squash = Math.max(0, e.squash - dt * 6);
+    if (e.squash > 0) e.squash = Math.max(0, e.squash - dt);
     if (e.popIn > 0) e.popIn -= dt;
     if (e.boss) updateBoss(run, e, dt);
     else ENEMY_AI[e.type].update(run, e, dt);

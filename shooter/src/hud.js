@@ -202,6 +202,16 @@ function drawPowerups(ctx, run, left, bottom, u) {
   }
 }
 
+// Zeitlupe (Power-up): lila Rand
+export function drawSlowTint(ctx, w, h, amount) {
+  if (amount <= 0.01) return;
+  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75);
+  g.addColorStop(0, 'rgba(160,80,255,0)');
+  g.addColorStop(1, `rgba(150,70,255,${0.35 * amount})`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
 // Roter Rand: Treffer-Blitz und Pulsieren bei wenig Leben
 export function drawDamageVignette(ctx, w, h, hurt, lowHp, time, colorFx) {
   let a = hurt * 0.55;

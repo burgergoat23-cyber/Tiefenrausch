@@ -124,7 +124,7 @@ function updateCharge(run, e, dt) {
     }
     e.vx = b.cdx * sp;
     e.vy = b.cdy * sp;
-    run.emit('trail', e.x, e.y, Math.atan2(e.vy, e.vx), b.color);
+    run.emit('trail', e.x, e.y, e.vx, e.vy, b.color);
     if (b.chargeRun <= 0) {
       b.charge = 'stun';
       b.stunT = g.chargeStun;

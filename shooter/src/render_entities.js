@@ -62,6 +62,14 @@ export function drawPlayer(ctx, run, alpha, time, settings) {
     }
   }
 
+  // weiche Aura (gelb bei Schnellfeuer, orange bei Mehrfachschuss)
+  const aura = run.power.rapid > 0 ? 'glow_rapid' : run.power.multi > 0 ? 'glow_multi' : 'glow_player';
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = aura === 'glow_player' ? 0.22 : 0.45 + 0.15 * Math.sin(time * 10);
+  drawSpriteSized(ctx, aura, x, y, 90);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+
   // Blinken nach Treffer
   if (p.invuln > 0 && Math.floor(time * 18) % 2 === 0) return;
   const white = p.invuln > CONFIG.player.invulnAfterHit - 0.08;
