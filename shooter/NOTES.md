@@ -21,6 +21,12 @@
 - **Kamera** darf 30 Einheiten über die Arena-Grenze schauen, damit die leuchtende Wand sichtbar bleibt.
 - **Streuung** in der Waffentabelle = gesamter Kegel (2° = ±1°).
 - **Hindernisse**: Blöcke (Rechtecke) und Säulen (Kreise), 4 Layouts mit 8–10 Hindernissen.
+- **Treffer-Erkennung**: Kugeln prüfen die ganze Strecke eines Schritts (Strecke gegen Kreis), nicht nur
+  den Endpunkt – so fliegt nichts durch Gegner oder dünne Wände.
+- **Kugeln und Dash**: Während des Dashes (und 0,06 s danach) fliegen gegnerische Kugeln durch den Spieler.
+- **Kontakt-Hitbox** der Gegner = 85 % ihres Radius (fühlt sich fairer an).
+- **Kombo**: Der erste Kill zählt als 1. Bei Treffer wird die Zahl halbiert (abgerundet).
+- **Explosionen, die der Spieler auslöst** (Rakete, Dash-Explosion, getöteter Bomber), schaden ihm nie.
 
 ## Bekannte Probleme / offen
 
@@ -30,3 +36,6 @@
 
 1. Plan ✔
 2. Grundgerüst ✔ – Canvas, fester Zeitschritt, Eingabe, Kamera, Arena, Spieler mit Dash
+3. Kampf-Kern ✔ – Pistole, Projektile (Pool), Läufer, Kollision über Spatial Hash, Schaden, Tod mit Zeitlupe,
+   einfacher Game Over (Enter/Tippen = nochmal). Erste Effekte (Funken, Explosion, Hülsen, Schadenszahlen,
+   roter Rand), HUD mit Leben, Punkten, Kombo und Waffe. Vorläufiger Spawner: Läufer am Rand (wird in M4 ersetzt).

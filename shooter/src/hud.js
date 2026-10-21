@@ -1,0 +1,210 @@
+// HUD im Spiel: Leben, Schild, Punkte, Kombo, Waffe, Power-ups, Welle, Boss-Leiste.
+// Zeichnet in Bildschirm-Koordinaten (CSS-Pixel) und beachtet sichere Bereiche (Notch).
+
+import { CONFIG } from './config.js';
+import { FONT, MONO } from './ui.js';
+import { clamp, formatScore } from './utils.js';
+import { comboMultiplier } from './scoring.js';
+import { hexAlpha } from './sprites.js';
+
+const C = CONFIG.colors;
+
+export function createHudState() {
+  return {
+    hpLag: CONFIG.player.maxHp,   // verzögerter weißer Schaden-Balken
+    hpLagHold: 0,
+    lastHp: CONFIG.player.maxHp,
+    score: 0,
+    scorePop: 0,
+    combo: 0,
+    comboPop: 0,
+    ammoPop: 0,
+    lastAmmo: 0,
+    lastWeapon: '',
+    wave: 0,
+    wavePop: 0,
+  };
+}
+
+export function hudScale(w, h) {
+  return clamp(Math.min(w, h) / 430, 0.78, 1.3);
+}
+
+// Werte für Animationen nachführen (pro Bild)
+export function updateHud(hs, run, dt) {
+  const p = run.player;
+  if (p.hp < hs.lastHp) hs.hpLagHold = 0.45;
+  if (p.hp > hs.hpLag) hs.hpLag = p.hp;
+  hs.lastHp = p.hp;
+  if (hs.hpLagHold > 0) hs.hpLagHold -= dt;
+  else hs.hpLag = Math.max(p.hp, hs.hpLag - p.maxHp * 0.6 * dt);
+
+  const sc = run.score.score;
+  if (sc !== hs.score) {
+    hs.scorePop = 1;
+    hs.score = sc;
+  }
+  if (run.score.combo !== hs.combo) {
+    if (run.score.combo > hs.combo) hs.comboPop = 1;
+    hs.combo = run.score.combo;
+  }
+  const ammo = run.arsenal.ammo[run.arsenal.current];
+  if (ammo !== hs.lastAmmo || run.arsenal.current !== hs.lastWeapon) {
+    hs.ammoPop = run.arsenal.current !== hs.lastWeapon ? 1 : 0.4;
+    hs.lastAmmo = ammo;
+    hs.lastWeapon = run.arsenal.current;
+  }
+  if (run.waves.number !== hs.wave) {
+    hs.wavePop = 1;
+    hs.wave = run.waves.number;
+  }
+  hs.scorePop = Math.max(0, hs.scorePop - dt * 5);
+  hs.comboPop = Math.max(0, hs.comboPop - dt * 4);
+  hs.ammoPop = Math.max(0, hs.ammoPop - dt * 5);
+  hs.wavePop = Math.max(0, hs.wavePop - dt * 3);
+}
+
+function bar(ctx, x, y, w, h, frac, color, back = 'rgba(255,255,255,0.08)') {
+  ctx.fillStyle = back;
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w * clamp(frac, 0, 1), h);
+}
+
+function text(ctx, s, x, y, size, color, align = 'left', weight = 800, font = FONT) {
+  ctx.font = `${weight} ${Math.round(size)}px ${font}`;
+  ctx.textAlign = align;
+  ctx.fillStyle = color;
+  ctx.fillText(s, x, y);
+}
+
+// layout = { w, h, safe: {top,right,bottom,left}, touch }
+export function drawHud(ctx, hs, run, layout, time, fx) {
+  const { w, h, safe } = layout;
+  const u = hudScale(w, h);
+  const pad = 14 * u;
+  const left = safe.left + pad;
+  const top = safe.top + pad;
+  const right = w - safe.right - pad;
+  const bottom = h - safe.bottom - pad;
+  ctx.textBaseline = 'alphabetic';
+
+  // --- oben links: Leben (mit verzögertem Schaden-Balken) und Schild ---
+  const p = run.player;
+  const bw = 210 * u;
+  const bh = 14 * u;
+  const sh = run.power.shield;
+  let y = top;
+  if (sh.amount > 0) {
+    bar(ctx, left, y, bw, 5 * u, sh.amount / CONFIG.powerups.shield.amount, C.shield);
+    y += 8 * u;
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(left, y, bw, bh);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillRect(left, y, bw * clamp(hs.hpLag / p.maxHp, 0, 1), bh);
+  const low = p.hp / p.maxHp < CONFIG.player.lowHpFraction;
+  const hpCol = low ? (Math.sin(time * 10) > 0 ? C.hpLow : '#ff8a9a') : C.hp;
+  ctx.fillStyle = hpCol;
+  ctx.fillRect(left, y, bw * clamp(p.hp / p.maxHp, 0, 1), bh);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(left + 0.5, y + 0.5, bw - 1, bh - 1);
+  text(ctx, `${Math.ceil(p.hp)} / ${p.maxHp}`, left + 6 * u, y + bh - 3 * u, 11 * u, '#04120a', 'left', 800, MONO);
+
+  // --- oben rechts: Punkte, Kombo ---
+  const sPop = 1 + hs.scorePop * 0.18;
+  text(ctx, formatScore(run.score.score), right, top + 24 * u * sPop, 26 * u * sPop, C.hud, 'right', 900, MONO);
+  const combo = run.score.combo;
+  if (combo > 0) {
+    const mult = comboMultiplier(combo);
+    const cPop = 1 + hs.comboPop * 0.3;
+    const flash = fx ? fx.comboFlash : 0;
+    const col = flash > 0 ? '#ffffff' : C.combo;
+    text(ctx, `${combo}× KOMBO`, right, top + 48 * u, 14 * u * cPop, col, 'right', 800);
+    if (mult > 1) text(ctx, `x${String(mult).replace('.', ',')}`, right - 118 * u, top + 48 * u, 16 * u * cPop, col, 'right', 900);
+    bar(ctx, right - 110 * u, top + 55 * u, 110 * u, 4 * u, run.score.comboT / CONFIG.combo.window, col);
+  }
+
+  // --- unten Mitte: Waffe und Munition, andere Waffen klein daneben ---
+  drawWeapons(ctx, run, hs, w / 2, bottom, u);
+
+  // --- unten links: aktive Power-ups ---
+  drawPowerups(ctx, run, left, bottom, u);
+}
+
+const WEAPON_SHORT = { pistol: 'PST', shotgun: 'SCH', mg: 'MG', rocket: 'RAK', rail: 'RAIL' };
+
+function drawWeapons(ctx, run, hs, cx, bottom, u) {
+  const ars = run.arsenal;
+  const id = ars.current;
+  const w = CONFIG.weapons[id];
+  const pop = 1 + hs.ammoPop * 0.2;
+  const ammo = ars.ammo[id];
+  const ammoTxt = ammo === Infinity ? '∞' : String(ammo);
+  text(ctx, w.name.toUpperCase(), cx, bottom - 26 * u, 13 * u, C.hudDim, 'center', 800);
+  text(ctx, ammoTxt, cx, bottom - 2 * u, 22 * u * pop, ammo !== Infinity && ammo <= w.ammo * 0.2 ? '#ff8a5a' : C.hud, 'center', 900, MONO);
+  // Railgun-Ladebalken
+  if (id === 'rail' && ars.railCharge > 0) {
+    bar(ctx, cx - 40 * u, bottom + 4 * u, 80 * u, 3 * u, ars.railCharge / CONFIG.weapons.rail.charge, '#9ffcff');
+  }
+  // andere Waffen
+  const order = CONFIG.weapons.order;
+  let x = cx + 70 * u;
+  let xl = cx - 70 * u;
+  let leftSide = false;
+  for (const wid of order) {
+    if (wid === id || !(ars.ammo[wid] > 0)) continue;
+    const label = `${order.indexOf(wid) + 1} ${WEAPON_SHORT[wid]} ${ars.ammo[wid] === Infinity ? '∞' : ars.ammo[wid]}`;
+    if (!leftSide) {
+      text(ctx, label, x, bottom - 4 * u, 11 * u, C.hudDim, 'left', 700, MONO);
+      x += ctx.measureText(label).width + 14 * u;
+    } else {
+      text(ctx, label, xl, bottom - 4 * u, 11 * u, C.hudDim, 'right', 700, MONO);
+      xl -= ctx.measureText(label).width + 14 * u;
+    }
+    leftSide = !leftSide;
+  }
+}
+
+const POWER_ORDER = ['shield', 'rapid', 'multi', 'slow'];
+const POWER_ICON = { shield: '◯', rapid: '»', multi: '⋔', slow: '◷' };
+
+function drawPowerups(ctx, run, left, bottom, u) {
+  let x = left;
+  const size = 30 * u;
+  for (const id of POWER_ORDER) {
+    const t = id === 'shield' ? run.power.shield.t : run.power[id];
+    if (!(t > 0)) continue;
+    const def = CONFIG.powerups[id];
+    const frac = t / def.duration;
+    ctx.fillStyle = hexAlpha(def.color, 0.15);
+    ctx.fillRect(x, bottom - size, size, size);
+    ctx.strokeStyle = def.color;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x + 0.5, bottom - size + 0.5, size - 1, size - 1);
+    text(ctx, POWER_ICON[id], x + size / 2, bottom - size * 0.3, 17 * u, def.color, 'center', 900);
+    bar(ctx, x, bottom + 3 * u, size, 3 * u, Math.min(1, frac), def.color);
+    x += size + 8 * u;
+  }
+}
+
+// Roter Rand: Treffer-Blitz und Pulsieren bei wenig Leben
+export function drawDamageVignette(ctx, w, h, hurt, lowHp, time, colorFx) {
+  let a = hurt * 0.55;
+  if (lowHp) a = Math.max(a, 0.22 + 0.18 * Math.sin(time * 6));
+  if (a <= 0.01) return;
+  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+  g.addColorStop(0, 'rgba(255,0,40,0)');
+  g.addColorStop(1, `rgba(255,20,60,${a})`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  if (colorFx && hurt > 0.3) {
+    // leichte Farbverschiebung beim Treffer
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(255,0,60,${(hurt - 0.3) * 0.12})`;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+

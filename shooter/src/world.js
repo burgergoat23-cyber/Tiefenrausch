@@ -120,6 +120,18 @@ export function circleBlocked(world, x, y, r) {
   return false;
 }
 
+// Liegt ein Kreis in einem Hindernis? (Außenwand zählt nicht)
+export function obstacleAt(world, x, y, r) {
+  const obs = world.obstacles;
+  for (let i = 0; i < obs.length; i++) {
+    const o = obs[i];
+    if (o.shape === 'rect' ? circleRect(x, y, r, o.x, o.y, o.w, o.h) : circleCircle(x, y, r, o.x, o.y, o.r)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Strecke gegen alle Hindernisse (nicht gegen die Außenwand). Rückgabe: kleinstes t oder -1.
 export function segmentObstacles(world, x1, y1, x2, y2, out) {
   let best = -1;

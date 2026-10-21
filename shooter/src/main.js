@@ -1,32 +1,61 @@
-// Einstieg: verbindet Canvas, Eingabe, Spielzustände und Zeichnen.
+// Einstieg: verbindet Canvas, Eingabe, Spielzustände, Effekte und Zeichnen.
 
 import { CONFIG } from './config.js';
 import { createInput, pollActions, consumeEdges, takeUiKeys } from './input.js';
 import { createGame, startRun, setState, frame, resolveAim } from './game.js';
 import { setViewport } from './camera.js';
 import { createRenderer, resizeRenderer, renderWorld } from './render.js';
+import { resetFloor, fadeFloor } from './render_world.js';
+import { createParticles, updateParticles, clearParticles } from './particles.js';
+import { createFx, attachFx } from './fx.js';
+import { createHudState, updateHud, drawHud, drawDamageVignette } from './hud.js';
 import { drawCrosshair, drawDebug, drawCenterText } from './ui.js';
+import { formatScore } from './utils.js';
 
 const canvas = document.getElementById('game');
 const renderer = createRenderer(canvas);
 const input = createInput(canvas);
 const game = createGame();
-const settings = { aimLine: true, showFps: false };
+const settings = {
+  aimLine: true, showFps: false, damageNumbers: true, vibration: true, colorFx: true, aimAssist: true,
+};
+const particles = createParticles();
+const fx = createFx(particles, game, settings);
+let hud = createHudState();
+const safe = { top: 0, right: 0, bottom: 0, left: 0 };
 
 game.getActions = (g) => resolveAim(pollActions(input), g.cam, g.run.player);
 game.afterStep = () => consumeEdges(input);
+
+// Sichere Bereiche (Notch) aus CSS lesen
+const safeProbe = document.createElement('div');
+safeProbe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;'
+  + 'padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+document.body.appendChild(safeProbe);
 
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   setViewport(game.cam, w, h);
   resizeRenderer(renderer, w, h, game.cam.zoom);
+  const cs = getComputedStyle(safeProbe);
+  safe.top = parseFloat(cs.paddingTop) || 0;
+  safe.right = parseFloat(cs.paddingRight) || 0;
+  safe.bottom = parseFloat(cs.paddingBottom) || 0;
+  safe.left = parseFloat(cs.paddingLeft) || 0;
 }
 window.addEventListener('resize', resize);
 resize();
 
-startRun(game, {});
-setState(game, 'playing');
+function newGame() {
+  const run = startRun(game, {});
+  attachFx(fx, run);
+  clearParticles(particles);
+  resetFloor(run.world);
+  hud = createHudState();
+  setState(game, 'playing');
+}
+newGame();
 
 // Automatische Pause, wenn der Tab unsichtbar wird
 document.addEventListener('visibilitychange', () => {
@@ -40,8 +69,20 @@ function handleUiKeys() {
       if (game.state === 'playing') setState(game, 'paused');
       else if (game.state === 'paused') setState(game, 'playing');
     }
+    if ((code === 'Enter' || code === 'Space') && game.state === 'gameover') newGame();
+    if (game.debug && game.state === 'playing') {
+      if (code === 'KeyG') game.run.god = !game.run.god;
+      if (code === 'KeyK') for (const e of game.run.enemies) e.hp = 0.001;
+    }
   }
 }
+canvas.addEventListener('pointerdown', () => {
+  if (game.state === 'gameover' && game.time - deathTime > 1) newGame();
+});
+let deathTime = 0;
+game.onStateChange = (s) => {
+  if (s === 'gameover') deathTime = game.time;
+};
 
 // FPS messen (gleitender Mittelwert)
 let fps = 60;
@@ -53,19 +94,40 @@ function loop(now) {
   if (dt > 0) fps += (1 / dt - fps) * 0.05;
   handleUiKeys();
   const alpha = frame(game, dt);
+  const run = game.run;
+  const simDt = game.state === 'playing' || game.state === 'dying' ? (game.hitStop > 0 ? 0 : dt) : 0;
+  const visDt = game.state === 'dying' ? simDt * CONFIG.juice.deathSlowmo : simDt;
+  updateParticles(particles, visDt);
+  fadeFloor(visDt);
+  updateHud(hud, run, dt);
+  fx.hurt = Math.max(0, fx.hurt - dt * 2.5);
+  fx.comboFlash = Math.max(0, fx.comboFlash - dt * 3);
+
   renderWorld(renderer, {
-    run: game.run, cam: game.cam, alpha, time: game.time, pulse: 0, settings,
+    run, cam: game.cam, alpha, time: game.time, pulse: 0, settings, particles,
   });
   const ctx = renderer.ctx;
-  if (game.state === 'paused') drawCenterText(ctx, renderer.w, renderer.h, 'PAUSE', 'P oder Esc: weiter');
-  if (input.device === 'mouse' && input.mouseInside) drawCrosshair(ctx, input.mouseX, input.mouseY, game.time);
+  const w = renderer.w;
+  const h = renderer.h;
+  const lowHp = !run.player.dead && run.player.hp / run.player.maxHp < CONFIG.player.lowHpFraction;
+  drawDamageVignette(ctx, w, h, fx.hurt, lowHp, game.time, settings.colorFx);
+  if (game.state !== 'gameover') drawHud(ctx, hud, run, { w, h, safe }, game.time, fx);
+  if (game.state === 'paused') drawCenterText(ctx, w, h, 'PAUSE', 'P oder Esc: weiter');
+  if (game.state === 'gameover') {
+    drawCenterText(ctx, w, h, 'GAME OVER',
+      `${formatScore(run.score.score)} Punkte · Kills ${run.stats.kills} · Enter oder Tippen: nochmal`);
+  }
+  if (input.device === 'mouse' && input.mouseInside && game.state !== 'gameover') {
+    drawCrosshair(ctx, input.mouseX, input.mouseY, game.time);
+  }
   if (game.debug || settings.showFps) {
-    const p = game.run.player;
+    const p = run.player;
     drawDebug(ctx, [
       `FPS ${fps.toFixed(0)}  Schritte ${game.stepsLastFrame}`,
-      `Spieler ${p.x.toFixed(0)}, ${p.y.toFixed(0)}  HP ${p.hp}`,
-      `Dash ${p.dashCharges}  Zustand ${game.state}`,
-    ], 8, 8);
+      `Gegner ${run.enemies.length}  Kugeln ${run.projectiles.player.count}/${run.projectiles.enemy.count}`,
+      `Partikel ${particles.pool.count}  Gefahren ${run.hazards.length}`,
+      `Spieler ${p.x.toFixed(0)}, ${p.y.toFixed(0)}  HP ${p.hp}${run.god ? ' (G)' : ''}`,
+    ], safe.left + 8, h - safe.bottom - 80);
   }
   requestAnimationFrame(loop);
 }

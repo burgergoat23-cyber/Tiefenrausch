@@ -171,3 +171,102 @@ test('Zufall mit Seed ist reproduzierbar', () => {
   const b = mulberry32(42);
   for (let i = 0; i < 10; i++) assert.equal(a(), b());
 });
+
+// --- Kampf -------------------------------------------------------------------------
+
+import { createEnemy, addEnemy } from '../src/enemies.js';
+import { hurtPlayer } from '../src/player.js';
+import { rollDamage, comboMultiplier, registerKill, comboOnHit, createScore, updateCombo } from '../src/scoring.js';
+
+function quietRun(seed = 7, layout = 0) {
+  const run = createRun({ seed, layout });
+  run.demoNoSpawn = true;
+  return run;
+}
+
+test('Pistole tötet einen Läufer, Punkte werden gutgeschrieben', () => {
+  const run = quietRun();
+  const p = run.player;
+  const e = addEnemy(run, createEnemy(run, 'runner', p.x + 300, p.y));
+  e.speed = 0;
+  let t = 0;
+  while (!e.dead && t < 5) {
+    stepRun(run, 1 / 60, idleActions({ fire: true, aimAngle: 0 }));
+    t += 1 / 60;
+  }
+  assert.ok(e.dead, 'Läufer tot');
+  assert.equal(run.stats.kills, 1);
+  assert.equal(run.score.score, CONFIG.enemies.runner.points);
+  assert.ok(run.stats.hits >= 3 && run.stats.shots >= run.stats.hits);
+});
+
+test('Schaden mit Upgrade und kritischem Treffer', () => {
+  const mods = { dmgMult: 1.3, crit: 0 };
+  assert.ok(near(rollDamage(10, mods, () => 0.5).amount, 13));
+  const crit = rollDamage(10, { dmgMult: 1, crit: 0.1 }, () => 0.05);
+  assert.equal(crit.crit, true);
+  assert.equal(crit.amount, 20);
+  const noCrit = rollDamage(10, { dmgMult: 1, crit: 0.1 }, () => 0.5);
+  assert.equal(noCrit.crit, false);
+  assert.equal(noCrit.amount, 10);
+});
+
+test('Schild absorbiert Schaden, Rest geht aufs Leben', () => {
+  const run = quietRun();
+  run.power.shield.amount = 50;
+  run.power.shield.t = 12;
+  hurtPlayer(run, 30, 'Test');
+  assert.equal(run.player.hp, 100);
+  assert.equal(run.power.shield.amount, 20);
+  run.player.invuln = 0;
+  hurtPlayer(run, 30, 'Test');
+  assert.equal(run.power.shield.amount, 0);
+  assert.equal(run.player.hp, 90);
+});
+
+test('Unverwundbar während des Dashes und kurz nach einem Treffer', () => {
+  const run = quietRun();
+  stepRun(run, 1 / 60, idleActions({ moveX: 1, dash: true }));
+  assert.ok(run.player.dashT > 0);
+  assert.equal(hurtPlayer(run, 50, 'Test'), 0);
+  for (let i = 0; i < 20; i++) stepRun(run, 1 / 60, idleActions());
+  assert.equal(hurtPlayer(run, 10, 'Test'), 10);
+  assert.equal(hurtPlayer(run, 10, 'Test'), 0, 'direkt danach unverwundbar');
+});
+
+test('Spieler stirbt bei 0 Leben', () => {
+  const run = quietRun();
+  run.player.hp = 5;
+  hurtPlayer(run, 10, 'Läufer');
+  assert.equal(run.player.dead, true);
+  assert.equal(run.player.hp, 0);
+  assert.equal(run.player.lastHitBy, 'Läufer');
+});
+
+test('Kombo-Multiplikator: x1, x1,5 ab 10, x2 ab 25, x3 ab 50, x4 ab 100', () => {
+  assert.equal(comboMultiplier(0), 1);
+  assert.equal(comboMultiplier(9), 1);
+  assert.equal(comboMultiplier(10), 1.5);
+  assert.equal(comboMultiplier(24), 1.5);
+  assert.equal(comboMultiplier(25), 2);
+  assert.equal(comboMultiplier(50), 3);
+  assert.equal(comboMultiplier(99), 3);
+  assert.equal(comboMultiplier(100), 4);
+  assert.equal(comboMultiplier(500), 4);
+});
+
+test('Punkte: Grundpunkte × Multiplikator, Kombo läuft ab und halbiert sich bei Treffer', () => {
+  const sc = createScore();
+  for (let i = 0; i < 9; i++) registerKill(sc, 10);
+  assert.equal(sc.score, 90);
+  const r = registerKill(sc, 10); // 10. Kill -> x1,5
+  assert.equal(r.gained, 15);
+  assert.equal(r.tierUp, true);
+  assert.equal(sc.combo, 10);
+  comboOnHit(sc);
+  assert.equal(sc.combo, 5);
+  updateCombo(sc, CONFIG.combo.window + 0.01);
+  assert.equal(sc.combo, 0);
+  registerKill(sc, 10);
+  assert.equal(sc.combo, 1, 'nach Ablauf beginnt die Kombo neu');
+});

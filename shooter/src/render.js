@@ -1,10 +1,12 @@
-// Setzt ein Bild zusammen: Welt (mit Kamera), danach Bildschirm-Ebenen (HUD, Menüs zeichnen andere).
+// Setzt ein Bild zusammen: Welt (mit Kamera), danach Bildschirm-Ebenen (HUD zeichnet main.js).
 
 import { CONFIG } from './config.js';
 import { cameraView } from './camera.js';
 import { buildSprites } from './sprites.js';
 import { drawGrid, drawFloor, drawWalls, drawObstacles } from './render_world.js';
 import { drawPlayer } from './render_entities.js';
+import { drawEnemies, drawPlayerProjectiles, drawEnemyProjectiles, drawHazards } from './render_enemies.js';
+import { drawParticlesFloor, drawParticlesTop, drawTexts } from './render_fx.js';
 
 export function createRenderer(canvas) {
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -15,13 +17,14 @@ export function createRenderer(canvas) {
     w: 1,
     h: 1,
     glow: true,
+    qualityScale: 1,
     view: { x: 0, y: 0, a: 0, zoom: 1, left: 0, right: 0, top: 0, bottom: 0 },
   };
 }
 
 // Canvas an Fenstergröße anpassen (scharf mit devicePixelRatio, höchstens 2)
 export function resizeRenderer(r, cssW, cssH, zoom) {
-  const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.view.dprMax) * (r.qualityScale || 1);
+  const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.view.dprMax) * r.qualityScale;
   r.dpr = dpr;
   r.w = cssW;
   r.h = cssH;
@@ -51,10 +54,10 @@ function beginWorld(r, cam, alpha) {
   return v;
 }
 
-// Ganzes Weltbild zeichnen. scene = { run, cam, alpha, time, pulse, settings }
+// Ganzes Weltbild zeichnen. scene = { run, cam, alpha, time, pulse, settings, particles }
 export function renderWorld(r, scene) {
   const ctx = r.ctx;
-  const { run, cam, alpha, time, settings } = scene;
+  const { run, cam, alpha, time, settings, particles } = scene;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = CONFIG.colors.background;
   ctx.fillRect(0, 0, r.canvas.width, r.canvas.height);
@@ -63,9 +66,17 @@ export function renderWorld(r, scene) {
   drawGrid(ctx, run.world, view, scene.pulse);
   drawFloor(ctx, run.world);
   drawWalls(ctx, run.world, r.glow);
+  drawHazards(ctx, run, time);
+  if (particles) drawParticlesFloor(ctx, particles, view);
   drawObstacles(ctx, run.world, view, r.glow);
+  drawEnemies(ctx, run, alpha, time, view);
+  drawPlayerProjectiles(ctx, run, alpha, view);
+  if (particles) drawParticlesTop(ctx, particles, view);
+  drawEnemyProjectiles(ctx, run, alpha, time, view);
   drawPlayer(ctx, run, alpha, time, settings);
+  if (particles && settings.damageNumbers !== false) drawTexts(ctx, particles);
 
   // zurück in Bildschirm-Koordinaten (CSS-Pixel)
   ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
+  return view;
 }

@@ -3,8 +3,14 @@
 
 import { CONFIG } from './config.js';
 import { mulberry32, hashSeed } from './utils.js';
-import { createWorld } from './world.js';
+import { SpatialHash } from './collision.js';
+import { createWorld, edgePoint } from './world.js';
 import { createPlayer, updatePlayer } from './player.js';
+import { createArsenal, updateWeapons } from './weapons.js';
+import { createProjectilePools, updatePlayerProjectiles, updateEnemyProjectiles } from './projectiles.js';
+import { createEnemy, addEnemy, updateEnemies, rebuildHash, compactEnemies, aliveCount } from './enemies.js';
+import { explodeAt, updateHazards } from './hazards.js';
+import { createScore, registerKill, comboOnHit, updateCombo } from './scoring.js';
 
 export function defaultMods() {
   return {
@@ -53,32 +59,89 @@ export function createRun(opts = {}) {
     demo: !!opts.demo,
     world,
     player: createPlayer(world.startX, world.startY),
+    arsenal: createArsenal(),
+    projectiles: createProjectilePools(),
+    enemies: [],
+    hazards: [],
+    pickups: [],
+    hash: new SpatialHash(world.width, world.height, 100),
+    score: createScore(),
     time: 0,
     god: false,
     mods: defaultMods(),
     stats: createStats(),
     power: { shield: { amount: 0, t: 0 }, rapid: 0, multi: 0, slow: 0 },
-    waves: { number: 0, hitThisWave: false },
+    waves: { number: 1, hitThisWave: false, hpScale: 1, speedScale: 1, spawnT: 1 },
     listeners: [],
-    over: false,
   };
   run.emit = (type, a, b, c, d, e) => {
     const ls = run.listeners;
     for (let i = 0; i < ls.length; i++) ls[i](type, a, b, c, d, e);
   };
-  run.onPlayerHit = () => {};
-  run.explodeAt = () => {};
+  run.onPlayerHit = () => comboOnHit(run.score);
+  run.explodeAt = (x, y, radius, damage, team, source, exclude) =>
+    explodeAt(run, x, y, radius, damage, team, source, exclude);
+  run.scoreKill = (e) => {
+    const res = registerKill(run.score, e.points);
+    if (run.score.combo > run.stats.maxCombo) run.stats.maxCombo = run.score.combo;
+    run.emit('score', res.gained, e.x, e.y);
+    if (res.tierUp) run.emit('comboTier', res.tier);
+  };
+  run.dropFrom = () => {};
   return run;
+}
+
+// Vorläufiger Spawner (bis zum Wellen-System): Läufer am Rand
+function simpleSpawner(run, dt) {
+  const w = run.waves;
+  w.spawnT -= dt;
+  if (w.spawnT > 0 || aliveCount(run) >= 14) return;
+  w.spawnT = 1.4;
+  for (let tries = 0; tries < 10; tries++) {
+    const pt = edgePoint(run.world, run.rng);
+    const dx = pt.x - run.player.x;
+    const dy = pt.y - run.player.y;
+    if (dx * dx + dy * dy < CONFIG.waves.spawnMinDist ** 2) continue;
+    addEnemy(run, createEnemy(run, 'runner', pt.x, pt.y));
+    return;
+  }
 }
 
 // Ein Logikschritt mit Zeit dt und den Aktionen des Spielers
 export function stepRun(run, dt, act) {
   run.time += dt;
-  if (!run.player.dead) run.stats.time += dt;
   const p = run.player;
+  if (!p.dead) run.stats.time += dt;
+  // Zeitlupe (Power-up): Gegner und ihre Kugeln halb so schnell
+  const enemyDt = run.power.slow > 0 ? dt * CONFIG.powerups.slow.factor : dt;
+
   p.px = p.x;
   p.py = p.y;
   updatePlayer(run, dt, act);
+  if (!run.demoNoSpawn) simpleSpawner(run, dt);
+
+  rebuildHash(run);
+  updateEnemies(run, enemyDt);
+  rebuildHash(run);
+  updateWeapons(run, dt, act);
+  updatePlayerProjectiles(run, dt);
+  updateEnemyProjectiles(run, enemyDt);
+  updateHazards(run, dt, enemyDt);
+  updateCombo(run.score, dt);
+  updatePowerups(run, dt);
+  compactEnemies(run);
 }
 
-export const RUN_CFG = CONFIG;
+function updatePowerups(run, dt) {
+  const pw = run.power;
+  if (pw.rapid > 0) pw.rapid = Math.max(0, pw.rapid - dt);
+  if (pw.multi > 0) pw.multi = Math.max(0, pw.multi - dt);
+  if (pw.slow > 0) pw.slow = Math.max(0, pw.slow - dt);
+  if (pw.shield.t > 0) {
+    pw.shield.t -= dt;
+    if (pw.shield.t <= 0) {
+      pw.shield.t = 0;
+      pw.shield.amount = 0;
+    }
+  }
+}

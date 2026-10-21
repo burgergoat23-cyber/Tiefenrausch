@@ -2,8 +2,6 @@
 // Liefert pro Logikschritt ein Aktionen-Objekt. Kurze Tastendrücke gehen nicht verloren:
 // Einmal-Aktionen (Dash, Waffenwechsel) bleiben stehen, bis ein Logikschritt sie verbraucht hat.
 
-import { CONFIG } from './config.js';
-
 const MOVE_KEYS = {
   KeyW: [0, -1], ArrowUp: [0, -1],
   KeyS: [0, 1], ArrowDown: [0, 1],
@@ -158,4 +156,3 @@ export function takeUiKeys(input) {
   return q;
 }
 
-export const TOUCH_CFG = CONFIG.touch;
