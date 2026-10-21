@@ -134,7 +134,8 @@ export const CONFIG = {
     tank: {
       name: 'Panzer', shape: 'hexagon', color: '#7dff3a', hp: 220, speed: 60, damage: 25, points: 50,
       unlock: 6, cost: 6, weight: 0.8, radius: 32, accel: 500, knockResist: 0.8, dropChance: 0.3,
-      stompEvery: 4, stompWindup: 0.6, waveSpeed: 330, waveMaxRadius: 290, waveThickness: 16, waveDamage: 18,
+      stompEvery: 4, stompWindup: 0.7, stompRange: 450, waveSpeed: 330, waveMaxRadius: 260, waveThickness: 16,
+      waveDamage: 15,
       big: true,
     },
     splitter: {
@@ -147,12 +148,12 @@ export const CONFIG = {
     },
     shield: {
       name: 'Schildträger', shape: 'shield', color: '#4a86ff', hp: 70, speed: 80, damage: 12, points: 40,
-      unlock: 9, cost: 4, weight: 1.2, radius: 20, accel: 600, turnRate: 1.25, shieldArc: 120,
+      unlock: 9, cost: 4, weight: 1.2, radius: 20, accel: 600, turnRate: 0.8, shieldArc: 110,
       knockResist: 0.35, big: true,
     },
     egg: {
       name: 'Ei', shape: 'egg', color: '#c9ff5a', hp: 20, speed: 0, damage: 0, points: 5,
-      radius: 13, accel: 0, hatchTime: 3, hatchInto: 'sprinter', hatchCount: 2, knockResist: 1,
+      radius: 13, accel: 0, hatchTime: 3, hatchInto: 'sprinter', hatchCount: 1, knockResist: 1,
     },
   },
 
@@ -176,9 +177,9 @@ export const CONFIG = {
       spiralSpeed: 210,
     },
     brood: {
-      name: 'DIE BRUT', hp: 2500, radius: 70, color: '#7dff5a', color2: '#c05cff', speed: 46, damage: 25,
-      eggEvery: 4, eggCount: 2, maxEggs: 8,
-      acidEvery: 3.4, acidCount: 3, acidFlight: 1, acidRadius: 70, acidLife: 4, acidDamage: 8,
+      name: 'DIE BRUT', hp: 2500, radius: 70, color: '#7dff5a', color2: '#c05cff', speed: 46, damage: 20,
+      eggEvery: 4, eggCount: 2, maxEggs: 6,
+      acidEvery: 3.8, acidCount: 3, acidFlight: 1, acidRadius: 70, acidLife: 4, acidDamage: 8,
       acidTick: 0.5, acidSpread: 110,
       splitHp: 0.3, childRadius: 48, childSpeed: 1.45, childRate: 1.35,
     },

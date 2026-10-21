@@ -61,10 +61,12 @@ export function botActions(bot, run, dt) {
     // Abstand halten und seitlich laufen
     const dx = (p.x - e.x) / near.d;
     const dy = (p.y - e.y) / near.d;
-    const want = e.boss ? 380 : 260;
+    const want = e.boss ? 380 : e.type === 'tank' ? 330 : 260;
     const radial = near.d < want ? 1 : near.d > want + 120 ? -0.6 : 0;
-    mx = dx * radial + -dy * bot.strafe * 0.9;
-    my = dy * radial + dx * bot.strafe * 0.9;
+    // Schildträger: um ihn herum laufen, um von der Seite zu treffen
+    const side = e.type === 'shield' ? 1.6 : 0.9;
+    mx = dx * radial + -dy * bot.strafe * side;
+    my = dy * radial + dx * bot.strafe * side;
     if (near.d < e.r + 60 && p.dashCharges > 0) a.dash = true;
   } else {
     // nichts zu tun: zur Mitte und Drops einsammeln
@@ -95,8 +97,12 @@ export function botActions(bot, run, dt) {
     if (d2 < 90 * 90 && p.dashCharges > 0) a.dash = true;
   }
 
-  // Gefahren am Boden meiden
+  // Gefahren am Boden meiden, über Schockwellen springen (Dash)
   for (const h of run.hazards) {
+    if (h.kind === 'wave' && !h.hit) {
+      const d = Math.sqrt((p.x - h.x) ** 2 + (p.y - h.y) ** 2);
+      if (d - h.r > 0 && d - h.r < 40 && p.dashCharges > 0) a.dash = true;
+    }
     if (h.kind === 'acid' || h.kind === 'glob') {
       const dx = p.x - h.x;
       const dy = p.y - h.y;

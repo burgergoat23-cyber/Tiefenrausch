@@ -18,15 +18,16 @@ import { drawOffscreen } from './render_overlay.js';
 import { drawCrosshair, drawDebug } from './ui.js';
 import { createAudio } from './audio.js';
 import { killAll, nextWave, bossNow } from './cheats.js';
-import { botActions } from './bot.js';
+import { botActions, createBot } from './bot.js';
 import { loadSettings, loadHighscores, loadTotals } from './storage.js';
 import {
   showStart, tickDemo, pauseGame, openUpgrade, demoUpgrade, showGameOver,
 } from './flow.js';
 import { createEnemy, addEnemy } from './enemies.js';
-import { startWave } from './waves.js';
+import { startWave } from './wave_director.js';
 import { spawnPickup } from './pickups.js';
 import { giveWeapon } from './weapons.js';
+import { spawnEnemyProjectile } from './projectiles.js';
 
 const canvas = document.getElementById('game');
 const settings = loadSettings();
@@ -52,6 +53,7 @@ const app = {
   totals: loadTotals(),
   fps: 60,
   perf: { low: 0, level: 0 },
+  timing: { logic: 0, draw: 0 },   // gleitende Mittel in ms (Debug-Anzeige)
 };
 const layout = { w: 1, h: 1, safe: app.safe, touch: false };
 const touch = createTouch(canvas, app.input, () => layout);
@@ -171,7 +173,9 @@ function loop(now) {
   handleUiKeys();
   tickDemo(app);
   autoQuality(dt);
+  const t0 = performance.now();
   const alpha = frame(game, dt);
+  const t1 = performance.now();
   const run = game.run;
   const st = game.state;
   const moving = st === 'playing' || st === 'dying' || st === 'menu';
@@ -192,6 +196,9 @@ function loop(now) {
     run, cam: game.cam, alpha, time: game.time, pulse, settings, particles, darkness,
   });
   drawScreen(alpha, st, run);
+  const t2 = performance.now();
+  app.timing.logic += (t1 - t0 - app.timing.logic) * 0.05;
+  app.timing.draw += (t2 - t1 - app.timing.draw) * 0.05;
   requestAnimationFrame(loop);
 }
 
@@ -219,6 +226,7 @@ function drawScreen(alpha, st, run) {
     const lines = [`FPS ${app.fps.toFixed(0)}  Schritte ${game.stepsLastFrame}`];
     if (game.debug) {
       lines.push(
+        `Logik ${app.timing.logic.toFixed(1)} ms  Zeichnen ${app.timing.draw.toFixed(1)} ms`,
         `Qualität ${app.perf.level}  Gerät ${app.input.device}`,
         `Gegner ${run.enemies.length}  Kugeln ${run.projectiles.player.count}/${run.projectiles.enemy.count}`,
         `Partikel ${particles.pool.count}  Gefahren ${run.hazards.length}  Drops ${run.pickups.length}`,
@@ -233,8 +241,24 @@ function drawScreen(alpha, st, run) {
 showStart(app);
 requestAnimationFrame(loop);
 
-// Für Tests im Browser
+// Für Tests im Browser: Zeitraffer (Logik + Partikel, jedes n-te Bild zeichnen)
+window.__fastForward = (seconds, drawEvery = 20) => {
+  const steps = Math.round(seconds * 60);
+  for (let i = 0; i < steps; i++) {
+    frame(game, 1 / 60);
+    updateParticles(particles, 1 / 60);
+    updateFx(fx, 1 / 60);
+    fadeFloor(1 / 60);
+    updateHud(app.hud, game.run, 1 / 60);
+    if (i % drawEvery === 0) {
+      renderWorld(app.renderer, { run: game.run, cam: game.cam, alpha: 1, time: game.time, pulse: 0, settings, particles, darkness });
+      drawScreen(1, game.state, game.run);
+    }
+  }
+};
 window.__game = game;
 window.__app = app;
 window.__audio = audio;
-window.__api = { createEnemy, addEnemy, startWave, spawnPickup, giveWeapon, CONFIG, setState };
+window.__api = {
+  createEnemy, addEnemy, startWave, spawnPickup, giveWeapon, spawnEnemyProjectile, CONFIG, setState, createBot, botActions,
+};

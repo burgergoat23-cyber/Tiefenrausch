@@ -9,7 +9,7 @@ import { createPlayer, updatePlayer } from './player.js';
 import { createArsenal, updateWeapons } from './weapons.js';
 import { createProjectilePools, updatePlayerProjectiles, updateEnemyProjectiles } from './projectiles.js';
 import { updateEnemies, rebuildHash, compactEnemies } from './enemies.js';
-import { createWaveState, startWave, updateWaves } from './waves.js';
+import { createWaveState, startWave, updateWaves } from './wave_director.js';
 import { maybeDrop, updatePickups } from './pickups.js';
 import { computeMods } from './upgrades.js';
 import { explodeAt, updateHazards } from './hazards.js';

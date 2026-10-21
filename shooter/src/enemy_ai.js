@@ -236,7 +236,7 @@ const tank = {
     if (e.state === 'walk') {
       chase(run, e, dt);
       e.timerA -= dt;
-      if (e.timerA <= 0 && distToPlayer(run, e) < 650) {
+      if (e.timerA <= 0 && distToPlayer(run, e) < d.stompRange) {
         e.state = 'windup';
         e.stateT = d.stompWindup;
         e.charging = true;

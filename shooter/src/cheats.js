@@ -1,7 +1,7 @@
 // Cheats für den Debug-Modus (F3): G = unverwundbar, N = nächste Welle, K = alle töten, B = Boss sofort.
 
 import { killEnemy } from './enemies.js';
-import { startWave } from './waves.js';
+import { startWave } from './wave_director.js';
 import { CONFIG } from './config.js';
 
 export function killAll(run) {

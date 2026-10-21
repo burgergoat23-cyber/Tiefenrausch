@@ -6,7 +6,7 @@ import { CONFIG } from './config.js';
 import { spawnEnemyProjectile } from './projectiles.js';
 import { steerTo } from './enemy_ai.js';
 import { resolveCircle } from './world.js';
-import { queueSpawn } from './waves.js';
+import { queueSpawn } from './wave_director.js';
 import { TAU, randInt, clamp } from './utils.js';
 
 const G = () => CONFIG.bosses.guardian;
