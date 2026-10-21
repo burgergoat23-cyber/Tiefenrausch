@@ -76,6 +76,15 @@
   darüber. Pegel aller Töne werden in `tests/scenarios.mjs` (`SCENARIO=sound`) offline gemessen.
 - **Musik**: a-Moll (Am–F–C–G), 120 BPM, Boss 140 BPM mit Snare und Lead. Tempowechsel immer am Taktanfang.
   Das Bodengitter pulsiert auf der Kick – auch wenn die Musik stumm ist (Takt läuft weiter).
+- **Menüs** sind HTML über dem Canvas (`menus.js` + `screens_*.js`), Ablauf in `flow.js`. Tasten im Menü werden
+  sofort (Capture) behandelt, damit Enter auf einem Knopf nicht doppelt auslöst.
+- **Startbildschirm-Demo**: echte Runde ab Welle 2–4 mit Bot (unverwundbar, stumm), startet nach 75 s neu.
+- **Highscore**: wird beim Game Over sofort mit dem letzten Kürzel gespeichert (geht nie verloren); das Kürzel kann
+  danach geändert werden. „Nochmal“ ist sofort möglich (Enter). Konfetti + Fanfare nur bei neuem Rekord (Platz 1).
+  Pfeil hoch/runter im Kürzel-Feld ändert den Buchstaben (für Gamepad).
+- **Aufgeben** im Pausemenü fragt nach; die Runde zählt dann normal für Statistik und Highscore.
+- **Alles zurücksetzen** löscht Einstellungen, Highscores und Gesamtstatistik (mit Nachfrage).
+- **Vibration** und **Farbeffekte bei Treffern** sind zusätzlich abschaltbar (laut Abschnitt 11 und 14).
 
 ## Bekannte Probleme / offen
 
@@ -104,3 +113,6 @@
 8. Sound und Musik ✔ – 37 erzeugte Geräusche (Waffen, Treffer, Explosionen, Boss, Wellen, Menü, Herzschlag),
    Mischpult mit Kompressor, prozedurale Musik mit 3 Intensitäten, Gitter-Puls im Takt, M = Musik stumm,
    Ton aus bei App-Wechsel.
+9. Menüs und Fortschritt ✔ – Startbildschirm mit animiertem Titel und Bot-Demo, Steuerung, Einstellungen
+   (gespeichert), Highscores (Top 10, Kürzel), Pause mit Upgrades, Game Over mit hochzählenden Punkten,
+   Statistik (Kills je Typ, Genauigkeit, Kombo, Lieblingswaffe …), Gesamtstatistik, Vollbild-Knopf.

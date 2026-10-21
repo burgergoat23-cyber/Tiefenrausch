@@ -6,7 +6,11 @@ import { PK, burst, emit, amount, emitLabel } from './particles.js';
 import { TAU } from './utils.js';
 
 function sound(fx, name, a, b) {
-  if (fx.audio) fx.audio.play(name, a, b);
+  if (fx.audio && !demo(fx)) fx.audio.play(name, a, b);
+}
+
+function demo(fx) {
+  return !!(fx.game.run && fx.game.run.demo);
 }
 
 export function handleMore(fx, type, a, b, c, d, e) {
@@ -35,11 +39,11 @@ export function handleMore(fx, type, a, b, c, d, e) {
     }
     case 'waveStart':
       sound(fx, d ? 'bossWave' : 'waveStart');
-      if (fx.audio) fx.audio.setIntensity(d ? 2 : 1);
+      if (fx.audio && !demo(fx)) fx.audio.setIntensity(d ? 2 : 1);
       break;
     case 'waveClear':
       sound(fx, 'waveClear');
-      if (fx.audio) fx.audio.setIntensity(0);
+      if (fx.audio && !demo(fx)) fx.audio.setIntensity(0);
       break;
     case 'fuse':
       sound(fx, 'fuse');
@@ -106,7 +110,7 @@ export function handleMore(fx, type, a, b, c, d, e) {
       addTrauma(fx.game.cam, CONFIG.trauma.bossDeath);
       fx.game.hitStop = Math.max(fx.game.hitStop, CONFIG.juice.hitStopBoss);
       fx.bossFlash = 1;
-      if (fx.settings.vibration && typeof navigator !== 'undefined' && navigator.vibrate) {
+      if (fx.settings.vibration && !demo(fx) && typeof navigator !== 'undefined' && navigator.vibrate) {
         try { navigator.vibrate(250); } catch { /* nicht unterstützt */ }
       }
       sound(fx, 'bossDeath');

@@ -64,6 +64,11 @@ async function main() {
     page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
     await page.goto(base + (process.env.QUERY || '') + (process.env.HASH || ''));
     await page.waitForTimeout(800);
+    // direkt ins Spiel (außer der Ablauf testet die Menüs selbst)
+    if (!['menus', 'sound', 'touch', 'layout'].includes(scenario)) {
+      await page.evaluate(() => document.querySelector('.start-screen .primary').click());
+      await page.waitForTimeout(200);
+    }
     const mod = await import(path.join(root, 'tests', 'scenarios.mjs'));
     await mod[scenario](page, dev, outDir);
     if (errors.length) {

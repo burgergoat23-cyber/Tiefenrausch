@@ -50,7 +50,8 @@ function trauma(fx, v) {
 }
 
 function sound(fx, name, a, b) {
-  if (fx.audio) fx.audio.play(name, a, b);
+  // die Demo im Startbildschirm bleibt stumm (nur Musik)
+  if (fx.audio && !(fx.game.run && fx.game.run.demo)) fx.audio.play(name, a, b);
 }
 
 function vibrate(fx, ms) {

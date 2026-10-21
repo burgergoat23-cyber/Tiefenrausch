@@ -99,3 +99,63 @@ export function upgradePage(cards, levels, onChoose) {
     },
   };
 }
+
+// Gesammelte Upgrades als kleine Liste (Pause, Game Over)
+function upgradeList(levels) {
+  const box = el('div', 'upgrade-list');
+  const ids = Object.keys(levels).filter((id) => levels[id] > 0);
+  if (!ids.length) {
+    box.appendChild(el('span', 'hint', 'Noch keine Upgrades'));
+    return box;
+  }
+  for (const id of ids) {
+    const def = upgradeDef(id);
+    const chip = el('span', 'chip');
+    chip.appendChild(iconCanvas(def.icon, 18, '#3ff3ff'));
+    chip.appendChild(el('span', '', `${def.name} ${levels[id]}/${def.max}`));
+    box.appendChild(chip);
+  }
+  return box;
+}
+
+// Pausemenü: Weiter, Einstellungen, Steuerung, Aufgeben + gesammelte Upgrades
+export function pausePage(run, actions) {
+  return {
+    name: 'pause',
+    onBack: actions.resume,
+    onKey(code) {
+      if (code === 'KeyP') {
+        actions.resume();
+        return true;
+      }
+      return false;
+    },
+    build(wrap) {
+      wrap.appendChild(el('h2', 'title-sm', 'PAUSE'));
+      wrap.appendChild(el('p', 'hint', `Welle ${run.waves.number} · ${run.score.score.toLocaleString('de-DE')} Punkte`));
+      const col = el('div', 'menu-col');
+      col.appendChild(button('Weiter', actions.resume, 'primary big'));
+      col.appendChild(button('Einstellungen', actions.settings));
+      col.appendChild(button('Steuerung', actions.controls));
+      const quit = button('Aufgeben', () => {
+        quit.hidden = true;
+        sure.hidden = false;
+        sure.querySelector('.danger').focus();
+      }, 'danger');
+      const sure = el('div', 'confirm');
+      sure.hidden = true;
+      sure.appendChild(button('Wirklich aufgeben', actions.quit, 'danger'));
+      sure.appendChild(button('Nein', () => {
+        sure.hidden = true;
+        quit.hidden = false;
+        quit.focus();
+      }));
+      col.appendChild(quit);
+      col.appendChild(sure);
+      wrap.appendChild(col);
+      wrap.appendChild(el('h3', 'sub', 'Upgrades dieser Runde'));
+      wrap.appendChild(upgradeList(run.upgrades));
+      return wrap;
+    },
+  };
+}

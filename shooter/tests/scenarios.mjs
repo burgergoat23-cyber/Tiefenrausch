@@ -325,3 +325,58 @@ export async function sound(page, dev) {
   });
   console.log('live', JSON.stringify(live));
 }
+
+// Menüs: Start, Einstellungen, Highscores, Spielen, Pause, Game Over, Name, Nochmal
+export async function menus(page, dev, outDir) {
+  const shot = shooter(page, dev, outDir);
+  const tap = async (sel) => {
+    const loc = typeof sel === 'string' ? page.locator(sel).first() : sel;
+    const box = await loc.boundingBox();
+    if (dev.touch) await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    else await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(250);
+  };
+  await page.waitForTimeout(1500);
+  await shot('m1_start');
+  await tap('text=Einstellungen');
+  await shot('m2_einstellungen');
+  await tap(page.locator('.settings .toggle').nth(2));
+  await tap('text="Zurück"');
+  await tap('text=Highscores');
+  await shot('m3_highscores');
+  await tap('text="Zurück"');
+  await tap('text=SPIELEN');
+  await page.waitForTimeout(2500);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  await shot('m4_pause');
+  const pauseState = await page.evaluate(() => window.__game.state);
+  await tap('text=Weiter');
+  await page.waitForTimeout(300);
+  const resumed = await page.evaluate(() => window.__game.state);
+  // Runde schnell beenden
+  await page.evaluate(() => {
+    const r = window.__game.run;
+    r.score.score = 12345;
+    r.stats.kills = 42;
+    r.player.hp = 1;
+    r.player.invuln = 0;
+    const { createEnemy, addEnemy } = window.__api;
+    const e = addEnemy(r, createEnemy(r, 'runner', r.player.x + 20, r.player.y));
+    e.speed = 0;
+  });
+  await page.waitForTimeout(2200);
+  await shot('m5_gameover');
+  const over = await page.evaluate(() => ({ state: window.__game.state, name: document.querySelector('.name-input')?.value }));
+  if (!dev.touch) {
+    await page.locator('.name-input').fill('ZED');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(150);
+    await page.keyboard.press('Enter');
+  } else {
+    await tap('text=Nochmal');
+  }
+  await page.waitForTimeout(400);
+  const again = await page.evaluate(() => ({ state: window.__game.state, hs: JSON.parse(localStorage.getItem('neonarena_highscores') || '[]') }));
+  console.log(dev.name, JSON.stringify({ pauseState, resumed, over, again }));
+}

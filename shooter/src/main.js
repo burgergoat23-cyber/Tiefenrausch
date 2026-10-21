@@ -1,47 +1,79 @@
-// Einstieg: verbindet Canvas, Eingabe, Spielzustände, Effekte und Zeichnen.
+// Einstieg: baut alles zusammen, steuert die Bildschleife (requestAnimationFrame) und zeichnet HUD-Ebenen.
 
 import { CONFIG } from './config.js';
 import { createInput, pollActions, consumeEdges, takeUiKeys } from './input.js';
-import { createGame, startRun, setState, frame, resolveAim } from './game.js';
+import { createGame, setState, frame, resolveAim } from './game.js';
 import { setViewport } from './camera.js';
 import { createRenderer, resizeRenderer, renderWorld } from './render.js';
-import { resetFloor, fadeFloor } from './render_world.js';
-import { createParticles, updateParticles, clearParticles } from './particles.js';
-import { createFx, attachFx, updateFx } from './fx.js';
+import { fadeFloor } from './render_world.js';
+import { createParticles, updateParticles } from './particles.js';
+import { createFx, updateFx } from './fx.js';
 import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo, drawBossBars, drawSlowTint } from './hud.js';
 import { bossBars } from './boss.js';
-import { createMenus, showMenu, hideMenu, menuOpen } from './menus.js';
-import { upgradePage } from './screens_game.js';
-import { pickCards, applyUpgrade } from './upgrades.js';
-import { healPlayer } from './player.js';
+import { createMenus, menuOpen } from './menus.js';
 import { drawOffscreen } from './render_overlay.js';
-import { drawCrosshair, drawDebug, drawCenterText } from './ui.js';
-import { formatScore } from './utils.js';
+import { drawCrosshair, drawDebug } from './ui.js';
 import { createAudio } from './audio.js';
 import { killAll, nextWave, bossNow } from './cheats.js';
+import { botActions } from './bot.js';
+import { loadSettings, loadHighscores, loadTotals } from './storage.js';
+import {
+  showStart, tickDemo, pauseGame, openUpgrade, demoUpgrade, showGameOver,
+} from './flow.js';
 import { createEnemy, addEnemy } from './enemies.js';
 import { startWave } from './waves.js';
 import { spawnPickup } from './pickups.js';
 import { giveWeapon } from './weapons.js';
 
 const canvas = document.getElementById('game');
-const renderer = createRenderer(canvas);
-const input = createInput(canvas);
+const settings = loadSettings();
 const game = createGame();
-const settings = {
-  aimLine: true, showFps: false, damageNumbers: true, vibration: true, colorFx: true, aimAssist: true,
-  musicVolume: CONFIG.audio.musicVolume, sfxVolume: CONFIG.audio.sfxVolume, musicMuted: false, sfxMuted: false,
-};
-const audio = createAudio(settings);
 const particles = createParticles();
+const audio = createAudio(settings);
 const fx = createFx(particles, game, settings);
 fx.audio = audio;
-let hud = createHudState();
-const menus = createMenus(document.getElementById('ui'), (name) => audio.play(name));
-const safe = { top: 0, right: 0, bottom: 0, left: 0 };
 
-game.getActions = (g) => resolveAim(pollActions(input), g.cam, g.run.player);
-game.afterStep = () => consumeEdges(input);
+const app = {
+  canvas,
+  renderer: createRenderer(canvas),
+  input: createInput(canvas),
+  game,
+  settings,
+  audio,
+  particles,
+  fx,
+  hud: createHudState(),
+  menus: createMenus(document.getElementById('ui'), (name) => audio.play(name)),
+  safe: { top: 0, right: 0, bottom: 0, left: 0 },
+  highscores: loadHighscores(),
+  totals: loadTotals(),
+  fps: 60,
+};
+
+// Einstellungen anwenden (Lautstärke, Screenshake, Effekt-Menge)
+app.applySettings = () => {
+  game.cam.shakeLevel = CONFIG.shake.levels[settings.shake] ?? 1;
+  particles.quality = CONFIG.particles.quality[settings.effects] ?? 1;
+  audio.applyVolumes();
+};
+app.applySettings();
+
+// Aktionen: im Menü spielt der Bot die Demo, sonst der Spieler
+game.getActions = (g) => {
+  if (g.state === 'menu') return botActions(g.demoBot, g.run, CONFIG.loop.step);
+  const a = resolveAim(pollActions(app.input), g.cam, g.run.player);
+  a.assist = a.assist && settings.aimAssist;
+  return a;
+};
+game.afterStep = (g) => {
+  if (g.state !== 'menu') consumeEdges(app.input);
+};
+game.onDemoUpgrade = demoUpgrade;
+game.onStateChange = (s) => {
+  app.input.enabled = s === 'playing';
+  if (s === 'upgrade') openUpgrade(app);
+  if (s === 'gameover') showGameOver(app);
+};
 
 // Sichere Bereiche (Notch) aus CSS lesen
 const safeProbe = document.createElement('div');
@@ -53,28 +85,16 @@ function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   setViewport(game.cam, w, h);
-  resizeRenderer(renderer, w, h, game.cam.zoom);
+  resizeRenderer(app.renderer, w, h, game.cam.zoom);
   const cs = getComputedStyle(safeProbe);
-  safe.top = parseFloat(cs.paddingTop) || 0;
-  safe.right = parseFloat(cs.paddingRight) || 0;
-  safe.bottom = parseFloat(cs.paddingBottom) || 0;
-  safe.left = parseFloat(cs.paddingLeft) || 0;
+  app.safe.top = parseFloat(cs.paddingTop) || 0;
+  app.safe.right = parseFloat(cs.paddingRight) || 0;
+  app.safe.bottom = parseFloat(cs.paddingBottom) || 0;
+  app.safe.left = parseFloat(cs.paddingLeft) || 0;
 }
 window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 150));
 resize();
-
-// Fester Seed über die Adresse (?seed=123), z. B. für Tests
-const urlSeed = new URLSearchParams(location.search).get('seed');
-
-function newGame() {
-  const run = startRun(game, urlSeed ? { seed: Number(urlSeed) } : {});
-  attachFx(fx, run);
-  clearParticles(particles);
-  resetFloor(run.world);
-  hud = createHudState();
-  setState(game, 'playing');
-}
-newGame();
 
 // Ton erst nach der ersten Berührung / dem ersten Klick / der ersten Taste starten (iPhone, Safari)
 const unlockAudio = () => audio.unlock();
@@ -83,7 +103,7 @@ for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) window.addEven
 // Automatische Pause und Ton aus, wenn der Tab unsichtbar wird (App-Wechsel, Anruf, Bildschirm aus)
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    if (game.state === 'playing') setState(game, 'paused');
+    pauseGame(app);
     audio.suspend();
   } else {
     audio.resume();
@@ -92,17 +112,13 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pagehide', () => audio.suspend());
 
 function handleUiKeys() {
-  for (const code of takeUiKeys(input)) {
+  for (const code of takeUiKeys(app.input)) {
     if (code === 'F3' && CONFIG.debug.enabled) game.debug = !game.debug;
     if (code === 'KeyM') {
       settings.musicMuted = !settings.musicMuted;
       audio.applyVolumes();
     }
-    if (code === 'KeyP' || code === 'Escape') {
-      if (game.state === 'playing') setState(game, 'paused');
-      else if (game.state === 'paused') setState(game, 'playing');
-    }
-    if ((code === 'Enter' || code === 'Space') && game.state === 'gameover') newGame();
+    if ((code === 'KeyP' || code === 'Escape') && game.state === 'playing') pauseGame(app);
     if (game.debug && game.state === 'playing') {
       if (code === 'KeyG') game.run.god = !game.run.god;
       if (code === 'KeyK') killAll(game.run);
@@ -111,42 +127,11 @@ function handleUiKeys() {
     }
   }
 }
-canvas.addEventListener('pointerdown', () => {
-  if (game.state === 'gameover' && game.time - deathTime > 1) newGame();
-});
-let deathTime = 0;
-game.onStateChange = (s) => {
-  input.enabled = s === 'playing';
-  if (s === 'gameover') deathTime = game.time;
-  if (s === 'upgrade') openUpgrade();
-};
-
-// Upgrade-Auswahl nach bestimmten Wellen
-function openUpgrade() {
-  const run = game.run;
-  const cards = pickCards(run.rng, run.upgrades);
-  if (!cards.length) {
-    // alles voll ausgebaut: stattdessen heilen
-    healPlayer(run, 25);
-    run.pendingUpgrade = 0;
-    setState(game, 'playing');
-    return;
-  }
-  input.releaseAll();
-  showMenu(menus, upgradePage(cards, run.upgrades, (id) => {
-    applyUpgrade(run, id);
-    run.pendingUpgrade = 0;
-    hideMenu(menus);
-    setState(game, 'playing');
-  }));
-}
 
 function lowHpNow(run) {
   return !run.player.dead && run.player.hp / run.player.maxHp < CONFIG.player.lowHpFraction;
 }
 
-// FPS messen (gleitender Mittelwert)
-let fps = 60;
 let darkness = 0;
 let slowTint = 0;
 let last = performance.now();
@@ -154,61 +139,71 @@ let last = performance.now();
 function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.25);
   last = now;
-  if (dt > 0) fps += (1 / dt - fps) * 0.05;
+  if (dt > 0) app.fps += (1 / dt - app.fps) * 0.05;
   handleUiKeys();
+  tickDemo(app);
   const alpha = frame(game, dt);
   const run = game.run;
-  const simDt = game.state === 'playing' || game.state === 'dying' ? (game.hitStop > 0 ? 0 : dt) : 0;
-  const visDt = game.state === 'dying' ? simDt * CONFIG.juice.deathSlowmo : simDt;
+  const st = game.state;
+  const moving = st === 'playing' || st === 'dying' || st === 'menu';
+  const simDt = moving && game.hitStop <= 0 ? dt : 0;
+  const visDt = st === 'dying' ? simDt * CONFIG.juice.deathSlowmo : simDt;
   updateParticles(particles, visDt);
   updateFx(fx, visDt);
   fadeFloor(visDt);
-  updateHud(hud, run, dt);
+  updateHud(app.hud, run, dt);
   fx.hurt = Math.max(0, fx.hurt - dt * 2.5);
   fx.comboFlash = Math.max(0, fx.comboFlash - dt * 3);
-
   darkness += ((run.waves.darkness ? 1 : 0) - darkness) * Math.min(1, dt * 2);
+  slowTint += ((run.power.slow > 0 ? 1 : 0) - slowTint) * Math.min(1, dt * 4);
+  audio.heartbeat(dt, lowHpNow(run) && st === 'playing');
+
   const pulse = audio.music ? audio.music.pulse() : Math.exp(-((game.time * 2) % 1) * 7);
-  audio.heartbeat(dt, lowHpNow(run) && game.state === 'playing');
-  renderWorld(renderer, {
+  renderWorld(app.renderer, {
     run, cam: game.cam, alpha, time: game.time, pulse, settings, particles, darkness,
   });
-  const ctx = renderer.ctx;
-  const w = renderer.w;
-  const h = renderer.h;
-  const lowHp = lowHpNow(run);
-  slowTint += ((run.power.slow > 0 ? 1 : 0) - slowTint) * Math.min(1, dt * 4);
+  drawScreen(alpha, st, run);
+  requestAnimationFrame(loop);
+}
+
+// Bildschirm-Ebenen über der Welt: Ränder, Pfeile, HUD, Fadenkreuz, Debug
+function drawScreen(alpha, st, run) {
+  const ctx = app.renderer.ctx;
+  const { w, h } = app.renderer;
+  const layout = { w, h, safe: app.safe };
+  if (st === 'menu') return;
   drawSlowTint(ctx, w, h, slowTint);
-  drawDamageVignette(ctx, w, h, fx.hurt, lowHp, game.time, settings.colorFx);
-  const layout = { w, h, safe };
-  if (game.state !== 'gameover') {
+  drawDamageVignette(ctx, w, h, fx.hurt, lowHpNow(run), game.time, settings.colorFx);
+  if (st !== 'gameover') {
     drawOffscreen(ctx, run, game.cam, alpha, layout, game.time);
-    drawHud(ctx, hud, run, layout, game.time, fx);
-    if (!menuOpen(menus)) drawWaveInfo(ctx, run, layout, game.time);
+    drawHud(ctx, app.hud, run, layout, game.time, fx);
+    if (!menuOpen(app.menus)) drawWaveInfo(ctx, run, layout, game.time);
     drawBossBars(ctx, run, layout, bossBars, game.time);
   }
-  if (game.state === 'paused') drawCenterText(ctx, w, h, 'PAUSE', 'P oder Esc: weiter');
-  if (game.state === 'gameover') {
-    drawCenterText(ctx, w, h, 'GAME OVER',
-      `${formatScore(run.score.score)} Punkte · Kills ${run.stats.kills} · Enter oder Tippen: nochmal`);
-  }
-  if (input.device === 'mouse' && input.mouseInside && game.state !== 'gameover' && !menuOpen(menus)) {
+  const input = app.input;
+  if (input.device === 'mouse' && input.mouseInside && !menuOpen(app.menus)) {
     drawCrosshair(ctx, input.mouseX, input.mouseY, game.time);
   }
   if (game.debug || settings.showFps) {
     const p = run.player;
-    drawDebug(ctx, [
-      `FPS ${fps.toFixed(0)}  Schritte ${game.stepsLastFrame}`,
-      `Gegner ${run.enemies.length}  Kugeln ${run.projectiles.player.count}/${run.projectiles.enemy.count}`,
-      `Partikel ${particles.pool.count}  Gefahren ${run.hazards.length}`,
-      `Spieler ${p.x.toFixed(0)}, ${p.y.toFixed(0)}  HP ${p.hp}${run.god ? ' (G)' : ''}`,
-    ], safe.left + 8, h - safe.bottom - 80);
+    const lines = [`FPS ${app.fps.toFixed(0)}  Schritte ${game.stepsLastFrame}`];
+    if (game.debug) {
+      lines.push(
+        `Gegner ${run.enemies.length}  Kugeln ${run.projectiles.player.count}/${run.projectiles.enemy.count}`,
+        `Partikel ${particles.pool.count}  Gefahren ${run.hazards.length}  Drops ${run.pickups.length}`,
+        `Spieler ${p.x.toFixed(0)}, ${p.y.toFixed(0)}  HP ${Math.ceil(p.hp)}${run.god ? ' (G)' : ''}`,
+        'G unverwundbar · N Welle · K töten · B Boss',
+      );
+    }
+    drawDebug(ctx, lines, app.safe.left + 8, h - app.safe.bottom - 20 - lines.length * 15);
   }
-  requestAnimationFrame(loop);
 }
+
+showStart(app);
 requestAnimationFrame(loop);
 
 // Für Tests im Browser
 window.__game = game;
+window.__app = app;
 window.__audio = audio;
-window.__api = { createEnemy, addEnemy, startWave, spawnPickup, giveWeapon, CONFIG };
+window.__api = { createEnemy, addEnemy, startWave, spawnPickup, giveWeapon, CONFIG, setState };

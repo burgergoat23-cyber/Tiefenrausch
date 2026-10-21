@@ -67,3 +67,31 @@ export function rollDamage(base, mods, rng, out = { amount: 0, crit: false }) {
   out.crit = crit;
   return out;
 }
+
+// Zusammenfassung einer Runde für den Game-Over-Bildschirm (rein)
+export function runSummary(run, cfg = CONFIG) {
+  const st = run.stats;
+  let fav = 'pistol';
+  let favKills = -1;
+  for (const [w, k] of Object.entries(st.killsByWeapon)) {
+    if (k > favKills) {
+      favKills = k;
+      fav = w;
+    }
+  }
+  const upgrades = {};
+  for (const id of st.upgrades) upgrades[id] = (upgrades[id] || 0) + 1;
+  return {
+    score: run.score.score,
+    wave: run.waves.number,
+    time: st.time,
+    kills: st.kills,
+    killsByType: { ...st.killsByType },
+    accuracy: st.shots > 0 ? Math.round((st.hits / st.shots) * 100) : 0,
+    maxCombo: st.maxCombo,
+    upgrades,
+    favoriteWeapon: cfg.weapons[fav] ? cfg.weapons[fav].name : fav,
+    deathBy: run.player.lastHitBy || '',
+    bosses: st.bossesKilled,
+  };
+}

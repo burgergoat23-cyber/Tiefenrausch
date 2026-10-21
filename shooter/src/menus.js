@@ -27,7 +27,7 @@ export function createMenus(root, sfx) {
   };
   root.addEventListener('pointerover', (ev) => {
     const t = ev.target.closest && ev.target.closest('[data-nav]');
-    if (t && t !== document.activeElement && ev.pointerType === 'mouse') {
+    if (t && t !== document.activeElement && ev.pointerType === 'mouse' && t.tagName !== 'INPUT') {
       t.focus({ preventScroll: true });
       menus.sfx('hover');
     }
@@ -38,7 +38,9 @@ export function createMenus(root, sfx) {
   // Tasten im Menü sofort behandeln (sonst löst Enter auf einem Knopf doppelt aus)
   window.addEventListener('keydown', (ev) => {
     if (!menus.current || ev.repeat) return;
-    if (ev.target && ev.target.tagName === 'INPUT' && ev.target.type === 'text' && ev.code !== 'Enter' && ev.code !== 'Escape') return;
+    // in Textfeldern normal tippen lassen (nur Enter, Esc und Pfeil hoch/runter gehen ans Menü)
+    const typing = ev.target && ev.target.tagName === 'INPUT' && ev.target.type === 'text';
+    if (typing && !['Enter', 'Escape', 'ArrowUp', 'ArrowDown'].includes(ev.code)) return;
     if (menuKey(menus, ev.code)) {
       ev.preventDefault();
       ev.stopPropagation();
@@ -126,6 +128,16 @@ export function moveFocus(menus, dx, dy) {
   menus.sfx('hover');
 }
 
+// Schieberegler mit links/rechts verstellen
+function nudgeSlider(dir) {
+  const a = document.activeElement;
+  if (!a || a.tagName !== 'INPUT' || a.type !== 'range') return false;
+  const step = Number(a.step) || 1;
+  a.value = String(Math.min(Number(a.max), Math.max(Number(a.min), Number(a.value) + dir * step)));
+  a.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+}
+
 // Tastendruck an das offene Menü geben. Rückgabe: true, wenn verbraucht.
 export function menuKey(menus, code) {
   const cur = menus.current;
@@ -134,8 +146,14 @@ export function menuKey(menus, code) {
   switch (code) {
     case 'ArrowUp': case 'KeyW': moveFocus(menus, 0, -1); return true;
     case 'ArrowDown': case 'KeyS': moveFocus(menus, 0, 1); return true;
-    case 'ArrowLeft': case 'KeyA': moveFocus(menus, -1, 0); return true;
-    case 'ArrowRight': case 'KeyD': moveFocus(menus, 1, 0); return true;
+    case 'ArrowLeft': case 'KeyA':
+      if (nudgeSlider(-1)) return true;
+      moveFocus(menus, -1, 0);
+      return true;
+    case 'ArrowRight': case 'KeyD':
+      if (nudgeSlider(1)) return true;
+      moveFocus(menus, 1, 0);
+      return true;
     case 'Enter': case 'Space': {
       const a = document.activeElement;
       if (a && cur.node.contains(a) && a.dataset.nav) {
