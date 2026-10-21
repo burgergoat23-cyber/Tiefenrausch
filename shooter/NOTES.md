@@ -85,6 +85,15 @@
 - **Aufgeben** im Pausemenü fragt nach; die Runde zählt dann normal für Statistik und Highscore.
 - **Alles zurücksetzen** löscht Einstellungen, Highscores und Gesamtstatistik (mit Nachfrage).
 - **Vibration** und **Farbeffekte bei Treffern** sind zusätzlich abschaltbar (laut Abschnitt 11 und 14).
+- **Touch**: Pointer Events mit pointerId → Rolle (Stick links/rechts, Knopf). Stick erscheint, wo der Daumen
+  aufsetzt (ganz auf dem Bildschirm), Radius 60 px, Totzone 10 %, Feuer ab 30 %. Ohne Ziel-Stick schaut die
+  Figur in Laufrichtung (schießt aber nicht). Knöpfe: Dash rechts über dem Ziel-Bereich, Waffenwechsel daneben,
+  Pause oben rechts unter den Punkten; zusätzlich lässt sich die Waffenleiste unten antippen. Power-ups stehen auf
+  Touch unter dem Lebensbalken (unten links liegt der Daumen).
+- **Leistungs-Automatik** (nur im Spiel): 3 s unter 50 FPS → Stufe 1 weniger Partikel, Stufe 2 ohne Glow,
+  Stufe 3 Auflösung ×0,75. Stufe steht im Debug-Fenster (F3).
+- **Gamepad** (Bonus, Standard-Belegung) ist schon drin, auch für Menüs.
+- **App-Symbole** werden mit `node tools/make_icons.mjs` aus einer Code-Zeichnung erzeugt (keine fremden Bilder).
 
 ## Bekannte Probleme / offen
 
@@ -116,3 +125,5 @@
 9. Menüs und Fortschritt ✔ – Startbildschirm mit animiertem Titel und Bot-Demo, Steuerung, Einstellungen
    (gespeichert), Highscores (Top 10, Kürzel), Pause mit Upgrades, Game Over mit hochzählenden Punkten,
    Statistik (Kills je Typ, Genauigkeit, Kombo, Lieblingswaffe …), Gesamtstatistik, Vollbild-Knopf.
+10. Handy und Tablet ✔ – Zwei-Daumen-Steuerung mit Multi-Touch, Knöpfe, Gamepad, Leistungs-Automatik,
+   Web-App (Manifest, Apple-Meta-Tags, Symbole), Hinweis zum Drehen im Hochformat, kein Zoom/Scrollen.

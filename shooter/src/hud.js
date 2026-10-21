@@ -27,6 +27,10 @@ export function createHudState() {
   };
 }
 
+export function hpBarWidth(w, u, left) {
+  return Math.max(90, Math.min(210 * u, w / 2 - 70 * u - left));
+}
+
 export function hudScale(w, h) {
   return clamp(Math.min(w, h) / 430, 0.78, 1.3);
 }
@@ -92,7 +96,8 @@ export function drawHud(ctx, hs, run, layout, time, fx) {
 
   // --- oben links: Leben (mit verzögertem Schaden-Balken) und Schild ---
   const p = run.player;
-  const bw = 210 * u;
+  // schmale Bildschirme: Balken darf nicht in die Wellen-Anzeige in der Mitte ragen
+  const bw = hpBarWidth(w, u, left);
   const bh = 14 * u;
   const sh = run.power.shield;
   let y = top;
@@ -130,8 +135,9 @@ export function drawHud(ctx, hs, run, layout, time, fx) {
   // --- unten Mitte: Waffe und Munition, andere Waffen klein daneben ---
   drawWeapons(ctx, run, hs, w / 2, bottom - 18 * u, u);
 
-  // --- unten links: aktive Power-ups ---
-  drawPowerups(ctx, run, left, bottom, u);
+  // --- unten links: aktive Power-ups (auf Touch unter dem Leben, weil dort der Daumen ist) ---
+  if (layout.touch) drawPowerups(ctx, run, left, top + 64 * u, u);
+  else drawPowerups(ctx, run, left, bottom, u);
 }
 
 // Waffenleiste: aktuelle Waffe groß mit Name und Munition, die anderen Plätze klein daneben.

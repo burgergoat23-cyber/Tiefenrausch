@@ -7,7 +7,7 @@ import { clearParticles } from './particles.js';
 import { resetFloor } from './render_world.js';
 import { createHudState } from './hud.js';
 import { showMenu, hideMenu } from './menus.js';
-import { startPage, controlsPage, settingsPage, highscoresPage } from './screens_main.js';
+import { startPage, controlsPage, settingsPage, highscoresPage, isTouchDevice } from './screens_main.js';
 import { upgradePage, pausePage } from './screens_game.js';
 import { gameOverPage } from './screens_over.js';
 import { pickCards, applyUpgrade } from './upgrades.js';
@@ -41,8 +41,25 @@ export function startDemo(app) {
   return run;
 }
 
+// Kurzer Hinweis unten
+export function toast(text, ms = 3500) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), ms);
+}
+
 export function showStart(app) {
   startDemo(app);
+  // Hochformat auf dem Handy: einmal zum Drehen raten
+  const s = app.settings;
+  if (!s.rotateHintShown && isTouchDevice() && window.innerHeight > window.innerWidth) {
+    s.rotateHintShown = true;
+    saveSettings(s);
+    toast('Für das beste Erlebnis drehen ↻', 4500);
+  }
   setState(app.game, 'menu');
   if (app.audio) app.audio.setIntensity(0);
   const totals = app.totals;

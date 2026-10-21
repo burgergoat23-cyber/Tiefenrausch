@@ -380,3 +380,58 @@ export async function menus(page, dev, outDir) {
   const again = await page.evaluate(() => ({ state: window.__game.state, hs: JSON.parse(localStorage.getItem('neonarena_highscores') || '[]') }));
   console.log(dev.name, JSON.stringify({ pauseState, resumed, over, again }));
 }
+
+// Touch mit zwei Daumen gleichzeitig (über CDP), Dash-Knopf, Waffenleiste antippen
+export async function touch(page, dev, outDir) {
+  if (!dev.touch) return;
+  const shot = shooter(page, dev, outDir);
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points });
+  // SPIELEN antippen
+  const box = await page.locator('.start-screen .primary').boundingBox();
+  await send('touchStart', [{ x: box.x + box.width / 2, y: box.y + box.height / 2, id: 9 }]);
+  await send('touchEnd', []);
+  await page.waitForTimeout(400);
+  const w = dev.width;
+  const h = dev.height;
+  const p0 = await page.evaluate(() => ({ x: window.__game.run.player.x, y: window.__game.run.player.y, state: window.__game.state }));
+  const L = { x: w * 0.18, y: h * 0.75, id: 1 };
+  const R = { x: w * 0.8, y: h * 0.72, id: 2 };
+  await send('touchStart', [L]);
+  await send('touchStart', [L, R]);
+  for (let i = 1; i <= 20; i++) {
+    // links nach rechts oben schieben, rechts nach links zielen (über die Bildschirmmitte hinaus = Stick bleibt)
+    await send('touchMove', [{ ...L, x: L.x + Math.min(50, i * 5), y: L.y - Math.min(30, i * 3) }, { ...R, x: R.x - Math.min(80, i * 8), y: R.y - i }]);
+    await page.waitForTimeout(60);
+  }
+  await shot('touch_sticks');
+  const mid = await page.evaluate(() => {
+    const r = window.__game.run;
+    return { x: r.player.x, y: r.player.y, shots: r.stats.shots, aim: r.player.aim, device: window.__app.input.device };
+  });
+  await send('touchEnd', []);
+  await page.waitForTimeout(200);
+  // Dash-Knopf
+  const dash = await page.evaluate(() => {
+    const t = window.__app.input.touch;
+    t.layoutButtons();
+    const b = t.buttons.find((x) => x.id === 'dash');
+    return { x: b.x, y: b.y };
+  });
+  const dashes0 = await page.evaluate(() => window.__game.run.stats.dashes);
+  await send('touchStart', [{ x: dash.x, y: dash.y, id: 3 }]);
+  await page.waitForTimeout(80);
+  await send('touchEnd', []);
+  await page.waitForTimeout(200);
+  const dashes1 = await page.evaluate(() => window.__game.run.stats.dashes);
+  // Pause-Knopf
+  const pause = await page.evaluate(() => {
+    const b = window.__app.input.touch.buttons.find((x) => x.id === 'pause');
+    return { x: b.x, y: b.y };
+  });
+  await send('touchStart', [{ x: pause.x, y: pause.y, id: 4 }]);
+  await send('touchEnd', []);
+  await page.waitForTimeout(300);
+  const st = await page.evaluate(() => window.__game.state);
+  console.log(dev.name, JSON.stringify({ p0, mid, dashes: dashes1 - dashes0, afterPause: st }));
+}

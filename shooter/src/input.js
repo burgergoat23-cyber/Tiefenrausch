@@ -87,6 +87,7 @@ export function createInput(canvas) {
     keys.clear();
     input.mouseLeft = false;
     input.mouseRight = false;
+    if (input.touch) input.touch.reset();
   };
 
   window.addEventListener('keydown', onKeyDown);

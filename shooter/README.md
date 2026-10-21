@@ -29,6 +29,12 @@ Dann im Browser `http://localhost:8000` öffnen.
 | Musik stumm | M |
 | Debug | F3 |
 
+## Handy und iPad
+
+- Steuerung: linker Daumen bewegen, rechter Daumen zielen und schießen, Knöpfe für Dash, Waffe und Pause.
+- Als App auf den Home-Bildschirm: in Safari auf „Teilen“ → „Zum Home-Bildschirm“.
+- Ton startet nach der ersten Berührung. Bei älteren iPhones den Stummschalter ausschalten.
+
 ## Tests
 
 ```bash

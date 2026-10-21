@@ -4,12 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>NEON ARENA</title>
+  <meta name="description" content="Schneller Top-down-Arena-Shooter im Browser">
   <meta name="theme-color" content="#07070f">
+  <!-- Als Web-App vom Home-Bildschirm (iPhone/iPad) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NEON ARENA">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <canvas id="game" aria-label="Spielfeld"></canvas>
   <div id="ui"></div>
+  <div id="toast" aria-live="polite"></div>
+  <noscript>NEON ARENA braucht JavaScript.</noscript>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

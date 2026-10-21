@@ -320,3 +320,24 @@ input.slider:focus::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(63, 243, 2
   .menu-col { gap: 6px; }
   .btn.big { min-height: 46px; }
 }
+
+/* Kurzer Hinweis (z. B. "Für das beste Erlebnis drehen") */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--safe-bottom));
+  transform: translate(-50%, 20px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(10, 20, 40, 0.92);
+  border: 1px solid var(--cyan);
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 15px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 10;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }

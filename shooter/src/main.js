@@ -10,7 +10,10 @@ import { createParticles, updateParticles } from './particles.js';
 import { createFx, updateFx } from './fx.js';
 import { createHudState, updateHud, drawHud, drawDamageVignette, drawWaveInfo, drawBossBars, drawSlowTint } from './hud.js';
 import { bossBars } from './boss.js';
-import { createMenus, menuOpen } from './menus.js';
+import { createMenus, menuOpen, menuKey } from './menus.js';
+import { createTouch } from './touch.js';
+import { createGamepad } from './gamepad.js';
+import { drawTouchControls } from './render_touch.js';
 import { drawOffscreen } from './render_overlay.js';
 import { drawCrosshair, drawDebug } from './ui.js';
 import { createAudio } from './audio.js';
@@ -48,7 +51,11 @@ const app = {
   highscores: loadHighscores(),
   totals: loadTotals(),
   fps: 60,
+  perf: { low: 0, level: 0 },
 };
+const layout = { w: 1, h: 1, safe: app.safe, touch: false };
+const touch = createTouch(canvas, app.input, () => layout);
+const pad = createGamepad(app.input);
 
 // Einstellungen anwenden (Lautstärke, Screenshake, Effekt-Menge)
 app.applySettings = () => {
@@ -91,6 +98,8 @@ function resize() {
   app.safe.right = parseFloat(cs.paddingRight) || 0;
   app.safe.bottom = parseFloat(cs.paddingBottom) || 0;
   app.safe.left = parseFloat(cs.paddingLeft) || 0;
+  layout.w = w;
+  layout.h = h;
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 150));
@@ -110,6 +119,24 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 window.addEventListener('pagehide', () => audio.suspend());
+// iOS: Pinch- und Doppeltipp-Zoom verhindern
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('dblclick', (e) => e.preventDefault());
+
+// Leistungs-Automatik: 3 s unter 50 FPS -> weniger Partikel, dann ohne Glow, dann geringere Auflösung
+function autoQuality(dt) {
+  const perf = app.perf;
+  if (game.state !== 'playing' || dt > 0.2) return;
+  if (app.fps < CONFIG.perf.lowFps) perf.low += dt;
+  else perf.low = Math.max(0, perf.low - dt * 0.5);
+  if (perf.low < CONFIG.perf.lowFpsTime || perf.level >= 3) return;
+  perf.level++;
+  perf.low = 0;
+  particles.auto = perf.level === 1 ? 0.6 : 0.4;
+  if (perf.level >= 2) app.renderer.glow = false;
+  if (perf.level >= 3) app.renderer.qualityScale = 0.75;
+  if (perf.level >= 2) resize();
+}
 
 function handleUiKeys() {
   for (const code of takeUiKeys(app.input)) {
@@ -140,8 +167,10 @@ function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.25);
   last = now;
   if (dt > 0) app.fps += (1 / dt - app.fps) * 0.05;
+  pad.poll(dt, menuOpen(app.menus), (code) => menuKey(app.menus, code));
   handleUiKeys();
   tickDemo(app);
+  autoQuality(dt);
   const alpha = frame(game, dt);
   const run = game.run;
   const st = game.state;
@@ -170,7 +199,7 @@ function loop(now) {
 function drawScreen(alpha, st, run) {
   const ctx = app.renderer.ctx;
   const { w, h } = app.renderer;
-  const layout = { w, h, safe: app.safe };
+  layout.touch = app.input.device === 'touch';
   if (st === 'menu') return;
   drawSlowTint(ctx, w, h, slowTint);
   drawDamageVignette(ctx, w, h, fx.hurt, lowHpNow(run), game.time, settings.colorFx);
@@ -179,6 +208,7 @@ function drawScreen(alpha, st, run) {
     drawHud(ctx, app.hud, run, layout, game.time, fx);
     if (!menuOpen(app.menus)) drawWaveInfo(ctx, run, layout, game.time);
     drawBossBars(ctx, run, layout, bossBars, game.time);
+    if (layout.touch && (st === 'playing' || st === 'dying')) drawTouchControls(ctx, touch, run, layout, game.time);
   }
   const input = app.input;
   if (input.device === 'mouse' && input.mouseInside && !menuOpen(app.menus)) {
@@ -189,6 +219,7 @@ function drawScreen(alpha, st, run) {
     const lines = [`FPS ${app.fps.toFixed(0)}  Schritte ${game.stepsLastFrame}`];
     if (game.debug) {
       lines.push(
+        `Qualität ${app.perf.level}  Gerät ${app.input.device}`,
         `Gegner ${run.enemies.length}  Kugeln ${run.projectiles.player.count}/${run.projectiles.enemy.count}`,
         `Partikel ${particles.pool.count}  Gefahren ${run.hazards.length}  Drops ${run.pickups.length}`,
         `Spieler ${p.x.toFixed(0)}, ${p.y.toFixed(0)}  HP ${Math.ceil(p.hp)}${run.god ? ' (G)' : ''}`,
