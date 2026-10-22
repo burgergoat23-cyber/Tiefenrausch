@@ -38,8 +38,9 @@ export function handleMore(fx, type, a, b, c, d, e) {
       break;
     }
     case 'waveStart':
-      sound(fx, d ? 'bossWave' : 'waveStart');
-      if (fx.audio && !demo(fx)) fx.audio.setIntensity(d ? 2 : 1);
+      // c: Namen der Bosse dieser Welle ('' ohne Boss)
+      sound(fx, c ? 'bossWave' : 'waveStart');
+      if (fx.audio && !demo(fx)) fx.audio.setIntensity(c ? 2 : 1);
       break;
     case 'waveClear':
       sound(fx, 'waveClear');

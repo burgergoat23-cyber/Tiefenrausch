@@ -108,7 +108,7 @@ export const SOUNDS = {
     return 0.45;
   },
   rail(a, t) {
-    a.charge = null;
+    a.stopCharge();
     noise(a, t, 0.08, 'highpass', 2500, 2500, 0.5);
     tone(a, t, 'square', 1900 * vary(), 160, 0.18, 0.2);
     tone(a, t, 'sine', 90, 40, 0.3, 0.45);

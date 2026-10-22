@@ -116,7 +116,23 @@ export function drawHud(ctx, hs, run, layout, time, fx) {
   ctx.strokeStyle = 'rgba(255,255,255,0.35)';
   ctx.lineWidth = 1;
   ctx.strokeRect(left + 0.5, y + 0.5, bw - 1, bh - 1);
-  text(ctx, `${Math.ceil(p.hp)} / ${p.maxHp}`, left + 6 * u, y + bh - 3 * u, 11 * u, '#04120a', 'left', 800, MONO);
+  // Lebenszahl zweifarbig: dunkel auf dem gefüllten Teil, weiß auf dem leeren (bei wenig Leben lesbar)
+  const hpTxt = `${Math.ceil(p.hp)} / ${p.maxHp}`;
+  const fillW = bw * clamp(Math.max(p.hp, hs.hpLag) / p.maxHp, 0, 1);
+  const tx = left + 6 * u;
+  const ty = y + bh - 3 * u;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(left, y, fillW, bh);
+  ctx.clip();
+  text(ctx, hpTxt, tx, ty, 11 * u, '#04120a', 'left', 800, MONO);
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(left + fillW, y, bw - fillW, bh);
+  ctx.clip();
+  text(ctx, hpTxt, tx, ty, 11 * u, '#ffffff', 'left', 800, MONO);
+  ctx.restore();
 
   // --- oben rechts: Punkte, Kombo ---
   const sPop = 1 + hs.scorePop * 0.18;

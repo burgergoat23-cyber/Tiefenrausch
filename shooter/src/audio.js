@@ -64,8 +64,15 @@ export function createAudio(settings) {
     if (a.charge) {
       try {
         const t = a.ctx.currentTime;
-        a.charge.gain.gain.cancelScheduledValues(t);
-        a.charge.gain.gain.setTargetAtTime(0, t, 0.02);
+        // laufende Rampe beim aktuellen Wert festhalten, dann weich ausblenden (kein Knacken)
+        const gp = a.charge.gain.gain;
+        if (gp.cancelAndHoldAtTime) gp.cancelAndHoldAtTime(t);
+        else {
+          const v = gp.value;
+          gp.cancelScheduledValues(t);
+          gp.setValueAtTime(v, t);
+        }
+        gp.setTargetAtTime(0, t, 0.02);
         a.charge.osc.stop(t + 0.1);
       } catch { /* schon gestoppt */ }
       a.charge = null;

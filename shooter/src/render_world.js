@@ -117,17 +117,19 @@ export function drawFloor(ctx, world) {
 }
 
 // Leuchtende Kontur ohne shadowBlur: mehrere Striche mit abnehmender Breite
+// Die eingehende Deckkraft gilt weiter (z. B. Hindernisse in der Dunkelheit)
 function glowStroke(ctx, color, width, glow) {
+  const a0 = ctx.globalAlpha;
   ctx.strokeStyle = color;
   if (glow) {
-    ctx.globalAlpha = 0.1;
+    ctx.globalAlpha = a0 * 0.1;
     ctx.lineWidth = width * 5;
     ctx.stroke();
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = a0 * 0.25;
     ctx.lineWidth = width * 2.4;
     ctx.stroke();
   }
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = a0;
   ctx.lineWidth = width;
   ctx.stroke();
 }

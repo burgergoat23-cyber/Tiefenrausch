@@ -27,6 +27,9 @@ function prepareRun(app, opts) {
   attachFx(app.fx, run);
   clearParticles(app.particles);
   app.fx.queue.length = 0;
+  // Welle 1 startete schon vor dem Anhängen der Zuhörer: Gong und Musik nachholen
+  const w = run.waves;
+  if (!run.demo && w.number > 0) run.emit('waveStart', w.number, w.special, w.boss ? 'boss' : '');
   resetFloor(run.world);
   app.hud = createHudState();
   return run;

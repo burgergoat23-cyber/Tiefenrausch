@@ -88,7 +88,8 @@ export function renderWorld(r, scene) {
   drawEnemyProjectiles(ctx, run, alpha, time, view);
   drawRailPreview(ctx, run, alpha);
   drawPlayer(ctx, run, alpha, time, settings);
-  if (particles && settings.damageNumbers !== false) drawTexts(ctx, particles);
+  // Schadenszahlen werden schon beim Erzeugen gefiltert (Einstellung); Drop-Namen und Punkte bleiben
+  if (particles) drawTexts(ctx, particles);
 
   // zurück in Bildschirm-Koordinaten (CSS-Pixel)
   ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);

@@ -19,9 +19,9 @@ import { drawCrosshair, drawDebug } from './ui.js';
 import { createAudio } from './audio.js';
 import { killAll, nextWave, bossNow } from './cheats.js';
 import { botActions, createBot } from './bot.js';
-import { loadSettings, loadHighscores, loadTotals } from './storage.js';
+import { loadSettings, saveSettings, loadHighscores, loadTotals } from './storage.js';
 import {
-  showStart, tickDemo, pauseGame, openUpgrade, demoUpgrade, showGameOver,
+  showStart, tickDemo, pauseGame, openUpgrade, demoUpgrade, showGameOver, toast,
 } from './flow.js';
 import { createEnemy, addEnemy } from './enemies.js';
 import { startWave } from './wave_director.js';
@@ -35,6 +35,12 @@ const game = createGame();
 const particles = createParticles();
 const audio = createAudio(settings);
 const fx = createFx(particles, game, settings);
+// Ton erst nach der ersten Berührung / dem ersten Klick / der ersten Taste starten (iPhone, Safari).
+// Capture-Phase und vor den Menüs angemeldet: Menü-Tasten stoppen das Ereignis sonst vorher.
+const unlockAudio = () => audio.unlock();
+for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) {
+  window.addEventListener(ev, unlockAudio, { capture: true, passive: true });
+}
 fx.audio = audio;
 
 const app = {
@@ -107,10 +113,6 @@ window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 150));
 resize();
 
-// Ton erst nach der ersten Berührung / dem ersten Klick / der ersten Taste starten (iPhone, Safari)
-const unlockAudio = () => audio.unlock();
-for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) window.addEventListener(ev, unlockAudio, { passive: true });
-
 // Automatische Pause und Ton aus, wenn der Tab unsichtbar wird (App-Wechsel, Anruf, Bildschirm aus)
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -145,7 +147,9 @@ function handleUiKeys() {
     if (code === 'F3' && CONFIG.debug.enabled) game.debug = !game.debug;
     if (code === 'KeyM') {
       settings.musicMuted = !settings.musicMuted;
+      saveSettings(settings);
       audio.applyVolumes();
+      toast(settings.musicMuted ? 'Musik aus (M)' : 'Musik an (M)', 1500);
     }
     if ((code === 'KeyP' || code === 'Escape') && game.state === 'playing') pauseGame(app);
     if (game.debug && game.state === 'playing') {
