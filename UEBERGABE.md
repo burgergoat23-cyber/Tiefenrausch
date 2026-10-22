@@ -100,3 +100,9 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Mit nur dem Start-Schwert (1 Schaden) ist der erste Boss (Ebene 3, 66 Leben) sehr zäh.
 - Koop-Lobby: „Abbrechen“ und sofort neu „Raum erstellen“ (innerhalb ~2 s) zeigt „Raum wird erstellt …“ ohne Fortschritt – nochmal Abbrechen hilft (Lösung wäre ein Zähler `CO.gen`).
 - Bomben-Gegner, die sich selbst sprengen (`e.nolo`), zählen trotzdem als besiegt (Beute, Aufgaben). Boss-Beute, die beim Verlassen noch am Boden lag, ist nach „Fortsetzen“ weg (Absicht: kein doppeltes Plündern).
+
+## BOXRUSH (eigenes Spiel im Ordner `boxrush/`, seit 22.10.2026)
+- Eigenständiges Top-Down-Boxfight-Spiel (Bauen, Editieren mit 3 Feldern, KI-Bots), **nicht** Teil von Tiefenrausch. Eine Datei `boxrush/index.html`, läuft ohne Server.
+- Aufbau im Code in Abschnitten: `CONFIG` (alle Zahlen), `Input`, `WallSystem`, `Physics`, `Entities`, `Weapons`, `Vision`, `AI` (`Brain`), `Match`, `Renderer`/`HUD`, `UI`, `Sfx` (Audio). Eigene Entscheidungen sind mit `// ENTSCHEIDUNG:` markiert.
+- Tests: `bash boxrush/tests/run.sh` (Regeln, Edit-Peek-Zeit, Menüs/Touch, Bot-Matches). Testzugang im Spiel: `window.BOXRUSH`; `#autoplay&lv=hard&mode=duel` lässt Bots gegeneinander spielen.
+- Online erst sichtbar, wenn der Ordner auf dem GitHub-Pages-Branch liegt: dann `…/Tiefenrausch/boxrush/`.

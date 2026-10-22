@@ -1,0 +1,93 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch(); const errs = []; const out = [];
+  const ok = (n, c) => out.push((c ? 'OK   ' : 'FAIL ') + n);
+  // --- PC ---
+  let c = await b.newContext({ viewport: { width: 1280, height: 800 } }); let p = await c.newPage();
+  p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(m.text()); });
+  await p.goto('file://' + require('path').resolve(__dirname, '../index.html')); await p.waitForTimeout(300);
+  const cur = () => p.evaluate(() => window.BOXRUSH.UI.current);
+  await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter'); await p.waitForTimeout(100);
+  ok('Tastatur: Einstellungen geöffnet', await cur() === 's-settings');
+  await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowRight'); await p.waitForTimeout(50);
+  ok('Einstellung per Pfeil geändert (Wackeln aus)', await p.evaluate(() => window.BOXRUSH.settings.shake === false));
+  await p.click('button[data-act=keys]'); await p.waitForTimeout(100);
+  await p.click('#key-opts button >> nth=4'); await p.keyboard.press('KeyE'); await p.waitForTimeout(50);
+  ok('Taste neu belegt (Bauen = E)', await p.evaluate(() => window.BOXRUSH.settings.keys.build === 'KeyE'));
+  await p.click('button[data-act=keysdefault]');
+  await p.keyboard.press('Escape'); await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  ok('Esc zurück zum Hauptmenü', await cur() === 's-main');
+  await p.click('button[data-act=stats]'); ok('Statistik', await cur() === 's-stats'); await p.keyboard.press('Escape');
+  await p.click('button[data-act=play]'); await p.click('#play-opts button >> nth=2'); await p.click('button[data-act=start]'); await p.waitForTimeout(3600);
+  ok('Match läuft', await p.evaluate(() => window.BOXRUSH.Game.state === 'playing' && window.BOXRUSH.Match.phase === 'combat'));
+  ok('Rundenzahl gewählt (7)', await p.evaluate(() => window.BOXRUSH.Match.roundsToWin === 7));
+  // Bauen mit Q + Klick
+  { const q = await p.evaluate(() => { const B = window.BOXRUSH, P = B.Match.player; return B.Renderer.worldToScreen(P.x + 48, P.y - 185); }); await p.mouse.move(q.x, q.y); await p.waitForTimeout(150); const q2 = await p.evaluate(() => { const B = window.BOXRUSH, P = B.Match.player; return B.Renderer.worldToScreen(P.x + 48, P.y - 185); }); await p.mouse.move(q2.x, q2.y); } await p.keyboard.press('KeyQ'); await p.waitForTimeout(60); await p.mouse.down(); await p.waitForTimeout(40); await p.mouse.up(); await p.waitForTimeout(100);
+  ok('PC: Wand gebaut', await p.evaluate(() => window.BOXRUSH.Match.player.stats.wallsBuilt >= 1));
+  await p.keyboard.press('Digit1'); await p.waitForTimeout(250); await p.mouse.down(); await p.waitForTimeout(40); await p.mouse.up(); await p.waitForTimeout(100);
+  ok('PC: geschossen', await p.evaluate(() => window.BOXRUSH.Match.player.stats.shots >= 1));
+  await p.keyboard.press('KeyV'); await p.keyboard.press('F3'); await p.waitForTimeout(300); await p.screenshot({ path: require('path').join(require('os').tmpdir(), 'debug.png') }); await p.keyboard.press('F3');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  ok('Esc pausiert', await cur() === 's-pause' && await p.evaluate(() => window.BOXRUSH.Game.state === 'paused'));
+  const t1 = await p.evaluate(() => window.BOXRUSH.Match.time); await p.waitForTimeout(300);
+  ok('Pause hält die Zeit an', await p.evaluate(t => window.BOXRUSH.Match.time === t, t1));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  ok('Esc setzt fort', await p.evaluate(() => window.BOXRUSH.Game.state === 'playing'));
+  // Tab unsichtbar
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
+  ok('Unsichtbarer Tab pausiert', await cur() === 's-pause');
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); });
+  await p.click('button[data-act=surrender]'); await p.waitForTimeout(100);
+  ok('Aufgeben → Endbildschirm', await cur() === 's-end');
+  await p.click('button[data-act=again]'); await p.waitForTimeout(200);
+  ok('Nochmal startet neu', await p.evaluate(() => window.BOXRUSH.Game.state === 'playing' && window.BOXRUSH.Match.round === 1));
+  // Ganzes Match im Zeitraffer bis zum Ende (Spieler als Bot)
+  await p.evaluate(() => { const B = window.BOXRUSH; const P = B.Match.player; P.brain = new (B.Match.fighters[1].brain.constructor)(P, 'pro'); P.isBot = true; for (let i = 0; i < 60 * 60 * 15 && B.Game.state === 'playing'; i++) B.Game.step(1 / 60); });
+  await p.waitForTimeout(200);
+  ok('Match endet mit Endbildschirm', await cur() === 's-end');
+  await p.screenshot({ path: require('path').join(require('os').tmpdir(), 'end.png') });
+  await p.click('button[data-act=menu]'); ok('Hauptmenü', await cur() === 's-main');
+  // Training: T setzt zurück
+  await p.click('button[data-act=training]'); await p.click('button[data-act=starttraining]'); await p.waitForTimeout(300);
+  { const q = await p.evaluate(() => { const B = window.BOXRUSH, P = B.Match.player; return B.Renderer.worldToScreen(P.x + 48, P.y - 185); }); await p.mouse.move(q.x, q.y); await p.waitForTimeout(150); const q2 = await p.evaluate(() => { const B = window.BOXRUSH, P = B.Match.player; return B.Renderer.worldToScreen(P.x + 48, P.y - 185); }); await p.mouse.move(q2.x, q2.y); } await p.keyboard.press('KeyQ'); await p.mouse.down(); await p.waitForTimeout(40); await p.mouse.up(); await p.waitForTimeout(80);
+  const n1 = await p.evaluate(() => window.BOXRUSH.WallSystem.list.filter(w => w.ownerId === 1).length);
+  await p.keyboard.press('KeyT'); await p.waitForTimeout(100);
+  const n2 = await p.evaluate(() => window.BOXRUSH.WallSystem.list.filter(w => w.ownerId === 1).length);
+  ok('Training: T setzt Arena zurück (' + n1 + ' → ' + n2 + ')', n2 < n1);
+  ok('Training: Material unbegrenzt', await p.evaluate(() => window.BOXRUSH.Match.player.mats === 500 && window.BOXRUSH.Match.player.unlimitedMats));
+  await c.close();
+  // --- Touch ---
+  c = await b.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }); p = await c.newPage();
+  p.on('pageerror', e => errs.push('touch: ' + e.message));
+  await p.goto('file://' + require('path').resolve(__dirname, '../index.html')); await p.waitForTimeout(300);
+  await p.tap('button[data-act=play]'); await p.tap('button[data-act=start]'); await p.waitForTimeout(3300);
+  const cdp = await c.newCDPSession(p);
+  const touch = async (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts });
+  const x0 = await p.evaluate(() => window.BOXRUSH.Match.player.x);
+  await touch('touchStart', [{ x: 150, y: 250, id: 1 }]);
+  for (let i = 0; i < 10; i++) { await touch('touchMove', [{ x: 150 - i * 6, y: 250, id: 1 }]); await p.waitForTimeout(30); }
+  await p.waitForTimeout(300); await touch('touchEnd', []);
+  const x1 = await p.evaluate(() => window.BOXRUSH.Match.player.x);
+  ok('Touch: Joystick bewegt (' + Math.round(x0) + ' → ' + Math.round(x1) + ')', x1 < x0 - 20);
+  const btn = async id => p.evaluate(id => window.BOXRUSH.UI.touchButtons().find(b => b.id === id), id);
+  let bb = await btn('build'); await touch('touchStart', [{ x: bb.x, y: bb.y, id: 2 }]); await p.waitForTimeout(80); await touch('touchEnd', []); await p.waitForTimeout(80);
+  ok('Touch: Bauen-Button baut', await p.evaluate(() => window.BOXRUSH.Match.player.stats.wallsBuilt >= 1));
+  bb = await btn('fire'); await touch('touchStart', [{ x: bb.x, y: bb.y, id: 3 }]); await p.waitForTimeout(400); await touch('touchEnd', []); await p.waitForTimeout(80);
+  ok('Touch: Feuer schießt', await p.evaluate(() => window.BOXRUSH.Match.player.stats.shots >= 1));
+  // Edit: Spieler zeigt auf eigene Boxwand
+  await p.evaluate(() => { const B = window.BOXRUSH, P = B.Match.player, T = 96; const bx = P.homeBox; P.x = (bx.x + 1.5) * T; P.y = (bx.y + 0.5) * T; B.Input.touch.aimAngle = 0; });
+  await p.waitForTimeout(100);
+  bb = await btn('edit'); await touch('touchStart', [{ x: bb.x, y: bb.y, id: 4 }]); await touch('touchEnd', []); await p.waitForTimeout(80);
+  ok('Touch: Edit-Modus', await p.evaluate(() => window.BOXRUSH.Match.player.mode === 'edit'));
+  const pl = await p.evaluate(() => window.BOXRUSH.UI.panelLayout());
+  await touch('touchStart', [{ x: pl.fields[0].x + 20, y: pl.fields[0].y + 20, id: 5 }]);
+  await touch('touchMove', [{ x: pl.fields[1].x + 20, y: pl.fields[1].y + 20, id: 5 }]); await p.waitForTimeout(50);
+  await touch('touchEnd', []); await p.waitForTimeout(40);
+  await touch('touchStart', [{ x: pl.confirm.x + 10, y: pl.confirm.y + 10, id: 6 }]); await touch('touchEnd', []); await p.waitForTimeout(200);
+  const segs = await p.evaluate(() => { const P = window.BOXRUSH.Match.player, T = 96, bx = P.homeBox; return window.BOXRUSH.WallSystem.get('V', bx.x + 2, bx.y).segments; });
+  ok('Touch: Wischen über 2 Felder + Bestätigen (' + segs + ')', !segs[0] && !segs[1] && segs[2]);
+  await p.screenshot({ path: require('path').join(require('os').tmpdir(), 'touch_land.png') });
+  await c.close();
+  console.log(out.join('\n')); console.log('ERR', errs);
+  await b.close();
+})();
