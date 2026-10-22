@@ -275,13 +275,13 @@ function makeIntent() {
   return { mx: 0, my: 0, aimX: 0, aimY: 0, fire: false, firePressed: false, alt: false, buildToggle: false, buildHold: false, buildHoldPressed: false,
     editPressed: false, editReleased: false, editTap: false, editConfirm: false, editReset: false,
     panelSeg: -1, panelPressed: false, panelHeld: false, box: false, slot: -1, cycle: 0, heal: false, reload: false,
-    shotError: 0, forceWeapon: false, trainReset: false };
+    shotError: 0, forceWeapon: false, trainReset: false, editCancel: false };
 }
 function clearIntent(it) {
   it.mx = 0; it.my = 0; it.fire = false; it.firePressed = false; it.alt = false; it.buildToggle = false; it.buildHold = false; it.buildHoldPressed = false;
   it.editPressed = false; it.editReleased = false; it.editTap = false; it.editConfirm = false; it.editReset = false;
   it.panelSeg = -1; it.panelPressed = false; it.panelHeld = false; it.box = false; it.slot = -1; it.cycle = 0; it.heal = false; it.reload = false;
-  it.shotError = 0; it.forceWeapon = false; it.trainReset = false;
+  it.shotError = 0; it.forceWeapon = false; it.trainReset = false; it.editCancel = false;
 }
 
 // =====================================================================
@@ -295,7 +295,7 @@ const Input = {
   capture: null,                 // Rückruf für Tastenbelegung
   touches: new Map(),            // id -> { role, sx, sy, x, y, id2 }
   touch: { moveX: 0, moveY: 0, aimAngle: 0, aimActive: false, fire: false, firePressed: false, buildHeld: false, buildPressed: false,
-    editTap: false, resetTap: false, healTap: false, reloadTap: false, cycleTap: false, boxTap: false, slotTap: -1, confirmTap: false,
+    editTap: false, resetTap: false, healTap: false, reloadTap: false, cycleTap: false, boxTap: false, slotTap: -1, confirmTap: false, cancelTap: false,
     panelSeg: -1, panelPressed: false, panelHeld: false, worldSelX: 0, worldSelY: 0, worldSel: false },
   pinch: null,
 
@@ -400,7 +400,7 @@ const Input = {
     if (panel) {
       tc.role = 'panel';
       if (panel.kind === 'seg') { T.panelSeg = panel.seg; T.panelPressed = true; T.panelHeld = true; tc.seg = panel.seg; }
-      else if (panel.kind === 'confirm') { T.confirmTap = true; tc.role = 'none'; }
+      else if (panel.kind === 'confirm') { T.cancelTap = true; tc.role = 'none'; }
       else if (panel.kind === 'reset') { T.resetTap = true; tc.role = 'none'; }
     } else if (btn) {
       tc.role = 'btn'; tc.btn = btn;
@@ -491,7 +491,7 @@ const Input = {
     this.wheel = 0;
     const T = this.touch;
     T.firePressed = false; T.buildPressed = false; T.editTap = false; T.resetTap = false; T.healTap = false; T.reloadTap = false;
-    T.cycleTap = false; T.boxTap = false; T.slotTap = -1; T.confirmTap = false; T.panelPressed = false;
+    T.cycleTap = false; T.boxTap = false; T.slotTap = -1; T.confirmTap = false; T.cancelTap = false; T.panelPressed = false;
     if (!T.panelHeld) T.panelSeg = -1;
   },
   resetAll() {
@@ -520,7 +520,7 @@ function playerIntent(f) {
     // Automatisch feuern, wenn ein sichtbarer Gegner im Fadenkreuz ist
     if (settings.autoFire && f.mode === 'weapon' && autoFireTarget(f)) it.fire = true;
     it.buildHold = T.buildHeld; it.buildHoldPressed = T.buildPressed;
-    it.editTap = T.editTap; it.editReset = T.resetTap; it.editConfirm = T.confirmTap;
+    it.editTap = T.editTap; it.editReset = T.resetTap; it.editConfirm = T.confirmTap; it.editCancel = T.cancelTap;
     it.heal = T.healTap; it.reload = T.reloadTap; it.box = T.boxTap; it.cycle = T.cycleTap ? 1 : 0;
     if (T.slotTap >= 0) it.slot = T.slotTap;
     it.panelSeg = T.panelSeg; it.panelPressed = T.panelPressed; it.panelHeld = T.panelHeld;
@@ -977,6 +977,7 @@ function handleActions(f, it, dt) {
   if (f.mode === 'edit') updateEditMode(f, it);
   if (it.editReleased && f.mode === 'edit' && releaseMode && !f.edit.tapMode) confirmEdit(f);
   if (it.editConfirm && f.mode === 'edit') confirmEdit(f, true);
+  if (it.editCancel && f.mode === 'edit') endEdit(f);
   if (it.editReset) { if (f.mode === 'edit') resetEdit(f); else resetTargetWall(f); }
 
   if (f.mode === 'build') updateBuildMode(f, it, dt);
@@ -1131,13 +1132,19 @@ function updateEditMode(f, it) {
   if (it.panelSeg >= 0) { seg = it.panelSeg; press = it.panelPressed; hold = it.panelHeld; }
   else if (it.fire || it.firePressed) { seg = WallSystem.fieldAt(w, it.aimX, it.aimY); press = it.firePressed; hold = it.fire; }
   if (press) {
-    if (seg >= 0) { e.paint = !sel[seg]; setSel(f, w, seg, e.paint); e.lastSeg = seg; }
+    if (seg >= 0) { e.paint = !sel[seg]; setSel(f, w, seg, e.paint); e.lastSeg = seg; e.gesture = true; }
     else e.paint = null;
   } else if (hold && e.paint !== null && seg >= 0 && seg !== e.lastSeg) {
     // Wischen: alle überfahrenen Felder bekommen den Zustand des ersten
     setSel(f, w, seg, e.paint); e.lastSeg = seg;
   }
-  if (!hold && !press) { e.paint = null; e.lastSeg = -1; }
+  if (!hold && !press) {
+    e.paint = null; e.lastSeg = -1;
+    // Finger/Maustaste losgelassen → Edit sofort anwenden, ohne Bestätigen.
+    // (Bei „Edit beim Loslassen“ am PC wird weiter beim Loslassen der Edit-Taste angewendet.)
+    if (e.gesture && (e.tapMode || !f.editRelease)) { e.gesture = false; confirmEdit(f, true); return; }
+    e.gesture = false;
+  }
 }
 function setSel(f, w, seg, val) {
   const sel = w.editState.selected;
@@ -1155,7 +1162,8 @@ function confirmEdit(f, keepOnInvalid) {
   if (sel.every(Boolean)) {
     // Ungültig: alle 3 offen. Bestätigen gesperrt.
     if (f.isPlayer) { Sfx.play('error', w.cx, w.cy, 0.7); UI.toast('Mindestens ein Feld muss bleiben'); }
-    // ENTSCHEIDUNG: Bei „Edit beim Loslassen“ verfällt die ungültige Auswahl, bei „Bestätigen per Klick“ bleibt der Modus offen.
+    if (keepOnInvalid) { for (let i = 0; i < 3; i++) w.editState.selected[i] = !w.segments[i]; }
+    // ENTSCHEIDUNG: Bei „Edit beim Loslassen“ verfällt die ungültige Auswahl; beim sofortigen Übernehmen (Touch/Klick) bleibt der Modus offen.
     if (f.editRelease && !keepOnInvalid) endEdit(f);
     return;
   }
@@ -3267,7 +3275,7 @@ const UI = {
     const el = document.getElementById('set-opts'); el.innerHTML = '';
     const S = settings, onoff = v => v ? 'An' : 'Aus', save = () => saveSettings();
     const pct = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-    this.cycler(el, 'Edit bestätigen', [true, false], () => S.editRelease, v => { S.editRelease = v; if (Match.player) Match.player.editRelease = v; save(); }, v => v ? 'Beim Loslassen' : 'Per Klick / F');
+    this.cycler(el, 'Edit bestätigen', [true, false], () => S.editRelease, v => { S.editRelease = v; if (Match.player) Match.player.editRelease = v; save(); }, v => v ? 'Beim Loslassen (F)' : 'Sofort beim Klick');
     this.cycler(el, 'Bildschirmwackeln', [true, false], () => S.shake, v => { S.shake = v; save(); }, onoff);
     this.cycler(el, 'Schadenszahlen', [true, false], () => S.dmgNumbers, v => { S.dmgNumbers = v; save(); }, onoff);
     this.cycler(el, 'Effekte reduziert', [false, true], () => S.reducedFx, v => { S.reducedFx = v; save(); }, onoff);
@@ -3389,7 +3397,7 @@ const UI = {
     const t = Input.isTouchUi();
     const all = t ? [
       ['move', 'Linke Hälfte: laufen · Rechte Hälfte: zielen'], ['build', '„Bauen“ antippen oder halten (Turbo)'],
-      ['edit', '„Edit“ → Felder antippen → Bestätigen'], ['reset', '„Reset“ schließt die Wand wieder'], ['box', '„Box“ baut dich ein · Trank = Schild']
+      ['edit', '„Edit“ → Felder antippen oder wischen – fertig'], ['reset', '„Reset“ schließt die Wand wieder'], ['box', '„Box“ baut dich ein · Trank = Schild']
     ] : [
       ['move', 'WASD laufen · Maus zielen · Linksklick schießen'], ['build', 'Q Bau-Modus · Linksklick halten = Turbo-Bau'],
       ['edit', 'F halten → Felder anklicken → F loslassen'], ['reset', 'Rechtsklick (im Edit) oder F antippen setzt zurück'], ['box', 'V boxt dich ein · 5 Schildtrank · R nachladen']
@@ -3442,7 +3450,7 @@ const UI = {
   },
   pauseRect() { const u = this.scale(); return { x: 10 * u, y: 10 * u, w: 44 * u, h: 44 * u }; },
   pauseButtonHit(x, y) { const r = this.pauseRect(); return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; },
-  // Edit-Panel: 3 Felder (vertikale Wände übereinander), dazu Reset und Bestätigen
+  // Edit-Panel: 3 Felder (vertikale Wände übereinander), dazu Reset und Zurück. Auswahl wird beim Loslassen sofort übernommen.
   panelLayout() {
     const P = Match.player;
     if (!P || P.mode !== 'edit' || !P.edit || !P.edit.wall || !Input.isTouchUi()) return null;
@@ -3504,7 +3512,7 @@ const UI = {
       }
       const btn = (r, label, c) => { HUD.panel(ctx, r.x, r.y, r.w, r.h, 10 * u); ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2); HUD.text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, 14 * u, c, 'center'); };
       btn(L.reset, 'RESET', '#ffb07a');
-      btn(L.confirm, 'BESTÄTIGEN', invalid ? '#ff6b5e' : COLORS.select);
+      btn(L.confirm, 'ZURÜCK', '#cfd8ea');
     }
   },
   drawTouchBtn(ctx, b, P) {
