@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import { createEnemy, addEnemy, killEnemy } from './enemies.js';
-import { guardianInit, guardianUpdate } from './boss_guardian.js';
+import { guardianInit, guardianUpdate, guardianPhaseChange } from './boss_guardian.js';
 import { broodInit, broodUpdate, broodSplit } from './boss_brood.js';
 import { pickDrop, spawnPickup } from './pickups.js';
 import { addBonus, bossBonus } from './scoring.js';
@@ -112,6 +112,7 @@ export function onBossDamaged(run, e) {
   b.invuln = CONFIG.bosses.roarTime;
   b.speedMult *= CONFIG.bosses.phaseSpeedup;
   e.charging = false;
+  if (b.kind === 'guardian') guardianPhaseChange(e);
   run.emit('bossRoar', e.x, e.y, b.phase);
 }
 

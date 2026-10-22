@@ -2,6 +2,7 @@
 
 import { CONFIG } from './config.js';
 import { spawnPlayerProjectile, fireRail } from './projectiles.js';
+import { raycast } from './world.js';
 import { angleDiff, DEG, randSigned } from './utils.js';
 
 const ORDER = CONFIG.weapons.order;
@@ -135,9 +136,10 @@ export function updateWeapons(run, dt, act) {
       ars.railCharge += dt;
       if (ars.railCharge >= w.charge) {
         ars.railCharge = 0;
-        shoot(run, id, act);
+        // Abklingzeit vor dem Schuss setzen: ein Waffenwechsel im Schuss (Munition leer) darf sie nicht verlängern
         ars.cooldown += 1 / fireRate(run, id);
         if (ars.cooldown < 0) ars.cooldown = 0;
+        shoot(run, id, act);
       }
     } else {
       if (ars.railCharge > 0) run.emit('railCancel');
@@ -147,9 +149,9 @@ export function updateWeapons(run, dt, act) {
   }
 
   if (act.fire && ars.cooldown <= 0 && hasAmmo(ars, id)) {
-    shoot(run, id, act);
     ars.cooldown += 1 / fireRate(run, id);
     if (ars.cooldown < 0) ars.cooldown = 0;
+    shoot(run, id, act);
   }
 }
 
@@ -159,7 +161,8 @@ function shoot(run, id, act) {
   const w = CONFIG.weapons[id];
   let aim = p.aim;
   if (act.assist) aim = assistAim(run, aim);
-  const muzzle = 24;
+  // Mündung nicht hinter einer Wand, an der der Spieler steht
+  const muzzle = raycast(run.world, p.x, p.y, Math.cos(aim), Math.sin(aim), CONFIG.weapons.muzzle, null);
   const mx = p.x + Math.cos(aim) * muzzle;
   const my = p.y + Math.sin(aim) * muzzle;
   const multi = run.power.multi > 0;

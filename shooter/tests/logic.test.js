@@ -265,3 +265,4 @@ import './waves.test.js';
 import './gear.test.js';
 import './bosses.test.js';
 import './progress.test.js';
+import './fixes.test.js';

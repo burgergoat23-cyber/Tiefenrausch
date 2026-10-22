@@ -41,6 +41,7 @@ export const CONFIG = {
     distance: 180,
     cooldown: 1.5,
     grace: 0.06,           // kurze Nach-Unverwundbarkeit nach dem Dash
+    buffer: 0.15,          // Dash-Druck während eines Dashes: bis so lange nach seinem Ende gemerkt
     afterimages: 5,
   },
 
@@ -101,6 +102,7 @@ export const CONFIG = {
       pellets: 1, knockback: 170, recoil: 240, trauma: 'rail',
     },
     multiShotAngle: 12,    // Mehrfachschuss: seitliche Schüsse um diesen Winkel
+    muzzle: 24,            // Abstand der Mündung vom Spielermittelpunkt
     assistAngle: 6,        // Zielhilfe: höchstens so viel Grad Korrektur
     assistCone: 16,        // nur Gegner innerhalb dieses Kegels
     assistRange: 900,
@@ -172,7 +174,7 @@ export const CONFIG = {
       salvoEvery: 2.6, salvoTelegraph: 0.6, salvoCount: 16, salvoGap: 3, salvoSpeed: 225,
       salvoRings2: 2, salvoRingDelay: 0.35, bulletRadius: 11, bulletDamage: 15,
       chargeEvery: 5.5, chargeWarn: 1, chargeSpeed: 920, chargeTime: 1.25, chargeStun: 0.6, chargeBounces: 2,
-      summonEvery: 6, summonCount: 4, summonType: 'runner',
+      summonEvery: 6, summonCount: 4, summonMax: 12, summonType: 'runner',
       spiralArms: 3, spiralInterval: 0.12, spiralTurn: 1.5, spiralTime: 2.8, spiralPause: 1.6,
       spiralSpeed: 210,
     },

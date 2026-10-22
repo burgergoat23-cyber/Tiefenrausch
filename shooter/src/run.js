@@ -5,6 +5,7 @@ import { CONFIG } from './config.js';
 import { mulberry32, hashSeed } from './utils.js';
 import { SpatialHash } from './collision.js';
 import { createWorld } from './world.js';
+import { createNav, updateNav } from './nav.js';
 import { createPlayer, updatePlayer } from './player.js';
 import { createArsenal, updateWeapons } from './weapons.js';
 import { createProjectilePools, updatePlayerProjectiles, updateEnemyProjectiles } from './projectiles.js';
@@ -48,6 +49,7 @@ export function createRun(opts = {}) {
     rng,
     demo: !!opts.demo,
     world,
+    nav: createNav(world),
     player: createPlayer(world.startX, world.startY),
     arsenal: createArsenal(),
     projectiles: createProjectilePools(),
@@ -100,6 +102,7 @@ export function stepRun(run, dt, act) {
   updatePlayer(run, dt, act);
   if (!run.noWaves) updateWaves(run, dt);
 
+  updateNav(run);
   rebuildHash(run);
   updateEnemies(run, enemyDt);
   rebuildHash(run);

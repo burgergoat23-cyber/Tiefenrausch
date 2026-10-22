@@ -18,6 +18,7 @@ export function createPlayer(x, y) {
     dashDX: 1, dashDY: 0,
     dashCharges: 1,
     dashRecharge: 0,
+    dashBuffer: 0,      // Dash-Druck während eines Dashes merken (Doppel-Dash)
     graceT: 0,          // kurze Unverwundbarkeit nach dem Dash
     invuln: 0,
     dead: false,
@@ -57,8 +58,10 @@ export function updatePlayer(run, dt, act) {
   let m = length(mx, my);
   if (m > 1) { mx /= m; my /= m; m = 1; }
 
+  if (p.dashBuffer > 0) p.dashBuffer -= dt;
   if (p.dashT > 0) {
     // Während des Dashes: feste Richtung und Tempo
+    if (act.dash) p.dashBuffer = p.dashT + dc.buffer;
     const speed = dc.distance / dc.duration;
     p.vx = p.dashDX * speed;
     p.vy = p.dashDY * speed;
@@ -83,7 +86,10 @@ export function updatePlayer(run, dt, act) {
       // Reibung: aus voller Fahrt in stopTime stehen
       approachVelocity(p, 0, 0, (pc.maxSpeed / pc.stopTime) * dt);
     }
-    if (act.dash && p.dashCharges >= 1) startDash(run, mx, my, m);
+    if ((act.dash || p.dashBuffer > 0) && p.dashCharges >= 1) {
+      p.dashBuffer = 0;
+      startDash(run, mx, my, m);
+    }
   }
 
   p.x += p.vx * dt;

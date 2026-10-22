@@ -103,7 +103,12 @@ export function resolveCircle(world, e, r, out) {
       : pushCircleOutOfCircle(e, r, o, tmpNormal);
     if (pushed) { hit = 1; nx = tmpNormal.nx; ny = tmpNormal.ny; }
   }
-  if (out) { out.nx = nx; out.ny = ny; }
+  if (out) {
+    // in Ecken zeigen zwei Wände zugleich: Normale auf Länge 1 bringen
+    const l = Math.hypot(nx, ny) || 1;
+    out.nx = nx / l;
+    out.ny = ny / l;
+  }
   return hit;
 }
 

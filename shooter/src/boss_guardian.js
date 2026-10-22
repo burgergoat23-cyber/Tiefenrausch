@@ -92,17 +92,23 @@ function updateCharge(run, e, dt) {
       b.cdx = (p.x - e.x) / d;
       b.cdy = (p.y - e.y) / d;
       b.path = chargePath(run, e, b.cdx, b.cdy);
+      // stehen bleiben, damit der Ansturm genau der Warnlinie folgt
+      e.vx = 0;
+      e.vy = 0;
       run.emit('bossTelegraph', e.x, e.y, 'charge');
+      return true;
     }
     return false;
   }
   if (b.charge === 'warn') {
     b.chargeWarn -= dt;
-    e.vx *= 0.8;
-    e.vy *= 0.8;
+    e.vx = 0;
+    e.vy = 0;
     if (b.chargeWarn <= 0) {
       b.charge = 'run';
       b.chargeRun = g.chargeTime;
+      e.x = b.path[0];
+      e.y = b.path[1];
       run.emit('bossCharge', e.x, e.y);
     }
     return true;
@@ -214,15 +220,28 @@ function updateSummon(run, e, dt) {
   b.summonT -= dt;
   if (b.summonT > 0) return;
   b.summonT = g.summonEvery;
-  let helpers = 0;
+  // angekündigte Helfer zählen mit, sonst wächst die Schar über die Grenze
+  let helpers = run.waves.warnings.length;
   for (const o of run.enemies) if (!o.dead && !o.boss) helpers++;
-  if (helpers >= 12) return;
-  for (let i = 0; i < g.summonCount; i++) {
-    const a = (i / g.summonCount) * TAU + b.rot;
+  const n = Math.min(g.summonCount, g.summonMax - helpers);
+  if (n <= 0) return;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * TAU + b.rot;
     const pt = { x: e.x + Math.cos(a) * (e.r + 70), y: e.y + Math.sin(a) * (e.r + 70) };
     queueSpawn(run, g.summonType, pt.x, pt.y);
   }
   run.emit('bossSummon', e.x, e.y);
+}
+
+// Phasenwechsel: laufende Salve und Ansturm abbrechen (sonst hängt Phase 3 ohne Spiralen)
+export function guardianPhaseChange(e) {
+  const b = e.boss;
+  b.ringsLeft = 0;
+  if (b.charge === 'warn' || b.charge === 'run') {
+    b.charge = 'idle';
+    b.path = [];
+    b.chargeT = G().chargeEvery / b.speedMult;
+  }
 }
 
 export function guardianUpdate(run, e, dt) {

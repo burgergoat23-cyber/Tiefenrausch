@@ -42,6 +42,11 @@
   Warnkreis, wartet der Spawn.
 - **Arena leer, aber Gruppen noch geplant**: Die nächste Gruppe kommt spätestens nach 1,5 s (kein Warten).
 - **Mini-Teiler** und geschlüpfte Sprinter zählen nicht zum Budget.
+- **Wegfindung**: Ein Wegfeld (Breitensuche auf 40er-Raster, vom Spieler aus, alle 0,25 s oder wenn der Spieler
+  das Feld wechselt) führt Gegner ohne Sichtlinie um Blöcke und aus L-Ecken heraus. Für große Gegner (Panzer)
+  gibt es ein zweites Feld mit mehr Abstand zu Wänden. Mit Sichtlinie laufen sie direkt (und weichen wie bisher aus).
+  Bosse nutzen es nicht (sie kreisen ohnehin). Gemessen: kein Gegnertyp bleibt mehr hängen (vorher bis 50 %).
+- **Doppel-Dash**: Ein Dash-Druck während des ersten Dashes wird gemerkt und danach ausgeführt.
 - **Rakete**: Der direkt getroffene Gegner bekommt 60 + 40 (Fläche), alle anderen im Radius 130 bekommen 40.
   Raketen- und Explosionsschaden ignoriert den Schild des Schildträgers.
 - **Railgun**: durchschlägt auch den Schild des Schildträgers (sie ist die „schwere“ Waffe); Laden: gedrückt halten,
@@ -58,8 +63,9 @@
   Phasenwechsel (66 %/33 %): 0,9 s Brüllen, dabei unverwundbar; ein großer Treffer kann keine Phase überspringen.
 - **Wächter**: Phase 1 ein Ring aus 16 Kugeln mit 3er-Lücke, Phase 2 zwei Ringe (halb versetzt) + Ansturm.
   Die Warnlinie zeigt den ganzen Weg inkl. Abprallern (wird mit derselben Physik vorausberechnet). Nach dem
-  Ansturm ist er 0,6 s benommen. Phase 3: Spiralen statt Salven, alle 6 s 4 Läufer (höchstens 12 Helfer).
-- **Brut**: Eier (max. 8) schlüpfen nach 3 s zu je 2 Sprintern; Säure-Geschosse zeigen ihren Zielkreis 1 s vorher.
+  Ansturm ist er 0,6 s benommen. Beim Warnen steht er still, damit der Ansturm genau der Linie folgt; ein
+  Phasenwechsel bricht Salve und Ansturm ab. Phase 3: Spiralen statt Salven, alle 6 s 4 Läufer (höchstens 12 Helfer, angekündigte zählen mit).
+- **Brut**: Eier (max. 6) schlüpfen nach 3 s zu je 1 Sprinter; Säure-Geschosse zeigen ihren Zielkreis 1 s vorher.
   Bei 33 % teilt sie sich; die Lebensleiste läuft dann im letzten Drittel weiter.
 - **Boss besiegt**: +5000 × Boss-Nummer (Welle/5), 3 Drops; übrige Helfer zerfallen (ohne Drops).
 - **Upgrade-Karten**: erscheinen 1,2 s nach Wellenende (Pause). Erst Karte wählen (Tippen/Klick/1–3), dann

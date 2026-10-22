@@ -5,6 +5,7 @@ import { spawnEnemyProjectile } from './projectiles.js';
 import { createEnemy, addEnemy, removeEnemy } from './enemies.js';
 import { addShockwave, addDelayedExplosion } from './hazards.js';
 import { DEG, randRange, turnTowards, TAU } from './utils.js';
+import { flowDir } from './nav.js';
 
 // --- Lenkhilfen --------------------------------------------------------------------
 
@@ -22,8 +23,11 @@ function approachVel(e, tx, ty, step) {
 }
 
 const AVOID_ANGLE = 55 * DEG;
+const flow = { x: 0, y: 0 };
 
-// Richtung zum Ziel mit einfachem Ausweichen um Hindernisse
+// Richtung zum Ziel mit einfachem Ausweichen um Hindernisse.
+// Ist das Ziel der Spieler und er nicht zu sehen, folgt der Gegner dem Wegfeld (nav.js),
+// sonst bliebe er hinter langen Blöcken oder in L-Ecken hängen.
 export function steerTo(run, e, tx, ty, speed, dt) {
   let dx = tx - e.x;
   let dy = ty - e.y;
@@ -35,7 +39,12 @@ export function steerTo(run, e, tx, ty, speed, dt) {
   dx /= d;
   dy /= d;
   const look = e.r + 55;
-  if (e.avoidT > 0) {
+  const toPlayer = !e.boss && tx === run.player.x && ty === run.player.y;
+  if (toPlayer && !lineOfSight(run.world, e.x, e.y, tx, ty) && flowDir(run, e, flow)) {
+    dx = flow.x;
+    dy = flow.y;
+    e.avoidT = 0;
+  } else if (e.avoidT > 0) {
     e.avoidT -= dt;
     const a = Math.atan2(dy, dx) + e.avoidSide * AVOID_ANGLE;
     dx = Math.cos(a);
@@ -111,8 +120,12 @@ const sprinter = {
         e.timerA = d.zigInterval;
         e.side = -e.side;
       }
-      const base = Math.atan2(p.y - e.y, p.x - e.x) + e.side * d.zigAngle * DEG;
-      steerTo(run, e, e.x + Math.cos(base) * 120, e.y + Math.sin(base) * 120, e.speed, dt);
+      if (lineOfSight(run.world, e.x, e.y, p.x, p.y)) {
+        const base = Math.atan2(p.y - e.y, p.x - e.x) + e.side * d.zigAngle * DEG;
+        steerTo(run, e, e.x + Math.cos(base) * 120, e.y + Math.sin(base) * 120, e.speed, dt);
+      } else {
+        steerTo(run, e, p.x, p.y, e.speed, dt); // ohne Sicht: dem Weg folgen
+      }
       faceVelocity(e);
       const dist = distToPlayer(run, e);
       if ((e.stateT <= 0 || dist < d.sprintRange) && lineOfSight(run.world, e.x, e.y, p.x, p.y)) {
@@ -159,7 +172,8 @@ const shooter = {
     const d = e.def;
     const p = run.player;
     const dist = distToPlayer(run, e);
-    if (dist > d.maxDist) {
+    const sees = lineOfSight(run.world, e.x, e.y, p.x, p.y);
+    if (dist > d.maxDist || !sees) {
       steerTo(run, e, p.x, p.y, e.speed, dt);
     } else if (dist < d.minDist) {
       steerTo(run, e, e.x + (e.x - p.x), e.y + (e.y - p.y), e.speed, dt);

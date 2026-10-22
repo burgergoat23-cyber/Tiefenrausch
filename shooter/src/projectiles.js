@@ -279,7 +279,9 @@ export function fireRail(run, x, y, angle) {
   const ey = y + dy * len;
   let hitAny = false;
   const list = run.enemies;
-  for (let i = 0; i < list.length; i++) {
+  // feste Anzahl: Gegner, die erst durch diesen Strahl entstehen (Mini-Teiler), trifft er nicht
+  const n = list.length;
+  for (let i = 0; i < n; i++) {
     const e = list[i];
     if (e.dead || e.spawning) continue;
     if (segmentCircle(x, y, ex, ey, e.x, e.y, e.r + w.beamWidth / 2) < 0) continue;
