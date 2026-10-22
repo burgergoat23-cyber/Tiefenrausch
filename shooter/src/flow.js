@@ -132,6 +132,7 @@ export function openUpgrade(app) {
   }
   app.input.releaseAll();
   showMenu(app.menus, upgradePage(cards, run.upgrades, (id) => {
+    if (app.game.state !== 'upgrade' || app.game.run !== run) return; // schon gewählt (doppelter Druck)
     applyUpgrade(run, id);
     run.pendingUpgrade = 0;
     hideMenu(app.menus);

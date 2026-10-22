@@ -28,7 +28,10 @@ export function createMenus(root, sfx) {
   root.addEventListener('pointerover', (ev) => {
     const t = ev.target.closest && ev.target.closest('[data-nav]');
     if (t && t !== document.activeElement && ev.pointerType === 'mouse' && t.tagName !== 'INPUT') {
+      // Kennzeichen für Seiten: Fokus kam nur vom Überfahren (Upgrade-Karten ändern dann nicht die Wahl)
+      t.dataset.hoverFocus = '1';
       t.focus({ preventScroll: true });
+      delete t.dataset.hoverFocus;
       menus.sfx('hover');
     }
   });
@@ -37,9 +40,14 @@ export function createMenus(root, sfx) {
   }, true);
   // Tasten im Menü sofort behandeln (sonst löst Enter auf einem Knopf doppelt aus)
   window.addEventListener('keydown', (ev) => {
-    if (!menus.current || ev.repeat) return;
+    if (!menus.current) return;
     // in Textfeldern normal tippen lassen (nur Enter, Esc und Pfeil hoch/runter gehen ans Menü)
     const typing = ev.target && ev.target.tagName === 'INPUT' && ev.target.type === 'text';
+    if (ev.repeat) {
+      // gehaltene Taste: den neu fokussierten Knopf nicht vom Browser auslösen lassen
+      if (!typing && ['Enter', 'NumpadEnter', 'Space'].includes(ev.code)) ev.preventDefault();
+      return;
+    }
     if (typing && !['Enter', 'Escape', 'ArrowUp', 'ArrowDown'].includes(ev.code)) return;
     if (menuKey(menus, ev.code)) {
       ev.preventDefault();
@@ -74,6 +82,8 @@ export function hideMenu(menus, instant = false) {
   if (cur.onHide) cur.onHide();
   if (instant) node.remove();
   else {
+    // beim Ausblenden keine Klicks und keinen Fokus mehr (sonst doppelte Auswahl per Enter)
+    node.inert = true;
     node.classList.remove('in');
     node.classList.add('out');
     setTimeout(() => node.remove(), 180);

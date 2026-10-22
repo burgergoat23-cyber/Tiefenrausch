@@ -86,8 +86,12 @@
   sofort (Capture) behandelt, damit Enter auf einem Knopf nicht doppelt auslöst.
 - **Startbildschirm-Demo**: echte Runde ab Welle 2–4 mit Bot (unverwundbar, stumm), startet nach 75 s neu.
 - **Highscore**: wird beim Game Over sofort mit dem letzten Kürzel gespeichert (geht nie verloren); das Kürzel kann
-  danach geändert werden. „Nochmal“ ist sofort möglich (Enter). Konfetti + Fanfare nur bei neuem Rekord (Platz 1).
-  Pfeil hoch/runter im Kürzel-Feld ändert den Buchstaben (für Gamepad).
+  danach geändert werden. „Nochmal“ geht nach 0,6 s Sperre (Enter/Leertaste/Gamepad-A kämen sonst noch vom Dash).
+  Enter auf dem markierten „Menü“ und Esc/Gamepad-B führen zum Startbildschirm. Konfetti + Fanfare nur bei neuem
+  Rekord (Platz 1). Gamepad im Kürzel-Feld: hoch/runter ändert den Buchstaben, links/rechts wechselt die Stelle.
+- **Pause** auch, wenn das Fenster den Fokus verliert (Alt+Tab, Split View) oder das Gamepad getrennt wird.
+- **Musik stumm (M)** wird gespeichert und kurz angezeigt; den Musik-Regler bewegen hebt sie wieder auf.
+- **Debug (F3)** zeigt auch die Trefferkreise (Spieler grün, Gegner rot, Kugeln weiß, Hindernisse orange).
 - **Aufgeben** im Pausemenü fragt nach; die Runde zählt dann normal für Statistik und Highscore.
 - **Alles zurücksetzen** löscht Einstellungen, Highscores und Gesamtstatistik (mit Nachfrage).
 - **Vibration** und **Farbeffekte bei Treffern** sind zusätzlich abschaltbar (laut Abschnitt 11 und 14).
@@ -103,7 +107,10 @@
 
 ## Bekannte Probleme / offen
 
-- (noch nichts)
+- Leistung und Ton auf echten Geräten (iPhone/iPad) konnten hier nicht gemessen werden, nur im Browser-Test
+  (Chromium mit Geräte-Nachbildung). Die Leistungs-Automatik senkt bei Bedarf Partikel, Glow und Auflösung.
+- iOS: Der Stummschalter am iPhone kann den Ton bei iOS älter als 16.4 abschalten.
+- Die Schwierigkeit ist mit einem Bot gemessen (Median Welle 10); echte Spieler können anders abschneiden.
 
 ## Meilensteine
 
@@ -133,3 +140,7 @@
    Statistik (Kills je Typ, Genauigkeit, Kombo, Lieblingswaffe …), Gesamtstatistik, Vollbild-Knopf.
 10. Handy und Tablet ✔ – Zwei-Daumen-Steuerung mit Multi-Touch, Knöpfe, Gamepad, Leistungs-Automatik,
    Web-App (Manifest, Apple-Meta-Tags, Symbole), Hinweis zum Drehen im Hochformat, kein Zoom/Scrollen.
+11. Feinschliff ✔ – Review mit vielen Prüfern, alle bestätigten Fehler behoben: Wegfeld für Gegner (keiner bleibt
+   mehr hängen), Wächter-Phasen und Ansturm, Railgun/Mündung/Waffenwechsel, Doppel-Dash-Puffer, Boss-Musik,
+   Ton-Freischaltung per Tastatur, Menü-Bedienung (Game Over, Upgrade-Karten, gehaltene Tasten, Gamepad),
+   Handy-quer-Layout, Debug-Hitboxen, Screenshake für Boss-Angriffe. Balance: Median Welle 10 (Bot, 40 Runden).

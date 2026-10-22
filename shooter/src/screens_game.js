@@ -67,6 +67,7 @@ export function upgradePage(cards, levels, onChoose) {
           select(i);
         });
         card.addEventListener('focus', () => {
+          if (card.dataset.hoverFocus) return; // nur mit der Maus überfahren: Auswahl bleibt
           if (selected >= 0 && selected !== i && !locked()) {
             selected = i;
             nodes.forEach((n, k) => n.classList.toggle('selected', k === i));

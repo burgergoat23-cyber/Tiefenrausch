@@ -94,12 +94,15 @@ export function handleMore(fx, type, a, b, c, d, e) {
     case 'bossAttack':
       addTrauma(fx.game.cam, CONFIG.trauma.bossAttack);
       break;
+    case 'bossShot':
+      addTrauma(fx.game.cam, CONFIG.trauma.bossAttack * 0.8);
+      break;
     case 'bossTelegraph':
       sound(fx, 'charge', 1);
       break;
     case 'bossCharge':
       sound(fx, 'dash');
-      addTrauma(fx.game.cam, 0.15);
+      addTrauma(fx.game.cam, CONFIG.trauma.bossAttack);
       break;
     case 'bossDeath':
       // Explosionsserie rund um den Boss

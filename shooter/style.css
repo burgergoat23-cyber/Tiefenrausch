@@ -314,6 +314,8 @@ input.slider:focus::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(63, 243, 2
 }
 
 @media (max-height: 520px) {
+  /* Handy quer: Knöpfe im Game Over bleiben unten sichtbar */
+  .over-screen .menu-row { position: sticky; bottom: 0; z-index: 2; width: 100%; padding: 6px 0; background: var(--bg); }
   .stats { grid-template-columns: repeat(6, minmax(70px, 1fr)); }
   .stat { padding: 4px; }
   .panel { max-height: 58vh; }

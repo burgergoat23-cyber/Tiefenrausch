@@ -142,6 +142,9 @@ export function settingsPage(settings, onChange, onReset, onBack) {
         s.dataset.nav = '1';
         s.addEventListener('input', () => {
           settings[key] = Number(s.value) / 100;
+          // Regler bewegen hebt die Stummschaltung (Taste M) auf
+          if (key === 'musicVolume') settings.musicMuted = false;
+          if (key === 'sfxVolume') settings.sfxMuted = false;
           onChange(settings);
         });
         return s;

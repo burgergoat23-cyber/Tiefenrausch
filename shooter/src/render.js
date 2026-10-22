@@ -88,10 +88,37 @@ export function renderWorld(r, scene) {
   drawEnemyProjectiles(ctx, run, alpha, time, view);
   drawRailPreview(ctx, run, alpha);
   drawPlayer(ctx, run, alpha, time, settings);
+  if (scene.debug) drawHitboxes(ctx, run);
   // Schadenszahlen werden schon beim Erzeugen gefiltert (Einstellung); Drop-Namen und Punkte bleiben
   if (particles) drawTexts(ctx, particles);
 
   // zurück in Bildschirm-Koordinaten (CSS-Pixel)
   ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
   return view;
+}
+
+// Debug (F3): Trefferkreise von Spieler, Gegnern, Kugeln und Hindernissen
+function drawHitboxes(ctx, run) {
+  const circle = (x, y, r, col) => {
+    ctx.strokeStyle = col;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+  };
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 1;
+  const p = run.player;
+  circle(p.x, p.y, p.r, '#00ff66');
+  for (const e of run.enemies) if (!e.dead) circle(e.x, e.y, e.r, '#ff3355');
+  for (const pool of [run.projectiles.player, run.projectiles.enemy]) {
+    for (let i = 0; i < pool.count; i++) {
+      const b = pool.items[i];
+      circle(b.x, b.y, b.r, '#ffffff');
+    }
+  }
+  ctx.strokeStyle = '#ffaa00';
+  for (const o of run.world.obstacles) {
+    if (o.shape === 'rect') ctx.strokeRect(o.x, o.y, o.w, o.h);
+    else circle(o.x, o.y, o.r, '#ffaa00');
+  }
 }

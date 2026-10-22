@@ -123,6 +123,9 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 window.addEventListener('pagehide', () => audio.suspend());
+// Fenster verliert den Fokus (Alt+Tab, Split View) oder Gamepad getrennt: pausieren
+window.addEventListener('blur', () => pauseGame(app));
+window.addEventListener('gamepaddisconnected', () => pauseGame(app));
 // iOS: Pinch- und Doppeltipp-Zoom verhindern
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
@@ -197,7 +200,7 @@ function loop(now) {
 
   const pulse = audio.music ? audio.music.pulse() : Math.exp(-((game.time * 2) % 1) * 7);
   renderWorld(app.renderer, {
-    run, cam: game.cam, alpha, time: game.time, pulse, settings, particles, darkness,
+    run, cam: game.cam, alpha, time: game.time, pulse, settings, particles, darkness, debug: game.debug,
   });
   drawScreen(alpha, st, run);
   const t2 = performance.now();

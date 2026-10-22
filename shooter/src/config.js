@@ -64,7 +64,7 @@ export const CONFIG = {
   trauma: {
     shot: 0.02, shotgun: 0.14, rocket: 0.08, rail: 0.22,
     explosion: 0.32, bigExplosion: 0.55, playerHit: 0.38, stomp: 0.28,
-    bossAttack: 0.18, bossRoar: 0.6, bossDeath: 0.9, playerDeath: 0.8,
+    bossAttack: 0.45, bossRoar: 0.6, bossDeath: 0.9, playerDeath: 0.8,
   },
 
   juice: {
@@ -251,6 +251,7 @@ export const CONFIG = {
   ],
   upgradeChoices: 3,
   upgradeConfirmLock: 0.45, // so lange nach dem Öffnen keine Auswahl (gegen Versehen)
+  gameOverLock: 0.6,        // Game Over: so lange keine Auswahl (Dash-Taste startet sonst sofort neu)
 
   combo: {
     window: 2.5,

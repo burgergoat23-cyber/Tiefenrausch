@@ -57,26 +57,30 @@ export function createInput(canvas) {
     input.mouseX = e.clientX - rect.left;
     input.mouseY = e.clientY - rect.top;
   };
+  // Maustasten aus der Bitmaske lesen: eine zweite Taste bei schon gedrückter erster kommt
+  // nur als pointermove an (kein pointerdown/pointerup)
+  const syncButtons = (e) => {
+    const right = (e.buttons & 2) !== 0;
+    if (right && !input.mouseRight) input.edges.dash = true;
+    input.mouseLeft = (e.buttons & 1) !== 0;
+    input.mouseRight = right;
+  };
   const onMouseMove = (e) => {
     if (e.pointerType && e.pointerType !== 'mouse') return;
     input.device = 'mouse';
     input.mouseInside = true;
     updateMouse(e);
+    syncButtons(e);
   };
   const onMouseDown = (e) => {
     if (e.pointerType && e.pointerType !== 'mouse') return;
     input.device = 'mouse';
     updateMouse(e);
-    if (e.button === 0) input.mouseLeft = true;
-    if (e.button === 2) {
-      input.mouseRight = true;
-      input.edges.dash = true;
-    }
+    syncButtons(e);
   };
   const onMouseUp = (e) => {
     if (e.pointerType && e.pointerType !== 'mouse') return;
-    if (e.button === 0) input.mouseLeft = false;
-    if (e.button === 2) input.mouseRight = false;
+    syncButtons(e);
   };
   const onWheel = (e) => {
     if (!input.enabled) return;
@@ -87,6 +91,10 @@ export function createInput(canvas) {
     keys.clear();
     input.mouseLeft = false;
     input.mouseRight = false;
+    // gemerkte Einmal-Aktionen (z. B. Waffenwechsel im Pausemenü) verwerfen
+    input.edges.dash = false;
+    input.edges.weaponDir = 0;
+    input.edges.weaponSlot = 0;
     if (input.touch) input.touch.reset();
   };
 
@@ -99,6 +107,10 @@ export function createInput(canvas) {
   canvas.addEventListener('wheel', onWheel, { passive: false });
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   window.addEventListener('blur', onBlur);
+  // Schon das Tippen auf ein Menü (z. B. SPIELEN) schaltet auf Touch-Bedienung
+  window.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' || e.pointerType === 'pen') input.device = 'touch';
+  }, true);
 
   input.releaseAll = onBlur;
   return input;

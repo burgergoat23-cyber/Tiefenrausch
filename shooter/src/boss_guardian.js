@@ -195,6 +195,7 @@ function updateSpiral(run, e, dt) {
       b.spiralFire = 0;
       b.spiralDir = -b.spiralDir;
       e.charging = false;
+      run.emit('bossShot', e.x, e.y, 'spiral');
     }
   } else {
     b.spiralRot += g.spiralTurn * b.spiralDir * dt;

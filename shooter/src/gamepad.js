@@ -28,7 +28,14 @@ export function createGamepad(input) {
     const pads = navigator.getGamepads();
     let pad = null;
     for (const p of pads) if (p && p.connected) { pad = p; break; }
-    if (!pad) return;
+    if (!pad) {
+      // getrennt: letzte Stick- und Abzugswerte nicht weiter anwenden
+      g.mx = g.my = g.ax = g.ay = 0;
+      g.fire = false;
+      g.prev.fill(false);
+      g.lastDir = '';
+      return;
+    }
     const now = pad.buttons.map((_, i) => pressed(pad, i));
     const edge = (i) => now[i] && !g.prev[i];
     g.mx = axis(pad.axes[0] || 0);

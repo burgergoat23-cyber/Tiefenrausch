@@ -27,17 +27,31 @@ function confetti(wrap) {
 export function gameOverPage(summary, hs, levels, actions) {
   let nameInput = null;
   let againBtn = null;
+  let menuBtn = null;
   let raf = 0;
+  // kurz nach dem Erscheinen keine Auswahl (Leertaste/Gamepad-A vom Dash starten sonst sofort neu)
+  const openedAt = performance.now();
+  const locked = () => performance.now() - openedAt < CONFIG.gameOverLock * 1000;
+  const unlessLocked = (fn) => () => { if (!locked()) fn(); };
   return {
     name: 'gameover',
     cls: 'over-screen',
     focus: '.primary',
+    onBack: unlessLocked(actions.menu),
     onHide() {
       cancelAnimationFrame(raf);
     },
     onKey(code) {
       const a = document.activeElement;
+      if ((code === 'Enter' || code === 'Space') && locked()) return true;
       if (nameInput && a === nameInput) {
+        // Gamepad: Schreibmarke zwischen den 3 Stellen bewegen (Tastatur bleibt im Feld nativ)
+        if (code === 'ArrowLeft' || code === 'ArrowRight') {
+          const cur = Math.max(1, nameInput.selectionStart || 0);
+          const p = Math.min(3, Math.max(1, cur + (code === 'ArrowRight' ? 1 : -1)));
+          nameInput.setSelectionRange(p, p);
+          return true;
+        }
         if (code === 'ArrowUp' || code === 'ArrowDown') {
           cycleLetter(nameInput, code === 'ArrowUp' ? 1 : -1, actions.rename);
           return true;
@@ -49,6 +63,7 @@ export function gameOverPage(summary, hs, levels, actions) {
         return false;
       }
       if (code === 'Enter') {
+        if (a === menuBtn) return false; // Menü-Knopf markiert: den auslösen
         actions.again();
         return true;
       }
@@ -135,9 +150,10 @@ export function gameOverPage(summary, hs, levels, actions) {
       }
 
       const col = el('div', 'menu-row');
-      againBtn = button('Nochmal', actions.again, 'primary big');
+      againBtn = button('Nochmal', unlessLocked(actions.again), 'primary big');
       col.appendChild(againBtn);
-      col.appendChild(button('Menü', actions.menu));
+      menuBtn = button('Menü', unlessLocked(actions.menu));
+      col.appendChild(menuBtn);
       wrap.appendChild(col);
       wrap.appendChild(el('p', 'hint', 'Enter oder „Nochmal“ für eine neue Runde'));
       return wrap;
