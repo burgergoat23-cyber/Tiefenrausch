@@ -136,6 +136,7 @@ export function openUpgrade(app) {
     applyUpgrade(run, id);
     run.pendingUpgrade = 0;
     hideMenu(app.menus);
+    app.input.releaseAll(); // im Kartenmenü gedrückte Q/E/4/5 nicht ins Spiel mitnehmen
     setState(app.game, 'playing');
   }));
 }

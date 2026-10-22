@@ -50,6 +50,7 @@ export function selectWeapon(run, id) {
   const ars = run.arsenal;
   if (!hasAmmo(ars, id) || ars.current === id) return false;
   ars.current = id;
+  if (ars.railCharge > 0) run.emit('railCancel'); // Ladeton weich ausblenden
   ars.railCharge = 0;
   ars.switchT = 0.25;
   ars.cooldown = Math.max(ars.cooldown, 0.12);
@@ -168,11 +169,13 @@ function shoot(run, id, act) {
   const multi = run.power.multi > 0;
   const sideAngle = CONFIG.weapons.multiShotAngle * DEG;
   const dirs = multi ? 3 : 1;
+  // alle Strahlen eines Schusses treffen nur Gegner, die es vorher schon gab (keine frischen Mini-Teiler)
+  const railCount = run.enemies.length;
 
   for (let k = 0; k < dirs; k++) {
     const base = aim + (multi ? (k - 1) * sideAngle : 0);
     if (id === 'rail') {
-      fireRail(run, mx, my, base);
+      fireRail(run, mx, my, base, railCount);
       continue;
     }
     const spreadDeg = id === 'mg' ? ars.mgSpread : w.spread;

@@ -270,7 +270,7 @@ export function updateEnemyProjectiles(run, dt) {
 
 // Railgun: sofortiger Strahl, durchschlägt alle Gegner auf der Linie bis zur Wand
 const railNormal = { nx: 0, ny: 0 };
-export function fireRail(run, x, y, angle) {
+export function fireRail(run, x, y, angle, count = run.enemies.length) {
   const w = CONFIG.weapons.rail;
   const dx = Math.cos(angle);
   const dy = Math.sin(angle);
@@ -279,8 +279,8 @@ export function fireRail(run, x, y, angle) {
   const ey = y + dy * len;
   let hitAny = false;
   const list = run.enemies;
-  // feste Anzahl: Gegner, die erst durch diesen Strahl entstehen (Mini-Teiler), trifft er nicht
-  const n = list.length;
+  // feste Anzahl: Gegner, die erst durch diesen Schuss entstehen (Mini-Teiler), trifft er nicht
+  const n = Math.min(count, list.length);
   for (let i = 0; i < n; i++) {
     const e = list[i];
     if (e.dead || e.spawning) continue;

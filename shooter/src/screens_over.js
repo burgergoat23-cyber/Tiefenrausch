@@ -28,6 +28,7 @@ export function gameOverPage(summary, hs, levels, actions) {
   let nameInput = null;
   let againBtn = null;
   let menuBtn = null;
+  let menuByHover = false;  // „Menü“ nur mit der Maus überfahren: Enter bleibt „Nochmal“
   let raf = 0;
   // kurz nach dem Erscheinen keine Auswahl (Leertaste/Gamepad-A vom Dash starten sonst sofort neu)
   const openedAt = performance.now();
@@ -44,6 +45,7 @@ export function gameOverPage(summary, hs, levels, actions) {
     onKey(code) {
       const a = document.activeElement;
       if ((code === 'Enter' || code === 'Space') && locked()) return true;
+      if (code === 'Backspace') return true; // nur Esc/Gamepad-B führen zum Startbildschirm (Tippfehler im Kürzel)
       if (nameInput && a === nameInput) {
         // Gamepad: Schreibmarke zwischen den 3 Stellen bewegen (Tastatur bleibt im Feld nativ)
         if (code === 'ArrowLeft' || code === 'ArrowRight') {
@@ -63,7 +65,7 @@ export function gameOverPage(summary, hs, levels, actions) {
         return false;
       }
       if (code === 'Enter') {
-        if (a === menuBtn) return false; // Menü-Knopf markiert: den auslösen
+        if (a === menuBtn && !menuByHover) return false; // per Tastatur/Gamepad markiert: den auslösen
         actions.again();
         return true;
       }
@@ -153,6 +155,7 @@ export function gameOverPage(summary, hs, levels, actions) {
       againBtn = button('Nochmal', unlessLocked(actions.again), 'primary big');
       col.appendChild(againBtn);
       menuBtn = button('Menü', unlessLocked(actions.menu));
+      menuBtn.addEventListener('focus', () => { menuByHover = !!menuBtn.dataset.hoverFocus; });
       col.appendChild(menuBtn);
       wrap.appendChild(col);
       wrap.appendChild(el('p', 'hint', 'Enter oder „Nochmal“ für eine neue Runde'));

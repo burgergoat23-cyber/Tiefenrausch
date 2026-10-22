@@ -85,6 +85,7 @@ game.afterStep = (g) => {
 };
 game.onDemoUpgrade = demoUpgrade;
 game.onStateChange = (s) => {
+  if (s !== 'playing') audio.stopCharge(); // Railgun-Ladeton bei Pause, Upgrade, Tod weich ausblenden
   app.input.enabled = s === 'playing';
   if (s === 'upgrade') openUpgrade(app);
   if (s === 'gameover') showGameOver(app);
@@ -125,7 +126,9 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pagehide', () => audio.suspend());
 // Fenster verliert den Fokus (Alt+Tab, Split View) oder Gamepad getrennt: pausieren
 window.addEventListener('blur', () => pauseGame(app));
-window.addEventListener('gamepaddisconnected', () => pauseGame(app));
+window.addEventListener('gamepaddisconnected', () => {
+  if (app.input.device === 'pad') pauseGame(app); // nur, wenn gerade mit dem Gamepad gespielt wird
+});
 // iOS: Pinch- und Doppeltipp-Zoom verhindern
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());

@@ -33,6 +33,19 @@ test('Wegfindung: Panzer findet aus der L-Ecke heraus zum Spieler', () => {
   assert.ok(reached, `Panzer steht bei ${e.x.toFixed(0)},${e.y.toFixed(0)}`);
 });
 
+test('Wegfindung: Panzer finden zum Spieler, der in der Innenecke eines L steht', () => {
+  const run = quietRun(11, 2);
+  run.god = true;
+  const e = addEnemy(run, createEnemy(run, 'tank', 400, 300));
+  let reached = false;
+  for (let i = 0; i < 30 * 60 && !reached; i++) {
+    holdPlayer(run, 594, 494);
+    stepRun(run, 1 / 60, idleActions());
+    reached = Math.hypot(e.x - 594, e.y - 494) < e.r + 40;
+  }
+  assert.ok(reached, `Panzer steht bei ${e.x.toFixed(0)},${e.y.toFixed(0)}`);
+});
+
 test('Wand-Ecke: Normale hat Länge 1', () => {
   const world = createWorld(0);
   const pos = { x: 2, y: 3 };
@@ -115,6 +128,21 @@ test('Railgun trifft keine Mini-Teiler, die erst durch denselben Strahl entstehe
   const minis = run.enemies.filter((o) => o.type === 'mini');
   assert.equal(minis.length, CONFIG.enemies.splitter.splitInto);
   assert.ok(minis.every((m) => !m.dead), 'Minis überleben den Strahl');
+});
+
+test('Railgun mit Mehrfachschuss: die anderen Strahlen treffen die frischen Mini-Teiler nicht', () => {
+  const run = quietRun(3, 0);
+  const p = run.player;
+  giveWeapon(run, 'rail');
+  run.power.multi = 10;
+  const s = addEnemy(run, createEnemy(run, 'splitter', p.x + 100, p.y));
+  s.speed = 0;
+  s.hp = 1;
+  for (let i = 0; i < 40 && !s.dead; i++) stepRun(run, 1 / 60, idleActions({ fire: true, aimAngle: 0 }));
+  assert.ok(s.dead);
+  const minis = run.enemies.filter((o) => o.type === 'mini');
+  assert.equal(minis.length, CONFIG.enemies.splitter.splitInto);
+  assert.ok(minis.every((m) => !m.dead), 'Minis überleben den Schuss');
 });
 
 test('Schuss direkt an der Außenwand fliegt nicht aus der Arena', () => {

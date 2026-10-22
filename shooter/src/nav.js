@@ -60,7 +60,9 @@ function flood(nav, field, start) {
         if (nc < 0 || nr < 0 || nc >= cols || nr >= rows) continue;
         const j = nr * cols + nc;
         if (blocked[j] || dist[j] >= 0) continue;
-        if (dr && dc && (blocked[r * cols + nc] || blocked[nr * cols + c])) continue;
+        // Ausnahme: Steht der Spieler in einer blockierten Zelle (Innenecke), darf der erste Schritt schräg sein
+        const cornerOk = i === start && blocked[start];
+        if (dr && dc && !cornerOk && (blocked[r * cols + nc] || blocked[nr * cols + c])) continue;
         dist[j] = dist[i] + 1;
         queue[tail++] = j;
       }
@@ -85,7 +87,10 @@ export function flowDir(run, e, out) {
   const field = e.r > LARGE_RADIUS ? nav.large : nav.small;
   const c = Math.floor(e.x / CELL);
   const r = Math.floor(e.y / CELL);
+  const px = run.player.x;
+  const py = run.player.y;
   let best = Infinity;
+  let bestG = Infinity;
   let bx = 0;
   let by = 0;
   for (let dr = -1; dr <= 1; dr++) {
@@ -94,10 +99,16 @@ export function flowDir(run, e, out) {
       const nr = r + dr;
       if (nc < 0 || nr < 0 || nc >= nav.cols || nr >= nav.rows) continue;
       const d = field.dist[nr * nav.cols + nc];
-      if (d < 0 || d >= best) continue;
+      if (d < 0 || d > best) continue;
+      // gleich weit (schräg zählt wie gerade): die Zelle näher am Spieler, sonst Zickzack-Umwege
+      const cx = (nc + 0.5) * CELL;
+      const cy = (nr + 0.5) * CELL;
+      const g = (cx - px) * (cx - px) + (cy - py) * (cy - py);
+      if (d === best && g >= bestG) continue;
       best = d;
-      bx = (nc + 0.5) * CELL - e.x;
-      by = (nr + 0.5) * CELL - e.y;
+      bestG = g;
+      bx = cx - e.x;
+      by = cy - e.y;
     }
   }
   if (best === Infinity) return false;

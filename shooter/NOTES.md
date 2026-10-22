@@ -46,12 +46,15 @@
   das Feld wechselt) führt Gegner ohne Sichtlinie um Blöcke und aus L-Ecken heraus. Für große Gegner (Panzer)
   gibt es ein zweites Feld mit mehr Abstand zu Wänden. Mit Sichtlinie laufen sie direkt (und weichen wie bisher aus).
   Bosse nutzen es nicht (sie kreisen ohnehin). Gemessen: kein Gegnertyp bleibt mehr hängen (vorher bis 50 %).
+  Steht der Spieler in einer Innenecke (Zelle selbst blockiert), darf der erste Schritt der Suche schräg sein.
+  Bei gleich weiten Nachbarzellen gewinnt die näher am Spieler (sonst Zickzack-Umwege).
 - **Doppel-Dash**: Ein Dash-Druck während des ersten Dashes wird gemerkt und danach ausgeführt.
 - **Rakete**: Der direkt getroffene Gegner bekommt 60 + 40 (Fläche), alle anderen im Radius 130 bekommen 40.
   Raketen- und Explosionsschaden ignoriert den Schild des Schildträgers.
 - **Railgun**: durchschlägt auch den Schild des Schildträgers (sie ist die „schwere“ Waffe); Laden: gedrückt halten,
   Loslassen bricht ab; danach 1,25 s bis zum nächsten Schuss (= 0,8 Schuss/s inkl. Laden).
 - **Mehrfachschuss** gilt für alle Waffen (Schrotflinte: 3 Fächer, Railgun: 3 Strahlen) und kostet 1 Munition.
+  Mini-Teiler, die ein Railgun-Schuss erzeugt, trifft derselbe Schuss nicht mehr (auch nicht die Nebenstrahlen).
 - **Neue Waffe aufheben** rüstet sie sofort aus; eine schon vorhandene gibt nur Munition (kein Wechsel).
 - **Waffenwechsel** zusätzlich mit Q/E. Kurze Wechsel-Verzögerung 0,12 s.
 - **Drops**: Heilung/Power-ups 12 s, Waffen 15 s (wie in der Vorgabe), die letzten 3 s blinkend.
@@ -87,9 +90,11 @@
 - **Startbildschirm-Demo**: echte Runde ab Welle 2–4 mit Bot (unverwundbar, stumm), startet nach 75 s neu.
 - **Highscore**: wird beim Game Over sofort mit dem letzten Kürzel gespeichert (geht nie verloren); das Kürzel kann
   danach geändert werden. „Nochmal“ geht nach 0,6 s Sperre (Enter/Leertaste/Gamepad-A kämen sonst noch vom Dash).
-  Enter auf dem markierten „Menü“ und Esc/Gamepad-B führen zum Startbildschirm. Konfetti + Fanfare nur bei neuem
+  Enter auf dem per Tastatur/Gamepad markierten „Menü“ und Esc/Gamepad-B führen zum Startbildschirm (Maus nur
+  darüber: Enter bleibt „Nochmal“; Backspace bleibt im Game Over ohne Wirkung). Konfetti + Fanfare nur bei neuem
   Rekord (Platz 1). Gamepad im Kürzel-Feld: hoch/runter ändert den Buchstaben, links/rechts wechselt die Stelle.
-- **Pause** auch, wenn das Fenster den Fokus verliert (Alt+Tab, Split View) oder das Gamepad getrennt wird.
+- **Pause** auch, wenn das Fenster den Fokus verliert (Alt+Tab, Split View) oder das gerade benutzte Gamepad
+  getrennt wird. Der Railgun-Ladeton blendet bei Pause, Upgrade, Tod und Waffenwechsel weich aus.
 - **Musik stumm (M)** wird gespeichert und kurz angezeigt; den Musik-Regler bewegen hebt sie wieder auf.
 - **Debug (F3)** zeigt auch die Trefferkreise (Spieler grün, Gegner rot, Kugeln weiß, Hindernisse orange).
 - **Aufgeben** im Pausemenü fragt nach; die Runde zählt dann normal für Statistik und Highscore.
