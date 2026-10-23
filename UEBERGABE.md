@@ -104,5 +104,6 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 ## BOXRUSH (eigenes Spiel im Ordner `boxrush/`, seit 22.10.2026)
 - Eigenständiges Top-Down-Boxfight-Spiel (Bauen, Editieren mit 3 Feldern, KI-Bots), **nicht** Teil von Tiefenrausch. Eine Datei `boxrush/index.html`, läuft ohne Server.
 - Aufbau im Code in Abschnitten: `CONFIG` (alle Zahlen), `Input`, `WallSystem`, `Physics`, `Entities`, `Weapons`, `Vision`, `AI` (`Brain`), `Match`, `Renderer`/`HUD`, `UI`, `Sfx` (Audio). Eigene Entscheidungen sind mit `// ENTSCHEIDUNG:` markiert.
+- Steuerung (Stand 23.10.): Edit-Ziel ist immer nur die Wand direkt vor dem Kämpfer (`frontWall`, Strahl in Zielrichtung). Touch: rechter Stick zielt und schießt beim weiten Ziehen, Zielrichtung bleibt stehen; Edit-Felder erscheinen direkt auf der Wand vor dir (`UI.panelLayout`), Antippen/Wischen + Loslassen übernimmt sofort; Knöpfe nur Feuer, Bauen, Waffe, Trank. Optik: Grasboden (`grassPattern`), Holzwände (`drawPlanks`), Rand/Kisten aus Stein.
 - Tests: `bash boxrush/tests/run.sh` (Regeln, Edit-Peek-Zeit, Menüs/Touch, Bot-Matches). Testzugang im Spiel: `window.BOXRUSH`; `#autoplay&lv=hard&mode=duel` lässt Bots gegeneinander spielen.
 - Online erst sichtbar, wenn der Ordner auf dem GitHub-Pages-Branch liegt: dann `…/Tiefenrausch/boxrush/`.

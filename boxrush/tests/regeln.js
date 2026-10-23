@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
     B.Game.startMatch({ mode: 'duel', difficulty: 'easy', rounds: 3 }); B.Game.state = 'sim';
     const M = B.Match, P = M.player, E = M.fighters[1], W = B.WallSystem;
     E.brain.passive = true; M.phase = 'combat';
-    for (const w of [...W.list]) if (!w.indestructible) W.remove(w);
+    for (const w of [...W.list]) if (!W.isBorder(w.orient, w.gx, w.gy)) W.remove(w);
     const tx = 5, ty = 5;
     const w = W.add('V', tx + 1, ty, { ownerId: P.id, team: P.team, instant: true });
     P.x = (tx + 0.5) * T; P.y = (ty + 0.5) * T; E.x = 15 * T; E.y = 15 * T;
@@ -50,10 +50,24 @@ const { chromium } = require('playwright');
     startReset(w, P); settle();
     ok('Reset schließt danach', w.segments.every(Boolean));
     // Gegnerische Wand nicht editierbar
-    for (const x of [...W.list]) if (!x.indestructible) W.remove(x);
+    for (const x of [...W.list]) if (!W.isBorder(x.orient, x.gx, x.gy)) W.remove(x);
     const we = W.add('V', tx + 1, ty, { ownerId: E.id, team: E.team, instant: true });
     P.pointerX = we.cx; P.pointerY = we.cy; P.mode = 'weapon';
     ok('Gegnerische Wand nicht editierbar', !startEdit(P) && P.mode !== 'edit');
+    // Wand hinter der Wand vor dir ist nicht editierbar
+    for (const x of [...W.list]) if (!W.isBorder(x.orient, x.gx, x.gy)) W.remove(x);
+    const front = W.add('V', tx + 1, ty, { ownerId: P.id, team: P.team, instant: true });
+    const back = W.add('V', tx + 2, ty, { ownerId: P.id, team: P.team, instant: true });
+    P.x = (tx + 0.5) * T; P.y = (ty + 0.5) * T; P.mode = 'weapon';
+    P.pointerX = back.cx; P.pointerY = back.cy;
+    startEdit(P);
+    ok('Nur die Wand direkt vor dir wird bearbeitet (nicht die dahinter)', P.edit && P.edit.wall === front);
+    endEdit(P);
+    W.setSegments(front, [true, false, true]);
+    P.pointerX = back.cx; P.pointerY = back.cy;
+    startEdit(P);
+    ok('Auch durch ein offenes Feld nicht die Wand dahinter', P.edit && P.edit.wall === front);
+    endEdit(P);
     // Randwand nicht editierbar
     P.x = 0.5 * T; P.y = 5.5 * T; P.pointerX = 0; P.pointerY = 5.5 * T;
     ok('Randwand nicht editierbar', !startEdit(P));

@@ -5,24 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#11151f">
+<meta name="theme-color" content="#1c2419">
 <title>BOXRUSH</title>
 <style>
-:root{--bg:#11151f;--panel:rgba(22,28,41,.94);--line:#263044;--blue:#3d8bff;--teal:#2de2c8;--red:#ff5a4a;--violet:#9b5cff;--text:#e8eefc;--dim:#8e9ab3}
+:root{--bg:#1c2419;--panel:rgba(30,35,27,.95);--line:#3c4a36;--blue:#3f7fd0;--teal:#e0b878;--red:#cf4e3c;--violet:#7d58c2;--text:#f1ede2;--dim:#a8a290;--wood:#b98149;--green:#5f8f3b}
 html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);overscroll-behavior:none}
 canvas#game{position:fixed;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
 canvas#game.nocursor{cursor:none}
 #ui{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-.screen{display:none;pointer-events:auto;flex-direction:column;align-items:center;gap:10px;background:var(--panel);border:1px solid #2f3b55;border-radius:16px;padding:22px 26px;box-shadow:0 0 40px rgba(61,139,255,.18),0 20px 60px rgba(0,0,0,.5);max-width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 32px);box-sizing:border-box;overflow:auto}
+.screen{display:none;pointer-events:auto;flex-direction:column;align-items:center;gap:10px;background:var(--panel);border:1px solid #4a5640;border-radius:16px;padding:22px 26px;box-shadow:0 20px 60px rgba(0,0,0,.5);max-width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 32px);box-sizing:border-box;overflow:auto}
 .screen.active{display:flex}
 .screen.bare{background:none;border:none;box-shadow:none}
 .screen h2{margin:0 0 6px;font-size:26px;letter-spacing:3px;font-weight:800;text-transform:uppercase}
 .screen .sub{color:var(--dim);font-size:14px;letter-spacing:2px;margin-bottom:6px;text-align:center}
 .screen .foot{color:var(--dim);font-size:12px;margin-top:6px;text-align:center;line-height:1.5}
-.screen button{font:inherit;font-size:17px;font-weight:700;letter-spacing:1px;color:var(--text);background:linear-gradient(180deg,#24304a,#1a2337);border:1px solid #34446a;border-radius:10px;padding:12px 18px;min-width:240px;min-height:48px;cursor:pointer;transition:transform .06s,border-color .1s,box-shadow .1s;outline:none;touch-action:manipulation}
-.screen button:hover,.screen button:focus-visible,.screen button.focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(61,139,255,.45),0 0 18px rgba(61,139,255,.35)}
+.screen button{font:inherit;font-size:17px;font-weight:700;letter-spacing:1px;color:var(--text);background:linear-gradient(180deg,#3a4433,#2b3326);border:1px solid #556349;border-radius:10px;padding:12px 18px;min-width:240px;min-height:48px;cursor:pointer;transition:transform .06s,border-color .1s,box-shadow .1s;outline:none;touch-action:manipulation}
+.screen button:hover,.screen button:focus-visible,.screen button.focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(224,184,120,.45)}
 .screen button:active{transform:scale(.97)}
-.screen button.primary{background:linear-gradient(180deg,#3d8bff,#2a63c4);border-color:#6aa6ff}
+.screen button.primary{background:linear-gradient(180deg,#6d9a42,#52782f);border-color:#8db35f}
 .screen button.danger{border-color:#7a3a36}
 .opts{display:flex;flex-direction:column;gap:8px;width:100%}
 .opts.scroll{max-height:52vh;overflow:auto;padding:2px 4px}
@@ -181,11 +181,11 @@ const DEG = Math.PI / 180;
 const WEAPONS = [
   { id: 'shotgun', name: 'Schrotflinte', short: 'SCHROT', pellets: 9, damage: 10, interval: 0.9, mag: 5, reload: 0.5, perShell: true,
     spread: 14, range: 4, falloffStart: 2, falloffMin: 0.3, auto: true, sound: 'shotgun' },
-  // ENTSCHEIDUNG: Sturmgewehr startet mit 0,5° Streuung, +1,1° pro Schuss bis 6°, erholt sich in 0,4 s; Reichweite 14 Kacheln.
+  // ENTSCHEIDUNG: Sturmgewehr: erster Schuss geht exakt ins Ziel (0°), +1,1° pro Schuss bis 6°, erholt sich in 0,4 s; Reichweite 14 Kacheln.
   { id: 'rifle', name: 'Sturmgewehr', short: 'GEWEHR', pellets: 1, damage: 30, interval: 1 / 5.5, mag: 30, reload: 2.2,
-    spread: 0.5, bloomPerShot: 1.1, bloomMax: 6, bloomRecover: 0.4, range: 14, auto: true, sound: 'rifle' },
+    spread: 0, bloomPerShot: 1.1, bloomMax: 6, bloomRecover: 0.4, range: 14, auto: true, sound: 'rifle' },
   { id: 'smg', name: 'Maschinenpistole', short: 'MP', pellets: 1, damage: 17, interval: 1 / 11, mag: 30, reload: 2.0,
-    spread: 4, range: 6, auto: true, sound: 'smg' },
+    spread: 3, range: 6, auto: true, sound: 'smg' },
   // ENTSCHEIDUNG: Spitzhacke trifft in einem Bogen von ±25°; nur zerstörbare Wände geben Material.
   { id: 'pickaxe', name: 'Spitzhacke', short: 'HACKE', melee: true, damage: 20, wallDamage: 50, interval: 0.45, reach: 50, matsPerHit: 5,
     arc: 25, auto: true, sound: 'pickaxe' }
@@ -201,11 +201,14 @@ const BOT_PROFILES = {
 const BOT_NAMES = ['Ziegelzorn', 'Kantenkönig', 'Feldfuchs', 'Mauerblitz', 'Eckenwolf', 'Fugenfee', 'Kachelkralle', 'Rasterrabe', 'Plankenpuma', 'Brettbaron', 'Lückenluchs', 'Fensterfalke'];
 
 // Farbpalette (Abschnitt 15)
+// Farbpalette – auf Wunsch natürlicher (Grasboden, Holzwände) statt Neon; Teamfarben nur noch als Akzent
 const COLORS = {
-  bg: '#11151f', floor: '#1b2230', grid: '#263044', outside: '#0d1018',
-  own: '#3d8bff', enemy: '#ff5a4a', neutral: '#59606e', mate: '#2de2c8', zone: '#9b5cff',
-  preview: 'rgba(255,255,255,0.35)', previewBad: 'rgba(255,70,60,0.45)',
-  select: '#2de2c8', shieldNum: '#58b4ff', hpNum: '#ffd84a', player: '#3d8bff'
+  bg: '#1c2419', floor: '#5b8a3d', floor2: '#649546', grid: 'rgba(28,48,18,0.22)', outside: '#27331f',
+  own: '#3f7fd0', enemy: '#cf4e3c', neutral: '#8a8f96', mate: '#2fa58c', zone: '#7d58c2',
+  preview: 'rgba(255,255,255,0.35)', previewBad: 'rgba(230,60,50,0.45)',
+  select: '#5ec8e8', shieldNum: '#58b4ff', hpNum: '#ffd84a', player: '#3f7fd0',
+  wood: '#b98149', woodLight: '#d6a56b', woodDark: '#7a4f26', woodSeam: 'rgba(72,40,14,0.6)', woodMem: '#8d8170',
+  stone: '#8d9196', stoneLight: '#a9adb2', stoneDark: '#62666c'
 };
 
 // =====================================================================
@@ -244,17 +247,13 @@ const KEY_LABELS = {
 // Touch-Buttons: Abstand von rechts/unten in CSS-Pixeln (dx, dy) und Größe s
 const DEFAULT_TOUCH_LAYOUT = {
   fire:   { dx: 92,  dy: 120, s: 100 },
-  build:  { dx: 200, dy: 74,  s: 64 },
-  edit:   { dx: 200, dy: 156, s: 64 },
-  reset:  { dx: 128, dy: 228, s: 58 },
-  weapon: { dx: 40,  dy: 236, s: 58 },
-  heal:   { dx: 280, dy: 34,  s: 58 },
-  reload: { dx: 46,  dy: 34,  s: 58 },
-  box:    { dx: 276, dy: 118, s: 58 }
+  build:  { dx: 214, dy: 78,  s: 70 },
+  heal:   { dx: 214, dy: 170, s: 60 },
+  weapon: { dx: 60,  dy: 252, s: 60 }
 };
 const DEFAULT_SETTINGS = {
   aimSens: 1, editRelease: CONFIG.EDIT_RELEASE_TO_CONFIRM, shake: true, dmgNumbers: true, reducedFx: false,
-  sfxVol: 80, musicVol: 40, music: true, autoFire: false, hints: true, touchUi: 'auto',
+  sfxVol: 80, musicVol: 40, music: true, autoFire: false, stickFire: true, hints: true, touchUi: 'auto',
   keys: Object.assign({}, DEFAULT_KEYS), touchLayout: JSON.parse(JSON.stringify(DEFAULT_TOUCH_LAYOUT)), seenHints: {}
 };
 function loadSettings() {
@@ -294,7 +293,7 @@ const Input = {
   touchMode: false,
   capture: null,                 // Rückruf für Tastenbelegung
   touches: new Map(),            // id -> { role, sx, sy, x, y, id2 }
-  touch: { moveX: 0, moveY: 0, aimAngle: 0, aimActive: false, fire: false, firePressed: false, buildHeld: false, buildPressed: false,
+  touch: { moveX: 0, moveY: 0, aimAngle: 0, aimActive: false, aimFire: false, fire: false, firePressed: false, buildHeld: false, buildPressed: false,
     editTap: false, resetTap: false, healTap: false, reloadTap: false, cycleTap: false, boxTap: false, slotTap: -1, confirmTap: false, cancelTap: false,
     panelSeg: -1, panelPressed: false, panelHeld: false, worldSelX: 0, worldSelY: 0, worldSel: false },
   pinch: null,
@@ -397,30 +396,21 @@ const Input = {
     const btn = UI.touchButtonAt(x, y);
     const slot = UI.slotAt(x, y);
     if (UI.pauseButtonHit(x, y)) { UI.pauseGame(); return; }
-    if (panel) {
-      tc.role = 'panel';
-      if (panel.kind === 'seg') { T.panelSeg = panel.seg; T.panelPressed = true; T.panelHeld = true; tc.seg = panel.seg; }
-      else if (panel.kind === 'confirm') { T.cancelTap = true; tc.role = 'none'; }
-      else if (panel.kind === 'reset') { T.resetTap = true; tc.role = 'none'; }
-    } else if (btn) {
+    if (btn) {
       tc.role = 'btn'; tc.btn = btn;
       UI.btnFlash[btn] = 0.15;
       switch (btn) {
         case 'fire': T.fire = true; T.firePressed = true; break;
         case 'build': T.buildHeld = true; T.buildPressed = true; break;
-        case 'edit': T.editTap = true; break;
-        case 'reset': T.resetTap = true; break;
         case 'weapon': T.cycleTap = true; break;
         case 'heal': T.healTap = true; break;
-        case 'reload': T.reloadTap = true; break;
-        case 'box': T.boxTap = true; break;
       }
+    } else if (panel) {
+      // Felder direkt auf der Wand vor dir antippen oder wischen
+      tc.role = 'panel'; tc.seg = panel.seg;
+      T.panelSeg = panel.seg; T.panelPressed = true; T.panelHeld = true;
     } else if (slot >= 0) {
       T.slotTap = slot;
-    } else if (P && P.mode === 'edit' && P.edit && x > Renderer.w * 0.35 && UI.worldFieldAt(x, y) >= 0) {
-      // Direktes Tippen auf die Wand in der Welt
-      tc.role = 'worldsel';
-      T.panelSeg = UI.worldFieldAt(x, y); T.panelPressed = true; T.panelHeld = true;
     } else if (y < Renderer.h * 0.28 && x > Renderer.w * 0.2 && x < Renderer.w * 0.8) {
       // ENTSCHEIDUNG: Zwei-Finger-Zoom nur im oberen Bildbereich (dort liegen keine Steuerelemente)
       tc.role = 'pinch';
@@ -437,25 +427,22 @@ const Input = {
     tc.x = x; tc.y = y;
     const T = this.touch;
     if (tc.role === 'move') this.updateMoveStick(tc);
-    else if (tc.role === 'aim' || (tc.role === 'btn' && tc.btn === 'fire')) this.updateAimStick(tc);
+    else if (tc.role === 'aim') this.updateAimStick(tc);
     else if (tc.role === 'panel') {
       const p = UI.panelHit(x, y);
       if (p && p.kind === 'seg' && p.seg !== tc.seg) { tc.seg = p.seg; T.panelSeg = p.seg; T.panelHeld = true; }
-    } else if (tc.role === 'worldsel') {
-      const s = UI.worldFieldAt(x, y);
-      if (s >= 0) { T.panelSeg = s; T.panelHeld = true; }
     } else if (tc.role === 'pinch') this.updatePinch();
   },
   touchEnd(id) {
     const tc = this.touches.get(id); if (!tc) return;
     const T = this.touch;
     if (tc.role === 'move') { T.moveX = 0; T.moveY = 0; }
-    if (tc.role === 'aim') T.aimActive = false;
+    if (tc.role === 'aim') { T.aimActive = false; T.aimFire = false; }
     if (tc.role === 'btn') {
       if (tc.btn === 'fire') T.fire = false;
       if (tc.btn === 'build') T.buildHeld = false;
     }
-    if (tc.role === 'panel' || tc.role === 'worldsel') T.panelHeld = false;
+    if (tc.role === 'panel') T.panelHeld = false;
     this.touches.delete(id);
     this.pinch = null; this.updatePinch();
   },
@@ -475,6 +462,8 @@ const Input = {
     const l = Math.hypot(dx, dy);
     const dead = 10 / clamp(settings.aimSens, 0.25, 3);
     if (l > dead) { this.touch.aimAngle = Math.atan2(dy, dx); this.touch.aimActive = true; }
+    // Ziel-Stick weit gezogen → es wird genau in diese Richtung geschossen
+    this.touch.aimFire = l > 56 * UI.scale() * 0.65;
   },
   updatePinch() {
     const ps = [...this.touches.values()].filter(t => t.role === 'pinch');
@@ -497,7 +486,7 @@ const Input = {
   resetAll() {
     this.down.clear(); this.pressed.clear(); this.released.clear(); this.touches.clear();
     this.mouse.left = this.mouse.right = false;
-    const T = this.touch; T.moveX = T.moveY = 0; T.fire = false; T.buildHeld = false; T.panelHeld = false; T.panelSeg = -1;
+    const T = this.touch; T.moveX = T.moveY = 0; T.fire = false; T.aimFire = false; T.aimActive = false; T.buildHeld = false; T.panelHeld = false; T.panelSeg = -1;
   }
 };
 
@@ -507,15 +496,12 @@ function playerIntent(f) {
   if (Input.isTouchUi()) {
     const T = Input.touch;
     it.mx = T.moveX; it.my = T.moveY;
-    // Auto-Zielrichtung, wenn nicht aktiv gezielt wird: Laufrichtung
-    if (!T.aimActive && !T.fire && (Math.abs(T.moveX) + Math.abs(T.moveY) > 0.3) && !hasTouchRole('aim')) {
-      const ma = Math.atan2(T.moveY, T.moveX);
-      T.aimAngle = T.aimAngle + angDiff(ma, T.aimAngle) * 0.12;
-    }
+    // Zielrichtung kommt nur vom Ziel-Stick und bleibt stehen, bis du neu zielst: Schüsse gehen immer dorthin
     const a = T.aimAngle;
     const d = (f.mode === 'edit' ? CONFIG.TOUCH_EDIT_DIST : CONFIG.TOUCH_BUILD_DIST) * TILE;
     it.aimX = f.x + Math.cos(a) * d; it.aimY = f.y + Math.sin(a) * d;
-    it.fire = T.fire; it.firePressed = T.firePressed;
+    const stickFire = settings.stickFire && T.aimFire && f.mode === 'weapon';
+    it.fire = T.fire || stickFire; it.firePressed = T.firePressed;
     if (T.fire || T.firePressed) it.forceWeapon = true;
     // Automatisch feuern, wenn ein sichtbarer Gegner im Fadenkreuz ist
     if (settings.autoFire && f.mode === 'weapon' && autoFireTarget(f)) it.fire = true;
@@ -524,6 +510,8 @@ function playerIntent(f) {
     it.heal = T.healTap; it.reload = T.reloadTap; it.box = T.boxTap; it.cycle = T.cycleTap ? 1 : 0;
     if (T.slotTap >= 0) it.slot = T.slotTap;
     it.panelSeg = T.panelSeg; it.panelPressed = T.panelPressed; it.panelHeld = T.panelHeld;
+    // Feld auf der Wand angetippt → Edit startet sofort, Loslassen übernimmt
+    if (T.panelPressed && f.mode !== 'edit') it.editTap = true;
   } else {
     it.mx = (Input.key('right') ? 1 : 0) - (Input.key('left') ? 1 : 0);
     it.my = (Input.key('down') ? 1 : 0) - (Input.key('up') ? 1 : 0);
@@ -1091,19 +1079,23 @@ function buildBox(f) {
 // Editsystem mit 3 gleich großen Feldern (Abschnitt 8)
 // ---------------------------------------------------------------------
 function canEdit(f, w) { return !w.indestructible && w.team === f.team; }
-function findEditTarget(f, px, py) {
-  const p = clampPointer(f, px, py, CONFIG.EDIT_RANGE * TILE);
+// Nur die Wand direkt vor dem Kämpfer: erster Wandkörper (inkl. offener Felder) auf dem Strahl in Zielrichtung.
+// Wände dahinter können so nie bearbeitet werden.
+function frontWall(f, ang) {
+  const dx = Math.cos(ang), dy = Math.sin(ang), range = CONFIG.EDIT_RANGE * TILE;
   const tx = tileOf(f.x), ty = tileOf(f.y);
-  let best = null, bd = Infinity;
+  let best = null, bt = range;
   const consider = (w) => {
     if (!w) return;
-    if (dist(f.x, f.y, w.cx, w.cy) > CONFIG.EDIT_RANGE * TILE) return;
-    const d = dist(p.x, p.y, w.cx, w.cy);
-    if (d < bd) { bd = d; best = w; }
+    const t = Physics.rayRect(f.x, f.y, dx, dy, WallSystem.fullRect(w.orient, w.gx, w.gy));
+    if (t < bt) { bt = t; best = w; }
   };
   for (let gx = tx - 2; gx <= tx + 2; gx++) for (let gy = ty - 2; gy <= ty + 3; gy++) consider(WallSystem.get('H', gx, gy));
   for (let gx = tx - 2; gx <= tx + 3; gx++) for (let gy = ty - 2; gy <= ty + 2; gy++) consider(WallSystem.get('V', gx, gy));
   return best;
+}
+function findEditTarget(f, px, py) {
+  return frontWall(f, Math.atan2(py - f.y, px - f.x));
 }
 function startEdit(f) {
   const w = findEditTarget(f, f.pointerX, f.pointerY);
@@ -1314,8 +1306,9 @@ function wallColorFor(w, team) {
   if (w.indestructible || w.team < 0) return COLORS.neutral;
   return w.team === team ? COLORS.own : COLORS.enemy;
 }
+function wallChipColor(w) { return w.indestructible ? (Math.random() < 0.5 ? COLORS.stone : COLORS.stoneDark) : (Math.random() < 0.5 ? COLORS.wood : COLORS.woodDark); }
 function damageWall(w, dmg, src, hx, hy) {
-  const col = wallColorFor(w, Match.playerTeam());
+  const col = wallChipColor(w);
   const n = settings.reducedFx ? 2 : 4;
   for (let i = 0; i < n; i++) Entities.particle(hx, hy, rand(-120, 120), rand(-120, 120), 0.3, rand(1.5, 3), col, 5);
   if (w.indestructible) return;
@@ -1324,7 +1317,7 @@ function damageWall(w, dmg, src, hx, hy) {
   if (w.hp <= 0) breakWall(w, src);
 }
 function breakWall(w, src) {
-  const col = wallColorFor(w, Match.playerTeam());
+  const col = wallChipColor(w);
   const n = settings.reducedFx ? 10 : 26;
   for (let i = 0; i < n; i++) {
     const u = Math.random() * TILE;
@@ -2494,7 +2487,7 @@ const Renderer = {
     const s = 0.7, ox = (this.menuT * 14) % TILE, oy = (this.menuT * 8) % TILE;
     ctx.save(); ctx.scale(s, s); ctx.translate(-ox, -oy);
     const cols = Math.ceil(w / s / TILE) + 2, rows = Math.ceil(h / s / TILE) + 2;
-    ctx.fillStyle = COLORS.floor; ctx.fillRect(0, 0, cols * TILE, rows * TILE);
+    ctx.fillStyle = this.grassPattern(ctx); ctx.fillRect(0, 0, cols * TILE, rows * TILE);
     ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1.5; ctx.beginPath();
     for (let i = 0; i <= cols; i++) { ctx.moveTo(i * TILE, 0); ctx.lineTo(i * TILE, rows * TILE); }
     for (let j = 0; j <= rows; j++) { ctx.moveTo(0, j * TILE); ctx.lineTo(cols * TILE, j * TILE); }
@@ -2506,16 +2499,16 @@ const Renderer = {
       if (hsh % 7 === 0) this.decoWall(ctx, i * TILE, j * TILE, hsh % 2 === 0 ? 'H' : 'V', hsh % 3 === 0 ? COLORS.enemy : COLORS.own, hsh);
     }
     ctx.restore();
-    ctx.fillStyle = 'rgba(10,13,20,0.55)'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(14,20,12,0.5)'; ctx.fillRect(0, 0, w, h);
     this.drawVignette();
   },
   decoWall(ctx, x, y, o, col, hsh) {
-    const P = wallPal(col), th = CONFIG.WALL_THICK;
+    const th = CONFIG.WALL_THICK;
     for (let i = 0; i < 3; i++) {
       if ((hsh >> (i + 3)) % 5 === 0) continue;
       const r = o === 'H' ? [x + i * SEG_LEN, y - th / 2, SEG_LEN, th] : [x - th / 2, y + i * SEG_LEN, th, SEG_LEN];
-      ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(r[0] + 3, r[1] + 3, r[2], r[3]);
-      ctx.fillStyle = P.body; ctx.fillRect(r[0], r[1], r[2], r[3]);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(r[0] + 3, r[1] + 3, r[2], r[3]);
+      this.drawPlanks(ctx, o, r, i, hsh % 97, false, false);
     }
   },
   drawVignette() {
@@ -2570,17 +2563,34 @@ const Renderer = {
     ctx.restore();
     HUD.draw(ctx, dt);
   },
+  grassPattern(ctx) {
+    if (this._grass) return this._grass;
+    const c = document.createElement('canvas'); c.width = c.height = TILE * 2;
+    const g = c.getContext('2d');
+    let r = 12345; const rnd = () => { r = (r * 16807) % 2147483647; return r / 2147483647; };
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { g.fillStyle = (i + j) % 2 ? COLORS.floor : COLORS.floor2; g.fillRect(i * TILE, j * TILE, TILE, TILE); }
+    // weiche Flecken
+    for (let k = 0; k < 14; k++) { g.fillStyle = rnd() < 0.5 ? 'rgba(40,70,25,0.18)' : 'rgba(150,190,90,0.12)'; g.beginPath(); g.arc(rnd() * 192, rnd() * 192, 8 + rnd() * 18, 0, Math.PI * 2); g.fill(); }
+    // Grashalme
+    g.lineWidth = 1.2; g.lineCap = 'round';
+    for (let k = 0; k < 170; k++) {
+      const x = rnd() * 192, y = rnd() * 192, h = 3 + rnd() * 4, a = (rnd() - 0.5) * 0.9;
+      g.strokeStyle = rnd() < 0.55 ? 'rgba(35,70,22,0.55)' : 'rgba(150,200,95,0.45)';
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.sin(a) * h, y - Math.cos(a) * h); g.stroke();
+    }
+    // vereinzelte Blüten
+    for (let k = 0; k < 5; k++) { g.fillStyle = rnd() < 0.5 ? 'rgba(245,230,140,0.8)' : 'rgba(240,240,240,0.75)'; g.beginPath(); g.arc(rnd() * 192, rnd() * 192, 1.4, 0, Math.PI * 2); g.fill(); }
+    this._grass = ctx.createPattern(c, 'repeat');
+    return this._grass;
+  },
   drawFloor(ctx, vb) {
-    ctx.fillStyle = COLORS.floor; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+    ctx.fillStyle = this.grassPattern(ctx); ctx.fillRect(0, 0, ARENA_W, ARENA_H);
     const x0 = Math.max(0, Math.floor(vb.x0 / TILE)), x1 = Math.min(GW, Math.ceil(vb.x1 / TILE));
     const y0 = Math.max(0, Math.floor(vb.y0 / TILE)), y1 = Math.min(GH, Math.ceil(vb.y1 / TILE));
-    ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1.2; ctx.beginPath();
     for (let x = x0; x <= x1; x++) { ctx.moveTo(x * TILE, y0 * TILE); ctx.lineTo(x * TILE, y1 * TILE); }
     for (let y = y0; y <= y1; y++) { ctx.moveTo(x0 * TILE, y * TILE); ctx.lineTo(x1 * TILE, y * TILE); }
     ctx.stroke();
-    // kleine Punkte an den Rasterknoten
-    ctx.fillStyle = '#2c3851';
-    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) ctx.fillRect(x * TILE - 2, y * TILE - 2, 4, 4);
   },
   drawZone(ctx, vb) {
     const Z = Match.zone; if (!Z.active) return;
@@ -2690,12 +2700,51 @@ const Renderer = {
     return b ? 1 : 0;
   },
   segDrawRect(o, x0, y0, i, sc, thickMul) {
-    const th = CONFIG.WALL_THICK * thickMul, L = SEG_LEN * sc;
+    // ENTSCHEIDUNG: Wände werden 1,3× so dick gezeichnet, damit das Holz auf Handys gut erkennbar ist (Kollision bleibt 10)
+    const th = CONFIG.WALL_THICK * thickMul * 1.3, L = SEG_LEN * sc;
     if (o === 'H') { const cx = x0 + (i + 0.5) * SEG_LEN; return [cx - L / 2, y0 - th / 2, L, th]; }
     const cy = y0 + (i + 0.5) * SEG_LEN; return [x0 - th / 2, cy - L / 2, th, L];
   },
+  // Holzlook: Bretter längs der Wand, Fugen, Maserung, Nägel; Randwände/Kisten aus Stein.
+  // Ein schmaler Streifen in Teamfarbe zeigt, wem die Wand gehört.
+  drawPlanks(ctx, o, R, i, seed, stone, mem) {
+    const along = o === 'H', x = R[0], y = R[1], w = R[2], h = R[3];
+    if (stone) {
+      ctx.fillStyle = mem ? '#7b7f84' : COLORS.stone; ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = COLORS.stoneLight; if (along) ctx.fillRect(x, y, w, 2.5); else ctx.fillRect(x, y, 2.5, h);
+      ctx.strokeStyle = 'rgba(40,42,46,0.55)'; ctx.lineWidth = 0.8; ctx.beginPath();
+      const mid = along ? y + h / 2 : x + w / 2;
+      if (along) { ctx.moveTo(x, mid); ctx.lineTo(x + w, mid); ctx.moveTo(x + w * (i % 2 ? 0.3 : 0.65), y); ctx.lineTo(x + w * (i % 2 ? 0.3 : 0.65), mid); ctx.moveTo(x + w * (i % 2 ? 0.75 : 0.2), mid); ctx.lineTo(x + w * (i % 2 ? 0.75 : 0.2), y + h); }
+      else { ctx.moveTo(mid, y); ctx.lineTo(mid, y + h); ctx.moveTo(x, y + h * (i % 2 ? 0.3 : 0.65)); ctx.lineTo(mid, y + h * (i % 2 ? 0.3 : 0.65)); ctx.moveTo(mid, y + h * (i % 2 ? 0.75 : 0.2)); ctx.lineTo(x + w, y + h * (i % 2 ? 0.75 : 0.2)); }
+      ctx.stroke();
+      return;
+    }
+    ctx.fillStyle = mem ? COLORS.woodMem : COLORS.wood; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = mem ? '#a09484' : COLORS.woodLight;
+    if (along) ctx.fillRect(x, y, w, 2.2); else ctx.fillRect(x, y, 2.2, h);
+    ctx.fillStyle = mem ? '#6f6556' : COLORS.woodDark;
+    if (along) ctx.fillRect(x, y + h - 1.6, w, 1.6); else ctx.fillRect(x + w - 1.6, y, 1.6, h);
+    // Brettfugen längs
+    ctx.strokeStyle = COLORS.woodSeam; ctx.lineWidth = 0.7; ctx.beginPath();
+    for (const k of [0.36, 0.68]) { if (along) { ctx.moveTo(x, y + h * k); ctx.lineTo(x + w, y + h * k); } else { ctx.moveTo(x + w * k, y); ctx.lineTo(x + w * k, y + h); } }
+    // Maserung: kurze Striche, fest je Wand und Feld
+    let r = (seed * 31 + i * 17) % 97;
+    for (let g = 0; g < 2; g++) {
+      r = (r * 37 + 11) % 97;
+      const u = (r / 97) * 0.7 + 0.1, v = g ? 0.22 : 0.84, len = 0.25;
+      if (along) { ctx.moveTo(x + w * u, y + h * v); ctx.lineTo(x + w * Math.min(1, u + len), y + h * v); }
+      else { ctx.moveTo(x + w * v, y + h * u); ctx.lineTo(x + w * v, y + h * Math.min(1, u + len)); }
+    }
+    ctx.stroke();
+    if (!mem && Math.min(w, h) > 6) {
+      // Nägel an den Feldenden
+      ctx.fillStyle = 'rgba(50,40,30,0.8)';
+      if (along) { ctx.fillRect(x + 2.5, y + h / 2 - 0.8, 1.6, 1.6); ctx.fillRect(x + w - 4, y + h / 2 - 0.8, 1.6, 1.6); }
+      else { ctx.fillRect(x + w / 2 - 0.8, y + 2.5, 1.6, 1.6); ctx.fillRect(x + w / 2 - 0.8, y + h - 4, 1.6, 1.6); }
+    }
+  },
   drawWallLive(ctx, w) {
-    const col = wallColorFor(w, Match.playerTeam()), P = wallPal(col);
+    const team = w.indestructible || w.team < 0 ? null : wallColorFor(w, Match.playerTeam());
     const bp = w.buildProgress;
     ctx.globalAlpha = 0.4 + 0.6 * bp;
     const o = w.orient;
@@ -2709,17 +2758,15 @@ const Renderer = {
         continue;
       }
       const R = this.segDrawRect(o, w.x0, w.y0, i, sc, 1);
-      ctx.fillStyle = bp < 1 ? P.build : P.body; ctx.fillRect(R[0], R[1], R[2], R[3]);
-      ctx.fillStyle = P.top;
-      if (o === 'H') ctx.fillRect(R[0], R[1], R[2], 3); else ctx.fillRect(R[0], R[1], 3, R[3]);
-      ctx.fillStyle = P.dark;
-      if (o === 'H') ctx.fillRect(R[0], R[1] + R[3] - 2, R[2], 2); else ctx.fillRect(R[0] + R[2] - 2, R[1], 2, R[3]);
+      this.drawPlanks(ctx, o, R, i, w.id, !team, false);
+      if (bp < 1) { ctx.fillStyle = 'rgba(255,240,210,0.35)'; ctx.fillRect(R[0], R[1], R[2], R[3]); }
+      if (team) { ctx.fillStyle = team; if (o === 'H') ctx.fillRect(R[0], R[1] - 1.2, R[2], 1.8); else ctx.fillRect(R[0] - 1.2, R[1], 1.8, R[3]); }
     }
     // Zwei feine Feldtrennlinien – die 3 Felder sind immer erkennbar
-    ctx.strokeStyle = 'rgba(8,12,20,0.75)'; ctx.lineWidth = 1.3; ctx.beginPath();
+    ctx.strokeStyle = 'rgba(40,24,8,0.85)'; ctx.lineWidth = 1.3; ctx.beginPath();
     for (let i = 1; i < 3; i++) {
-      if (o === 'H') { const x = w.x0 + i * SEG_LEN; ctx.moveTo(x, w.y0 - 5); ctx.lineTo(x, w.y0 + 5); }
-      else { const y = w.y0 + i * SEG_LEN; ctx.moveTo(w.x0 - 5, y); ctx.lineTo(w.x0 + 5, y); }
+      if (o === 'H') { const x = w.x0 + i * SEG_LEN; ctx.moveTo(x, w.y0 - 6.5); ctx.lineTo(x, w.y0 + 6.5); }
+      else { const y = w.y0 + i * SEG_LEN; ctx.moveTo(w.x0 - 6.5, y); ctx.lineTo(w.x0 + 6.5, y); }
     }
     ctx.stroke();
     // Risse bei < 66 % und < 33 % HP
@@ -2759,17 +2806,13 @@ const Renderer = {
     return out;
   },
   drawWallMem(ctx, m) {
-    const col = m.indestructible || m.team < 0 ? COLORS.neutral : (m.team === Match.playerTeam() ? COLORS.own : COLORS.enemy);
-    const P = wallPal(col);
+    const stone = m.indestructible || m.team < 0;
     ctx.globalAlpha = 0.7;
     for (let i = 0; i < 3; i++) {
       if (!m.segments[i]) continue;
-      const R = this.segDrawRect(m.o, m.x0, m.y0, i, 1, 1);
-      ctx.fillStyle = P.mem; ctx.fillRect(R[0], R[1], R[2], R[3]);
-      ctx.fillStyle = P.memTop;
-      if (m.o === 'H') ctx.fillRect(R[0], R[1], R[2], 2); else ctx.fillRect(R[0], R[1], 2, R[3]);
+      this.drawPlanks(ctx, m.o, this.segDrawRect(m.o, m.x0, m.y0, i, 1, 1), i, m.gx * 7 + m.gy, stone, true);
     }
-    ctx.strokeStyle = 'rgba(8,12,20,0.6)'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = 'rgba(40,30,20,0.6)'; ctx.lineWidth = 1; ctx.beginPath();
     for (let i = 1; i < 3; i++) {
       if (m.o === 'H') { const x = m.x0 + i * SEG_LEN; ctx.moveTo(x, m.y0 - 5); ctx.lineTo(x, m.y0 + 5); }
       else { const y = m.y0 + i * SEG_LEN; ctx.moveTo(m.x0 - 5, y); ctx.lineTo(m.x0 + 5, y); }
@@ -2784,7 +2827,7 @@ const Renderer = {
     ctx.moveTo(Vision.px[0], Vision.py[0]);
     for (let i = 1; i < n; i++) ctx.lineTo(Vision.px[i], Vision.py[i]);
     ctx.closePath();
-    ctx.fillStyle = `rgba(6,9,16,${CONFIG.FOG_ALPHA})`;
+    ctx.fillStyle = `rgba(10,16,12,${CONFIG.FOG_ALPHA})`;
     ctx.fill('evenodd');
   },
   drawParticles(ctx) {
@@ -2824,11 +2867,19 @@ const Renderer = {
       }
       ctx.stroke();
     }
-    if (P.mode === 'edit' && P.edit && P.edit.wall && P.edit.wall.editState) this.drawEditOverlay(ctx, P.edit.wall, P);
+    if (P.mode === 'edit' && P.edit && P.edit.wall && P.edit.wall.editState && !Input.isTouchUi()) this.drawEditOverlay(ctx, P.edit.wall, P);
+    // Touch: Ziellinie zeigt genau, wohin geschossen wird
+    if (Input.isTouchUi() && P.mode === 'weapon') {
+      const wpn = WEAPONS[P.slot], dx = Math.cos(P.aim), dy = Math.sin(P.aim);
+      const maxT = wpn.melee ? P.r + wpn.reach : Math.min(wpn.range * TILE, 5 * TILE);
+      const h = Physics.raycastWalls(P.rx, P.ry, dx, dy, maxT), t = h ? h.t : maxT;
+      ctx.setLineDash([8, 7]); ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(P.rx + dx * (P.r + 6), P.ry + dy * (P.r + 6)); ctx.lineTo(P.rx + dx * t, P.ry + dy * t); ctx.stroke(); ctx.setLineDash([]);
+    }
   },
   drawEditOverlay(ctx, w, P) {
     const sel = w.editState.selected, invalid = sel.every(Boolean);
-    const col = wallColorFor(w, P.team), Pl = wallPal(col);
+    const Pl = { body: COLORS.wood, top: COLORS.woodLight };
     const thM = CONFIG.EDIT_DRAW_SCALE, gap = 2.5;
     const full = WallSystem.segRect(w, 0, thM), fullEnd = WallSystem.segRect(w, 2, thM);
     ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 2;
@@ -2842,7 +2893,7 @@ const Renderer = {
       const selCol = invalid ? '#ff4a4a' : COLORS.select;
       if (sel[i] && !open) {
         // wird entfernt: halbtransparent in Auswahlfarbe, gestreift
-        ctx.fillStyle = invalid ? 'rgba(255,74,74,0.5)' : 'rgba(45,226,200,0.45)'; ctx.fillRect(x, y, ww, hh);
+        ctx.fillStyle = invalid ? 'rgba(255,74,74,0.5)' : 'rgba(94,200,232,0.45)'; ctx.fillRect(x, y, ww, hh);
         ctx.save(); ctx.beginPath(); ctx.rect(x, y, ww, hh); ctx.clip();
         ctx.strokeStyle = selCol; ctx.lineWidth = 2; ctx.beginPath();
         for (let k = -40; k < 80; k += 7) { ctx.moveTo(x + k, y); ctx.lineTo(x + k + 30, y + 30); }
@@ -2943,7 +2994,7 @@ const HUD = {
     ctx.strokeText(s, x, y); ctx.fillStyle = col; ctx.fillText(s, x, y);
   },
   panel(ctx, x, y, w, h, r) {
-    ctx.fillStyle = 'rgba(14,19,30,0.72)'; ctx.strokeStyle = 'rgba(80,100,140,0.45)'; ctx.lineWidth = 1;
+    ctx.fillStyle = 'rgba(20,24,18,0.72)'; ctx.strokeStyle = 'rgba(150,140,110,0.35)'; ctx.lineWidth = 1;
     ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r || 8); else ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
   },
   crosshairPos(touch) {
@@ -3207,7 +3258,7 @@ const UI = {
     if (id === 's-keys') this.buildKeys();
     if (id === 's-stats') this.buildStats();
     if (id === 's-main') document.getElementById('main-foot').textContent = Input.isTouchUi() ?
-      'Links: laufen · Rechts: zielen · Buttons: Feuer, Bauen, Edit' : 'WASD bewegen · Maus zielen · Q bauen · F editieren · V einboxen';
+      'Links laufen · Rechts zielen und schießen · Felder auf der Wand antippen' : 'WASD bewegen · Maus zielen · Q bauen · F editieren · V einboxen';
     const first = el.querySelector('button');
     if (first && !Input.isTouchUi()) first.focus({ preventScroll: true });
   },
@@ -3283,6 +3334,7 @@ const UI = {
     this.cycler(el, 'Lautstärke Musik', pct, () => S.musicVol, v => { S.musicVol = v; save(); Sfx.applyVolumes(); }, v => v + ' %');
     this.cycler(el, 'Musik', [true, false], () => S.music, v => { S.music = v; save(); Sfx.applyVolumes(); }, onoff);
     this.cycler(el, 'Zielempfindlichkeit (Touch)', [0.5, 0.75, 1, 1.25, 1.5, 2], () => S.aimSens, v => { S.aimSens = v; save(); }, v => v.toFixed(2) + '×');
+    this.cycler(el, 'Ziel-Stick schießt (Touch)', [true, false], () => S.stickFire, v => { S.stickFire = v; save(); }, onoff);
     this.cycler(el, 'Auto-Feuer (Touch)', [false, true], () => S.autoFire, v => { S.autoFire = v; save(); }, onoff);
     this.cycler(el, 'Touch-Steuerung', ['auto', 'on', 'off'], () => S.touchUi, v => { S.touchUi = v; save(); }, v => ({ auto: 'Automatisch', on: 'Immer', off: 'Nie' })[v]);
     this.cycler(el, 'Hinweise', [true, false], () => S.hints, v => { S.hints = v; save(); }, onoff);
@@ -3394,13 +3446,13 @@ const UI = {
   // Kurze Hinweise beim ersten Spielen
   roundStartHints() {
     if (!settings.hints) return;
-    const t = Input.isTouchUi();
-    const all = t ? [
-      ['move', 'Linke Hälfte: laufen · Rechte Hälfte: zielen'], ['build', '„Bauen“ antippen oder halten (Turbo)'],
-      ['edit', '„Edit“ → Felder antippen oder wischen – fertig'], ['reset', '„Reset“ schließt die Wand wieder'], ['box', '„Box“ baut dich ein · Trank = Schild']
-    ] : [
-      ['move', 'WASD laufen · Maus zielen · Linksklick schießen'], ['build', 'Q Bau-Modus · Linksklick halten = Turbo-Bau'],
-      ['edit', 'F halten → Felder anklicken → F loslassen'], ['reset', 'Rechtsklick (im Edit) oder F antippen setzt zurück'], ['box', 'V boxt dich ein · 5 Schildtrank · R nachladen']
+    // [Schlüssel, Touch-Text, PC-Text] – der Text wird beim Anzeigen passend zur Steuerung gewählt
+    const all = [
+      ['move', 'Links: laufen · Rechts: zielen – weit ziehen schießt', 'WASD laufen · Maus zielen · Linksklick schießen'],
+      ['build', '„Bauen“ antippen oder halten (Turbo)', 'Q Bau-Modus · Linksklick halten = Turbo-Bau'],
+      ['edit', 'Wand vor dir: Felder antippen = öffnen / schließen', 'F halten → Felder anklicken → F loslassen'],
+      ['reset', '', 'Rechtsklick (im Edit) oder F antippen setzt zurück'],
+      ['box', '„Waffe“ wechselt · „Trank“ gibt Schild', 'V boxt dich ein · 5 Schildtrank · R nachladen']
     ];
     this.hintQueue = all.filter(h => !settings.seenHints[h[0]]);
     this.hintT = 0;
@@ -3413,13 +3465,15 @@ const UI = {
       if (!this.hintQueue.length) return;
     }
     const h = this.hintQueue[0];
+    const txt = h[Input.isTouchUi() ? 1 : 2];
+    if (!txt) { this.hintT = CONFIG.HINT_TIME + 1; return; }
     const a = clamp(Math.min(this.hintT * 3, (CONFIG.HINT_TIME - this.hintT) * 3), 0, 1);
     ctx.globalAlpha = a;
     const y = Renderer.h * (Input.isTouchUi() ? (Renderer.portrait ? 0.2 : 0.24) : 0.76);
     ctx.font = `700 ${Math.round(15 * u)}px system-ui,sans-serif`;
-    const tw = ctx.measureText(h[1]).width + 30 * u;
+    const tw = ctx.measureText(txt).width + 30 * u;
     HUD.panel(ctx, Renderer.w / 2 - tw / 2, y - 17 * u, tw, 34 * u, 10 * u);
-    HUD.text(ctx, h[1], Renderer.w / 2, y, 15 * u, '#e8eefc', 'center', 700);
+    HUD.text(ctx, txt, Renderer.w / 2, y, 15 * u, '#e8eefc', 'center', 700);
     ctx.globalAlpha = 1;
   },
 
@@ -3428,9 +3482,7 @@ const UI = {
   touchButtons() {
     const k = this.touchK(), w = Renderer.w, h = Renderer.h, out = [];
     const P = Match.player;
-    const editing = P && P.mode === 'edit';
     for (const id of Object.keys(DEFAULT_TOUCH_LAYOUT)) {
-      if (editing && Game.state === 'playing') continue;   // im Edit-Modus übernimmt das Edit-Panel
       const L = settings.touchLayout[id] || DEFAULT_TOUCH_LAYOUT[id];
       const r = Math.max(28, L.s * k / 2);
       out.push({ id, x: clamp(w - L.dx * k, r + 4, w - r - 4), y: clamp(h - L.dy * k, r + 4, h - r - 4), r });
@@ -3453,27 +3505,24 @@ const UI = {
   // Edit-Panel: 3 Felder (vertikale Wände übereinander), dazu Reset und Zurück. Auswahl wird beim Loslassen sofort übernommen.
   panelLayout() {
     const P = Match.player;
-    if (!P || P.mode !== 'edit' || !P.edit || !P.edit.wall || !Input.isTouchUi()) return null;
-    const u = this.scale(), w = Renderer.w, h = Renderer.h, fs = 72 * u, g = 8 * u, m = 22 * u, bh = 50 * u;
-    const vert = P.edit.wall.orient === 'V';
+    if (!P || !P.alive || !Input.isTouchUi() || Game.state !== 'playing' || Match.phase !== 'combat') return null;
+    const w = P.mode === 'edit' && P.edit ? P.edit.wall : frontWall(P, P.aim);
+    if (!w || w.dead || !canEdit(P, w)) return null;
+    if (P.mode !== 'edit' && w.editState) return null;
+    const c = Renderer.worldToScreen(w.cx, w.cy);
+    // Mindestens 56 px große Tippflächen, mittig auf der Wand
+    const L = Math.max(SEG_LEN * Renderer.scale, 56), th = Math.max(CONFIG.WALL_THICK * Renderer.scale * 2.2, 50), g = 4;
     const fields = [];
-    if (!vert) {
-      const x0 = w - m - 3 * fs - 2 * g, y0 = h - m - fs;
-      for (let i = 0; i < 3; i++) fields.push({ x: x0 + i * (fs + g), y: y0, w: fs, h: fs });
-      const bw = (3 * fs + 2 * g - g) / 2;
-      return { fields, reset: { x: x0, y: y0 - g - bh, w: bw, h: bh }, confirm: { x: x0 + bw + g, y: y0 - g - bh, w: bw, h: bh } };
+    for (let i = 0; i < 3; i++) {
+      const o = (i - 1) * (L + g);
+      fields.push(w.orient === 'H' ? { x: c.x + o - L / 2, y: c.y - th / 2, w: L, h: th } : { x: c.x - th / 2, y: c.y + o - L / 2, w: th, h: L });
     }
-    const x0 = w - m - fs, y0 = h - m - 3 * fs - 2 * g;
-    for (let i = 0; i < 3; i++) fields.push({ x: x0, y: y0 + i * (fs + g), w: fs, h: fs });
-    const bw = 120 * u;
-    return { fields, reset: { x: x0 - g - bw, y: h - m - 2 * bh - g, w: bw, h: bh }, confirm: { x: x0 - g - bw, y: h - m - bh, w: bw, h: bh } };
+    return { wall: w, fields };
   },
   panelHit(x, y) {
     const L = this.panelLayout(); if (!L) return null;
     const inR = r => x >= r.x - 4 && x <= r.x + r.w + 4 && y >= r.y - 4 && y <= r.y + r.h + 4;
     for (let i = 0; i < 3; i++) if (inR(L.fields[i])) return { kind: 'seg', seg: i };
-    if (inR(L.confirm)) return { kind: 'confirm' };
-    if (inR(L.reset)) return { kind: 'reset' };
     return null;
   },
   worldFieldAt(sx, sy) {
@@ -3501,18 +3550,15 @@ const UI = {
     for (const b of this.touchButtons()) this.drawTouchBtn(ctx, b, P);
     const L = this.panelLayout();
     if (L) {
-      const w = P.edit.wall, sel = w.editState ? w.editState.selected : [false, false, false], invalid = sel.every(Boolean);
-      const col = wallColorFor(w, P.team);
+      const w = L.wall, editing = P.mode === 'edit' && w.editState;
+      const sel = editing ? w.editState.selected : [false, false, false], invalid = sel.every(Boolean);
       for (let i = 0; i < 3; i++) {
         const r = L.fields[i], open = !w.segments[i];
-        HUD.panel(ctx, r.x - 3, r.y - 3, r.w + 6, r.h + 6, 8 * u);
-        if (sel[i] && !open) { ctx.fillStyle = invalid ? 'rgba(255,74,74,0.6)' : 'rgba(45,226,200,0.55)'; ctx.fillRect(r.x, r.y, r.w, r.h); }
-        else if (sel[i] && open) { ctx.setLineDash([6, 4]); ctx.strokeStyle = invalid ? '#ff4a4a' : COLORS.select; ctx.lineWidth = 2; ctx.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4); ctx.setLineDash([]); }
-        else { ctx.fillStyle = col; ctx.globalAlpha = open ? 0.5 : 1; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.globalAlpha = 1; }
+        ctx.lineWidth = 2;
+        if (sel[i] && !open) { ctx.fillStyle = invalid ? 'rgba(220,70,60,0.55)' : 'rgba(94,200,232,0.5)'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.strokeStyle = invalid ? '#e0645a' : '#9fe0f2'; ctx.strokeRect(r.x, r.y, r.w, r.h); }
+        else if (open && !(editing && !sel[i])) { ctx.setLineDash([6, 4]); ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2); ctx.setLineDash([]); }
+        else { ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.strokeRect(r.x, r.y, r.w, r.h); }
       }
-      const btn = (r, label, c) => { HUD.panel(ctx, r.x, r.y, r.w, r.h, 10 * u); ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2); HUD.text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, 14 * u, c, 'center'); };
-      btn(L.reset, 'RESET', '#ffb07a');
-      btn(L.confirm, 'ZURÜCK', '#cfd8ea');
     }
   },
   drawTouchBtn(ctx, b, P) {
@@ -3603,7 +3649,7 @@ const UI = {
     const y0 = 40;
     t = t || 0;
     for (let li = 0; li < word.length; li++) {
-      const g = this.GLYPHS[word[li]], col = li < 3 ? COLORS.own : COLORS.enemy;
+      const g = this.GLYPHS[word[li]], col = li < 3 ? COLORS.woodLight : COLORS.wood;
       for (let r = 0; r < 5; r++) for (let q = 0; q < 4; q++) {
         if (g[r][q] !== '1') continue;
         // ein „editiertes“ Feld im O als Augenzwinkern
@@ -3614,10 +3660,10 @@ const UI = {
         }
         const bx = x + q * (cell + gap), by = y0 + r * (cell + gap) + Math.sin(t * 3 + li * 0.6) * 2;
         ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(bx + 4, by + 5, cell, cell);
-        ctx.shadowColor = col; ctx.shadowBlur = 14;
         ctx.fillStyle = col; ctx.fillRect(bx, by, cell, cell);
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = shade(col, 0.4); ctx.fillRect(bx, by, cell, 4);
+        ctx.fillStyle = shade(col, 0.3); ctx.fillRect(bx, by, cell, 3);
+        ctx.fillStyle = shade(col, -0.35); ctx.fillRect(bx, by + cell - 2, cell, 2);
+        ctx.fillStyle = 'rgba(72,40,14,0.5)'; ctx.fillRect(bx, by + cell * 0.5, cell, 1);
       }
       x += lw;
     }
@@ -3625,7 +3671,7 @@ const UI = {
     const uy = y0 + 5 * (cell + gap) + 18, ux = (W - total) / 2;
     for (let i = 0; i < 3; i++) {
       const sw = (total - 12) / 3;
-      ctx.fillStyle = i === 1 ? 'rgba(45,226,200,0.25)' : '#59606e';
+      ctx.fillStyle = i === 1 ? 'rgba(94,200,232,0.25)' : COLORS.stone;
       ctx.fillRect(ux + i * (sw + 6), uy, sw, 10);
       if (i === 1) { ctx.strokeStyle = COLORS.mate; ctx.lineWidth = 1.5; ctx.strokeRect(ux + i * (sw + 6), uy, sw, 10); }
     }
