@@ -31,6 +31,12 @@ canvas#game.nocursor{cursor:none}
 .stats{display:grid;grid-template-columns:auto auto;gap:4px 18px;font-size:15px;margin:4px 0 8px}
 .stats .k{color:var(--dim)}
 .stats .v{text-align:right;font-weight:700}
+.skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;width:100%;max-height:56vh;overflow:auto;padding:2px}
+.screen button.skin{min-width:0;min-height:0;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px}
+.screen button.skin canvas{width:64px;height:64px}
+.screen button.skin.sel{border-color:var(--teal);box-shadow:0 0 0 2px rgba(224,184,120,.5)}
+.screen button.skin.locked{opacity:.55}
+.skin .lock{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:0}
 #end-score{font-size:30px;font-weight:800;letter-spacing:4px}
 #s-touch{position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:10px 12px;gap:6px}
 #s-touch .bar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
@@ -49,6 +55,7 @@ canvas#game.nocursor{cursor:none}
     <button class="primary" data-act="play">Spielen</button>
     <button data-act="training">Training</button>
     <button data-act="settings">Einstellungen</button>
+    <button data-act="skins">Skins</button>
     <button data-act="stats">Statistik</button>
     <div class="foot" id="main-foot">WASD bewegen · Maus zielen · Q bauen · F editieren · V einboxen</div>
   </div>
@@ -77,6 +84,12 @@ canvas#game.nocursor{cursor:none}
     <h2>Tasten</h2>
     <div class="opts scroll" id="key-opts"></div>
     <button data-act="keysdefault">Standard</button>
+    <button data-act="back">Zurück</button>
+  </div>
+  <div class="screen" id="s-skins">
+    <h2>Skins</h2>
+    <div class="sub" id="skin-info">Wähle dein Aussehen</div>
+    <div class="skin-grid" id="skin-grid"></div>
     <button data-act="back">Zurück</button>
   </div>
   <div class="screen" id="s-stats">
@@ -200,6 +213,60 @@ const BOT_PROFILES = {
   hard:   { label: 'Schwer', reaction: 0.25, aimError: 2.5, turnSpeed: 540, buildReaction: 0.15, peek: 0.6,  doublePeek: false, lead: true,  turbo: true,  push: 1.3, strafe: 0.9,  coverChance: 0.95 },
   pro:    { label: 'Profi',  reaction: 0.15, aimError: 1.2, turnSpeed: 720, buildReaction: 0.08, peek: 0.9,  doublePeek: true,  lead: true,  turbo: true,  push: 1.6, strafe: 1.0,  coverChance: 1.0 }
 };
+// Skins: Aussehen der Kämpfer. Der Teamring um die Figur zeigt weiter, zu wem sie gehört.
+const SKINS = [
+  { id: 'standard', name: 'Standard', body: '#3f7fd0', rim: '#a9c9ef', acc: '', accCol: '' },
+  { id: 'ranger', name: 'Waldläufer', body: '#56803d', rim: '#a8c886', acc: 'hood', accCol: '#2e4a20' },
+  { id: 'builder', name: 'Bauarbeiter', body: '#e07b2a', rim: '#ffc58a', acc: 'helmet', accCol: '#f2c230' },
+  { id: 'ninja', name: 'Ninja', body: '#2a2e35', rim: '#646b76', acc: 'band', accCol: '#d0403a' },
+  { id: 'knight', name: 'Ritter', body: '#a7adb5', rim: '#eef1f4', acc: 'visor', accCol: '#3a3f46', unlock: { k: 'matchesWon', v: 1, text: '1 Match gewinnen' } },
+  { id: 'pirate', name: 'Pirat', body: '#8a5a3a', rim: '#d6a77f', acc: 'tricorn', accCol: '#1e1e22', unlock: { k: 'roundsWon', v: 10, text: '10 Runden gewinnen' } },
+  { id: 'astro', name: 'Astronaut', body: '#eef1f4', rim: '#ffffff', acc: 'glass', accCol: '#3f7fd0', unlock: { k: 'fastestEdit', v: 250, lt: true, text: 'Edit unter 250 ms' } },
+  { id: 'gold', name: 'Goldkämpfer', body: '#d9a521', rim: '#ffe08a', acc: 'crown', accCol: '#fff1a8', unlock: { k: 'matchesWon', v: 5, text: '5 Matches gewinnen' } }
+];
+function skinById(id) { return SKINS.find(k => k.id === id) || SKINS[0]; }
+function skinUnlocked(sk) {
+  if (!sk.unlock) return true;
+  const v = bests[sk.unlock.k] || 0;
+  return sk.unlock.lt ? (v > 0 && v <= sk.unlock.v) : v >= sk.unlock.v;
+}
+// Figur mit Skin zeichnen (Draufsicht): Teamring, Körper, Zubehör in Blickrichtung
+function drawSkin(ctx, sk, x, y, r, aim, team) {
+  if (team) { ctx.fillStyle = team; ctx.beginPath(); ctx.arc(x, y, r + 2.8, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = sk.body; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = sk.rim; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.save(); ctx.translate(x, y); ctx.rotate(aim);
+  const c = sk.accCol;
+  switch (sk.acc) {
+    case 'hood':   // Kapuze hinten
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(0, 0, r, Math.PI * 0.55, Math.PI * 1.45); ctx.arc(-r * 0.15, 0, r * 0.62, Math.PI * 1.45, Math.PI * 0.55, true); ctx.fill(); break;
+    case 'helmet': // Bauhelm mit Schirm nach vorn
+      ctx.fillStyle = shade(c, -0.25); ctx.fillRect(r * 0.35, -r * 0.7, r * 0.45, r * 1.4);
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(-r * 0.1, 0, r * 0.78, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(-r * 0.75, -1.2, r * 1.3, 2.4); break;
+    case 'band':   // Stirnband mit Bändern hinten
+      ctx.fillStyle = c; ctx.fillRect(-2.2, -r * 0.98, 4.4, r * 1.96);
+      ctx.strokeStyle = c; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(-r * 0.9, 0); ctx.lineTo(-r - 8, -4); ctx.moveTo(-r * 0.9, 0); ctx.lineTo(-r - 7, 5); ctx.stroke(); break;
+    case 'visor':  // Ritterhelm mit Sehschlitz
+      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.beginPath(); ctx.arc(-2, 0, r * 0.7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = c; ctx.fillRect(r * 0.45, -r * 0.6, r * 0.22, r * 1.2); ctx.fillRect(-r * 0.6, -1, r * 1.05, 2); break;
+    case 'tricorn': // Piratenhut mit Totenkopf-Punkt
+      ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(r * 1.0, 0); ctx.lineTo(-r * 0.75, r * 1.0); ctx.lineTo(-r * 0.75, -r * 1.0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#f0e6d0'; ctx.beginPath(); ctx.arc(r * 0.05, 0, 2.2, 0, Math.PI * 2); ctx.fill(); break;
+    case 'glass':  // Raumhelm-Visier
+      ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(r * 0.3, 0, r * 0.5, r * 0.72, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.ellipse(r * 0.42, -r * 0.3, r * 0.14, r * 0.22, 0, 0, Math.PI * 2); ctx.fill(); break;
+    case 'crown': { // Krone
+      ctx.fillStyle = c; ctx.beginPath();
+      for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, rr = k % 2 ? r * 0.42 : r * 0.78; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#d0403a'; ctx.beginPath(); ctx.arc(0, 0, 2.2, 0, Math.PI * 2); ctx.fill(); break;
+    }
+    default:
+      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.beginPath(); ctx.arc(-4, -4, r * 0.45, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
 const BOT_NAMES = ['Ziegelzorn', 'Kantenkönig', 'Feldfuchs', 'Mauerblitz', 'Eckenwolf', 'Fugenfee', 'Kachelkralle', 'Rasterrabe', 'Plankenpuma', 'Brettbaron', 'Lückenluchs', 'Fensterfalke'];
 
 // Farbpalette (Abschnitt 15)
@@ -256,7 +323,7 @@ const DEFAULT_TOUCH_LAYOUT = {
 };
 const DEFAULT_SETTINGS = {
   aimSens: 1, editRelease: CONFIG.EDIT_RELEASE_TO_CONFIRM, shake: true, dmgNumbers: true, reducedFx: false,
-  sfxVol: 80, musicVol: 40, music: true, autoFire: false, stickFire: true, hints: true, touchUi: 'auto',
+  sfxVol: 80, musicVol: 40, music: true, autoFire: false, skin: 'standard', hints: true, touchUi: 'auto',
   keys: Object.assign({}, DEFAULT_KEYS), touchLayout: JSON.parse(JSON.stringify(DEFAULT_TOUCH_LAYOUT)), seenHints: {}
 };
 function loadSettings() {
@@ -296,7 +363,7 @@ const Input = {
   touchMode: false,
   capture: null,                 // Rückruf für Tastenbelegung
   touches: new Map(),            // id -> { role, sx, sy, x, y, id2 }
-  touch: { moveX: 0, moveY: 0, aimAngle: 0, aimActive: false, aimFire: false, fire: false, firePressed: false, buildHeld: false, buildPressed: false,
+  touch: { moveX: 0, moveY: 0, aimAngle: 0, aimActive: false, fire: false, firePressed: false, buildHeld: false, buildPressed: false,
     editTap: false, resetTap: false, healTap: false, reloadTap: false, cycleTap: false, boxTap: false, slotTap: -1, confirmTap: false, cancelTap: false,
     panelSeg: -1, panelPressed: false, panelHeld: false, worldSelX: 0, worldSelY: 0, worldSel: false },
   pinch: null,
@@ -440,7 +507,7 @@ const Input = {
     const tc = this.touches.get(id); if (!tc) return;
     const T = this.touch;
     if (tc.role === 'move') { T.moveX = 0; T.moveY = 0; }
-    if (tc.role === 'aim') { T.aimActive = false; T.aimFire = false; }
+    if (tc.role === 'aim') { T.aimActive = false; }
     if (tc.role === 'btn') {
       if (tc.btn === 'fire') T.fire = false;
       if (tc.btn === 'build') T.buildHeld = false;
@@ -465,8 +532,6 @@ const Input = {
     const l = Math.hypot(dx, dy);
     const dead = 10 / clamp(settings.aimSens, 0.25, 3);
     if (l > dead) { this.touch.aimAngle = Math.atan2(dy, dx); this.touch.aimActive = true; }
-    // Ziel-Stick weit gezogen → es wird genau in diese Richtung geschossen
-    this.touch.aimFire = l > 56 * UI.scale() * 0.65;
   },
   updatePinch() {
     const ps = [...this.touches.values()].filter(t => t.role === 'pinch');
@@ -489,7 +554,7 @@ const Input = {
   resetAll() {
     this.down.clear(); this.pressed.clear(); this.released.clear(); this.touches.clear();
     this.mouse.left = this.mouse.right = false;
-    const T = this.touch; T.moveX = T.moveY = 0; T.fire = false; T.aimFire = false; T.aimActive = false; T.buildHeld = false; T.panelHeld = false; T.panelSeg = -1;
+    const T = this.touch; T.moveX = T.moveY = 0; T.fire = false; T.aimActive = false; T.buildHeld = false; T.panelHeld = false; T.panelSeg = -1;
   }
 };
 
@@ -503,8 +568,8 @@ function playerIntent(f) {
     const a = T.aimAngle;
     const d = (f.mode === 'edit' ? CONFIG.TOUCH_EDIT_DIST : CONFIG.TOUCH_BUILD_DIST) * TILE;
     it.aimX = f.x + Math.cos(a) * d; it.aimY = f.y + Math.sin(a) * d;
-    const stickFire = settings.stickFire && T.aimFire && f.mode === 'weapon';
-    it.fire = T.fire || stickFire; it.firePressed = T.firePressed;
+    // Geschossen wird nur mit dem FEUER-Knopf (antippen = ein Schuss, halten = Dauerfeuer). Der Ziel-Stick zielt nur.
+    it.fire = T.fire; it.firePressed = T.firePressed;
     if (T.fire || T.firePressed) it.forceWeapon = true;
     // Automatisch feuern, wenn ein sichtbarer Gegner im Fadenkreuz ist
     if (settings.autoFire && f.mode === 'weapon' && autoFireTarget(f)) it.fire = true;
@@ -2261,11 +2326,14 @@ const Match = {
     const names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
     let id = 1;
     const P = createFighter({ id: id++, team: 0, name: 'Du', isPlayer: true, color: COLORS.player });
+    const mySkin = skinById(settings.skin);
+    P.skin = skinUnlocked(mySkin) ? mySkin : SKINS[0];
     P.editRelease = settings.editRelease;
     this.fighters.push(P); this.player = P;
     if (this.autoplay) { P.isBot = true; P.brain = new Brain(P, opts.autoplayLevel || 'hard'); P.editRelease = true; }
     const addBot = (team, color, passive) => {
       const f = createFighter({ id: id++, team, name: names.pop() || ('Bot ' + id), isBot: true, color });
+      f.skin = SKINS[randInt(0, SKINS.length - 1)];
       f.brain = new Brain(f, this.difficulty, { passive });
       f.passive = !!passive;
       f.turboAllowed = BOT_PROFILES[this.difficulty].turbo;
@@ -2723,9 +2791,7 @@ const Renderer = {
     }
     ctx.restore();
     // Körper
-    ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = shade(f.color, 0.55); ctx.lineWidth = 2.5; ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.beginPath(); ctx.arc(x - 4, y - 4, r * 0.45, 0, Math.PI * 2); ctx.fill();
+    drawSkin(ctx, f.skin || SKINS[0], x, y, r, f.aim, f.color);
     if (f.hurtT > 0) { ctx.fillStyle = `rgba(255,255,255,${f.hurtT * 2})`; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
     // Schild als dünner blauer Ring
     if (f.shield > 0) {
@@ -3358,8 +3424,9 @@ const UI = {
     if (id === 's-settings') this.buildSettings();
     if (id === 's-keys') this.buildKeys();
     if (id === 's-stats') this.buildStats();
+    if (id === 's-skins') this.buildSkins();
     if (id === 's-main') document.getElementById('main-foot').textContent = Input.isTouchUi() ?
-      'Links laufen · Rechts zielen und schießen · Felder auf der Wand antippen' : 'WASD bewegen · Maus zielen · Q bauen · F editieren · V einboxen';
+      'Links laufen · Rechts zielen · FEUER schießt · Felder auf der Wand antippen' : 'WASD bewegen · Maus zielen · Q bauen · F editieren · V einboxen';
     const first = el.querySelector('button');
     if (first && !Input.isTouchUi()) first.focus({ preventScroll: true });
   },
@@ -3374,6 +3441,7 @@ const UI = {
       case 'training': this.show('s-training', true); break;
       case 'settings': this.show('s-settings', true); break;
       case 'stats': this.show('s-stats', true); break;
+      case 'skins': this.show('s-skins', true); break;
       case 'keys': this.show('s-keys', true); break;
       case 'back': this.back(); break;
       case 'start': Store.set('playOpts', this.playOpts); Game.startMatch({ mode: this.playOpts.mode, difficulty: this.playOpts.difficulty, rounds: this.playOpts.rounds }); break;
@@ -3435,7 +3503,6 @@ const UI = {
     this.cycler(el, 'Lautstärke Musik', pct, () => S.musicVol, v => { S.musicVol = v; save(); Sfx.applyVolumes(); }, v => v + ' %');
     this.cycler(el, 'Musik', [true, false], () => S.music, v => { S.music = v; save(); Sfx.applyVolumes(); }, onoff);
     this.cycler(el, 'Zielempfindlichkeit (Touch)', [0.5, 0.75, 1, 1.25, 1.5, 2], () => S.aimSens, v => { S.aimSens = v; save(); }, v => v.toFixed(2) + '×');
-    this.cycler(el, 'Ziel-Stick schießt (Touch)', [true, false], () => S.stickFire, v => { S.stickFire = v; save(); }, onoff);
     this.cycler(el, 'Auto-Feuer (Touch)', [false, true], () => S.autoFire, v => { S.autoFire = v; save(); }, onoff);
     this.cycler(el, 'Touch-Steuerung', ['auto', 'on', 'off'], () => S.touchUi, v => { S.touchUi = v; save(); }, v => ({ auto: 'Automatisch', on: 'Immer', off: 'Nie' })[v]);
     this.cycler(el, 'Hinweise', [true, false], () => S.hints, v => { S.hints = v; save(); }, onoff);
@@ -3468,6 +3535,29 @@ const UI = {
     el.appendChild(note);
   },
   statsHtml(rows) { return rows.map(([k, v]) => `<div class="k">${k}</div><div class="v">${v}</div>`).join(''); },
+  buildSkins() {
+    const el = document.getElementById('skin-grid'); el.innerHTML = '';
+    const unlockedCount = SKINS.filter(skinUnlocked).length;
+    document.getElementById('skin-info').textContent = unlockedCount + ' von ' + SKINS.length + ' freigeschaltet';
+    for (const sk of SKINS) {
+      const open = skinUnlocked(sk), sel = settings.skin === sk.id || (!SKINS.some(k => k.id === settings.skin) && sk === SKINS[0]);
+      const b = document.createElement('button');
+      b.className = 'skin' + (sel ? ' sel' : '') + (open ? '' : ' locked');
+      const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+      const g = cv.getContext('2d'); g.scale(128 / 40, 128 / 40);
+      drawSkin(g, sk, 20, 20, 13, -Math.PI / 4, COLORS.own);
+      const name = document.createElement('span'); name.textContent = sk.name;
+      const lock = document.createElement('span'); lock.className = 'lock';
+      lock.textContent = sel ? 'Ausgewählt' : open ? 'Antippen zum Wählen' : '🔒 ' + sk.unlock.text;
+      b.append(cv, name, lock);
+      b.addEventListener('click', () => {
+        if (!open) { Sfx.play('error'); return; }
+        settings.skin = sk.id; saveSettings(); Sfx.play('select'); this.buildSkins();
+        const btns = el.querySelectorAll('button'); const i = SKINS.indexOf(sk); if (btns[i] && !Input.isTouchUi()) btns[i].focus();
+      });
+      el.appendChild(b);
+    }
+  },
   buildStats() {
     const B = bests;
     document.getElementById('stats-body').innerHTML = this.statsHtml([
@@ -3549,7 +3639,7 @@ const UI = {
     if (!settings.hints) return;
     // [Schlüssel, Touch-Text, PC-Text] – der Text wird beim Anzeigen passend zur Steuerung gewählt
     const all = [
-      ['move', 'Links: laufen · Rechts: zielen – weit ziehen schießt', 'WASD laufen · Maus zielen · Linksklick schießen'],
+      ['move', 'Links: laufen · Rechts: zielen · FEUER drücken oder halten', 'WASD laufen · Maus zielen · Linksklick schießen'],
       ['build', '„Bauen“ antippen oder halten (Turbo)', 'Q Bau-Modus · Linksklick halten = Turbo-Bau'],
       ['edit', 'Wand vor dir: Felder antippen = öffnen / schließen', 'F halten → Felder anklicken → F loslassen'],
       ['reset', '', 'Rechtsklick (im Edit) oder F antippen setzt zurück'],
