@@ -21,7 +21,7 @@ const { chromium } = require('playwright');
         if (!f.brain || !f.alive || B.Match.phase !== 'combat') { still[f.id] = 0; continue; }
         stateCount[f.brain.state] = (stateCount[f.brain.state] || 0) + 1;
         const k = f.id; const s = still[k] || { x: f.x, y: f.y, t: 0 };
-        if (Math.hypot(f.x - s.x, f.y - s.y) < 2 && f.brain.wantMove) s.t++; else { s.t = 0; s.x = f.x; s.y = f.y; }
+        if (Math.hypot(f.x - s.x, f.y - s.y) < 2 && f.brain.wantMove && !f.brain.task && !f.brain.blocked) s.t++; else { s.t = 0; s.x = f.x; s.y = f.y; }
         still[k] = s; maxStill = Math.max(maxStill, s.t);
       }
       if (B.Match.phase === 'roundEnd' && B.Match.phaseT < 1/60 + 1e-9) log.push('R' + B.Match.round + ' t=' + B.Match.roundTime.toFixed(1) + ' ' + B.Match.scores.join(':'));
