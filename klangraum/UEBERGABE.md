@@ -95,6 +95,17 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Warteschlange). Großer Player ab 1024 px mit Warteschlange rechts (`components/QueueList.tsx`:
   `UpNextList` wird auch von der Warteschlangen-Seite benutzt). Song-Listen ab 1100 px mit Album-Spalte.
   Neue Seite **Radio** (`pages/RadioPage.tsx`): beliebte Sender + Sender nach Genre (Lieblingsgenres vorne).
+- **Redesign „weniger KI-Look“** (25.10., Wunsch des Nutzers): Überschriften-Schrift **Archivo**
+  (`@fontsource-variable/archivo`, SIL OFL, mitgeliefert, keine Google-Server; `--kr-font-heading`,
+  schmal über `font-stretch`), Seitentitel in Großbuchstaben, kleine Zeilen `.kr-label`; kleinere Ecken
+  (`--kr-radius` 10, `--kr-radius-art` 6), Knöpfe/Chips mit feiner Linie statt bunter Blasen, keine
+  Leuchtverläufe/Schatten auf Kacheln, Listen mit Trennlinien, Seitenleiste mit Schriftzug „KLANGRAUM“.
+  Startseite: Datum + „START“ statt Gruß und Fülltext; „Für dich“ flach (Vorlesetext der Überschrift per
+  `aria-label`, weil die Zeilen untereinander/in Großbuchstaben stehen).
+- **Gestaltete Cover** (`Artwork`): ohne Bild ein schlichtes Plattencover (ruhige Farbe aus
+  `--kr-sleeve-1…8`, Künstler oben, Titel groß unten; bei kleinen Covern < 90 px nur Anfangsbuchstaben).
+  Radiosender bekommen immer so eine Kachel (Logo nur, wenn es ≥ 64 px groß lädt), Live-Music-Archive-
+  Konzerte ebenfalls (statt Archiv-Logo). Cover-Suche: erst genau, dann locker (einzelne Wörter).
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
   ursprüngliche Reihenfolge in `original` gemerkt; Wiederholen aus/alle/einer).
@@ -119,7 +130,7 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (142 Unit-Tests) – vor jedem Commit grün.
+- `npm run lint`, `npm run typecheck`, `npm test` (147 Unit-Tests) – vor jedem Commit grün.
 - `npm run e2e` – 26 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.

@@ -124,6 +124,36 @@ describe('Originale Cover', () => {
     );
   });
 
+  it('findet die genaue Suche nichts, wird locker weitergesucht', async () => {
+    const fetch = vi.fn(async (url: string) => {
+      const q = new URL(url).searchParams.get('query') ?? '';
+      return q.includes('"')
+        ? jsonResponse({ recordings: [] })
+        : jsonResponse({
+            recordings: [
+              {
+                score: 95,
+                releases: [
+                  {
+                    status: 'Official',
+                    date: '2021',
+                    'release-group': { id: RG_ALBUM, 'primary-type': 'Album' },
+                  },
+                ],
+              },
+            ],
+          });
+    });
+    const resolver = createCoverResolver({ fetch, cache: createCache(null), intervalMs: 0 });
+    expect(await resolver.resolve(yt('Testkünstler - Song: Teil 2 (Official Video)'))).toBe(
+      coverUrl(RG_ALBUM),
+    );
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(new URL(fetch.mock.calls[1]![0]).searchParams.get('query')).toBe(
+      'recording:(Song Teil 2) AND artist:(Testkünstler)',
+    );
+  });
+
   it('kein Treffer wird auch gemerkt, Netzfehler nicht', async () => {
     let fail = true;
     const fetch = vi.fn(async () => {
@@ -155,11 +185,13 @@ describe('Originale Cover', () => {
       const all = Promise.all(
         [1, 2, 3].map((n) => resolver.resolve(yt(`K - Song ${n}`, 'K', `vid${n}`))),
       );
-      await vi.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(10000);
       await all;
-      expect(times).toHaveLength(3);
-      expect(times[1]! - times[0]!).toBeGreaterThanOrEqual(1000);
-      expect(times[2]! - times[1]!).toBeGreaterThanOrEqual(1000);
+      // je Song genau + locker (nichts gefunden) = 6 Anfragen, immer mit Abstand
+      expect(times).toHaveLength(6);
+      for (let i = 1; i < times.length; i++) {
+        expect(times[i]! - times[i - 1]!).toBeGreaterThanOrEqual(1000);
+      }
     } finally {
       vi.useRealTimers();
     }

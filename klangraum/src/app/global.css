@@ -16,13 +16,33 @@
   --kr-shadow: #000000;
 
   /* Form & Abstände (Phase 4 macht sie einstellbar) */
-  --kr-radius: 16px;
-  --kr-radius-sm: 10px;
+  --kr-radius: 10px;
+  --kr-radius-sm: 6px;
+  --kr-radius-art: 6px;
   --kr-gap: 16px;
   --kr-touch: 44px;
   --kr-shadow-strength: 35%;
   --kr-font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --kr-font-heading: var(--kr-font-body);
+  /* Überschriften: Archivo (mitgeliefert, SIL OFL), schmal und kräftig */
+  --kr-font-heading: 'Archivo Variable', var(--kr-font-body);
+
+  /* Farben für gestaltete Cover (Songs ohne Bild): ruhige, erdige Töne */
+  --kr-sleeve-1: #5f6b3a;
+  --kr-sleeve-1-fg: #f1eedf;
+  --kr-sleeve-2: #8a3b22;
+  --kr-sleeve-2-fg: #f6e9dd;
+  --kr-sleeve-3: #c9b88e;
+  --kr-sleeve-3-fg: #1d1a12;
+  --kr-sleeve-4: #3c4651;
+  --kr-sleeve-4-fg: #e9eef2;
+  --kr-sleeve-5: #e6e0d1;
+  --kr-sleeve-5-fg: #1a1914;
+  --kr-sleeve-6: #5a1f24;
+  --kr-sleeve-6-fg: #f3e3e0;
+  --kr-sleeve-7: #2f5250;
+  --kr-sleeve-7-fg: #e2efec;
+  --kr-sleeve-8: #b58a2a;
+  --kr-sleeve-8-fg: #1b1609;
   --kr-font-scale: 1;
   --kr-transition: 160ms ease;
 
@@ -77,21 +97,42 @@ h3 {
   margin: 0;
 }
 
+/* Seitentitel: schmal, kräftig, in Großbuchstaben – wie auf einem Plattencover */
 h1 {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 800;
-  letter-spacing: -0.025em;
+  font-stretch: 75%;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 h2 {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 750;
-  letter-spacing: -0.015em;
+  font-stretch: 88%;
+  letter-spacing: 0;
 }
 
 h3 {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 700;
+  font-stretch: 90%;
+}
+
+/* Kleine Zeile über Überschriften (Datum, „Für dich“ …) */
+.kr-label {
+  color: var(--kr-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 3.4rem;
+  }
 }
 
 p {
@@ -165,12 +206,13 @@ button {
   justify-content: center;
   gap: 8px;
   min-height: var(--kr-touch);
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 0;
-  background: color-mix(in srgb, var(--kr-text) 9%, transparent);
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--kr-border);
+  background: transparent;
   color: var(--kr-text);
   font-weight: 650;
+  font-size: 0.92rem;
   text-decoration: none;
   transition:
     transform var(--kr-transition),
@@ -179,7 +221,7 @@ button {
 
 @media (hover: hover) {
   .kr-btn:hover {
-    background: color-mix(in srgb, var(--kr-text) 14%, transparent);
+    background: color-mix(in srgb, var(--kr-text) 8%, transparent);
   }
 }
 
@@ -189,6 +231,7 @@ button {
 
 .kr-btn--primary {
   background: var(--kr-accent);
+  border-color: var(--kr-accent);
   color: var(--kr-accent-text);
 }
 
@@ -243,7 +286,6 @@ button {
   border-radius: 999px;
   background: var(--kr-accent);
   color: var(--kr-accent-text);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--kr-shadow) var(--kr-shadow-strength), transparent);
   transition: transform var(--kr-transition);
 }
 
@@ -259,26 +301,27 @@ button {
 }
 
 .kr-chip {
-  min-height: 36px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 0;
-  background: color-mix(in srgb, var(--kr-text) 9%, transparent);
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid var(--kr-border);
+  background: transparent;
   color: var(--kr-text);
-  font-size: 0.9rem;
-  font-weight: 550;
+  font-size: 0.86rem;
+  font-weight: 600;
   white-space: nowrap;
   transition: background var(--kr-transition);
 }
 
 @media (hover: hover) {
   .kr-chip:hover {
-    background: color-mix(in srgb, var(--kr-text) 14%, transparent);
+    border-color: color-mix(in srgb, var(--kr-text) 40%, transparent);
   }
 }
 
 .kr-chip[aria-pressed='true'] {
   background: var(--kr-text);
+  border-color: var(--kr-text);
   color: var(--kr-bg);
 }
 
@@ -336,6 +379,7 @@ button {
 
 .kr-card {
   background: var(--kr-surface);
+  border: 1px solid var(--kr-border);
   border-radius: var(--kr-radius);
   padding: 18px;
 }

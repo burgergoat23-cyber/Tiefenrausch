@@ -13,9 +13,9 @@
 }
 
 .title {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 750;
-  letter-spacing: -0.015em;
+  font-stretch: 88%;
 }
 
 h3.title {
@@ -70,8 +70,7 @@ h3.title {
 .coverImg {
   width: 100% !important;
   height: 100% !important;
-  border-radius: var(--kr-radius);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--kr-shadow) 28%, transparent);
+  border-radius: var(--kr-radius-art);
 }
 
 .playHint {
@@ -85,7 +84,6 @@ h3.title {
   border-radius: 50%;
   background: var(--kr-accent);
   color: var(--kr-accent-text);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--kr-shadow) 40%, transparent);
   opacity: 0;
   transform: translateY(6px);
   transition:
@@ -110,8 +108,8 @@ h3.title {
 }
 
 .cardTitle {
-  font-weight: 650;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.9rem;
   line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -149,7 +147,7 @@ h3.title {
   gap: 2px;
   width: 100%;
   aspect-ratio: 1;
-  border-radius: var(--kr-radius);
+  border-radius: var(--kr-radius-art);
   overflow: hidden;
   background: var(--kr-surface-raised);
 }

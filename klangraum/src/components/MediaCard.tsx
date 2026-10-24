@@ -23,6 +23,8 @@ export function MediaCard({ kind, sourceId, id, title, subtitle, artworkUrl }: P
         <Artwork
           srcs={[artworkUrl]}
           seed={title}
+          title={title}
+          label={subtitle}
           size="100%"
           round={kind === 'artist'}
           className={styles.art}

@@ -11,6 +11,18 @@
   align-items: center;
   gap: 4px;
   border-radius: var(--kr-radius-sm);
+  position: relative;
+}
+
+/* Trennlinie beginnt erst nach dem Cover */
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 68px;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--kr-border) 70%, transparent);
 }
 
 /* Nur mit Maus: am Handy bliebe der Effekt nach dem Tippen hängen */
@@ -84,7 +96,7 @@
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 550;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

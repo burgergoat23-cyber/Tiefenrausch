@@ -56,12 +56,18 @@ export function ForYouSection({ sources }: { sources: MusicSource[] }) {
           <CoverMosaic tracks={data?.mix ?? []} />
         </div>
         <div className={styles.heroText}>
-          <h2 className={styles.heroTitle}>{title}</h2>
+          {/* Vorlesetext fest, weil die Zeilen untereinander und in Großbuchstaben stehen */}
+          <h2 className={styles.heroTitle} aria-label={title}>
+            <span className="kr-label">{t('forYou.title')}</span>
+            {genres.length > 0 && <span className={styles.heroGenres}>{genresText}</span>}
+          </h2>
           {artists.length > 0 && (
             <p className={styles.heroSub}>{t('forYou.with', { artists: artists.join(', ') })}</p>
           )}
           {data && data.mix.length > 0 && (
-            <p className={styles.heroCount}>{t('forYou.mixCount', { count: data.mix.length })}</p>
+            <p className={styles.heroCount}>
+              {t('forYou.meta', { artists: artists.length, songs: data.mix.length })}
+            </p>
           )}
           {state.status === 'loading' && <p className={styles.heroCount}>{t('app.loading')}</p>}
         </div>

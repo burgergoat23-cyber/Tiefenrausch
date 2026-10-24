@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type Ref } from 'react';
+import { useEffect, useRef, useState, type Ref } from 'react';
 import { useCover } from '../library/covers';
 import type { Track } from '../sources/types';
 import styles from './Artwork.module.css';
@@ -6,14 +6,22 @@ import styles from './Artwork.module.css';
 interface Props {
   /** Bilder in Reihenfolge – lädt eins nicht, kommt das nächste */
   srcs?: (string | undefined)[];
-  /** Für den Platzhalter (Farbe + Anfangsbuchstaben), wenn es gar kein Bild gibt */
+  /** Bestimmt die Farbe des gestalteten Covers (immer gleich für denselben Song) */
   seed?: string;
+  /** Gestaltetes Cover, wenn es kein Bild gibt: großer Titel … */
+  title?: string;
+  /** … und kleine Zeile darüber (Künstler, „Radio“ …) */
+  label?: string;
+  /** kleines Logo im gestalteten Cover (z. B. Sender-Logo), nur wenn es scharf genug ist */
+  logo?: string;
   size?: number | string;
   round?: boolean;
   className?: string;
   /** Zugriff auf das Element (z. B. um zu erkennen, wann es sichtbar wird) */
   boxRef?: Ref<HTMLSpanElement>;
 }
+
+const SLEEVES = 8;
 
 function hash(s: string): number {
   let h = 0;
@@ -22,20 +30,43 @@ function hash(s: string): number {
 }
 
 function initials(s: string): string {
-  const words = s
+  return s
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .split(/\s+/)
-    .filter(Boolean);
-  return words
+    .filter(Boolean)
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? '')
     .join('');
 }
 
-/** Cover-Bild: lädt erst, wenn es sichtbar wird; ohne Bild ein ruhiger Farbverlauf aus dem Theme */
+/** Logo nur zeigen, wenn es groß genug ist – verpixelte Mini-Symbole sehen schlechter aus als keins */
+function SleeveLogo({ src }: { src: string }) {
+  const [ok, setOk] = useState(false);
+  return (
+    <img
+      className={styles.logo}
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      data-ok={ok || undefined}
+      onLoad={(e) => setOk(e.currentTarget.naturalWidth >= 64)}
+      onError={() => setOk(false)}
+    />
+  );
+}
+
+/**
+ * Cover-Bild. Gibt es kein (funktionierendes) Bild, entsteht ein gestaltetes Plattencover:
+ * ruhige Farbe, kleine Zeile oben, großer Titel unten – wie ein schlichtes Album-Cover.
+ */
 export function Artwork({
   srcs = [],
   seed = '',
+  title = '',
+  label = '',
+  logo,
   size = 48,
   round = false,
   className,
@@ -47,18 +78,16 @@ export function Artwork({
   useEffect(() => setIndex(0), [listKey]);
   const dim = typeof size === 'number' ? `${size}px` : size;
   const src = list[index];
-  const h = hash(seed || 'klangraum');
-  const placeholder = {
-    '--kr-art-mix': `${25 + (h % 45)}%`,
-    '--kr-art-angle': `${h % 360}deg`,
-    fontSize: typeof size === 'number' ? `${Math.max(11, size * 0.32)}px` : undefined,
-  } as CSSProperties;
+  const sleeve = (hash(seed || title || 'klangraum') % SLEEVES) + 1;
+  // Kleine Cover (Listen): nur Anfangsbuchstaben – Titel wäre dort unlesbar und stünde doppelt im Text
+  const small = typeof size === 'number' && size < 90;
   return (
     <span
       ref={boxRef}
       className={[styles.art, round ? styles.round : '', className ?? ''].join(' ')}
-      style={{ width: dim, height: dim, ...(src ? {} : placeholder) }}
+      style={{ width: dim, height: dim }}
       data-placeholder={src ? undefined : true}
+      data-sleeve={src ? undefined : sleeve}
     >
       {src ? (
         <img
@@ -71,15 +100,24 @@ export function Artwork({
           onError={() => setIndex((i) => i + 1)}
         />
       ) : (
-        <span className={styles.initials} aria-hidden="true">
-          {initials(seed)}
+        <span className={styles.sleeve} aria-hidden="true" data-small={small || undefined}>
+          {!small && (
+            <>
+              <span className={styles.sleeveTop}>
+                <span className={styles.label}>{label}</span>
+                {logo && <SleeveLogo src={logo} />}
+              </span>
+              <span className={styles.sleeveTitle}>{title}</span>
+            </>
+          )}
+          <span className={styles.initials}>{initials(title || seed)}</span>
         </span>
       )}
     </span>
   );
 }
 
-/** Cover eines Songs: das originale Album-/Single-Cover (falls gefunden), sonst das Bild der Quelle */
+/** Cover eines Songs: originales Album-/Single-Cover (falls gefunden), sonst das Bild der Quelle */
 export function TrackArtwork({
   track,
   size,
@@ -106,11 +144,18 @@ export function TrackArtwork({
     return () => io.disconnect();
   }, [visible]);
   const cover = useCover(track, visible);
+  const radio = track.sourceId === 'radio';
+  // Mitschnitte aus dem Live Music Archive haben kein echtes Cover (nur das Archiv-Logo)
+  const concert = track.sourceId === 'archive' && track.license?.name === 'Live Music Archive';
+  const srcs = radio ? [] : concert ? [cover] : [cover, track.artworkUrl];
   return (
     <Artwork
       boxRef={ref}
-      srcs={[cover, track.artworkUrl]}
-      seed={track.album || track.title}
+      srcs={srcs}
+      seed={radio ? track.title : track.album || track.title}
+      title={radio || !concert ? track.title : (track.album ?? track.title)}
+      label={track.artists[0] ?? ''}
+      logo={radio ? track.artworkUrl : undefined}
       size={size}
       className={className}
     />

@@ -78,6 +78,8 @@ export default function CollectionPage({ kind }: { kind: CollectionKind }) {
             <Artwork
               srcs={[state.data.artworkUrl, state.data.tracks[0]?.artworkUrl]}
               seed={state.data.title}
+              title={state.data.title}
+              label={state.data.subtitle}
               size={160}
               round={kind === 'artist'}
               className={styles.art}

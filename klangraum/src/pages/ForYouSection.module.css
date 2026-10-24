@@ -14,15 +14,8 @@
     'buttons buttons';
   align-items: end;
   gap: 16px;
-  padding: 16px;
-  border-radius: calc(var(--kr-radius) + 6px);
-  background:
-    radial-gradient(
-      120% 140% at 0% 0%,
-      color-mix(in srgb, var(--kr-accent) 34%, transparent),
-      transparent 60%
-    ),
-    var(--kr-surface);
+  padding: 0 0 22px;
+  border-bottom: 1px solid var(--kr-border);
 }
 
 .heroArt {
@@ -39,9 +32,21 @@
 }
 
 .heroTitle {
-  font-size: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: inherit;
+}
+
+/* Das Genre groß, schmal, in Großbuchstaben */
+.heroGenres {
+  font-family: var(--kr-font-heading);
+  font-stretch: 75%;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 2rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .heroSub {
@@ -75,7 +80,7 @@
       'art text'
       'art buttons';
     align-items: center;
-    padding: 24px;
+    padding: 0 0 28px;
     column-gap: 28px;
     row-gap: 14px;
   }
@@ -96,7 +101,7 @@
     flex: none;
   }
 
-  .heroTitle {
-    font-size: 2.2rem;
+  .heroGenres {
+    font-size: 3.2rem;
   }
 }

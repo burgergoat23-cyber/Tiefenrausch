@@ -100,7 +100,7 @@
     margin: 0 auto;
     padding: 0 14px 0 10px;
     gap: 14px;
-    border-radius: 999px;
+    border-radius: 14px;
     background: color-mix(in srgb, var(--kr-surface-raised) 84%, transparent);
     -webkit-backdrop-filter: saturate(1.6) blur(24px);
     backdrop-filter: saturate(1.6) blur(24px);

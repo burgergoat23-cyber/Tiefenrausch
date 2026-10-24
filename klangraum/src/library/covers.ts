@@ -83,6 +83,14 @@ export function parseArtistTitle(t: Track): { artist: string; title: string } | 
 
 const quote = (s: string) => `"${s.replace(/[\\"]/g, '\\$&')}"`;
 
+/** Einzelne Wörter ohne Sonderzeichen der Such-Sprache (für die lockere zweite Suche) */
+const words = (s: string) =>
+  s
+    .replace(/[^\p{L}\p{N}\s']/gu, ' ')
+    .split(/\s+/)
+    .filter((w) => w && !/^(AND|OR|NOT)$/i.test(w))
+    .join(' ');
+
 /** Bestes Album/Single zur Aufnahme: offiziell, kein Sampler/Live, möglichst die erste Veröffentlichung */
 export function pickReleaseGroup(data: MbResponse): string | null {
   const candidates: { id: string; date: string }[] = [];
@@ -147,14 +155,22 @@ export function createCoverResolver(opts: CoverResolverOptions): CoverResolver {
   const lookup = async (t: Track): Promise<string | null> => {
     const parsed = parseArtistTitle(t);
     if (!parsed) return null;
-    const query = `recording:${quote(parsed.title)} AND artist:${quote(parsed.artist)}`;
-    const url = `${MUSICBRAINZ_API}/recording/?query=${encodeURIComponent(query)}&fmt=json&limit=5`;
-    const res = await throttled(() => fetchImpl(url, { headers: { Accept: 'application/json' } }));
-    if (!res.ok) throw new Error(`MusicBrainz ${res.status}`);
-    const parsedBody = mbResponseSchema.safeParse(await res.json());
-    if (!parsedBody.success) return null;
-    const rg = pickReleaseGroup(parsedBody.data);
-    return rg ? coverUrl(rg) : null;
+    // 1. genau (Titel und Künstler als ganze Wortgruppe), 2. locker (einzelne Wörter)
+    const queries = [
+      `recording:${quote(parsed.title)} AND artist:${quote(parsed.artist)}`,
+      `recording:(${words(parsed.title)}) AND artist:(${words(parsed.artist)})`,
+    ];
+    for (const query of queries) {
+      const url = `${MUSICBRAINZ_API}/recording/?query=${encodeURIComponent(query)}&fmt=json&limit=5`;
+      const res = await throttled(() =>
+        fetchImpl(url, { headers: { Accept: 'application/json' } }),
+      );
+      if (!res.ok) throw new Error(`MusicBrainz ${res.status}`);
+      const body = mbResponseSchema.safeParse(await res.json());
+      const rg = body.success ? pickReleaseGroup(body.data) : null;
+      if (rg) return coverUrl(rg);
+    }
+    return null;
   };
 
   return {

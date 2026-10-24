@@ -38,10 +38,7 @@ export default function RadioPage() {
 
   return (
     <div className="kr-page">
-      <header className="kr-section">
-        <h1>{t('radio.title')}</h1>
-        <p className="kr-muted">{t('radio.intro')}</p>
-      </header>
+      <h1>{t('radio.title')}</h1>
 
       {ready && !radio && (
         <div className="kr-card kr-section">

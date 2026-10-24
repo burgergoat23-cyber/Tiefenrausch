@@ -5,17 +5,11 @@ import { Icon } from '../components/Icon';
 import { TrackShelf } from '../components/Shelf';
 import { ForYouSection } from './ForYouSection';
 import { useAsync } from '../components/useAsync';
-import { useT, type TKey } from '../i18n';
+import { useSettings } from '../app/settingsStore';
+import { useT } from '../i18n';
+import styles from './HomePage.module.css';
 import { useActiveSources } from '../sources/useActiveSources';
 import type { MusicSource } from '../sources/types';
-
-function greetingKey(hour: number): TKey {
-  if (hour < 5) return 'home.night';
-  if (hour < 11) return 'home.morning';
-  if (hour < 18) return 'home.day';
-  if (hour < 23) return 'home.evening';
-  return 'home.night';
-}
 
 function TrendingSection({ source }: { source: MusicSource }) {
   const t = useT();
@@ -59,13 +53,19 @@ function TrendingSection({ source }: { source: MusicSource }) {
 
 export default function HomePage() {
   const t = useT();
+  const language = useSettings((s) => s.settings.language);
+  const today = new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : 'de-DE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date());
   const { sources, ready } = useActiveSources();
   const trending = sources.filter((s) => s.getTrending);
   return (
     <div className="kr-page">
-      <header className="kr-section">
-        <h1>{t(greetingKey(new Date().getHours()))}</h1>
-        <p className="kr-muted">{t('home.intro')}</p>
+      <header className={styles.head}>
+        <p className="kr-label">{today}</p>
+        <h1>{t('home.title')}</h1>
       </header>
       {ready && sources.length === 0 && (
         <div className="kr-card kr-section">

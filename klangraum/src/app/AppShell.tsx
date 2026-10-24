@@ -93,7 +93,6 @@ export function AppShell() {
       </a>
       <nav ref={navRef} className={styles.nav} aria-label={t('nav.main')}>
         <span className={styles.brand} aria-hidden="true">
-          <Icon name="note" size={22} />
           {t('app.name')}
         </span>
         {NAV_GROUPS.map((group, gi) => (
