@@ -12,6 +12,18 @@ export const de = {
     library: 'Bibliothek',
     customize: 'Anpassen',
     settings: 'Einstellungen',
+    radio: 'Radio',
+    queue: 'Warteschlange',
+    libraryGroup: 'Mediathek',
+    designGroup: 'Gestalten',
+  },
+  radio: {
+    title: 'Radio',
+    intro: 'Tausende Sender aus aller Welt – live und kostenlos.',
+    popular: 'Beliebte Sender',
+    genres: 'Nach Genre',
+    stationsFor: 'Sender: {genre}',
+    off: 'Internetradio ist ausgeschaltet. Du kannst es in den Einstellungen einschalten.',
   },
   home: {
     morning: 'Guten Morgen',
@@ -183,6 +195,7 @@ export const de = {
     addSuggestion: '„{name}“ hinzufügen',
     language: 'Sprache',
     about: 'Über Klangraum',
+    toCustomize: 'Aussehen anpassen (Themes)',
     legal:
       'Klangraum spielt Musik nur über die offiziellen Schnittstellen der Quellen ab. Bei freier Musik siehst du Künstler und Lizenz. Es werden keine Songs heruntergeladen oder weitergegeben.',
     version: 'Version {version}',

@@ -10,7 +10,7 @@ const bg = (page: import('@playwright/test').Page) =>
 
 test('Theme ändern → neu laden → Theme ist noch da', async ({ page }) => {
   await page.goto('/#/anpassen');
-  expect(await bg(page)).toBe('rgb(14, 16, 32)'); // Mitternacht
+  expect(await bg(page)).toBe('rgb(11, 12, 9)'); // Oliv (Standard)
   await page.getByRole('button', { name: 'Theme „Hell“ wählen' }).click();
   await expect(page.getByRole('button', { name: 'Theme „Hell“ wählen' })).toHaveAttribute(
     'aria-pressed',

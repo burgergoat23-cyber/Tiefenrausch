@@ -45,7 +45,7 @@ test('YouTube: erst nach „Suchen“ fragen, offizieller Player bleibt sichtbar
   await expect(page.getByTestId('fake-youtube')).toHaveCount(1);
 
   // Steuerung über unsere Knöpfe
-  const player = page.getByTestId('full-player');
+  const player = page.getByTestId('now-playing');
   await player.getByRole('button', { name: 'Pause' }).click();
   await expect(fake).toHaveAttribute('data-state', '2');
   await player.getByRole('button', { name: 'Abspielen' }).click();
@@ -55,7 +55,7 @@ test('YouTube: erst nach „Suchen“ fragen, offizieller Player bleibt sichtbar
   await expect(player.getByRole('heading', { name: 'Ballade & Klavier' })).toBeVisible();
 
   // Schließen: Video hält an und verschwindet
-  await player.getByRole('button', { name: 'Player schließen' }).click();
+  await page.getByRole('button', { name: 'Player schließen' }).click();
   await page.getByRole('button', { name: 'Video anhalten und ausblenden' }).click();
   await expect(fake).toHaveAttribute('data-state', '2');
   await expect(page.getByTestId('video-float')).toHaveCount(0);

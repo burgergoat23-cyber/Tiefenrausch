@@ -86,6 +86,15 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Startseite mit Cover-Reihen zum Wischen (`components/Shelf.tsx`: `Shelf`, `TrackShelf`, `CoverMosaic`),
   „Für dich“ mit Collage aus 4 Covern. Wichtig: `body { overflow-x: clip }` statt `hidden` – sonst gilt
   `body` als Scroll-Bereich und dnd-kit (Tastatur-Verschieben) bewegt nichts.
+- **Look nach Vorbild Apple Music, aber in Grün/Khaki** (Wunsch des Nutzers, 25.10.; nur Aufbau als
+  Vorbild – keine Logos/Symbole/Bilder von Apple): Themes **Oliv** (neuer Standard, `DEFAULT_THEME_ID`)
+  und **Khaki**; Seitenleiste in Gruppen (`NAV_GROUPS` in `AppShell.tsx`: oben Start/Suche/Radio,
+  „Mediathek“, „Gestalten“; Symbole in Akzentfarbe, leichter Akzent-Verlauf); am Handy nur Punkte mit
+  `tab: true` (Start, Suche, Radio, Bibliothek, Einstellungen – „Anpassen“ per Knopf in den Einstellungen).
+  Mini-Player ab 768 px als schwebende Pille (Zufall/Zurück/Play/Weiter/Wiederholen | Song | Lautstärke,
+  Warteschlange). Großer Player ab 1024 px mit Warteschlange rechts (`components/QueueList.tsx`:
+  `UpNextList` wird auch von der Warteschlangen-Seite benutzt). Song-Listen ab 1100 px mit Album-Spalte.
+  Neue Seite **Radio** (`pages/RadioPage.tsx`): beliebte Sender + Sender nach Genre (Lieblingsgenres vorne).
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
   ursprüngliche Reihenfolge in `original` gemerkt; Wiederholen aus/alle/einer).
@@ -110,8 +119,8 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (136 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 23 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (142 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 26 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).

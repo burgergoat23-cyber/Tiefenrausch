@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router';
 import { useSettings } from '../app/settingsStore';
 import { Icon } from '../components/Icon';
 import { openSuggestions, SUGGESTED_ARTISTS, SUGGESTED_GENRES } from '../library/suggestions';
@@ -220,6 +221,13 @@ export default function SettingsPage() {
           <option value="en">{t('languages.en')}</option>
         </select>
       </section>
+
+      <div>
+        <Link to="/anpassen" className="kr-btn">
+          <Icon name="customize" size={18} />
+          {t('settings.toCustomize')}
+        </Link>
+      </div>
 
       <section className="kr-section kr-card" aria-labelledby="s-about">
         <h2 id="s-about">{t('settings.about')}</h2>

@@ -4,7 +4,10 @@ import { usePlayerState } from '../app/context';
 import { TrackArtwork } from '../components/Artwork';
 import { useCover } from '../library/covers';
 import { Icon } from '../components/Icon';
-import { PlayerControls } from '../components/PlayerControls';
+import { PlayerControls, RepeatButton, ShuffleButton } from '../components/PlayerControls';
+import { UpNextList } from '../components/QueueList';
+import { TrackMenu } from '../components/TrackMenu';
+import { useMediaQuery } from '../components/useMediaQuery';
 import { ProgressBar } from '../components/ProgressBar';
 import { SourceBadge } from '../components/SourceBadge';
 import { VideoSlot } from '../components/VideoDock';
@@ -24,6 +27,8 @@ export default function PlayerPage() {
   const backdrop = cover ?? track?.artworkUrl;
   const buffering = usePlayerState((s) => s.buffering || s.status === 'loading');
   const closeRef = useRef<HTMLButtonElement>(null);
+  // Breiter Bildschirm (iPad quer, PC): Warteschlange rechts neben dem Player
+  const wide = useMediaQuery('(min-width: 1024px) and (min-height: 600px)');
 
   const close = () => {
     if (window.history.length > 1) navigate(-1);
@@ -82,20 +87,25 @@ export default function PlayerPage() {
         </div>
       ) : (
         <div className={styles.body}>
-          {track.sourceId === 'youtube' ? (
-            <div className={styles.videoWrap}>
-              <VideoSlot className={styles.video} />
-              {isAppleTouchDevice() && <p className={styles.videoHint}>{t('video.tapHint')}</p>}
-            </div>
-          ) : (
-            <div className={styles.coverWrap}>
-              <TrackArtwork track={track} size="100%" className={styles.cover} eager />
-            </div>
-          )}
-          <div className={styles.panel}>
-            <div className={styles.info}>
-              <h1 className={styles.title}>{track.title}</h1>
-              <p className={styles.artist}>{buffering ? t('player.buffering') : artists}</p>
+          <div className={styles.nowPlaying} data-testid="now-playing">
+            {track.sourceId === 'youtube' ? (
+              <div className={styles.videoWrap}>
+                <VideoSlot className={styles.video} />
+                {isAppleTouchDevice() && <p className={styles.videoHint}>{t('video.tapHint')}</p>}
+              </div>
+            ) : (
+              <div className={styles.coverWrap}>
+                <TrackArtwork track={track} size="100%" className={styles.cover} eager />
+              </div>
+            )}
+            <div className={styles.panel}>
+              <div className={styles.infoRow}>
+                <div className={styles.info}>
+                  <h1 className={styles.title}>{track.title}</h1>
+                  <p className={styles.artist}>{buffering ? t('player.buffering') : artists}</p>
+                </div>
+                <TrackMenu track={track} />
+              </div>
               <p className={styles.meta}>
                 <SourceBadge sourceId={track.sourceId} />
                 <span>{sourceName(track.sourceId)}</span>
@@ -114,13 +124,31 @@ export default function PlayerPage() {
                   {artists}
                 </p>
               )}
-            </div>
-            <ProgressBar />
-            <PlayerControls />
-            <div className={styles.volume}>
-              <VolumeControl />
+              <ProgressBar />
+              <PlayerControls />
+              <div className={styles.volume}>
+                <VolumeControl />
+              </div>
             </div>
           </div>
+          {wide && (
+            <aside
+              className={styles.queuePanel}
+              aria-labelledby="fp-next"
+              data-testid="player-queue"
+            >
+              <div className={styles.queueHead}>
+                <h2 id="fp-next">{t('queue.upNext')}</h2>
+                <div className={styles.queueTools}>
+                  <ShuffleButton />
+                  <RepeatButton />
+                </div>
+              </div>
+              <div className={styles.queueScroll}>
+                <UpNextList />
+              </div>
+            </aside>
+          )}
         </div>
       )}
     </section>

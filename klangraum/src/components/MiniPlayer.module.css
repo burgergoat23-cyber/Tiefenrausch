@@ -78,6 +78,12 @@
   flex: none;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
 .wideOnly {
   display: none;
 }
@@ -86,25 +92,44 @@
   display: none;
 }
 
+/* PC/iPad: schwebende Pille unten in der Mitte – Knöpfe links, Song in der Mitte, Rest rechts */
 @media (min-width: 768px) {
   .mini {
-    height: var(--kr-mini-height);
-    padding: 0 20px;
-    gap: 16px;
-    border-radius: 0;
-    background: transparent;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    box-shadow: none;
-    overflow: visible;
+    width: min(1120px, 100%);
+    height: 68px;
+    margin: 0 auto;
+    padding: 0 14px 0 10px;
+    gap: 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--kr-surface-raised) 84%, transparent);
+    -webkit-backdrop-filter: saturate(1.6) blur(24px);
+    backdrop-filter: saturate(1.6) blur(24px);
+    box-shadow:
+      0 16px 40px color-mix(in srgb, var(--kr-shadow) 45%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--kr-text) 8%, transparent);
+    overflow: hidden;
+  }
+
+  .controls {
+    order: 1;
+  }
+
+  .info {
+    order: 2;
+    flex: 1;
+    padding: 4px 8px 4px 4px;
+    border-radius: 14px;
+  }
+
+  .actions {
+    order: 3;
+    gap: 4px;
   }
 
   .progress {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: auto;
-    border-radius: 0;
+    left: 24px;
+    right: 24px;
+    bottom: 0;
   }
 
   .progressFill {
@@ -115,18 +140,14 @@
     display: inline-flex;
   }
 
-  .controls {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .info {
-    flex: 1;
-  }
-
   .volume {
-    flex: 1;
     display: flex;
-    justify-content: flex-end;
+    width: 160px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .volume {
+    display: none;
   }
 }

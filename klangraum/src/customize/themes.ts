@@ -49,6 +49,42 @@ export function cssVarName(token: TokenName): string {
 /** Fertige Themes. Phase 1: drei Stück – Phase 4 bringt mindestens zehn und einen Editor. */
 export const PRESET_THEMES: readonly Theme[] = [
   {
+    id: 'oliv',
+    name: 'Oliv',
+    scheme: 'dark',
+    tokens: {
+      bg: '#0b0c09',
+      surface: '#1a1c15',
+      surfaceRaised: '#262a1f',
+      text: '#f1f2ea',
+      textMuted: '#a7ab97',
+      accent: '#a8c26b',
+      accentText: '#10120c',
+      border: '#34382a',
+      error: '#ff8a7a',
+      success: '#8fd18a',
+      shadow: '#000000',
+    },
+  },
+  {
+    id: 'khaki',
+    name: 'Khaki',
+    scheme: 'dark',
+    tokens: {
+      bg: '#0d0c0a',
+      surface: '#1d1b16',
+      surfaceRaised: '#2a2720',
+      text: '#f3f0e6',
+      textMuted: '#ada791',
+      accent: '#c9b880',
+      accentText: '#15130e',
+      border: '#3a3629',
+      error: '#ff8a7a',
+      success: '#9ccf86',
+      shadow: '#000000',
+    },
+  },
+  {
     id: 'mitternacht',
     name: 'Mitternacht',
     scheme: 'dark',
@@ -104,7 +140,7 @@ export const PRESET_THEMES: readonly Theme[] = [
   },
 ];
 
-export const DEFAULT_THEME_ID = 'mitternacht';
+export const DEFAULT_THEME_ID = 'oliv';
 
 export function findTheme(id: string): Theme {
   return PRESET_THEMES.find((t) => t.id === id) ?? (PRESET_THEMES[0] as Theme);

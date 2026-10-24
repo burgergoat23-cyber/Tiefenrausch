@@ -98,6 +98,12 @@ const STROKE = {
   ),
   check: <path d="m5 12 5 5 9-10" />,
   expand: <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />,
+  radio: (
+    <>
+      <circle cx="12" cy="12" r="2" />
+      <path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>;
 
 const FILL = {

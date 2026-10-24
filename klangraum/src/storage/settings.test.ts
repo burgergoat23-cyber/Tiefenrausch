@@ -42,7 +42,7 @@ describe('Einstellungen', () => {
   it('ohne gespeicherte Daten: Standardwerte', () => {
     const s = loadSettings(localStorage);
     expect(s.schemaVersion).toBe(SETTINGS_VERSION);
-    expect(s.themeId).toBe('mitternacht');
+    expect(s.themeId).toBe('oliv');
   });
 
   it('speichern und wieder laden', () => {
@@ -53,7 +53,7 @@ describe('Einstellungen', () => {
 
   it('kaputtes JSON → Standardwerte statt Absturz', () => {
     localStorage.setItem(SETTINGS_STORAGE_KEY, '{nicht json');
-    expect(loadSettings(localStorage).themeId).toBe('mitternacht');
+    expect(loadSettings(localStorage).themeId).toBe('oliv');
   });
 
   it('einzelne kaputte Felder werden ersetzt, der Rest bleibt', () => {

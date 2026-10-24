@@ -10,12 +10,37 @@ import { useT, type TKey } from '../i18n';
 import { usePlayerState } from './context';
 import styles from './AppShell.module.css';
 
-const NAV: { to: string; icon: IconName; label: TKey }[] = [
-  { to: '/', icon: 'home', label: 'nav.home' },
-  { to: '/suche', icon: 'search', label: 'nav.search' },
-  { to: '/bibliothek', icon: 'library', label: 'nav.library' },
-  { to: '/anpassen', icon: 'customize', label: 'nav.customize' },
-  { to: '/einstellungen', icon: 'settings', label: 'nav.settings' },
+interface NavItem {
+  to: string;
+  icon: IconName;
+  label: TKey;
+  /** auch unten in der Leiste am Handy (dort ist nur Platz für fünf) */
+  tab?: boolean;
+}
+
+/** Seitenleiste in Gruppen (am PC/iPad); am Handy nur die Punkte mit `tab` */
+const NAV_GROUPS: { title?: TKey; items: NavItem[] }[] = [
+  {
+    items: [
+      { to: '/', icon: 'home', label: 'nav.home', tab: true },
+      { to: '/suche', icon: 'search', label: 'nav.search', tab: true },
+      { to: '/radio', icon: 'radio', label: 'nav.radio', tab: true },
+    ],
+  },
+  {
+    title: 'nav.libraryGroup',
+    items: [
+      { to: '/bibliothek', icon: 'library', label: 'nav.library', tab: true },
+      { to: '/warteschlange', icon: 'queue', label: 'nav.queue' },
+    ],
+  },
+  {
+    title: 'nav.designGroup',
+    items: [
+      { to: '/anpassen', icon: 'customize', label: 'nav.customize' },
+      { to: '/einstellungen', icon: 'settings', label: 'nav.settings', tab: true },
+    ],
+  },
 ];
 
 function PageFallback() {
@@ -71,16 +96,21 @@ export function AppShell() {
           <Icon name="note" size={22} />
           {t('app.name')}
         </span>
-        <ul>
-          {NAV.map((item) => (
-            <li key={item.to}>
-              <NavLink to={item.to} end={item.to === '/'} className={styles.link}>
-                <Icon name={item.icon} size={22} />
-                <span className={styles.linkText}>{t(item.label)}</span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        {NAV_GROUPS.map((group, gi) => (
+          <div key={gi} className={styles.group}>
+            {group.title && <h2 className={styles.groupTitle}>{t(group.title)}</h2>}
+            <ul>
+              {group.items.map((item) => (
+                <li key={item.to} data-tab={item.tab || undefined}>
+                  <NavLink to={item.to} end={item.to === '/'} className={styles.link}>
+                    <Icon name={item.icon} size={22} />
+                    <span className={styles.linkText}>{t(item.label)}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
       <main id="main" ref={mainRef} tabIndex={-1} className={styles.main}>
         <ErrorBoundary key={location.pathname}>

@@ -52,7 +52,7 @@ test('Vollbild-Player: Steuerung, Quelle und Lizenz, Übergang zwischen Quellen'
     .getByRole('link', { name: /Player öffnen/ })
     .click();
 
-  const player = page.getByTestId('full-player');
+  const player = page.getByTestId('now-playing');
   await expect(player.getByRole('heading', { name: 'wald Freier Himmel' })).toBeVisible();
   await expect(player.getByRole('link', { name: 'Lizenz: CC BY-SA 3.0' })).toHaveAttribute(
     'href',
@@ -66,7 +66,7 @@ test('Vollbild-Player: Steuerung, Quelle und Lizenz, Übergang zwischen Quellen'
   await expect(player.getByRole('heading', { name: 'wald Offene Straße' })).toBeVisible();
   await expectAudioPlaying(page);
 
-  await player.getByRole('button', { name: 'Player schließen' }).click();
+  await page.getByRole('button', { name: 'Player schließen' }).click();
   await expect(page.getByTestId('full-player')).toHaveCount(0);
   await expect(page.getByTestId('mini-player')).toBeVisible();
 });
@@ -96,14 +96,12 @@ test('Am Songende geht es automatisch weiter (Wiederholen: alle)', async ({ page
   await expect(mini).toContainText('Sternenstaub');
   // nach dem letzten Trending-Song von Audius ist Schluss → Wiederholen: alle springt zum ersten
   await mini.getByRole('link', { name: /Player öffnen/ }).click();
-  await page.getByRole('button', { name: 'Wiederholen: aus' }).click();
-  await expect(page.getByRole('button', { name: 'Wiederholen: alle' })).toBeVisible();
-  await expect(page.getByTestId('full-player').getByRole('heading')).toHaveText(
-    'Mitternachtsfahrt',
-    {
-      timeout: 6000,
-    },
-  );
+  const np = page.getByTestId('now-playing');
+  await np.getByRole('button', { name: 'Wiederholen: aus' }).click();
+  await expect(np.getByRole('button', { name: 'Wiederholen: alle' })).toBeVisible();
+  await expect(np.getByRole('heading')).toHaveText('Mitternachtsfahrt', {
+    timeout: 6000,
+  });
   await expectAudioPlaying(page);
 });
 
@@ -116,7 +114,7 @@ test('Internetradio: Sender suchen und live hören', async ({ page }) => {
     .getByTestId('mini-player')
     .getByRole('link', { name: /Player öffnen/ })
     .click();
-  const player = page.getByTestId('full-player');
+  const player = page.getByTestId('now-playing');
   await expect(player.getByRole('heading', { name: 'Rockradio 24 rock' })).toBeVisible();
   await expect(player.getByText('LIVE', { exact: true })).toBeVisible();
   await expect(player.getByRole('slider', { name: 'Position im Song' })).toHaveCount(0);

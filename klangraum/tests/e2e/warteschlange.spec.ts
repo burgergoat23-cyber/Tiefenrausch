@@ -38,14 +38,13 @@ test('Warteschlange per Tastatur umsortieren, entfernen, Zufall', async ({ page 
 
   // Zufall an → andere Reihenfolge, Zufall aus → wieder wie vorher
   const ordered = await titles();
-  await page.getByRole('button', { name: 'Zufall ist aus' }).click();
-  await expect(page.getByRole('button', { name: 'Zufall ist an' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
+  await page.getByRole('main').getByRole('button', { name: 'Zufall ist aus' }).click();
+  await expect(
+    page.getByRole('main').getByRole('button', { name: 'Zufall ist an' }),
+  ).toHaveAttribute('aria-pressed', 'true');
   const mixed = await titles();
   expect([...mixed].sort()).toEqual([...ordered].sort());
-  await page.getByRole('button', { name: 'Zufall ist an' }).click();
+  await page.getByRole('main').getByRole('button', { name: 'Zufall ist an' }).click();
   await expect.poll(titles).toEqual(ordered);
 });
 

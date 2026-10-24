@@ -13,6 +13,18 @@ export const en: Dict = {
     library: 'Library',
     customize: 'Customize',
     settings: 'Settings',
+    radio: 'Radio',
+    queue: 'Queue',
+    libraryGroup: 'Library',
+    designGroup: 'Personalize',
+  },
+  radio: {
+    title: 'Radio',
+    intro: 'Thousands of stations from around the world – live and free.',
+    popular: 'Popular stations',
+    genres: 'By genre',
+    stationsFor: 'Stations: {genre}',
+    off: 'Internet radio is switched off. You can turn it on in the settings.',
   },
   home: {
     morning: 'Good morning',
@@ -182,6 +194,7 @@ export const en: Dict = {
     addSuggestion: 'Add “{name}”',
     language: 'Language',
     about: 'About Klangraum',
+    toCustomize: 'Customize the look (themes)',
     legal:
       'Klangraum only plays music through the official interfaces of each source. For free music you see the artist and license. No songs are downloaded or redistributed.',
     version: 'Version {version}',

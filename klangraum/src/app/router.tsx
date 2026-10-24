@@ -13,6 +13,7 @@ const CustomizePage = lazy(() => import('../pages/CustomizePage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
 const CollectionPage = lazy(() => import('../pages/CollectionPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const RadioPage = lazy(() => import('../pages/RadioPage'));
 
 export const routes: RouteObject[] = [
   {
@@ -22,6 +23,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: 'suche', element: <SearchPage /> },
+      { path: 'radio', element: <RadioPage /> },
       { path: 'bibliothek', element: <LibraryPage /> },
       { path: 'player', element: <PlayerPage /> },
       { path: 'warteschlange', element: <QueuePage /> },

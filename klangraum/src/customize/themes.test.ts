@@ -73,7 +73,7 @@ describe('Theme-Prüfung (Sicherheit)', () => {
     applyTheme(findTheme('hell'), root);
     expect(root.style.getPropertyValue('--kr-surface-raised')).toBe('#eceef6');
     expect(root.dataset.theme).toBe('hell');
-    expect(findTheme('gibts-nicht').id).toBe('mitternacht');
+    expect(findTheme('gibts-nicht').id).toBe('oliv');
   });
 
   it('Variablennamen', () => {

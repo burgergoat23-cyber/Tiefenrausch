@@ -1,18 +1,18 @@
 /*
  * Grund-Stile. ALLE Farben kommen aus CSS-Variablen (--kr-…), die das Theme setzt.
- * Hier stehen nur Startwerte (Theme „Mitternacht“), damit vor dem ersten Laden nichts blitzt.
+ * Hier stehen nur Startwerte (Theme „Oliv“), damit vor dem ersten Laden nichts blitzt.
  */
 :root {
-  --kr-bg: #0e1020;
-  --kr-surface: #171a2e;
-  --kr-surface-raised: #21253d;
-  --kr-text: #eef0ff;
-  --kr-text-muted: #a3a8c8;
-  --kr-accent: #8b7dff;
-  --kr-accent-text: #0e1020;
-  --kr-border: #2f3452;
-  --kr-error: #ff7a8a;
-  --kr-success: #5fd39a;
+  --kr-bg: #0b0c09;
+  --kr-surface: #1a1c15;
+  --kr-surface-raised: #262a1f;
+  --kr-text: #f1f2ea;
+  --kr-text-muted: #a7ab97;
+  --kr-accent: #a8c26b;
+  --kr-accent-text: #10120c;
+  --kr-border: #34382a;
+  --kr-error: #ff8a7a;
+  --kr-success: #8fd18a;
   --kr-shadow: #000000;
 
   /* Form & Abstände (Phase 4 macht sie einstellbar) */

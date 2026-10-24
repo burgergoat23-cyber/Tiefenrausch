@@ -4,7 +4,13 @@ import { useT } from '../i18n';
 import { currentItem } from '../player/queue';
 import { TrackArtwork } from './Artwork';
 import { Icon } from './Icon';
-import { NextButton, PlayPauseButton, PrevButton } from './PlayerControls';
+import {
+  NextButton,
+  PlayPauseButton,
+  PrevButton,
+  RepeatButton,
+  ShuffleButton,
+} from './PlayerControls';
 import { SourceBadge } from './SourceBadge';
 import { VolumeControl } from './VolumeControl';
 import styles from './MiniPlayer.module.css';
@@ -46,10 +52,21 @@ export function MiniPlayer() {
       </Link>
       <div className={styles.controls}>
         <span className={styles.wideOnly}>
+          <ShuffleButton />
+        </span>
+        <span className={styles.wideOnly}>
           <PrevButton />
         </span>
         <PlayPauseButton />
         <NextButton />
+        <span className={styles.wideOnly}>
+          <RepeatButton />
+        </span>
+      </div>
+      <div className={styles.actions}>
+        <span className={styles.volume}>
+          <VolumeControl />
+        </span>
         <Link
           to="/warteschlange"
           className={`kr-icon-btn ${styles.wideOnly}`}
@@ -58,9 +75,6 @@ export function MiniPlayer() {
         >
           <Icon name="queue" size={22} />
         </Link>
-      </div>
-      <div className={styles.volume}>
-        <VolumeControl />
       </div>
     </section>
   );

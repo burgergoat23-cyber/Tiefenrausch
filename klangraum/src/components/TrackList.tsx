@@ -43,6 +43,7 @@ const TrackRow = memo(function TrackRow({ track, index, active, playing, onPlay 
             {track.license && <span className={styles.license}>· {track.license.name}</span>}
           </span>
         </span>
+        <span className={styles.album}>{track.album ?? ''}</span>
         <span className={styles.dur}>
           {track.live
             ? t('player.live')
