@@ -1,11 +1,26 @@
-import type { TrackCache } from '../storage/cache';
-import { trackKey, type MusicSource, type Track } from '../sources/types';
+import { z } from 'zod';
+import type { Cache } from '../storage/cache';
+import {
+  playlistSummarySchema,
+  trackKey,
+  trackSchema,
+  type MusicSource,
+  type Playlist,
+  type Track,
+} from '../sources/types';
 
 const DAY = 24 * 60 * 60 * 1000;
 const SIX_HOURS = 6 * 60 * 60 * 1000;
+const tracksSchema = z.array(trackSchema).max(200);
+const playlistsSchema = z.array(playlistSummarySchema).max(50);
+
+/** So viele Songs pro Künstler (eine YouTube-Suche liefert höchstens 25) */
+export const SONGS_PER_ARTIST = 25;
+/** Höchstens so viele Songs im Mix */
+export const MIX_MAX = 200;
 
 export interface ForYouSources {
-  /** Für Lieblingskünstler: offizielle Videos (kostet Kontingent → 24 h merken) */
+  /** Für Lieblingskünstler und Playlists: offizielle Videos (kostet Kontingent → 24 h merken) */
   youtube?: MusicSource;
   /** Für Genres: unabhängige Künstler */
   audius?: MusicSource;
@@ -18,56 +33,62 @@ export interface ForYouResult {
   mix: Track[];
   /** Radiosender zu den Lieblingsgenres */
   stations: Track[];
+  /** YouTube-Playlists zu den Lieblingsgenres */
+  playlists: Playlist[];
   /** true, wenn Künstler gewünscht sind, aber YouTube fehlt (dann Hinweis anzeigen) */
   artistsNeedYouTube: boolean;
   /** Quellen, die gerade nicht geantwortet haben */
   failed: string[];
 }
 
-/** Abwechselnd aus jeder Liste nehmen, doppelte Songs weglassen */
-export function roundRobin(lists: Track[][], max: number): Track[] {
-  const out: Track[] = [];
+/** Abwechselnd aus jeder Liste nehmen, doppelte Einträge weglassen */
+export function roundRobin<T extends { sourceId: Track['sourceId']; id: string }>(
+  lists: T[][],
+  max: number,
+): T[] {
+  const out: T[] = [];
   const seen = new Set<string>();
   const longest = Math.max(0, ...lists.map((l) => l.length));
   for (let i = 0; i < longest && out.length < max; i++) {
     for (const list of lists) {
-      const t = list[i];
-      if (!t) continue;
-      const key = trackKey(t);
+      const item = list[i];
+      if (!item) continue;
+      const key = trackKey(item);
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(t);
+      out.push(item);
       if (out.length >= max) break;
     }
   }
   return out;
 }
 
-async function cached(
-  cache: TrackCache,
+async function cached<T>(
+  cache: Cache,
   key: string,
+  schema: z.ZodType<T>,
   ttl: number,
-  load: () => Promise<Track[]>,
-): Promise<Track[]> {
-  const hit = cache.get(key);
+  load: () => Promise<T>,
+): Promise<T> {
+  const hit = cache.get(key, schema);
   if (hit) return hit;
-  const tracks = await load();
-  cache.set(key, tracks, ttl);
-  return tracks;
+  const value = await load();
+  cache.set(key, value, ttl);
+  return value;
 }
 
 /**
- * Baut „Für dich“: Lieblingskünstler über YouTube (offizieller Player),
+ * Baut „Für dich“: Lieblingskünstler und Genre-Playlists über YouTube (offizieller Player),
  * Lieblingsgenres über Audius (unabhängige Künstler) und Internetradio.
  */
 export async function loadForYou(
   artists: string[],
   genres: string[],
   sources: ForYouSources,
-  cache: TrackCache,
+  cache: Cache,
 ): Promise<ForYouResult> {
   const failed = new Set<string>();
-  const safe = async (sourceName: string, p: Promise<Track[]>) => {
+  const safe = async <T>(sourceName: string, p: Promise<T[]>): Promise<T[]> => {
     try {
       return await p;
     } catch {
@@ -76,55 +97,59 @@ export async function loadForYou(
     }
   };
   const { youtube, audius, radio } = sources;
+  const each = <T>(
+    source: MusicSource | undefined,
+    items: string[],
+    load: (s: MusicSource, item: string) => Promise<T[]>,
+  ): Promise<T[][]> =>
+    source
+      ? Promise.all(items.map((item) => safe(source.name, load(source, item))))
+      : Promise.resolve([]);
 
-  const artistLists = youtube
-    ? await Promise.all(
-        artists.map((a) =>
-          safe(
-            youtube.name,
-            cached(cache, `fy:yt:${a.toLowerCase()}`, DAY, async () =>
-              (await youtube.search(a, { type: 'track', limit: 10 })).tracks.filter((t) => !t.live),
-            ),
-          ),
+  const [artistLists, genreLists, stationLists, playlistLists] = await Promise.all([
+    each(youtube, artists, (yt, a) =>
+      cached(cache, `fy:yt:${a.toLowerCase()}`, tracksSchema, DAY, async () =>
+        (await yt.search(a, { type: 'track', limit: SONGS_PER_ARTIST })).tracks.filter(
+          (t) => !t.live,
         ),
-      )
-    : [];
-
-  const genreLists = audius
-    ? await Promise.all(
-        genres.map((g) =>
-          safe(
-            audius.name,
-            cached(
-              cache,
-              `fy:au:${g.toLowerCase()}`,
-              SIX_HOURS,
-              async () => (await audius.search(g, { type: 'track', limit: 15 })).tracks,
-            ),
-          ),
-        ),
-      )
-    : [];
-
-  const stationLists = radio
-    ? await Promise.all(
-        genres.map((g) =>
-          safe(
-            radio.name,
-            cached(
-              cache,
-              `fy:radio:${g.toLowerCase()}`,
-              SIX_HOURS,
-              async () => (await radio.search(g, { type: 'track', limit: 8 })).tracks,
-            ),
-          ),
-        ),
-      )
-    : [];
+      ),
+    ),
+    each(audius, genres, (au, g) =>
+      cached(
+        cache,
+        `fy:au:${g.toLowerCase()}`,
+        tracksSchema,
+        SIX_HOURS,
+        async () => (await au.search(g, { type: 'track', limit: 25 })).tracks,
+      ),
+    ),
+    each(radio, genres, (r, g) =>
+      cached(
+        cache,
+        `fy:radio:${g.toLowerCase()}`,
+        tracksSchema,
+        SIX_HOURS,
+        async () => (await r.search(g, { type: 'track', limit: 8 })).tracks,
+      ),
+    ),
+    each(youtube, genres, (yt, g) =>
+      cached(cache, `fy:ytpl:${g.toLowerCase()}`, playlistsSchema, DAY, async () =>
+        (await yt.search(g, { type: 'playlist', limit: 10 })).playlists.map((p) => ({
+          id: p.id,
+          sourceId: p.sourceId,
+          title: p.title,
+          owner: p.owner,
+          artworkUrl: p.artworkUrl,
+          trackCount: p.trackCount,
+        })),
+      ),
+    ),
+  ]);
 
   return {
-    mix: roundRobin([...artistLists, ...genreLists], 60),
+    mix: roundRobin([...artistLists, ...genreLists], MIX_MAX),
     stations: roundRobin(stationLists, 8),
+    playlists: roundRobin(playlistLists, 10),
     artistsNeedYouTube: artists.length > 0 && !youtube,
     failed: [...failed],
   };

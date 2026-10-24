@@ -67,6 +67,8 @@ export const en: Dict = {
     empty: 'Nothing found yet – try again in a moment.',
     setup: 'Tell me what you like: add artists and genres under Settings → Your music.',
     yourArtists: 'Your artists',
+    playlists: 'Playlists: {genres}',
+    moreSongs: 'The mix has {count} songs – “Play mix” plays them all.',
   },
   library: {
     title: 'Library',
@@ -174,6 +176,8 @@ export const en: Dict = {
     addArtist: 'Add artist',
     addGenre: 'Add genre',
     removeItem: 'Remove “{name}”',
+    suggestions: 'Suggestions',
+    addSuggestion: 'Add “{name}”',
     language: 'Language',
     about: 'About Klangraum',
     legal:

@@ -4,7 +4,7 @@ import { sourceIdSchema } from '../sources/types';
 import { runMigrations, type Migration } from './migrations';
 
 export const SETTINGS_STORAGE_KEY = 'klangraum.settings';
-export const SETTINGS_VERSION = 3;
+export const SETTINGS_VERSION = 4;
 
 /**
  * EIN Einstellungs-Objekt für alles, was man anpassen kann.
@@ -34,7 +34,20 @@ export const settingsSchema = z.object({
 export type Settings = z.infer<typeof settingsSchema>;
 
 /** Startwerte für „Für dich“ – so gewünscht vom Besitzer der App, jederzeit änderbar */
-export const DEFAULT_FAVORITE_ARTISTS = ['King Von', 'Bloodhound Lil Jeff', 'YNW Melly'] as const;
+export const DEFAULT_FAVORITE_ARTISTS = [
+  'King Von',
+  'Bloodhound Lil Jeff',
+  'YNW Melly',
+  'Lil Durk',
+  'Chief Keef',
+  'Pop Smoke',
+  'Polo G',
+  'G Herbo',
+  'Fivio Foreign',
+  'Central Cee',
+] as const;
+/** Mit Version 4 neu dazugekommene Startkünstler (werden bei bestehenden Einstellungen ergänzt) */
+const ADDED_IN_V4 = DEFAULT_FAVORITE_ARTISTS.slice(3);
 export const DEFAULT_FAVORITE_GENRES = ['Drill'] as const;
 
 export function defaultSettings(language: 'de' | 'en' = 'de'): Settings {
@@ -57,9 +70,18 @@ export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
   /** 2 → 3: Lieblingskünstler und -genres für „Für dich“ */
   2: (d) => ({
     ...d,
-    favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
+    favoriteArtists: DEFAULT_FAVORITE_ARTISTS.slice(0, 3),
     favoriteGenres: [...DEFAULT_FAVORITE_GENRES],
   }),
+  /** 3 → 4: weitere Drill-Künstler ergänzen (eigene Einträge bleiben, höchstens 20) */
+  3: (d) => {
+    const own = Array.isArray(d.favoriteArtists)
+      ? d.favoriteArtists.filter((a): a is string => typeof a === 'string')
+      : [];
+    const have = new Set(own.map((a) => a.toLowerCase()));
+    const added = ADDED_IN_V4.filter((a) => !have.has(a.toLowerCase()));
+    return { ...d, favoriteArtists: [...own, ...added].slice(0, 20) };
+  },
 };
 
 /** Browser-Sprache als Startwert (Deutsch zuerst) */

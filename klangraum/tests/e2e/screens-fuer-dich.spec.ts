@@ -10,6 +10,9 @@ test('Screenshot Für dich', async ({ page }, info) => {
   await page.getByTestId('for-you').getByRole('button', { name: 'Mix abspielen' }).waitFor();
   await page.waitForLoadState('networkidle');
   await page.screenshot({ path: `docs/screenshots/fuer-dich/${info.project.name}-start.png` });
+  await page.getByRole('heading', { name: 'Playlists: Drill' }).scrollIntoViewIfNeeded();
+  await page.waitForLoadState('networkidle');
+  await page.screenshot({ path: `docs/screenshots/fuer-dich/${info.project.name}-playlists.png` });
   await page.goto('/#/einstellungen');
   await page.getByRole('heading', { name: 'Deine Musik' }).scrollIntoViewIfNeeded();
   await page.screenshot({

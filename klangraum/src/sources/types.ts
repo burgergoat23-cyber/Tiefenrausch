@@ -42,6 +42,16 @@ export const trackSchema = z.object({
 });
 export type Track = z.infer<typeof trackSchema>;
 
+/** Playlist ohne Songs (z. B. als Kachel) – zum Merken im Zwischenspeicher */
+export const playlistSummarySchema = z.object({
+  id: z.string().min(1).max(200),
+  sourceId: sourceIdSchema,
+  title: z.string().max(500),
+  owner: z.string().max(300).optional(),
+  artworkUrl: webUrlSchema.optional(),
+  trackCount: z.number().int().nonnegative().optional(),
+});
+
 export interface Album {
   id: string;
   sourceId: SourceId;

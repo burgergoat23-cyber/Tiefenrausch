@@ -68,6 +68,8 @@ export const de = {
     empty: 'Noch nichts gefunden – versuch es gleich nochmal.',
     setup: 'Sag mir, was du magst: Trag unter Einstellungen → Deine Musik Künstler und Genres ein.',
     yourArtists: 'Deine Künstler',
+    playlists: 'Playlists: {genres}',
+    moreSongs: 'Im Mix sind {count} Songs – „Mix abspielen“ spielt alle.',
   },
   library: {
     title: 'Bibliothek',
@@ -175,6 +177,8 @@ export const de = {
     addArtist: 'Künstler hinzufügen',
     addGenre: 'Genre hinzufügen',
     removeItem: '„{name}“ entfernen',
+    suggestions: 'Vorschläge',
+    addSuggestion: '„{name}“ hinzufügen',
     language: 'Sprache',
     about: 'Über Klangraum',
     legal:

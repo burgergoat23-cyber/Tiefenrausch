@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useSettings } from '../app/settingsStore';
 import { Icon } from '../components/Icon';
+import { openSuggestions, SUGGESTED_ARTISTS, SUGGESTED_GENRES } from '../library/suggestions';
 import { useT } from '../i18n';
 import { useSourceStatus } from '../sources/useActiveSources';
 import styles from './SettingsPage.module.css';
@@ -74,6 +75,11 @@ function FavoriteList({ kind }: { kind: 'favoriteArtists' | 'favoriteGenres' }) 
   const [value, setValue] = useState('');
   const isArtists = kind === 'favoriteArtists';
   const inputId = `kr-${kind}`;
+  const max = isArtists ? 20 : 10;
+  const suggestions =
+    items.length < max
+      ? openSuggestions(isArtists ? SUGGESTED_ARTISTS : SUGGESTED_GENRES, items)
+      : [];
   return (
     <div className={styles.form}>
       <h3>{isArtists ? t('settings.artists') : t('settings.genres')}</h3>
@@ -118,6 +124,24 @@ function FavoriteList({ kind }: { kind: 'favoriteArtists' | 'favoriteGenres' }) 
           {t('settings.add')}
         </button>
       </form>
+      {suggestions.length > 0 && (
+        <div className={styles.suggest}>
+          <span className="kr-muted">{t('settings.suggestions')}</span>
+          <div className="kr-chips">
+            {suggestions.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className="kr-chip"
+                aria-label={t('settings.addSuggestion', { name })}
+                onClick={() => add(kind, name)}
+              >
+                + {name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

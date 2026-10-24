@@ -282,6 +282,30 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
   await page.route(/^https:\/\/www\.googleapis\.com\/youtube\/v3\//, async (route) => {
     const url = new URL(route.request().url());
     const kind = url.pathname.split('/').pop();
+    if (kind === 'search' && url.searchParams.get('type') === 'playlist') {
+      const q = url.searchParams.get('q') ?? '';
+      return json(route, {
+        items: [1, 2].map((n) => ({
+          id: { playlistId: `PLtest${n}${q.replace(/\W/g, '')}` },
+          snippet: {
+            title: `${q} Playlist ${n}`,
+            channelTitle: 'Playlist-Kanal',
+            thumbnails: { high: { url: `https://img.test/pl${n}.svg` } },
+          },
+        })),
+      });
+    }
+    if (kind === 'playlists') {
+      const id = url.searchParams.get('id') ?? '';
+      return json(route, {
+        items: [{ id, snippet: { title: `Playlist ${id}`, channelTitle: 'Playlist-Kanal' } }],
+      });
+    }
+    if (kind === 'playlistItems') {
+      return json(route, {
+        items: YT_VIDEOS.map((v) => ({ contentDetails: { videoId: v.id } })),
+      });
+    }
     if (kind === 'search') {
       const q = url.searchParams.get('q') ?? '';
       return json(route, {

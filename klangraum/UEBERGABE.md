@@ -64,7 +64,12 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Settings jetzt `schemaVersion: 3`, Migration 2 → 3). `library/forYou.ts`: Künstler über YouTube
   (offizieller Player, 24 h im `storage/cache.ts` gemerkt → ca. 303 Einheiten/Tag), Genres über Audius
   (unabhängige Künstler) + Internetradio (6 h gemerkt), abwechselnd gemischt ohne Doppelte.
-  Startseite `pages/ForYouSection.tsx`; ohne YouTube-Schlüssel ehrlicher Hinweis. Suche zeigt bei leerem
+  Startseite `pages/ForYouSection.tsx`; ohne YouTube-Schlüssel ehrlicher Hinweis.
+  „Noch mehr“ (24.10.): 25 Songs pro Künstler, Mix bis 200 Songs, YouTube-Playlists pro Genre
+  (`search` type=playlist, 24 h gemerkt), Künstler-Knöpfe im „Für dich“-Bereich; Startkünstler auf 10
+  erweitert (Settings `schemaVersion: 4`, Migration 3 → 4 ergänzt nur fehlende, eigene bleiben);
+  Vorschläge zum Antippen in `library/suggestions.ts`. Zwischenspeicher jetzt allgemein
+  (`storage/cache.ts`: `get(key, zodSchema)`). Kontingent bei 10 Künstlern + 1 Genre ≈ 1 100 Einheiten/Tag. Suche zeigt bei leerem
   Feld „Deine Künstler“ als Schnellwahl (zählt als bestätigte Suche). Es wird nichts heruntergeladen.
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
@@ -90,8 +95,8 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (124 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 19 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (130 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 21 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).

@@ -1,21 +1,23 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { usePlayer } from '../app/context';
 import { useSettings } from '../app/settingsStore';
 import { Icon } from '../components/Icon';
+import { CardGrid, MediaCard } from '../components/MediaCard';
 import { TrackList } from '../components/TrackList';
 import { useAsync } from '../components/useAsync';
 import { useT } from '../i18n';
 import { loadForYou } from '../library/forYou';
-import { createTrackCache } from '../storage/cache';
+import { createCache } from '../storage/cache';
 import { safeLocalStorage } from '../storage/settings';
 import type { MusicSource } from '../sources/types';
 
-const cache = createTrackCache(safeLocalStorage());
+const cache = createCache(safeLocalStorage());
 
 /** „Für dich“: Mix aus Lieblingskünstlern (YouTube) und Lieblingsgenres (Audius + Radio) */
 export function ForYouSection({ sources }: { sources: MusicSource[] }) {
   const t = useT();
+  const navigate = useNavigate();
   const player = usePlayer();
   const artists = useSettings((s) => s.settings.favoriteArtists);
   const genres = useSettings((s) => s.settings.favoriteGenres);
@@ -91,7 +93,42 @@ export function ForYouSection({ sources }: { sources: MusicSource[] }) {
           </button>
         </div>
       )}
+      {artists.length > 0 && (
+        <div className="kr-chips" role="group" aria-label={t('forYou.yourArtists')}>
+          {artists.map((a) => (
+            <button
+              key={a}
+              type="button"
+              className="kr-chip"
+              onClick={() => navigate(`/suche?q=${encodeURIComponent(a)}`)}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+      )}
       {data && data.mix.length > 0 && <TrackList tracks={data.mix.slice(0, 12)} label={title} />}
+      {data && data.mix.length > 12 && (
+        <p className="kr-muted">{t('forYou.moreSongs', { count: data.mix.length })}</p>
+      )}
+      {data && data.playlists.length > 0 && (
+        <>
+          <h3>{t('forYou.playlists', { genres: genres.join(', ') })}</h3>
+          <CardGrid label={t('forYou.playlists', { genres: genres.join(', ') })}>
+            {data.playlists.map((p) => (
+              <MediaCard
+                key={p.id}
+                kind="playlist"
+                sourceId={p.sourceId}
+                id={p.id}
+                title={p.title}
+                subtitle={p.owner}
+                artworkUrl={p.artworkUrl}
+              />
+            ))}
+          </CardGrid>
+        </>
+      )}
       {data && data.stations.length > 0 && (
         <>
           <h3>{t('forYou.stations', { genres: genres.join(', ') })}</h3>

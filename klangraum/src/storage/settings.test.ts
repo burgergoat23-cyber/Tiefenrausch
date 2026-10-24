@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { runMigrations } from './migrations';
 import {
+  DEFAULT_FAVORITE_ARTISTS,
   defaultSettings,
   loadSettings,
   parseSettings,
@@ -84,16 +85,30 @@ describe('Echte Migrationen', () => {
       searchHistory: ['rock'],
     };
     expect(parseSettings(v1)).toEqual({
-      schemaVersion: 3,
+      schemaVersion: 4,
       themeId: 'hell',
       language: 'en',
       sources: { audius: false },
       jamendoClientId: 'abc',
       youtubeApiKey: '',
       searchHistory: ['rock'],
-      favoriteArtists: ['King Von', 'Bloodhound Lil Jeff', 'YNW Melly'],
+      favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
       favoriteGenres: ['Drill'],
     });
+  });
+
+  it('3 → 4 ergänzt neue Drill-Künstler, behält eigene und entfernt nichts', () => {
+    const v3 = {
+      ...defaultSettings(),
+      schemaVersion: 3,
+      favoriteArtists: ['King Von', 'Mein Künstler', 'lil durk'],
+    };
+    const s = parseSettings(v3);
+    expect(s.schemaVersion).toBe(4);
+    expect(s.favoriteArtists.slice(0, 3)).toEqual(['King Von', 'Mein Künstler', 'lil durk']);
+    expect(s.favoriteArtists).toContain('Chief Keef');
+    expect(s.favoriteArtists.filter((a) => a.toLowerCase() === 'lil durk')).toHaveLength(1);
+    expect(s.favoriteArtists.length).toBeLessThanOrEqual(20);
   });
 
   it('2 → 3 behält den YouTube-Schlüssel', () => {
@@ -104,7 +119,7 @@ describe('Echte Migrationen', () => {
     delete v2.favoriteArtists;
     delete v2.favoriteGenres;
     const s = parseSettings(v2);
-    expect(s.schemaVersion).toBe(3);
+    expect(s.schemaVersion).toBe(4);
     expect(s.youtubeApiKey).toBe('KEY');
     expect(s.favoriteGenres).toEqual(['Drill']);
   });

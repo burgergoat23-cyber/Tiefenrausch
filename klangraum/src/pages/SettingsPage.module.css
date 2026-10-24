@@ -78,3 +78,9 @@
 .form h3 {
   font-size: 1rem;
 }
+
+.suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
