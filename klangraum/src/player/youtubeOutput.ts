@@ -13,6 +13,7 @@ interface YTPlayer {
   getCurrentTime(): number;
   getDuration(): number;
   cueVideoById(opts: { videoId: string; startSeconds?: number }): void;
+  setPlaybackRate?(rate: number): void;
 }
 
 interface YTNamespace {
@@ -94,6 +95,7 @@ export class YouTubeOutput implements PlaybackOutput {
   private timer: ReturnType<typeof setInterval> | null = null;
   private volume = 1;
   private muted = false;
+  private rate = 1;
   private pendingPlay: {
     resolve(): void;
     reject(e: unknown): void;
@@ -149,6 +151,7 @@ export class YouTubeOutput implements PlaybackOutput {
                 this.player = e.target;
                 e.target.setVolume(Math.round(this.volume * 100));
                 if (this.muted) e.target.mute();
+                if (this.rate !== 1) e.target.setPlaybackRate?.(this.rate);
                 resolve(e.target);
               },
               onStateChange: (e) => this.onState(e.data),
@@ -229,6 +232,7 @@ export class YouTubeOutput implements PlaybackOutput {
       }, PLAY_TIMEOUT_MS);
       this.pendingPlay = { resolve, reject, timer };
       p.playVideo();
+      if (this.rate !== 1) p.setPlaybackRate?.(this.rate);
     });
   }
 
@@ -244,6 +248,12 @@ export class YouTubeOutput implements PlaybackOutput {
   setVolume(volume: number) {
     this.volume = Math.min(1, Math.max(0, volume));
     this.player?.setVolume(Math.round(this.volume * 100));
+  }
+
+  /** YouTube kennt nur feste Stufen (0,75 / 1 / 1,25 …) und behält die Tonhöhe */
+  setRate(rate: number) {
+    this.rate = rate < 1 ? 0.75 : rate > 1 ? 1.25 : 1;
+    this.player?.setPlaybackRate?.(this.rate);
   }
 
   setMuted(muted: boolean) {

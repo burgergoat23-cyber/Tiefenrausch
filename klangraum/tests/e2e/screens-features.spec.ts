@@ -78,6 +78,10 @@ test('Screenshots Funktionen', async ({ page }, info) => {
   await page.evaluate(() => window.scrollTo(0, 900));
   await page.waitForTimeout(300);
   await shot('4-rueckblick-unten');
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+  await shot('0-start');
   await page.goto('/#/bibliothek/playlist/pl-1');
   await page.getByRole('button', { name: 'Alle abspielen' }).click();
   await expectAudioPlaying(page);

@@ -490,3 +490,21 @@ describe('Autoplay und Schlaf-Timer', () => {
     expect(notices).toContainEqual({ kind: 'sleep' });
   });
 });
+
+describe('Tempo', () => {
+  it('Slowed/Sped up für Songs, Live-Radio bleibt normal', async () => {
+    const output = new FakeOutput() as FakeOutput & { rate?: number; setRate(r: number): void };
+    output.setRate = (r: number) => {
+      output.rate = r;
+    };
+    const engine = new PlayerEngine({ getSource: (id) => fakeSource(id), output });
+    engine.playTracks(tracks('a'));
+    await flush();
+    engine.setRate(0.8);
+    expect(engine.state.rate).toBe(0.8);
+    expect(output.rate).toBe(0.8);
+    engine.playTracks([track('live', { live: true })]);
+    await flush();
+    expect(output.rate).toBe(1);
+  });
+});

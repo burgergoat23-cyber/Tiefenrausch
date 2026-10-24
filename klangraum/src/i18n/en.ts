@@ -378,6 +378,13 @@ export const en: Dict = {
       'No account needed. Everything stays on your device and can be changed later in Settings.',
     start: 'Let’s go',
   },
+  tempo: {
+    title: 'Tempo',
+    label: 'Tempo: {name}',
+    normal: 'Normal',
+    slowed: 'Slowed',
+    sped: 'Sped up',
+  },
   common: {
     close: 'Close',
     dismiss: 'Dismiss message',

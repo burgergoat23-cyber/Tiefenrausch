@@ -26,6 +26,8 @@ export interface PlaybackOutput {
   unlock(): void;
   /** iPhone/iPad erlauben keine Lautstärke per Webseite – dann blenden wir den Regler aus */
   canSetVolume(): boolean;
+  /** Tempo (Slowed/Sped up). Fehlt = geht bei dieser Ausgabe nicht. */
+  setRate?(rate: number): void;
 }
 
 /** Sehr kurze, stille WAV-Datei zum Freischalten von Audio auf iOS */
@@ -133,6 +135,15 @@ export class HtmlAudioOutput implements PlaybackOutput {
 
   setMuted(muted: boolean) {
     this.el.muted = muted;
+  }
+
+  /** Tempo ohne Tonhöhen-Korrektur: langsamer klingt tiefer („slowed“), schneller höher („sped up“) */
+  setRate(rate: number) {
+    const el = this.el as HTMLAudioElement & { webkitPreservesPitch?: boolean };
+    el.preservesPitch = rate === 1;
+    el.webkitPreservesPitch = rate === 1;
+    el.defaultPlaybackRate = rate;
+    el.playbackRate = rate;
   }
 
   stop() {

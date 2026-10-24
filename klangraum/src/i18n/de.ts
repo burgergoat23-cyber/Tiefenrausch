@@ -380,6 +380,13 @@ export const de = {
       'Du brauchst kein Konto. Alles bleibt auf deinem Gerät und lässt sich später unter Einstellungen ändern.',
     start: 'Los geht’s',
   },
+  tempo: {
+    title: 'Tempo',
+    label: 'Tempo: {name}',
+    normal: 'Normal',
+    slowed: 'Slowed',
+    sped: 'Sped up',
+  },
   common: {
     close: 'Schließen',
     dismiss: 'Meldung schließen',

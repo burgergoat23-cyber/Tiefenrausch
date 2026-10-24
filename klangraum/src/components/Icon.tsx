@@ -130,6 +130,12 @@ const STROKE = {
       <path d="M12 7v5l3 2" />
     </>
   ),
+  tempo: (
+    <>
+      <path d="M5 19a9 9 0 1 1 14 0" />
+      <path d="m12 14 4-5" />
+    </>
+  ),
   edit: <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" />,
   spark: (
     <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" />

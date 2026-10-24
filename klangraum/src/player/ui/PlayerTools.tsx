@@ -1,3 +1,4 @@
+import { usePlayer, usePlayerState } from '../../app/context';
 import { useDialogs } from '../../app/dialogStore';
 import { formatDuration } from '../../components/format';
 import { Icon } from '../../components/Icon';
@@ -18,6 +19,11 @@ export function PlayerTools({ track }: { track: Track }) {
   const now = useSleepTimer((s) => s.now);
   const left = remainingMs(mode, now);
   const share = useShareTracks();
+  const player = usePlayer();
+  const rate = usePlayerState((s) => s.rate);
+  // Reihenfolge beim Antippen: normal → slowed → sped up → normal
+  const nextRate = rate === 1 ? 0.8 : rate < 1 ? 1.25 : 1;
+  const rateName = rate === 1 ? t('tempo.normal') : rate < 1 ? t('tempo.slowed') : t('tempo.sped');
   return (
     <div className={styles.tools}>
       {!track.live && (
@@ -46,6 +52,18 @@ export function PlayerTools({ track }: { track: Track }) {
               : t('sleep.title')}
         </span>
       </button>
+      {!track.live && (
+        <button
+          type="button"
+          className={styles.tool}
+          aria-pressed={rate !== 1}
+          aria-label={t('tempo.label', { name: rateName })}
+          onClick={() => player.setRate(nextRate)}
+        >
+          <Icon name="tempo" size={22} />
+          <span>{rate === 1 ? t('tempo.title') : rateName}</span>
+        </button>
+      )}
       <button
         type="button"
         className={styles.tool}

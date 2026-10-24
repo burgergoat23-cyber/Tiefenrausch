@@ -68,3 +68,28 @@ test.describe('mit Testdaten', () => {
     await expect(page.getByRole('button', { name: '„Lumen“ entfernen' })).toBeVisible();
   });
 });
+
+test('Tempo: Slowed und Sped up', async ({ page }) => {
+  await mockMusicApis(page);
+  await page.goto('/#/suche');
+  await page.getByRole('searchbox').fill('lofi');
+  await page.getByRole('searchbox').press('Enter');
+  await page
+    .getByTestId('results-audius')
+    .getByRole('button', { name: /„lofi Neonlicht“ abspielen/ })
+    .click();
+  await expectAudioPlaying(page);
+  await page
+    .getByTestId('mini-player')
+    .getByRole('link', { name: /Player öffnen/ })
+    .click();
+  const rate = () => page.evaluate(() => document.querySelector('audio')?.playbackRate);
+  await page.getByRole('button', { name: 'Tempo: Normal' }).click();
+  await expect.poll(rate).toBe(0.8);
+  await page.getByRole('button', { name: 'Tempo: Slowed' }).click();
+  await expect.poll(rate).toBe(1.25);
+  await page.getByTestId('now-playing').getByRole('button', { name: 'Nächster Song' }).click();
+  await expect.poll(rate).toBe(1.25);
+  await page.getByRole('button', { name: 'Tempo: Sped up' }).click();
+  await expect.poll(rate).toBe(1);
+});

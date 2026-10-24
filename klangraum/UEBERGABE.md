@@ -117,7 +117,8 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 - iOS: `<audio playsinline>`, Freischalten beim ersten Tippen (`unlock()` mit stiller WAV, nur Apple-Geräte),
   Lautstärke-Regler wird auf iOS durch einen Hinweis ersetzt (iOS erlaubt das nicht).
   **Kein** `crossOrigin` am Audio-Element – kommt erst mit Web Audio in Phase 5 (sonst blockt CORS das Abspielen).
-- `customize/themes.ts` – 3 Themes (Mitternacht, Hell, OLED-Schwarz), Farben nur `#hex` (zod), CSS-Variablen
+- `customize/themes.ts` – 10 Themes (Oliv Standard, Khaki, Mitternacht, Hell, OLED, Wald, Sand, Asphalt, Ozean,
+  Kupfer) + eigene Akzentfarbe (`withAccent`, Schrift darauf per `textOn`), Farben nur `#hex` (zod), CSS-Variablen
   `--kr-bg`, `--kr-surface-raised` … (`cssVarName`). `customize/contrast.ts` – WCAG-Kontrast (Tests prüfen alle Themes).
 - `storage/settings.ts` – EIN Einstellungs-Objekt mit `schemaVersion` + `storage/migrations.ts`;
   kaputte Felder werden einzeln durch Standardwerte ersetzt. Zustand-Store: `app/settingsStore.ts`.
@@ -126,12 +127,37 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Meldungen, Screenreader-Ansage), `router.tsx` (Seiten per `lazy` = Code-Splitting).
 - `pages/` – Start (Trending), Suche, Album/Künstler/Playlist (`CollectionPage`), Vollbild-Player
   („Großes Cover“), Warteschlange (dnd-kit, Tastatur + Maus/Finger am Griff), Anpassen, Einstellungen,
-  Bibliothek (Platzhalter), 404.
+  Bibliothek, Lieblingssongs, Verlauf, eigene Playlist, Rückblick, Geteilt, 404.
+
+## Große Ausbaustufe „besser als Spotify“ (2026-10-24)
+
+- **Bibliothek** (`library/library.ts` reine Funktionen, `library/libraryStore.ts` Zustand + IndexedDB über `idb`,
+  DB `klangraum`, Store `kv`, Schlüssel `library`; gespeichert 400 ms gesammelt + bei pagehide/hidden):
+  Lieblingssongs (`LikeButton`), Playlists (`/bibliothek/playlist/:id`, Sortieren mit `SortableTracks`),
+  Verlauf (`plays` + `known`, max. 5000). Kaputte Einträge werden einzeln verworfen (`parseLibrary`).
+- **Gehört zählen** (`library/playTracker.ts`): nach 30 s echter Abspielzeit (kurze Songs: Hälfte), Spulen zählt nicht.
+- **Songtexte** (`lyrics/`): LRCLIB (`lrclib.net/api/search`, kein Schlüssel), LRC-Parser, synchron mitlaufend,
+  Zeile antippen = springen. Schmal statt Cover, breit (≥1024) rechts statt Warteschlange. Nur im Speicher gecacht.
+- **Song-Radio + Autoplay** (`library/songRadio.ts`, `useSongRadio.ts`, Engine `onQueueEnd`): Suche nach
+  Künstler + 2 Lieblingskünstlern, YouTube nur wenn erlaubt (Kontingent). Einstellung `autoplay`.
+- **Rückblick** (`library/stats.ts`, `/rueckblick`) + Bild zum Teilen (`library/statsCard.ts`, Canvas 1080×1920).
+- **Eigene Mixe** auf Start (`library/mixes.ts`): Auf Repeat, Lieblingssongs-Mix, Wiederentdecken. „Zuletzt gehört“-Reihe.
+- **Teilen** (`share/`): Link `#/geteilt?d=…` mit lz-string, zod-geprüft, max. 100 Songs. Seite `SharedPage`.
+- **Schlaf-Timer** (`player/sleepTimer.ts`, Engine `stopAfterCurrent`), **Tempo** Slowed 0,8 / Sped up 1,25
+  (`setRate`, ohne Tonhöhen-Korrektur; YouTube 0,75/1,25 mit Tonhöhe; Radio immer 1).
+- **Tastenkürzel** (`app/shortcuts.ts`, `?` zeigt alle) – nie auf Knöpfen/Feldern (sonst kaputtes Tastatur-Verschieben).
+- **Fenster**: `components/Dialog.tsx` (natives `<dialog>`), `app/dialogStore.ts` + `DialogHost`.
+- **Sicherung** als JSON (`library/backup.ts`, ohne YouTube-Schlüssel), **Begrüßung** beim ersten Start
+  (`components/Onboarding.tsx`, Flag `klangraum.onboarded`; E2E überspringen sie per `addInitScript`).
+- **PWA** (`vite-plugin-pwa`): Manifest, Symbole in `public/` (Skript in der Sitzung: SVG → PNG per Playwright),
+  Service Worker cacht nur App-Dateien, Bereich `/Tiefenrausch/klangraum/`. Installations-Tipp + Offline-Hinweis.
+- Künstlern folgen (= Lieblingskünstler), Warteschlange als Playlist, Suche zeigt Bibliotheks-Treffer,
+  Mini-Player: Herz (PC), Wischen = nächster/vorheriger Song. Einstellungen jetzt v6.
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (147 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 26 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (195 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 38 Tests × PC/iPhone (inkl. `bibliothek.spec.ts`, `extras.spec.ts`; LRCLIB-Mock, Audio mit Range-Anfragen) (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).
@@ -141,20 +167,20 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 - Adresse: https://burgergoat23-cyber.github.io/Tiefenrausch/klangraum/ (Nutzer hat am 2026-10-24 erlaubt).
 - Dort liegt nur der **gebaute** Stand im Ordner `klangraum/` des Pages-Branches
   `claude/tiefen-raush-code-review-jb306f` (das Spiel `index.html` daneben nicht anfassen).
-- Neu veröffentlichen (nach grünen Checks und Commit hier):
-  1. `cd klangraum && npm run build` (ohne `.env` → keine Schlüssel im Build; Nutzer trägt sie in den Einstellungen ein)
-  2. `git worktree add <scratchpad>/pages claude/tiefen-raush-code-review-jb306f` (vorher `git fetch origin claude/tiefen-raush-code-review-jb306f` und Branch auf `origin/…` bringen)
-  3. Ordner `<scratchpad>/pages/klangraum/` **leeren** (alte Dateinamen mit Hash), dann `cp -r klangraum/dist/. <scratchpad>/pages/klangraum/`
-  4. Dort committen, `git push -u origin claude/tiefen-raush-code-review-jb306f`, danach `git worktree remove <scratchpad>/pages`. Nach ~2 Min. live.
-- Kein Service Worker (weder Spiel noch App) → kein Cache-Ärger. Kommt mit Phase 6 (PWA) einer dazu: Scope auf `/Tiefenrausch/klangraum/` begrenzen.
+- Neu veröffentlichen (nach grünen Checks und Commit hier): `cd klangraum && bash tools/publish.sh <scratchpad>/pages`
+  (baut, prüft auf Schlüssel, ersetzt nur `klangraum/` im Pages-Branch, pusht, räumt auf). Nach ~2 Min. live.
+  Achtung: Die Commit-Zeile `Claude-Session:` im Skript an die aktuelle Sitzung anpassen.
+- Service Worker der App gilt nur für `/Tiefenrausch/klangraum/` (das Spiel hat keinen).
 
 ## Ehrlich: noch nicht geprüft
 
-- Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org`, `*.api.radio-browser.info`, `googleapis.com`, `youtube.com`, `musicbrainz.org` und `coverartarchive.org` gesperrt.
+- Echte Server: in der Cloud-Sitzung sind `lrclib.net` (Songtexte) und `api.audius.co`, `api.jamendo.com`, `archive.org`, `*.api.radio-browser.info`, `googleapis.com`, `youtube.com`, `musicbrainz.org` und `coverartarchive.org` gesperrt.
   Die Antwort-Formate stammen aus der Doku/Erfahrung; Adapter sind tolerant (zod, kaputte Einträge werden übersprungen).
 - Echtes iPhone/iPad (nur Chromium mit iPhone-Größe und -Kennung getestet).
 
 ## Offen / nächste Schritte
 
-- Phase 2: Favoriten, Playlists, Verlauf (idb), Firebase Auth (Google + anonym) + Firestore-Sync,
-  `firestore.rules` + Emulator-Tests, E2E „in Playlist legen“. Eigenes Firebase-Projekt empfehlen (nicht das Spiel-Projekt).
+- Sync zwischen Geräten (Firebase Auth + Firestore) – bis dahin „Sicherung speichern/laden“.
+  Eigenes Firebase-Projekt empfehlen (nicht das Spiel-Projekt); Nutzer minderjährig → Eltern.
+- Nicht gebaut (bewusst): Equalizer/Crossfade (bräuchte `crossOrigin` + Web Audio; am iPhone stoppt Web Audio
+  im Hintergrund), Gemeinsam hören (bräuchte Server).

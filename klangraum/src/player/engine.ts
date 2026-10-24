@@ -17,6 +17,8 @@ export interface PlayerState {
   muted: boolean;
   /** uid des Eintrags, der gerade in der Ausgabe steckt (null = muss vor dem Abspielen geladen werden) */
   loadedUid: string | null;
+  /** Tempo: 1 = normal, < 1 slowed, > 1 sped up (bei Live-Radio immer 1) */
+  rate: number;
 }
 
 export type PlayerNotice =
@@ -53,6 +55,7 @@ export function initialPlayerState(): PlayerState {
     volume: 1,
     muted: false,
     loadedUid: null,
+    rate: 1,
   };
 }
 
@@ -93,6 +96,7 @@ export class PlayerEngine {
     const s = this.store.getState();
     output.setVolume(s.volume);
     output.setMuted(s.muted);
+    output.setRate?.(s.rate);
     output.setListener(this.makeListener(output));
   }
 
@@ -262,6 +266,13 @@ export class PlayerEngine {
     this.set({ muted });
   }
 
+  setRate(rate: number) {
+    const r = Math.min(2, Math.max(0.5, rate));
+    this.set({ rate: r });
+    const live = this.current?.live;
+    for (const o of this.outputs) o.setRate?.(live ? 1 : r);
+  }
+
   canSetVolume() {
     return this.deps.output.canSetVolume();
   }
@@ -325,6 +336,7 @@ export class PlayerEngine {
     if (token !== this.loadToken) return;
     this.switchTo(output);
     output.load(ref, startMs / 1000);
+    output.setRate?.(item.track.live ? 1 : this.state.rate);
     this.set({ loadedUid: item.uid });
     if (!autoplay) return;
     try {
