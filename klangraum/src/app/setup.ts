@@ -13,6 +13,10 @@ import { safeLocalStorage } from '../storage/settings';
 import type { AppServices } from './context';
 import { useSettings } from './settingsStore';
 import { useToasts } from './toastStore';
+import { connectLibrary, idbPersistence, useLibrary } from '../library/libraryStore';
+import { trackPlays } from '../library/playTracker';
+import { autoplayProvider } from '../library/useSongRadio';
+import { connectSleepTimer } from '../player/sleepTimer';
 
 export function isAppleTouchDevice(): boolean {
   const ua = navigator.userAgent;
@@ -27,6 +31,7 @@ function showNotice(n: PlayerNotice) {
     toast(`errors.${n.errorKind}`, { source: sourceName(n.sourceId) }, 'error');
   else if (n.kind === 'trackError')
     toast(n.skipped ? 'errors.trackSkipped' : 'errors.trackFailed', { title: n.title }, 'error');
+  else if (n.kind === 'sleep') toast('sleep.stopped');
   else toast('errors.unsupported', { source: sourceName(n.sourceId) }, 'error');
 }
 
@@ -65,10 +70,18 @@ export function setupApp(): AppServices {
       getExternalOutput: (source) =>
         source.id === 'youtube' ? (youtube ??= new YouTubeOutput()) : undefined,
       onNotice: showNotice,
+      onQueueEnd: autoplayProvider(sources),
     },
     loadPlayerState(storage) ?? {},
   );
   persistPlayer(player, storage);
+  void connectLibrary(idbPersistence());
+  trackPlays(
+    player.store,
+    (track, ms) => useLibrary.getState().recordPlay(track, ms),
+    (track, ms) => useLibrary.getState().addListenTime(track, ms),
+  );
+  connectSleepTimer(player, () => showNotice({ kind: 'sleep' }));
   setCoverResolver(createCoverResolver({ cache: createCache(storage) }));
   connectMediaSession(player, undefined, undefined, {
     get: coverFor,

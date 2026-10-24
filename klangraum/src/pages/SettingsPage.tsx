@@ -6,6 +6,7 @@ import { openSuggestions, SUGGESTED_ARTISTS, SUGGESTED_GENRES } from '../library
 import { useT } from '../i18n';
 import { useSourceStatus } from '../sources/useActiveSources';
 import styles from './SettingsPage.module.css';
+import { BackupSettings, PlaybackSettings } from './settings/MoreSettings';
 
 const KEY_RE = /^[A-Za-z0-9_-]*$/;
 
@@ -208,6 +209,9 @@ export default function SettingsPage() {
         <FavoriteList kind="favoriteArtists" />
         <FavoriteList kind="favoriteGenres" />
       </section>
+
+      <PlaybackSettings />
+      <BackupSettings />
 
       <section className="kr-section kr-card" aria-labelledby="s-lang">
         <h2 id="s-lang">{t('settings.language')}</h2>

@@ -1,0 +1,101 @@
+.numbers {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border-top: 1px solid var(--kr-border);
+}
+
+.numbers > div {
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--kr-border);
+}
+
+.numbers dt {
+  color: var(--kr-text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.numbers dd {
+  margin: 4px 0 0;
+  font-family: var(--kr-font-heading);
+  font-stretch: 75%;
+  font-weight: 800;
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--kr-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.artists {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.artist {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rank {
+  width: 1.6em;
+  font-family: var(--kr-font-heading);
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--kr-text-muted);
+  text-align: right;
+}
+
+.artistText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.artistName {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.hours {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  align-items: end;
+  gap: 3px;
+  height: 120px;
+  padding-bottom: 18px;
+}
+
+.hour {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--kr-accent);
+  border-radius: 2px 2px 0 0;
+}
+
+.hourLabel {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  font-size: 0.72rem;
+  color: var(--kr-text-muted);
+}
+
+@media (min-width: 768px) {
+  .numbers {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

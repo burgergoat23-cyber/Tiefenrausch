@@ -1,0 +1,137 @@
+.dialog {
+  padding: 0;
+  border: 1px solid var(--kr-border);
+  border-radius: var(--kr-radius);
+  background: var(--kr-surface-raised);
+  color: var(--kr-text);
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(640px, calc(100dvh - 48px));
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--kr-shadow) 60%, transparent);
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 10px 10px 20px;
+  border-bottom: 1px solid var(--kr-border);
+}
+
+.title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.body {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Auswahl-Liste in Fenstern (Playlists, Timer) */
+.options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--kr-radius-sm);
+  background: transparent;
+  color: var(--kr-text);
+  text-align: left;
+  font-size: 0.98rem;
+}
+
+.option:hover,
+.option:focus-visible {
+  background: color-mix(in srgb, var(--kr-text) 9%, transparent);
+}
+
+.option[aria-pressed='true'] {
+  color: var(--kr-accent);
+  font-weight: 700;
+}
+
+.optionText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.optionSub {
+  color: var(--kr-text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.keys {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.keyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--kr-border);
+}
+
+.keyRow dt {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.keyRow dd {
+  margin: 0;
+  color: var(--kr-text-muted);
+  text-align: right;
+}
+
+.keyRow kbd {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border: 1px solid var(--kr-border);
+  border-radius: 4px;
+  background: var(--kr-surface);
+}

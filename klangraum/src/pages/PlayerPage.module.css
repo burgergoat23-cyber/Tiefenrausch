@@ -89,6 +89,10 @@
     color-mix(in srgb, var(--kr-shadow) var(--kr-shadow-strength), transparent);
 }
 
+.lyricsWrap {
+  width: min(100%, 560px);
+}
+
 /* YouTube-Video: 16:9, aber nie kleiner als 200 px hoch (Regel von YouTube) */
 .videoWrap {
   width: min(100%, 720px);
@@ -215,4 +219,22 @@
   .title {
     font-size: 1.7rem;
   }
+}
+
+.lyricsPanel {
+  height: min(calc(100dvh - 120px), 640px);
+  padding-right: 20px;
+}
+
+/* „Sicher zentriert“: passt der Inhalt nicht, beginnt er oben statt unter der Kopfzeile zu verschwinden */
+.nowPlaying {
+  justify-content: flex-start;
+}
+
+.nowPlaying > :first-child {
+  margin-top: auto;
+}
+
+.nowPlaying > :last-child {
+  margin-bottom: auto;
 }

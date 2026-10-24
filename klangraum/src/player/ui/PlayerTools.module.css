@@ -1,0 +1,29 @@
+.tools {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 72px;
+  min-height: var(--kr-touch);
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--kr-radius-sm);
+  background: transparent;
+  color: var(--kr-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tool:hover {
+  color: var(--kr-text);
+}
+
+.tool[aria-pressed='true'] {
+  color: var(--kr-accent);
+}

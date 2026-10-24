@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
+import { DialogHost } from '../components/DialogHost';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Icon, type IconName } from '../components/Icon';
 import { LiveAnnouncer } from '../components/LiveAnnouncer';
@@ -8,6 +9,7 @@ import { Toaster } from '../components/Toaster';
 import { VideoDock } from '../components/VideoDock';
 import { useT, type TKey } from '../i18n';
 import { usePlayerState } from './context';
+import { useKeyboardShortcuts } from './shortcuts';
 import styles from './AppShell.module.css';
 
 interface NavItem {
@@ -31,6 +33,8 @@ const NAV_GROUPS: { title?: TKey; items: NavItem[] }[] = [
     title: 'nav.libraryGroup',
     items: [
       { to: '/bibliothek', icon: 'library', label: 'nav.library', tab: true },
+      { to: '/bibliothek/lieblingssongs', icon: 'heart', label: 'library.liked' },
+      { to: '/rueckblick', icon: 'chart', label: 'stats.title' },
       { to: '/warteschlange', icon: 'queue', label: 'nav.queue' },
     ],
   },
@@ -62,6 +66,7 @@ export function AppShell() {
   const mainRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const firstRender = useRef(true);
+  useKeyboardShortcuts();
 
   // Der Vollbild-Player liegt über allem: Menü dahinter für Tastatur und Screenreader sperren
   useEffect(() => {
@@ -101,7 +106,11 @@ export function AppShell() {
             <ul>
               {group.items.map((item) => (
                 <li key={item.to} data-tab={item.tab || undefined}>
-                  <NavLink to={item.to} end={item.to === '/'} className={styles.link}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === '/' || item.to === '/bibliothek'}
+                    className={styles.link}
+                  >
                     <Icon name={item.icon} size={22} />
                     <span className={styles.linkText}>{t(item.label)}</span>
                   </NavLink>
@@ -124,6 +133,7 @@ export function AppShell() {
         </div>
       )}
       <VideoDock />
+      <DialogHost />
       <Toaster />
       <LiveAnnouncer />
     </div>

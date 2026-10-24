@@ -427,3 +427,66 @@ describe('Media Session (Sperrbildschirm)', () => {
     expect(() => off()).not.toThrow();
   });
 });
+
+describe('Autoplay und Schlaf-Timer', () => {
+  function withAutoplay(more: Track[]) {
+    const output = new FakeOutput();
+    const notices: PlayerNotice[] = [];
+    const asked: Track[] = [];
+    const engine = new PlayerEngine({
+      getSource: (id) => fakeSource(id),
+      output,
+      onNotice: (n) => notices.push(n),
+      onQueueEnd: async (last) => {
+        asked.push(last);
+        return more;
+      },
+    });
+    return { engine, output, notices, asked };
+  }
+
+  it('am Ende der Warteschlange geht es mit ähnlichen Songs weiter', async () => {
+    const { engine, output, asked } = withAutoplay(tracks('x', 'y'));
+    engine.playTracks(tracks('a'));
+    await flush();
+    output.listener.onEnded();
+    await flush();
+    await flush();
+    expect(asked.map((t) => t.id)).toEqual(['a']);
+    expect(engine.current?.id).toBe('x');
+    expect(engine.state.queue.items).toHaveLength(3);
+    expect(output.loaded.at(-1)).toBe('https://stream.test/audius/x');
+  });
+
+  it('ohne Vorschläge bleibt der letzte Song pausiert stehen', async () => {
+    const { engine, output } = withAutoplay([]);
+    engine.playTracks(tracks('a'));
+    await flush();
+    output.listener.onEnded();
+    await flush();
+    expect(engine.state.status).toBe('paused');
+    expect(engine.current?.id).toBe('a');
+  });
+
+  it('„Weiter“ am Ende holt auch Vorschläge', async () => {
+    const { engine } = withAutoplay(tracks('x'));
+    engine.playTracks(tracks('a'));
+    await flush();
+    engine.next();
+    await flush();
+    await flush();
+    expect(engine.current?.id).toBe('x');
+  });
+
+  it('Schlaf-Timer „Ende des Songs“ hält an statt weiterzuspielen', async () => {
+    const { engine, output, notices } = withAutoplay(tracks('x'));
+    engine.playTracks(tracks('a', 'b'));
+    await flush();
+    engine.stopAfterCurrent = true;
+    output.listener.onEnded();
+    expect(engine.current?.id).toBe('a');
+    expect(engine.state.status).toBe('paused');
+    expect(engine.stopAfterCurrent).toBe(false);
+    expect(notices).toContainEqual({ kind: 'sleep' });
+  });
+});

@@ -14,6 +14,10 @@ import { VideoSlot } from '../components/VideoDock';
 import { VolumeControl } from '../components/VolumeControl';
 import { isAppleTouchDevice } from '../app/setup';
 import { useT } from '../i18n';
+import { LikeButton } from '../library/ui/LikeButton';
+import { LyricsView } from '../lyrics/LyricsView';
+import { PlayerTools } from '../player/ui/PlayerTools';
+import { usePlayerView } from '../player/ui/playerView';
 import { currentItem } from '../player/queue';
 import { sourceName } from '../sources/names';
 import styles from './PlayerPage.module.css';
@@ -27,8 +31,11 @@ export default function PlayerPage() {
   const backdrop = cover ?? track?.artworkUrl;
   const buffering = usePlayerState((s) => s.buffering || s.status === 'loading');
   const closeRef = useRef<HTMLButtonElement>(null);
+  const lyricsOn = usePlayerView((s) => s.lyrics);
   // Breiter Bildschirm (iPad quer, PC): Warteschlange rechts neben dem Player
   const wide = useMediaQuery('(min-width: 1024px) and (min-height: 600px)');
+  // Breit: Songtext rechts statt der Warteschlange; schmal: statt des Covers
+  const lyrics = lyricsOn && !wide;
 
   const close = () => {
     if (window.history.length > 1) navigate(-1);
@@ -92,6 +99,11 @@ export default function PlayerPage() {
               <div className={styles.videoWrap}>
                 <VideoSlot className={styles.video} />
                 {isAppleTouchDevice() && <p className={styles.videoHint}>{t('video.tapHint')}</p>}
+                {lyrics && <LyricsView track={track} compact />}
+              </div>
+            ) : lyrics ? (
+              <div className={styles.lyricsWrap}>
+                <LyricsView track={track} />
               </div>
             ) : (
               <div className={styles.coverWrap}>
@@ -104,6 +116,7 @@ export default function PlayerPage() {
                   <h1 className={styles.title}>{track.title}</h1>
                   <p className={styles.artist}>{buffering ? t('player.buffering') : artists}</p>
                 </div>
+                <LikeButton track={track} size={24} />
                 <TrackMenu track={track} />
               </div>
               <p className={styles.meta}>
@@ -126,12 +139,21 @@ export default function PlayerPage() {
               )}
               <ProgressBar />
               <PlayerControls />
+              <PlayerTools track={track} />
               <div className={styles.volume}>
                 <VolumeControl />
               </div>
             </div>
           </div>
-          {wide && (
+          {wide && lyricsOn && (
+            <aside
+              className={`${styles.queuePanel} ${styles.lyricsPanel}`}
+              aria-label={t('lyrics.title')}
+            >
+              <LyricsView track={track} />
+            </aside>
+          )}
+          {wide && !lyricsOn && (
             <aside
               className={styles.queuePanel}
               aria-labelledby="fp-next"

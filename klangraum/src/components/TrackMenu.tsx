@@ -1,17 +1,32 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { usePlayer } from '../app/context';
+import { useDialogs } from '../app/dialogStore';
 import { useToasts } from '../app/toastStore';
+import { useIsLiked, useLibrary } from '../library/libraryStore';
+import { useSongRadio } from '../library/useSongRadio';
+import { useShareTracks } from '../share/useShareTracks';
 import { useT } from '../i18n';
 import { sourceName } from '../sources/names';
 import type { Track } from '../sources/types';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 import styles from './TrackMenu.module.css';
 
-/** ⋮-Menü an einem Song: Als Nächstes spielen, Ans Ende der Warteschlange, bei der Quelle ansehen */
-export function TrackMenu({ track }: { track: Track }) {
+export interface ExtraMenuItem {
+  label: string;
+  icon: IconName;
+  onSelect(): void;
+}
+
+/** ⋮-Menü an einem Song: Warteschlange, Lieblingssong, Playlist, Song-Radio, Teilen, Quelle */
+export function TrackMenu({ track, extra = [] }: { track: Track; extra?: ExtraMenuItem[] }) {
   const t = useT();
   const player = usePlayer();
   const toast = useToasts((s) => s.show);
+  const liked = useIsLiked(track);
+  const toggleLike = useLibrary((s) => s.toggleLike);
+  const openDialog = useDialogs((s) => s.open);
+  const startRadio = useSongRadio();
+  const share = useShareTracks();
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -27,7 +42,7 @@ export function TrackMenu({ track }: { track: Track }) {
   useLayoutEffect(() => {
     if (!open || !btnRef.current) return;
     const rect = btnRef.current.getBoundingClientRect();
-    setUp(window.innerHeight - rect.bottom < 240);
+    setUp(window.innerHeight - rect.bottom < 420 && rect.top > window.innerHeight - rect.bottom);
     menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
   }, [open]);
 
@@ -108,6 +123,76 @@ export function TrackMenu({ track }: { track: Track }) {
             <Icon name="queue" size={20} />
             {t('track.addToQueue')}
           </button>
+          {!track.live && (
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.item}
+              onClick={() => {
+                const now = toggleLike(track);
+                toast(now ? 'library.likedToast' : 'library.unlikedToast', { title: track.title });
+                close();
+              }}
+            >
+              <Icon name={liked ? 'heartFilled' : 'heart'} size={20} />
+              {liked ? t('library.unlike') : t('library.like')}
+            </button>
+          )}
+          {!track.live && (
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.item}
+              onClick={() => {
+                close(false);
+                openDialog({ kind: 'addToPlaylist', tracks: [track] });
+              }}
+            >
+              <Icon name="listPlus" size={20} />
+              {t('library.addTo')}
+            </button>
+          )}
+          {!track.live && (
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.item}
+              onClick={() => {
+                close();
+                void startRadio(track);
+              }}
+            >
+              <Icon name="spark" size={20} />
+              {t('songRadio.start')}
+            </button>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            className={styles.item}
+            onClick={() => {
+              close();
+              void share(track.title, [track]);
+            }}
+          >
+            <Icon name="share" size={20} />
+            {t('share.share')}
+          </button>
+          {extra.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              role="menuitem"
+              className={styles.item}
+              onClick={() => {
+                close();
+                item.onSelect();
+              }}
+            >
+              <Icon name={item.icon} size={20} />
+              {item.label}
+            </button>
+          ))}
           {track.permalink && (
             <a
               role="menuitem"

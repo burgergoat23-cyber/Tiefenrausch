@@ -85,7 +85,7 @@ describe('Echte Migrationen', () => {
       searchHistory: ['rock'],
     };
     expect(parseSettings(v1)).toEqual({
-      schemaVersion: 4,
+      schemaVersion: SETTINGS_VERSION,
       themeId: 'hell',
       language: 'en',
       sources: { audius: false },
@@ -94,6 +94,7 @@ describe('Echte Migrationen', () => {
       searchHistory: ['rock'],
       favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
       favoriteGenres: ['Drill'],
+      autoplay: true,
     });
   });
 
@@ -104,7 +105,7 @@ describe('Echte Migrationen', () => {
       favoriteArtists: ['King Von', 'Mein Künstler', 'lil durk'],
     };
     const s = parseSettings(v3);
-    expect(s.schemaVersion).toBe(4);
+    expect(s.schemaVersion).toBe(SETTINGS_VERSION);
     expect(s.favoriteArtists.slice(0, 3)).toEqual(['King Von', 'Mein Künstler', 'lil durk']);
     expect(s.favoriteArtists).toContain('Chief Keef');
     expect(s.favoriteArtists.filter((a) => a.toLowerCase() === 'lil durk')).toHaveLength(1);
@@ -119,7 +120,7 @@ describe('Echte Migrationen', () => {
     delete v2.favoriteArtists;
     delete v2.favoriteGenres;
     const s = parseSettings(v2);
-    expect(s.schemaVersion).toBe(4);
+    expect(s.schemaVersion).toBe(SETTINGS_VERSION);
     expect(s.youtubeApiKey).toBe('KEY');
     expect(s.favoriteGenres).toEqual(['Drill']);
   });

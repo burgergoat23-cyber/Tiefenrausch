@@ -1,0 +1,85 @@
+.nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--kr-border);
+}
+
+.nav li {
+  border-bottom: 1px solid var(--kr-border);
+}
+
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 4px;
+  color: var(--kr-text);
+  text-decoration: none;
+  font-size: 1.08rem;
+}
+
+.navRow:hover .navLabel {
+  color: var(--kr-accent);
+}
+
+.navIcon {
+  display: inline-flex;
+  color: var(--kr-accent);
+}
+
+.navLabel {
+  flex: 1;
+}
+
+.navCount {
+  color: var(--kr-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chev {
+  color: var(--kr-text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 22px 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--kr-text);
+  text-decoration: none;
+}
+
+.cardArt {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.cardTitle {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardSub {
+  color: var(--kr-text-muted);
+  font-size: 0.88rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}

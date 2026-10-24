@@ -4,7 +4,7 @@ import { sourceIdSchema } from '../sources/types';
 import { runMigrations, type Migration } from './migrations';
 
 export const SETTINGS_STORAGE_KEY = 'klangraum.settings';
-export const SETTINGS_VERSION = 4;
+export const SETTINGS_VERSION = 5;
 
 /**
  * EIN Einstellungs-Objekt für alles, was man anpassen kann.
@@ -30,6 +30,8 @@ export const settingsSchema = z.object({
   /** „Für dich“: Lieblingskünstler und -genres (frei änderbar unter Einstellungen → Deine Musik) */
   favoriteArtists: z.array(z.string().min(1).max(60)).max(20),
   favoriteGenres: z.array(z.string().min(1).max(40)).max(10),
+  /** Autoplay: wenn die Warteschlange zu Ende ist, ähnliche Songs weiterspielen */
+  autoplay: z.boolean(),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
@@ -61,6 +63,7 @@ export function defaultSettings(language: 'de' | 'en' = 'de'): Settings {
     searchHistory: [],
     favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
     favoriteGenres: [...DEFAULT_FAVORITE_GENRES],
+    autoplay: true,
   };
 }
 
@@ -82,6 +85,8 @@ export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
     const added = ADDED_IN_V4.filter((a) => !have.has(a.toLowerCase()));
     return { ...d, favoriteArtists: [...own, ...added].slice(0, 20) };
   },
+  /** 4 → 5: Autoplay (an) */
+  4: (d) => ({ ...d, autoplay: true }),
 };
 
 /** Browser-Sprache als Startwert (Deutsch zuerst) */

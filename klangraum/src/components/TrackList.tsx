@@ -7,7 +7,7 @@ import { TrackArtwork } from './Artwork';
 import { formatDuration } from './format';
 import { SourceBadge } from './SourceBadge';
 import { trackPlayLabel } from './trackLabel';
-import { TrackMenu } from './TrackMenu';
+import { TrackMenu, type ExtraMenuItem } from './TrackMenu';
 import styles from './TrackList.module.css';
 
 interface RowProps {
@@ -16,9 +16,17 @@ interface RowProps {
   active: boolean;
   playing: boolean;
   onPlay(index: number): void;
+  menuExtra?: (track: Track, index: number) => ExtraMenuItem[];
 }
 
-const TrackRow = memo(function TrackRow({ track, index, active, playing, onPlay }: RowProps) {
+const TrackRow = memo(function TrackRow({
+  track,
+  index,
+  active,
+  playing,
+  onPlay,
+  menuExtra,
+}: RowProps) {
   const t = useT();
   const artists = track.artists.join(', ') || t('track.unknownArtist');
   const label = trackPlayLabel(t, track);
@@ -52,7 +60,7 @@ const TrackRow = memo(function TrackRow({ track, index, active, playing, onPlay 
               : ''}
         </span>
       </button>
-      <TrackMenu track={track} />
+      <TrackMenu track={track} extra={menuExtra?.(track, index)} />
     </li>
   );
 });
@@ -62,10 +70,12 @@ interface Props {
   /** Wird beim Abspielen aufgerufen (z. B. um die Suche im Verlauf zu merken) */
   onPlayed?(): void;
   label?: string;
+  /** Zusätzliche Menüpunkte je Song (z. B. „Aus Playlist entfernen“) */
+  menuExtra?: (track: Track, index: number) => ExtraMenuItem[];
 }
 
 /** Song-Liste. Antippen spielt den Song und stellt die ganze Liste in die Warteschlange. */
-export function TrackList({ tracks, onPlayed, label }: Props) {
+export function TrackList({ tracks, onPlayed, label, menuExtra }: Props) {
   const player = usePlayer();
   const currentKey = usePlayerState((s) => {
     const item = currentItem(s.queue);
@@ -89,6 +99,7 @@ export function TrackList({ tracks, onPlayed, label }: Props) {
           active={currentKey === trackKey(track)}
           playing={playing}
           onPlay={onPlay}
+          menuExtra={menuExtra}
         />
       ))}
     </ol>

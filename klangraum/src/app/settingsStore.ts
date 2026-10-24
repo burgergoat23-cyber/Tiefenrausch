@@ -23,6 +23,7 @@ export interface SettingsStore {
   clearSearchHistory(): void;
   addFavorite(kind: 'favoriteArtists' | 'favoriteGenres', name: string): void;
   removeFavorite(kind: 'favoriteArtists' | 'favoriteGenres', name: string): void;
+  setAutoplay(on: boolean): void;
   resetAll(): void;
 }
 
@@ -60,6 +61,7 @@ export const useSettings = create<SettingsStore>()((set, get) => {
     },
     removeFavorite: (kind, name) =>
       update({ [kind]: get().settings[kind].filter((x) => x !== name) }),
+    setAutoplay: (autoplay) => update({ autoplay }),
     resetAll: () => update(defaultSettings(guessLanguage())),
   };
 });

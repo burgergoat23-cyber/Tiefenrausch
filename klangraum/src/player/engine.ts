@@ -22,7 +22,9 @@ export interface PlayerState {
 export type PlayerNotice =
   | { kind: 'sourceError'; sourceId: SourceId; errorKind: SourceErrorKind }
   | { kind: 'trackError'; title: string; skipped: boolean }
-  | { kind: 'unsupported'; sourceId: SourceId };
+  | { kind: 'unsupported'; sourceId: SourceId }
+  /** Schlaf-Timer hat angehalten */
+  | { kind: 'sleep' };
 
 export interface EngineDeps {
   getSource(id: SourceId): MusicSource | undefined;
@@ -32,6 +34,8 @@ export interface EngineDeps {
   getExternalOutput?(source: MusicSource): PlaybackOutput | undefined;
   random?: Q.Random;
   onNotice?(notice: PlayerNotice): void;
+  /** Autoplay: Warteschlange zu Ende → passende Songs zum Weiterspielen (leer = aufhören) */
+  onQueueEnd?(last: Track, played: Track[]): Promise<Track[]>;
 }
 
 /** Wie oft hintereinander ein kaputter Song übersprungen wird, bevor wir aufhören */
@@ -65,6 +69,8 @@ export class PlayerEngine {
   /** Die Ausgabe, die gerade spielt – nur ihre Rückmeldungen zählen */
   private active: PlaybackOutput;
   private readonly outputs: PlaybackOutput[] = [];
+  /** Schlaf-Timer „Ende des Songs“: nach diesem Song anhalten statt weiterzuspielen */
+  stopAfterCurrent = false;
 
   constructor(deps: EngineDeps, initial: Partial<PlayerState> = {}) {
     this.deps = deps;
@@ -211,7 +217,10 @@ export class PlayerEngine {
 
   next() {
     const idx = Q.nextIndex(this.state.queue, false);
-    if (idx === null) return;
+    if (idx === null) {
+      void this.continueWithAutoplay(false);
+      return;
+    }
     this.errorStreak = 0;
     this.setQueue(Q.jumpTo(this.state.queue, idx));
     void this.loadCurrent(true);
@@ -326,6 +335,44 @@ export class PlayerEngine {
     }
   }
 
+  /** Ende der Warteschlange: mit Autoplay weiter, sonst bleibt der letzte Song stehen */
+  private async continueWithAutoplay(ended: boolean) {
+    const q = this.state.queue;
+    const last = Q.currentItem(q)?.track;
+    const stopHere = () => {
+      if (!ended) return;
+      this.active.seek(0);
+      this.set({ status: 'paused', positionMs: 0, buffering: false });
+    };
+    if (!last || !this.deps.onQueueEnd) {
+      stopHere();
+      return;
+    }
+    const token = ++this.loadToken;
+    if (ended) this.set({ status: 'loading', buffering: false });
+    let more: Track[] = [];
+    try {
+      more = await this.deps.onQueueEnd(
+        last,
+        q.items.map((i) => i.track),
+      );
+    } catch {
+      more = [];
+    }
+    // In der Zwischenzeit hat jemand etwas anderes gestartet
+    if (token !== this.loadToken) return;
+    if (more.length === 0) {
+      stopHere();
+      return;
+    }
+    // Hat man beim Warten auf Pause gedrückt, wird nur angehängt, aber nicht losgespielt
+    const autoplay = !ended || this.state.status === 'loading';
+    const added = Q.addToEnd(this.state.queue, more);
+    const idx = Q.nextIndex(added, false);
+    this.setQueue(idx === null ? added : Q.jumpTo(added, idx));
+    void this.loadCurrent(autoplay);
+  }
+
   private handlePlayRejection(err: unknown) {
     // NotAllowedError: Browser will erst einen Tipp vom Nutzer → einfach pausiert anzeigen.
     // Andere Fehler meldet das <audio>-Element selbst über onError.
@@ -335,11 +382,16 @@ export class PlayerEngine {
 
   private onEnded = () => {
     const q = this.state.queue;
-    const idx = Q.nextIndex(q, true);
-    if (idx === null) {
-      // Ende der Warteschlange: letzter Song bleibt stehen, zurück auf Anfang
+    if (this.stopAfterCurrent) {
+      this.stopAfterCurrent = false;
       this.active.seek(0);
       this.set({ status: 'paused', positionMs: 0, buffering: false });
+      this.notice({ kind: 'sleep' });
+      return;
+    }
+    const idx = Q.nextIndex(q, true);
+    if (idx === null) {
+      void this.continueWithAutoplay(true);
       return;
     }
     if (idx === q.index) {

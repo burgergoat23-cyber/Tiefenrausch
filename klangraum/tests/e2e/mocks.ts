@@ -111,8 +111,29 @@ export interface MockOptions {
 /** Fängt alle Anfragen an Audius, Jamendo und Bilder ab */
 export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
   const wav = toneWav(opts.audioSeconds ?? 30);
-  const audio = (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'audio/wav', headers: CORS, body: wav });
+  // Mit Range-Anfragen (wie echte Server) – sonst kann der Browser nicht spulen
+  const audio = (route: Route) => {
+    const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers()['range'] ?? '');
+    if (!range)
+      return route.fulfill({
+        status: 200,
+        contentType: 'audio/wav',
+        headers: { ...CORS, 'Accept-Ranges': 'bytes' },
+        body: wav,
+      });
+    const start = Number(range[1]);
+    const end = range[2] ? Math.min(Number(range[2]), wav.length - 1) : wav.length - 1;
+    return route.fulfill({
+      status: 206,
+      contentType: 'audio/wav',
+      headers: {
+        ...CORS,
+        'Accept-Ranges': 'bytes',
+        'Content-Range': `bytes ${start}-${end}/${wav.length}`,
+      },
+      body: wav.subarray(start, end + 1),
+    });
+  };
 
   await page.route(/^https:\/\/api\.audius\.co\//, async (route) => {
     const url = new URL(route.request().url());
@@ -357,6 +378,27 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
       body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#e9c46a"/><circle cx="5" cy="5" r="3" fill="#264653"/></svg>',
     }),
   );
+
+  // LRCLIB: zu jedem Song ein synchroner Songtext (Zeilen alle 1,5 Sekunden)
+  await page.route(/^https:\/\/lrclib\.net\/api\//, (route) => {
+    const url = new URL(route.request().url());
+    const name = url.searchParams.get('track_name') ?? '';
+    if (!name || name.includes('Ohne Text')) return json(route, []);
+    const lines = Array.from(
+      { length: 20 },
+      (_, i) =>
+        `[00:${String(Math.floor(i * 1.5)).padStart(2, '0')}.${i % 2 ? '50' : '00'}]Zeile ${i + 1} von ${name}`,
+    );
+    return json(route, [
+      {
+        trackName: name,
+        artistName: url.searchParams.get('artist_name'),
+        duration: null,
+        plainLyrics: 'Text',
+        syncedLyrics: lines.join('\n'),
+      },
+    ]);
+  });
 
   await page.route(/^https:\/\/audio\.jamendo\.test\//, audio);
   await page.route(/^https:\/\/img\.test\//, (route) => {
