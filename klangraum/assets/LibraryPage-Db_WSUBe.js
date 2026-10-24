@@ -1,0 +1,1 @@
+import{u as a,j as r}from"./index-BoeSkW5p.js";function i(){const s=a();return r.jsxs("div",{className:"kr-page",children:[r.jsx("h1",{children:s("library.title")}),r.jsx("p",{className:"kr-card kr-muted",children:s("library.comingSoon")})]})}export{i as default};

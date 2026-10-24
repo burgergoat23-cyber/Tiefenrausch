@@ -9,6 +9,7 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 
 ## Wo was liegt
 - **Spiel online:** https://burgergoat23-cyber.github.io/Tiefenrausch/ (GitHub Pages, Branch `claude/tiefen-raush-code-review-jb306f`, Ordner `/`). Jeder Push ist nach ~2 Min. live.
+- **Musik-App Klangraum online:** https://burgergoat23-cyber.github.io/Tiefenrausch/klangraum/ – Ordner `klangraum/` ist nur der **gebaute** Stand (nicht hier bearbeiten). Quellcode und Anleitung zum Neu-Veröffentlichen: Branch `claude/new-session-dwbtel`, Datei `klangraum/UEBERGABE.md`.
 - `index.html` – das ganze Spiel (eine Datei, Canvas, kein Build-Schritt). Ursprünglich aus dem claude.ai-Artifact „Tiefenrausch“ kopiert; das Artifact wird **nicht** mehr aktualisiert.
 - `firestore.rules` – Firebase-Sicherheitsregeln. Nach jeder Änderung muss der **Nutzer** sie in der Konsole einfügen und veröffentlichen: https://console.firebase.google.com/project/tiefenrausch/firestore/rules (ganzen Text ersetzen → „Veröffentlichen“).
 - `tests/` – Testprogramme (Playwright). `bash tests/run.sh` bzw. `bash tests/run.sh --firebase`.

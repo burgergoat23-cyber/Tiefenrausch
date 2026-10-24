@@ -1,0 +1,1 @@
+function s(t){if(!Number.isFinite(t)||t<0)return"0:00";const o=Math.floor(t/1e3),r=Math.floor(o/3600),n=Math.floor(o%3600/60),i=o%60,a=String(i).padStart(2,"0");return r>0?`${r}:${String(n).padStart(2,"0")}:${a}`:`${n}:${a}`}export{s as f};

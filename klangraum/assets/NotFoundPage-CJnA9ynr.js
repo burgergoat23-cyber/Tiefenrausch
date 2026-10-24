@@ -1,0 +1,1 @@
+import{u as e,j as s,L as n}from"./index-BoeSkW5p.js";function a(){const r=e();return s.jsxs("div",{className:"kr-page",children:[s.jsx("h1",{children:r("errors.notFoundPage")}),s.jsx("div",{children:s.jsx(n,{to:"/",className:"kr-btn",children:r("errors.backHome")})})]})}export{a as default};
