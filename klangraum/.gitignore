@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-e2e/
+test-results/
+playwright-report/
+*.tsbuildinfo
+# Geheimnisse / eigene Schlüssel – niemals committen
+.env
+.env.local
+.env.*.local
+docs/screenshots/

@@ -1,0 +1,93 @@
+.form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 0 14px;
+  min-height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--kr-border);
+  background: var(--kr-surface);
+  color: var(--kr-text-muted);
+}
+
+.field:focus-within {
+  border-color: var(--kr-accent);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  border: 0;
+  background: transparent;
+  color: var(--kr-text);
+  font-size: 1rem; /* 16px verhindert das automatische Zoomen am iPhone */
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--kr-text-muted);
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sourceHead {
+  font-size: 1.05rem;
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.history li {
+  display: flex;
+  align-items: center;
+}
+
+.historyItem {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--kr-touch);
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--kr-radius-sm);
+  background: transparent;
+  color: var(--kr-text);
+  text-align: left;
+}
+
+.historyItem span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nur mit Maus: am Handy bliebe der Effekt nach dem Tippen hängen */
+@media (hover: hover) {
+  .historyItem:hover {
+    background: color-mix(in srgb, var(--kr-text) 6%, transparent);
+  }
+}

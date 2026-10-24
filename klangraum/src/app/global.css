@@ -1,0 +1,384 @@
+/*
+ * Grund-Stile. ALLE Farben kommen aus CSS-Variablen (--kr-…), die das Theme setzt.
+ * Hier stehen nur Startwerte (Theme „Mitternacht“), damit vor dem ersten Laden nichts blitzt.
+ */
+:root {
+  --kr-bg: #0e1020;
+  --kr-surface: #171a2e;
+  --kr-surface-raised: #21253d;
+  --kr-text: #eef0ff;
+  --kr-text-muted: #a3a8c8;
+  --kr-accent: #8b7dff;
+  --kr-accent-text: #0e1020;
+  --kr-border: #2f3452;
+  --kr-error: #ff7a8a;
+  --kr-success: #5fd39a;
+  --kr-shadow: #000000;
+
+  /* Form & Abstände (Phase 4 macht sie einstellbar) */
+  --kr-radius: 14px;
+  --kr-radius-sm: 8px;
+  --kr-gap: 16px;
+  --kr-touch: 44px;
+  --kr-shadow-strength: 35%;
+  --kr-font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --kr-font-heading: var(--kr-font-body);
+  --kr-font-scale: 1;
+  --kr-transition: 160ms ease;
+
+  /* Aufbau */
+  --kr-nav-width: 232px;
+  --kr-mini-height: 72px;
+  --kr-tabbar-height: 60px;
+  --kr-safe-top: env(safe-area-inset-top, 0px);
+  --kr-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --kr-safe-left: env(safe-area-inset-left, 0px);
+  --kr-safe-right: env(safe-area-inset-right, 0px);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: calc(100% * var(--kr-font-scale));
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--kr-bg);
+  color: var(--kr-text);
+  font-family: var(--kr-font-body);
+  line-height: 1.45;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--kr-font-heading);
+  line-height: 1.2;
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--kr-accent);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Sichtbarer Fokus für Tastatur-Bedienung */
+:focus-visible {
+  outline: 3px solid var(--kr-accent);
+  outline-offset: 2px;
+  border-radius: var(--kr-radius-sm);
+}
+
+.kr-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.kr-skip-link {
+  position: absolute;
+  left: 8px;
+  top: -100px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--kr-accent);
+  color: var(--kr-accent-text);
+  border-radius: var(--kr-radius-sm);
+  font-weight: 600;
+}
+
+.kr-skip-link:focus {
+  top: calc(8px + var(--kr-safe-top));
+}
+
+.kr-icon {
+  flex: none;
+}
+
+/* ---------- Knöpfe ---------- */
+
+.kr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--kr-touch);
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--kr-border);
+  background: var(--kr-surface-raised);
+  color: var(--kr-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    transform var(--kr-transition),
+    background var(--kr-transition);
+}
+
+@media (hover: hover) {
+  .kr-btn:hover {
+    background: color-mix(in srgb, var(--kr-surface-raised) 80%, var(--kr-text));
+  }
+}
+
+.kr-btn:active {
+  transform: scale(0.97);
+}
+
+.kr-btn--primary {
+  background: var(--kr-accent);
+  color: var(--kr-accent-text);
+  border-color: transparent;
+}
+
+@media (hover: hover) {
+  .kr-btn--primary:hover {
+    background: color-mix(in srgb, var(--kr-accent) 88%, var(--kr-text));
+  }
+}
+
+.kr-icon-btn {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--kr-touch);
+  height: var(--kr-touch);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--kr-text);
+  transition:
+    background var(--kr-transition),
+    color var(--kr-transition),
+    transform var(--kr-transition);
+}
+
+@media (hover: hover) {
+  .kr-icon-btn:hover {
+    background: color-mix(in srgb, var(--kr-text) 10%, transparent);
+  }
+}
+
+.kr-icon-btn:active {
+  transform: scale(0.94);
+}
+
+.kr-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.kr-icon-btn[aria-pressed='true'] {
+  color: var(--kr-accent);
+}
+
+.kr-play-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--kr-accent);
+  color: var(--kr-accent-text);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--kr-shadow) var(--kr-shadow-strength), transparent);
+  transition: transform var(--kr-transition);
+}
+
+.kr-play-btn:active {
+  transform: scale(0.95);
+}
+
+/* Filter-Chips */
+.kr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kr-chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--kr-border);
+  background: transparent;
+  color: var(--kr-text);
+  font-size: 0.92rem;
+}
+
+.kr-chip[aria-pressed='true'] {
+  background: var(--kr-text);
+  color: var(--kr-bg);
+  border-color: var(--kr-text);
+}
+
+/* ---------- Seiten ---------- */
+
+.kr-page {
+  padding: calc(20px + var(--kr-safe-top)) calc(16px + var(--kr-safe-right)) 24px
+    calc(16px + var(--kr-safe-left));
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.kr-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kr-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kr-muted {
+  color: var(--kr-text-muted);
+}
+
+.kr-card {
+  background: var(--kr-surface);
+  border: 1px solid var(--kr-border);
+  border-radius: var(--kr-radius);
+  padding: 16px;
+}
+
+.kr-error-text {
+  color: var(--kr-error);
+}
+
+.kr-input {
+  width: 100%;
+  min-height: var(--kr-touch);
+  padding: 0 14px;
+  border-radius: var(--kr-radius-sm);
+  border: 1px solid var(--kr-border);
+  background: var(--kr-surface);
+  color: var(--kr-text);
+}
+
+.kr-input::placeholder {
+  color: var(--kr-text-muted);
+}
+
+/* Schieberegler (Fortschritt, Lautstärke) – Farben aus dem Theme */
+.kr-range {
+  --kr-range-fill: 0%;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.kr-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 99px;
+  background: linear-gradient(
+    to right,
+    var(--kr-accent) var(--kr-range-fill),
+    color-mix(in srgb, var(--kr-text) 22%, transparent) var(--kr-range-fill)
+  );
+}
+
+.kr-range::-moz-range-track {
+  height: 4px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--kr-text) 22%, transparent);
+}
+
+.kr-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--kr-accent);
+}
+
+.kr-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--kr-text);
+  border: 0;
+}
+
+.kr-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--kr-text);
+  border: 0;
+}
+
+.kr-range:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --kr-transition: 0ms linear;
+  }
+}

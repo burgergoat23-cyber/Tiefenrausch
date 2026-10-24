@@ -1,0 +1,14 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.times {
+  display: flex;
+  justify-content: space-between;
+  color: var(--kr-text-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}

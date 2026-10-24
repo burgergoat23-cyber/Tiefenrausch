@@ -1,0 +1,19 @@
+.art {
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: var(--kr-radius-sm);
+  background: var(--kr-surface-raised);
+  color: var(--kr-text-muted);
+}
+
+.art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.round {
+  border-radius: 50%;
+}

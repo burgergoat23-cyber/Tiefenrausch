@@ -1,0 +1,123 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--kr-radius-sm);
+}
+
+/* Nur mit Maus: am Handy bliebe der Effekt nach dem Tippen hängen */
+@media (hover: hover) {
+  .row:hover {
+    background: color-mix(in srgb, var(--kr-text) 6%, transparent);
+  }
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--kr-radius-sm);
+  background: transparent;
+  color: var(--kr-text);
+  text-align: left;
+}
+
+.art {
+  position: relative;
+  flex: none;
+}
+
+.eq {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--kr-radius-sm);
+  background: color-mix(in srgb, var(--kr-bg) 55%, transparent);
+}
+
+.eq::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--kr-accent);
+  animation: kr-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes kr-pulse {
+  from {
+    transform: scale(0.7);
+  }
+  to {
+    transform: scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eq::after {
+    animation: none;
+  }
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row[data-active] .title {
+  color: var(--kr-accent);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--kr-text-muted);
+  font-size: 0.86rem;
+}
+
+.artist,
+.license {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.license {
+  flex: none;
+  max-width: 40%;
+}
+
+.dur {
+  flex: none;
+  color: var(--kr-text-muted);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}

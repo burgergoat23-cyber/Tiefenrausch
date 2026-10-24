@@ -1,0 +1,41 @@
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.art {
+  box-shadow: 0 12px 32px
+    color-mix(in srgb, var(--kr-shadow) var(--kr-shadow-strength), transparent);
+}
+
+.info {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info h1 {
+  overflow-wrap: anywhere;
+}
+
+.kind {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--kr-text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}

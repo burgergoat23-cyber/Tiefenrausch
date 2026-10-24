@@ -1,0 +1,43 @@
+.stack {
+  position: fixed;
+  left: calc(12px + var(--kr-safe-left));
+  right: calc(12px + var(--kr-safe-right));
+  bottom: calc(var(--kr-bottom-stack, 0px) + 12px);
+  z-index: 60;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(520px, 100%);
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-radius: var(--kr-radius);
+  background: var(--kr-text);
+  color: var(--kr-bg);
+  box-shadow: 0 10px 30px
+    color-mix(in srgb, var(--kr-shadow) var(--kr-shadow-strength), transparent);
+  font-size: 0.95rem;
+}
+
+.toast[data-tone='error'] {
+  border-left: 6px solid var(--kr-error);
+}
+
+.toast :global(.kr-icon-btn) {
+  color: var(--kr-bg);
+}
+
+.msg {
+  flex: 1;
+}
