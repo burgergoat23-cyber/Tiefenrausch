@@ -127,6 +127,7 @@ export default function SearchPage() {
   const [committedQ, setCommittedQ] = useState(q);
   const inputRef = useRef<HTMLInputElement>(null);
   const history = useSettings((s) => s.settings.searchHistory);
+  const favoriteArtists = useSettings((s) => s.settings.favoriteArtists);
   const addSearch = useSettings((s) => s.addSearch);
   const removeSearch = useSettings((s) => s.removeSearch);
   const clearHistory = useSettings((s) => s.clearSearchHistory);
@@ -274,6 +275,19 @@ export default function SearchPage() {
           </div>
         )}
       </div>
+
+      {!q && favoriteArtists.length > 0 && (
+        <section className="kr-section" aria-labelledby="s-fav">
+          <h2 id="s-fav">{t('forYou.yourArtists')}</h2>
+          <div className="kr-chips">
+            {favoriteArtists.map((a) => (
+              <button key={a} type="button" className="kr-chip" onClick={() => runHistory(a)}>
+                {a}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {!q && history.length > 0 && (
         <section className="kr-section" aria-label={t('search.history')}>

@@ -3,6 +3,7 @@ import { usePlayer } from '../app/context';
 import { errorText } from '../components/errorText';
 import { Icon } from '../components/Icon';
 import { TrackList } from '../components/TrackList';
+import { ForYouSection } from './ForYouSection';
 import { useAsync } from '../components/useAsync';
 import { useT, type TKey } from '../i18n';
 import { useActiveSources } from '../sources/useActiveSources';
@@ -79,6 +80,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
+      {ready && sources.length > 0 && <ForYouSection sources={sources} />}
       {trending.map((s) => (
         <TrendingSection key={s.id} source={s} />
       ))}

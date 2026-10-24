@@ -73,8 +73,8 @@ describe('Einstellungen', () => {
   });
 });
 
-describe('Echte Migration 1 → 2', () => {
-  it('alte Einstellungen bekommen das YouTube-Feld, alles andere bleibt', () => {
+describe('Echte Migrationen', () => {
+  it('1 → 3: alte Einstellungen bekommen YouTube-Feld und „Für dich“, alles andere bleibt', () => {
     const v1 = {
       schemaVersion: 1,
       themeId: 'hell',
@@ -83,15 +83,29 @@ describe('Echte Migration 1 → 2', () => {
       jamendoClientId: 'abc',
       searchHistory: ['rock'],
     };
-    const s = parseSettings(v1);
-    expect(s).toMatchObject({
-      schemaVersion: 2,
+    expect(parseSettings(v1)).toEqual({
+      schemaVersion: 3,
       themeId: 'hell',
       language: 'en',
       sources: { audius: false },
       jamendoClientId: 'abc',
       youtubeApiKey: '',
       searchHistory: ['rock'],
+      favoriteArtists: ['King Von', 'Bloodhound Lil Jeff', 'YNW Melly'],
+      favoriteGenres: ['Drill'],
     });
+  });
+
+  it('2 → 3 behält den YouTube-Schlüssel', () => {
+    const v2 = { ...defaultSettings(), schemaVersion: 2, youtubeApiKey: 'KEY' } as Record<
+      string,
+      unknown
+    >;
+    delete v2.favoriteArtists;
+    delete v2.favoriteGenres;
+    const s = parseSettings(v2);
+    expect(s.schemaVersion).toBe(3);
+    expect(s.youtubeApiKey).toBe('KEY');
+    expect(s.favoriteGenres).toEqual(['Drill']);
   });
 });

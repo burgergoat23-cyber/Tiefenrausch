@@ -4,7 +4,7 @@ import { sourceIdSchema } from '../sources/types';
 import { runMigrations, type Migration } from './migrations';
 
 export const SETTINGS_STORAGE_KEY = 'klangraum.settings';
-export const SETTINGS_VERSION = 2;
+export const SETTINGS_VERSION = 3;
 
 /**
  * EIN Einstellungs-Objekt für alles, was man anpassen kann.
@@ -27,8 +27,15 @@ export const settingsSchema = z.object({
     .max(100)
     .regex(/^[A-Za-z0-9_-]*$/),
   searchHistory: z.array(z.string().max(200)).max(20),
+  /** „Für dich“: Lieblingskünstler und -genres (frei änderbar unter Einstellungen → Deine Musik) */
+  favoriteArtists: z.array(z.string().min(1).max(60)).max(20),
+  favoriteGenres: z.array(z.string().min(1).max(40)).max(10),
 });
 export type Settings = z.infer<typeof settingsSchema>;
+
+/** Startwerte für „Für dich“ – so gewünscht vom Besitzer der App, jederzeit änderbar */
+export const DEFAULT_FAVORITE_ARTISTS = ['King Von', 'Bloodhound Lil Jeff', 'YNW Melly'] as const;
+export const DEFAULT_FAVORITE_GENRES = ['Drill'] as const;
 
 export function defaultSettings(language: 'de' | 'en' = 'de'): Settings {
   return {
@@ -39,12 +46,20 @@ export function defaultSettings(language: 'de' | 'en' = 'de'): Settings {
     jamendoClientId: '',
     youtubeApiKey: '',
     searchHistory: [],
+    favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
+    favoriteGenres: [...DEFAULT_FAVORITE_GENRES],
   };
 }
 
 export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
   /** 1 → 2: Feld für den YouTube-Schlüssel */
   1: (d) => ({ ...d, youtubeApiKey: '' }),
+  /** 2 → 3: Lieblingskünstler und -genres für „Für dich“ */
+  2: (d) => ({
+    ...d,
+    favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
+    favoriteGenres: [...DEFAULT_FAVORITE_GENRES],
+  }),
 };
 
 /** Browser-Sprache als Startwert (Deutsch zuerst) */

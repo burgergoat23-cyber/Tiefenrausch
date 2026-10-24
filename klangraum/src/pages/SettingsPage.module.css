@@ -55,3 +55,26 @@
   flex: 1;
   min-width: 0;
 }
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 14px;
+  border-radius: 999px;
+  border: 1px solid var(--kr-border);
+  background: var(--kr-surface-raised);
+}
+
+.form h3 {
+  font-size: 1rem;
+}

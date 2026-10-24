@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useSettings } from '../app/settingsStore';
+import { Icon } from '../components/Icon';
 import { useT } from '../i18n';
 import { useSourceStatus } from '../sources/useActiveSources';
 import styles from './SettingsPage.module.css';
@@ -64,6 +65,63 @@ function KeyForm({
   );
 }
 
+/** Liste mit Chips zum Entfernen und Feld zum Hinzufügen (Künstler oder Genres) */
+function FavoriteList({ kind }: { kind: 'favoriteArtists' | 'favoriteGenres' }) {
+  const t = useT();
+  const items = useSettings((s) => s.settings[kind]);
+  const add = useSettings((s) => s.addFavorite);
+  const remove = useSettings((s) => s.removeFavorite);
+  const [value, setValue] = useState('');
+  const isArtists = kind === 'favoriteArtists';
+  const inputId = `kr-${kind}`;
+  return (
+    <div className={styles.form}>
+      <h3>{isArtists ? t('settings.artists') : t('settings.genres')}</h3>
+      <ul
+        className={styles.chips}
+        aria-label={isArtists ? t('settings.artists') : t('settings.genres')}
+      >
+        {items.map((name) => (
+          <li key={name} className={styles.chip}>
+            <span>{name}</span>
+            <button
+              type="button"
+              className="kr-icon-btn"
+              aria-label={t('settings.removeItem', { name })}
+              onClick={() => remove(kind, name)}
+            >
+              <Icon name="close" size={16} />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <form
+        className={styles.inline}
+        onSubmit={(e) => {
+          e.preventDefault();
+          add(kind, value);
+          setValue('');
+        }}
+      >
+        <label htmlFor={inputId} className="kr-visually-hidden">
+          {isArtists ? t('settings.addArtist') : t('settings.addGenre')}
+        </label>
+        <input
+          id={inputId}
+          className="kr-input"
+          value={value}
+          maxLength={isArtists ? 60 : 40}
+          placeholder={isArtists ? t('settings.addArtist') : t('settings.addGenre')}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <button type="submit" className="kr-btn" disabled={!value.trim()}>
+          {t('settings.add')}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const t = useT();
   const language = useSettings((s) => s.settings.language);
@@ -117,6 +175,13 @@ export default function SettingsPage() {
           maxLength={100}
           onSave={setYoutubeApiKey}
         />
+      </section>
+
+      <section className="kr-section kr-card" aria-labelledby="s-music">
+        <h2 id="s-music">{t('settings.myMusic')}</h2>
+        <p className="kr-muted">{t('settings.myMusicHint')}</p>
+        <FavoriteList kind="favoriteArtists" />
+        <FavoriteList kind="favoriteGenres" />
       </section>
 
       <section className="kr-section kr-card" aria-labelledby="s-lang">

@@ -21,6 +21,8 @@ export interface SettingsStore {
   addSearch(query: string): void;
   removeSearch(query: string): void;
   clearSearchHistory(): void;
+  addFavorite(kind: 'favoriteArtists' | 'favoriteGenres', name: string): void;
+  removeFavorite(kind: 'favoriteArtists' | 'favoriteGenres', name: string): void;
   resetAll(): void;
 }
 
@@ -48,6 +50,16 @@ export const useSettings = create<SettingsStore>()((set, get) => {
     removeSearch: (query) =>
       update({ searchHistory: get().settings.searchHistory.filter((h) => h !== query) }),
     clearSearchHistory: () => update({ searchHistory: [] }),
+    addFavorite: (kind, name) => {
+      const v = name.trim().replace(/\s+/g, ' ');
+      const max = kind === 'favoriteArtists' ? 20 : 10;
+      const list = get().settings[kind];
+      if (!v || v.length > 60 || list.length >= max) return;
+      if (list.some((x) => x.toLowerCase() === v.toLowerCase())) return;
+      update({ [kind]: [...list, v] });
+    },
+    removeFavorite: (kind, name) =>
+      update({ [kind]: get().settings[kind].filter((x) => x !== name) }),
     resetAll: () => update(defaultSettings(guessLanguage())),
   };
 });

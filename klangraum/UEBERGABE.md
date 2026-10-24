@@ -58,7 +58,14 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Links zu YouTube-Nutzungsbedingungen/Google-Datenschutz unter Einstellungen → Über.
 - Engine kann mehrere Ausgaben: `deps.output` (eigenes Audio) + `getExternalOutput(source)`; beim Wechsel
   wird die alte Ausgabe gestoppt, Rückmeldungen nicht aktiver Ausgaben werden ignoriert, Lautstärke gilt für alle.
-- Einstellungen jetzt `schemaVersion: 2` (Migration 1 → 2 ergänzt `youtubeApiKey`).
+- Einstellungen: Migration 1 → 2 ergänzt `youtubeApiKey`, 2 → 3 die Favoriten (siehe „Für dich“).
+- **„Für dich“** (Wunsch des Nutzers: Drill, King Von, Bloodhound Lil Jeff, YNW Melly): Einstellungen
+  `favoriteArtists`/`favoriteGenres` (Startwerte genau diese, änderbar unter Einstellungen → Deine Musik;
+  Settings jetzt `schemaVersion: 3`, Migration 2 → 3). `library/forYou.ts`: Künstler über YouTube
+  (offizieller Player, 24 h im `storage/cache.ts` gemerkt → ca. 303 Einheiten/Tag), Genres über Audius
+  (unabhängige Künstler) + Internetradio (6 h gemerkt), abwechselnd gemischt ohne Doppelte.
+  Startseite `pages/ForYouSection.tsx`; ohne YouTube-Schlüssel ehrlicher Hinweis. Suche zeigt bei leerem
+  Feld „Deine Künstler“ als Schnellwahl (zählt als bestätigte Suche). Es wird nichts heruntergeladen.
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
   ursprüngliche Reihenfolge in `original` gemerkt; Wiederholen aus/alle/einer).
@@ -83,8 +90,8 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (117 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 17 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (124 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 19 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).
