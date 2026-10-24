@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const SOURCE_IDS = ['audius', 'jamendo', 'archive', 'local', 'spotify'] as const;
+export const SOURCE_IDS = ['audius', 'jamendo', 'archive', 'radio', 'local', 'spotify'] as const;
 export const sourceIdSchema = z.enum(SOURCE_IDS);
 export type SourceId = z.infer<typeof sourceIdSchema>;
 
@@ -29,6 +29,8 @@ export const trackSchema = z.object({
   license: licenseSchema.optional(),
   explicit: z.boolean().optional(),
   permalink: webUrlSchema.optional(),
+  /** Live-Stream (Radio): keine Länge, kein Spulen */
+  live: z.boolean().optional(),
 });
 export type Track = z.infer<typeof trackSchema>;
 
@@ -79,6 +81,8 @@ export interface MusicSource {
   id: SourceId;
   name: string;
   needsLogin: boolean;
+  /** Welche Such-Arten die Quelle kann (fehlt = alle) */
+  searchTypes?: SearchType[];
   isAvailable(): Promise<boolean>;
   search(query: string, opts?: SearchOptions): Promise<SearchResult>;
   getTrack(id: string): Promise<Track>;

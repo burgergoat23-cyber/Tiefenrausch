@@ -21,6 +21,8 @@ export const en: Dict = {
     night: 'Good night',
     intro: 'Search for songs, albums or artists – or listen to what is trending right now.',
     trendingOn: 'Trending on {source}',
+    radio: 'Popular radio stations',
+    archive: 'Concerts and free music from the Internet Archive',
     noSources: 'No music source is switched on. Turn on at least one in the settings.',
     toSettings: 'Go to settings',
   },
@@ -41,6 +43,7 @@ export const en: Dict = {
     noResults: 'Nothing found on {source}.',
     resultsFrom: 'Results from {source}',
     retry: 'Try again',
+    typeUnsupported: '{source} cannot be searched for {type}.',
   },
   types: {
     track: 'Songs',
@@ -77,6 +80,8 @@ export const en: Dict = {
     volumeFixed: 'On iPhone and iPad, use the buttons on your device to change the volume.',
     announce: 'Now playing: {title} by {artist}',
     mini: 'Mini player',
+    live: 'LIVE',
+    liveHint: 'Live radio – seeking is not possible.',
   },
   queue: {
     title: 'Queue',

@@ -20,7 +20,12 @@ function TrendingSection({ source }: { source: MusicSource }) {
   const t = useT();
   const player = usePlayer();
   const state = useAsync(() => source.getTrending?.() ?? Promise.resolve([]), [source]);
-  const title = t('home.trendingOn', { source: source.name });
+  const title =
+    source.id === 'radio'
+      ? t('home.radio')
+      : source.id === 'archive'
+        ? t('home.archive')
+        : t('home.trendingOn', { source: source.name });
   const tracks = state.status === 'done' ? state.data.slice(0, 10) : [];
   return (
     <section className="kr-section" aria-label={title}>

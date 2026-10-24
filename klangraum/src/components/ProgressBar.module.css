@@ -12,3 +12,35 @@
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
+
+.live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--kr-text);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+}
+
+.liveDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--kr-error);
+  animation: kr-live 1.4s ease-in-out infinite;
+}
+
+@keyframes kr-live {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot {
+    animation: none;
+  }
+}

@@ -106,3 +106,42 @@ test('Am Songende geht es automatisch weiter (Wiederholen: alle)', async ({ page
   );
   await expectAudioPlaying(page);
 });
+
+test('Internetradio: Sender suchen und live hören', async ({ page }) => {
+  await page.goto('/#/suche?q=rock');
+  const radio = page.getByTestId('results-radio');
+  await radio.getByRole('button', { name: /„Rockradio 24 rock“ abspielen/ }).click();
+  await expectAudioPlaying(page);
+  await page
+    .getByTestId('mini-player')
+    .getByRole('link', { name: /Player öffnen/ })
+    .click();
+  const player = page.getByTestId('full-player');
+  await expect(player.getByRole('heading', { name: 'Rockradio 24 rock' })).toBeVisible();
+  await expect(player.getByText('LIVE', { exact: true })).toBeVisible();
+  await expect(player.getByRole('slider', { name: 'Position im Song' })).toHaveCount(0);
+  // Radio gibt es nur unter „Songs“, nicht bei Alben
+  await page.goto('/#/suche?q=rock&typ=album');
+  await expect(page.getByTestId('results-archive')).toBeVisible();
+  await expect(page.getByTestId('results-radio')).toHaveCount(0);
+});
+
+test('Internet Archive: Konzert öffnen und abspielen, mit Lizenz', async ({ page }) => {
+  await page.goto('/#/suche?q=park&typ=album');
+  await page
+    .getByTestId('results-archive')
+    .getByRole('link', { name: /Live im Park 1999/ })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Live im Park 1999' })).toBeVisible();
+  await page.getByRole('button', { name: 'Alle abspielen' }).click();
+  await expectAudioPlaying(page);
+  await expect(page.getByTestId('mini-player')).toContainText('Intro im Park');
+  await page.goto('/#/suche?q=frei&typ=album');
+  await page
+    .getByTestId('results-archive')
+    .getByRole('link', { name: /Freie EP/ })
+    .click();
+  await expect(
+    page.getByRole('button', { name: /„Offener Anfang“ abspielen.*Lizenz: CC BY-NC 3\.0/ }),
+  ).toBeVisible();
+});

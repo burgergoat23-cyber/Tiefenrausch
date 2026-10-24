@@ -190,6 +190,94 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
     return ok([]);
   });
 
+  // Internet Archive
+  await page.route(/^https:\/\/archive\.org\//, async (route) => {
+    const url = new URL(route.request().url());
+    const p = url.pathname;
+    if (p === '/advancedsearch.php') {
+      return json(route, {
+        response: {
+          docs: [
+            {
+              identifier: 'band1999-05-01',
+              title: 'Live im Park 1999',
+              creator: 'Die Parkband',
+              year: '1999',
+              collection: ['etree'],
+            },
+            {
+              identifier: 'netlabel-ep',
+              title: 'Freie EP',
+              creator: 'Netlabel-Künstler',
+              licenseurl: 'http://creativecommons.org/licenses/by-nc/3.0/',
+              collection: ['netlabels'],
+            },
+          ],
+        },
+      });
+    }
+    const m = /^\/metadata\/(.+)$/.exec(p);
+    if (m) {
+      const id = decodeURIComponent(m[1] ?? '');
+      const etree = id.startsWith('band');
+      return json(route, {
+        metadata: {
+          identifier: id,
+          title: etree ? 'Live im Park 1999' : 'Freie EP',
+          creator: etree ? 'Die Parkband' : 'Netlabel-Künstler',
+          collection: [etree ? 'etree' : 'netlabels'],
+          licenseurl: etree ? undefined : 'http://creativecommons.org/licenses/by-nc/3.0/',
+        },
+        files: [
+          {
+            name: 't01.mp3',
+            format: 'VBR MP3',
+            title: etree ? 'Intro im Park' : 'Offener Anfang',
+            track: '1',
+            length: '95.0',
+          },
+          {
+            name: 't02.mp3',
+            format: 'VBR MP3',
+            title: etree ? 'Abendlied' : 'Freies Ende',
+            track: '2',
+            length: '201.3',
+          },
+        ],
+      });
+    }
+    if (p.startsWith('/download/')) return audio(route);
+    if (p.startsWith('/services/img/')) {
+      return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: coverSvg(p) });
+    }
+    return route.fulfill({ status: 404, headers: CORS, body: '' });
+  });
+
+  // Internetradio-Verzeichnis
+  await page.route(/^https:\/\/[a-z0-9]+\.api\.radio-browser\.info\//, async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.startsWith('/json/url/')) return json(route, { ok: true });
+    const q = url.searchParams.get('name') ?? url.searchParams.get('tag') ?? '';
+    const names = ['Welle Nord', 'Rockradio 24', 'Klassik Plus', 'Charts Live'];
+    return json(
+      route,
+      names.map((name, i) => ({
+        stationuuid: `9${i}a0b1c2-0000-4000-8000-00000000000${i}`,
+        name: q ? `${name} ${q}`.trim() : name,
+        url_resolved: `https://radio.stream.test/${i}.mp3`,
+        homepage: `https://radio.test/${i}`,
+        favicon: `https://img.test/radio${i}.svg`,
+        tags: 'pop,rock',
+        country: 'Germany',
+        codec: 'MP3',
+        bitrate: 128,
+        hls: 0,
+        lastcheckok: 1,
+      })),
+    );
+  });
+  await page.route(/^https:\/\/radio\.stream\.test\//, audio);
+
   await page.route(/^https:\/\/audio\.jamendo\.test\//, audio);
   await page.route(/^https:\/\/img\.test\//, (route) => {
     const name = new URL(route.request().url()).pathname;

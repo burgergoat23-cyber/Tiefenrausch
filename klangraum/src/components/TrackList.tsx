@@ -51,7 +51,11 @@ const TrackRow = memo(function TrackRow({ track, index, active, playing, onPlay 
           </span>
         </span>
         <span className={styles.dur}>
-          {track.durationMs > 0 ? formatDuration(track.durationMs) : ''}
+          {track.live
+            ? t('player.live')
+            : track.durationMs > 0
+              ? formatDuration(track.durationMs)
+              : ''}
         </span>
       </button>
       <TrackMenu track={track} />

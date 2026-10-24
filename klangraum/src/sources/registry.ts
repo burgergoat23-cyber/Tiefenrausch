@@ -1,5 +1,7 @@
+import { ArchiveSource } from './archive';
 import { AudiusSource } from './audius';
 import { JamendoSource } from './jamendo';
+import { RadioSource } from './radio';
 import type { MusicSource, SourceId } from './types';
 
 export interface SourceRegistry {
@@ -12,6 +14,14 @@ export function createRegistry(list: MusicSource[]): SourceRegistry {
   return { all: list, get: (id) => byId.get(id) };
 }
 
+/** Ländercode aus der Browser-Sprache, z. B. „de-DE“ → „DE“ (für beliebte Radiosender) */
+export function browserCountryCode(): string {
+  const lang = typeof navigator !== 'undefined' ? navigator.language : '';
+  const region = /-([A-Za-z]{2})$/.exec(lang)?.[1];
+  if (region) return region.toUpperCase();
+  return lang.toLowerCase().startsWith('de') ? 'DE' : '';
+}
+
 /** Die echten Quellen der App. Weitere Quellen (Spotify, eigene Dateien …) folgen in späteren Phasen. */
 export function createDefaultRegistry(getJamendoClientId: () => string): SourceRegistry {
   return createRegistry([
@@ -19,5 +29,7 @@ export function createDefaultRegistry(getJamendoClientId: () => string): SourceR
     new JamendoSource({
       getClientId: () => getJamendoClientId() || import.meta.env.VITE_JAMENDO_CLIENT_ID || '',
     }),
+    new ArchiveSource(),
+    new RadioSource({ getCountryCode: browserCountryCode }),
   ]);
 }

@@ -6,6 +6,7 @@ import { Icon } from '../components/Icon';
 import { CardGrid, MediaCard } from '../components/MediaCard';
 import { TrackList } from '../components/TrackList';
 import { useT } from '../i18n';
+import { sourceName } from '../sources/names';
 import { useActiveSources } from '../sources/useActiveSources';
 import { useMultiSearch, type SourceSearchState } from '../sources/useMultiSearch';
 import type { MusicSource, SearchType, SourceId } from '../sources/types';
@@ -129,9 +130,14 @@ export default function SearchPage() {
   const clearHistory = useSettings((s) => s.clearSearchHistory);
   const { sources } = useActiveSources();
 
+  // Nur Quellen, die diese Such-Art können (Radio kennt z. B. keine Alben)
+  const typeSources = useMemo(
+    () => sources.filter((s) => !s.searchTypes || s.searchTypes.includes(type)),
+    [sources, type],
+  );
   const shown = useMemo(
-    () => (sourceFilter ? sources.filter((s) => s.id === sourceFilter) : sources),
-    [sources, sourceFilter],
+    () => typeSources.filter((s) => !sourceFilter || s.id === sourceFilter),
+    [typeSources, sourceFilter],
   );
   const { states, retrySource } = useMultiSearch(q, type, shown);
 
@@ -229,7 +235,7 @@ export default function SearchPage() {
             </button>
           ))}
         </div>
-        {sources.length > 1 && (
+        {typeSources.length > 1 && (
           <div className="kr-chips" role="group" aria-label={t('search.filterSource')}>
             <button
               type="button"
@@ -239,7 +245,7 @@ export default function SearchPage() {
             >
               {t('search.all')}
             </button>
-            {sources.map((s) => (
+            {typeSources.map((s) => (
               <button
                 key={s.id}
                 type="button"
@@ -283,6 +289,15 @@ export default function SearchPage() {
         </section>
       )}
       {!q && history.length === 0 && <p className="kr-muted">{t('search.empty')}</p>}
+
+      {q && shown.length === 0 && sourceFilter && (
+        <p className="kr-muted">
+          {t('search.typeUnsupported', {
+            source: sourceName(sourceFilter),
+            type: t(`types.${type}`),
+          })}
+        </p>
+      )}
 
       {q &&
         shown.map((source) => (

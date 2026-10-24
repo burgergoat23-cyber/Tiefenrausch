@@ -261,6 +261,35 @@ describe('PlayerEngine', () => {
   });
 });
 
+describe('Live-Radio', () => {
+  it('kein Spulen, Zurück geht direkt zum vorigen Sender, Start immer „jetzt“', async () => {
+    const live = (id: string) => track(id, { live: true, durationMs: 0 });
+    const { engine, output } = setup();
+    engine.playTracks([live('r1'), live('r2')], 1);
+    await flush();
+    output.listener.onTime(120, Infinity);
+    engine.seek(5000);
+    expect(output.seekedTo).toBeNull();
+    expect(engine.state.durationMs).toBe(0);
+    engine.prev();
+    await flush();
+    expect(engine.current?.id).toBe('r1');
+
+    // nach dem Neuladen: Radio startet nicht bei der gespeicherten Position
+    const again = setup(undefined, {
+      queue: engine.state.queue,
+      positionMs: 99000,
+    });
+    const loads: number[] = [];
+    again.output.load = (url: string, start?: number) => {
+      again.output.loaded.push(url);
+      loads.push(start ?? 0);
+    };
+    await again.engine.play();
+    expect(loads).toEqual([0]);
+  });
+});
+
 describe('Warteschlange speichern', () => {
   it('speichert und lädt die Warteschlange (nur Anzeige-Infos)', async () => {
     const { engine } = setup();

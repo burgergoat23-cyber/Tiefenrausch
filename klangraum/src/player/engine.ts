@@ -164,7 +164,8 @@ export class PlayerEngine {
     const item = Q.currentItem(this.state.queue);
     if (!item) return;
     if (this.state.loadedUid !== item.uid) {
-      await this.loadCurrent(true, this.state.positionMs);
+      // Live-Radio startet immer „jetzt“, Songs dort, wo man aufgehört hat
+      await this.loadCurrent(true, item.track.live ? 0 : this.state.positionMs);
       return;
     }
     try {
@@ -194,7 +195,7 @@ export class PlayerEngine {
   }
 
   prev() {
-    if (this.state.positionMs > PREV_RESTART_MS) {
+    if (this.state.positionMs > PREV_RESTART_MS && !this.current?.live) {
       this.seek(0);
       return;
     }
@@ -209,6 +210,7 @@ export class PlayerEngine {
   }
 
   seek(ms: number) {
+    if (this.current?.live) return;
     const dur = this.state.durationMs;
     const clamped = Math.max(0, dur > 0 ? Math.min(ms, dur) : ms);
     this.set({ positionMs: clamped });

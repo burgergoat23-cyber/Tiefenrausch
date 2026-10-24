@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { usePlayer, usePlayerState } from '../app/context';
+import { currentItem } from '../player/queue';
 import { useT } from '../i18n';
 import { formatDuration } from './format';
 import styles from './ProgressBar.module.css';
@@ -11,6 +12,7 @@ export function ProgressBar() {
   const position = usePlayerState((s) => s.positionMs);
   const duration = usePlayerState((s) => s.durationMs);
   const hasTrack = usePlayerState((s) => s.queue.index >= 0);
+  const live = usePlayerState((s) => !!currentItem(s.queue)?.track.live);
   const [drag, setDrag] = useState<number | null>(null);
   const value = drag ?? position;
   const max = Math.max(duration, 1);
@@ -20,6 +22,16 @@ export function ProgressBar() {
     if (drag !== null) player.seek(drag);
     setDrag(null);
   };
+
+  if (live) {
+    return (
+      <div className={styles.live} title={t('player.liveHint')}>
+        <span className={styles.liveDot} aria-hidden="true" />
+        <span>{t('player.live')}</span>
+        <span className="kr-visually-hidden">{t('player.liveHint')}</span>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrap}>

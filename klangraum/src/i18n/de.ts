@@ -20,6 +20,8 @@ export const de = {
     night: 'Gute Nacht',
     intro: 'Such nach Songs, Alben oder Künstlern – oder hör rein, was gerade angesagt ist.',
     trendingOn: 'Angesagt auf {source}',
+    radio: 'Beliebte Radiosender',
+    archive: 'Konzerte und freie Musik aus dem Internet Archive',
     noSources:
       'Keine Musik-Quelle ist eingeschaltet. Schalte in den Einstellungen mindestens eine ein.',
     toSettings: 'Zu den Einstellungen',
@@ -41,6 +43,7 @@ export const de = {
     noResults: 'Bei {source} nichts gefunden.',
     resultsFrom: 'Ergebnisse von {source}',
     retry: 'Nochmal versuchen',
+    typeUnsupported: 'Bei {source} kann man nicht nach {type} suchen.',
   },
   types: {
     track: 'Songs',
@@ -77,6 +80,8 @@ export const de = {
     volumeFixed: 'Am iPhone und iPad regelst du die Lautstärke mit den Tasten am Gerät.',
     announce: 'Jetzt läuft: {title} von {artist}',
     mini: 'Mini-Player',
+    live: 'LIVE',
+    liveHint: 'Live-Radio – Spulen geht hier nicht.',
   },
   queue: {
     title: 'Warteschlange',

@@ -1,6 +1,6 @@
 # Klangraum – Übergabe für neue Sitzungen
 
-Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst). Auftrag mit allen Phasen: `docs/AUFTRAG.md`.
+Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen Internet Archive und Internetradio** (auf Wunsch des Nutzers „so viele Lieder wie möglich“, vorgezogen aus Phase 4). Auftrag mit allen Phasen: `docs/AUFTRAG.md`.
 
 ## Der Nutzer
 
@@ -29,6 +29,19 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst). Auftrag mit allen Phasen: 
 - `sources/jamendo` – `client_id` aus Einstellungen (in der App eintragbar) oder `VITE_JAMENDO_CLIENT_ID`;
   ohne ID still aus. Lizenz aus `license_ccurl` → „CC BY-NC-SA 3.0“. Stream-URL (`audio`) wird gemerkt,
   sonst per `/tracks/?id=` nachgeholt.
+- `sources/archive` – Internet Archive, **nur** Sammlungen `etree` (Live Music Archive, Bands erlauben
+  Weitergabe) und `netlabels`; Einträge ohne CC/Public-Domain-Lizenz (außer etree) fliegen raus.
+  Such-API `advancedsearch.php` findet Einträge (= Alben); für „Songs“ werden die 4 besten Einträge per
+  `/metadata/{id}` geladen (je max. 5 MP3s). Track-ID = `{identifier}/{dateiname}`, Stream
+  `/download/{id}/{datei}`, Cover `/services/img/{id}`. `searchTypes: ['track','album']`.
+- `sources/radio` – Internetradio über radio-browser.info (feste Serverliste, bei Fehler nächster).
+  Nur https-Streams, `hidebroken`, kein HLS, nur MP3/AAC (läuft auch am iPhone). Sender = Track mit
+  `live: true`, `durationMs: 0` → UI zeigt „LIVE“ statt Fortschritt, kein Spulen, Start immer „jetzt“.
+  Beliebte Sender nach Ländercode der Browser-Sprache. Start wird per `/json/url/{uuid}` gemeldet (Bitte
+  des Verzeichnisses). `canUseWebAudio: false` (Radio-Streams haben meist kein CORS). Nur Such-Art „Songs“.
+- `MusicSource.searchTypes` (optional): Suche zeigt eine Quelle nur bei Such-Arten, die sie kann.
+- Bewusst **nicht**: YouTube-Ton herunterladen/abgreifen (verboten). Angeboten, aber vom Nutzer noch nicht
+  gewählt: offizieller YouTube-Player (Video muss sichtbar sein, stoppt am iPhone im Hintergrund, API-Schlüssel nötig).
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
   ursprüngliche Reihenfolge in `original` gemerkt; Wiederholen aus/alle/einer).
@@ -53,15 +66,15 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst). Auftrag mit allen Phasen: 
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (90 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 12 Tests × PC/iPhone. Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (104 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 14 Tests × PC/iPhone. Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).
 
 ## Ehrlich: noch nicht geprüft
 
-- Echte Audius-/Jamendo-Server: in der Cloud-Sitzung sind `api.audius.co` und `api.jamendo.com` gesperrt.
+- Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org` und `*.api.radio-browser.info` gesperrt.
   Die Antwort-Formate stammen aus der Doku/Erfahrung; Adapter sind tolerant (zod, kaputte Einträge werden übersprungen).
 - Echtes iPhone/iPad (nur Chromium mit iPhone-Größe und -Kennung getestet).
 
