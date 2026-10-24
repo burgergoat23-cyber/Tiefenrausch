@@ -4,7 +4,7 @@ import { sourceIdSchema } from '../sources/types';
 import { runMigrations, type Migration } from './migrations';
 
 export const SETTINGS_STORAGE_KEY = 'klangraum.settings';
-export const SETTINGS_VERSION = 5;
+export const SETTINGS_VERSION = 6;
 
 /**
  * EIN Einstellungs-Objekt für alles, was man anpassen kann.
@@ -32,6 +32,10 @@ export const settingsSchema = z.object({
   favoriteGenres: z.array(z.string().min(1).max(40)).max(10),
   /** Autoplay: wenn die Warteschlange zu Ende ist, ähnliche Songs weiterspielen */
   autoplay: z.boolean(),
+  /** Eigene Akzentfarbe (#rrggbb) – leer = Farbe des Themes */
+  accentColor: z.union([z.literal(''), z.string().regex(/^#[0-9a-fA-F]{6}$/)]),
+  /** Verschwommenes Cover als Hintergrund im großen Player */
+  playerBackdrop: z.boolean(),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
@@ -64,6 +68,8 @@ export function defaultSettings(language: 'de' | 'en' = 'de'): Settings {
     favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
     favoriteGenres: [...DEFAULT_FAVORITE_GENRES],
     autoplay: true,
+    accentColor: '',
+    playerBackdrop: true,
   };
 }
 
@@ -87,6 +93,8 @@ export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
   },
   /** 4 → 5: Autoplay (an) */
   4: (d) => ({ ...d, autoplay: true }),
+  /** 5 → 6: eigene Akzentfarbe, Cover-Hintergrund im Player */
+  5: (d) => ({ ...d, accentColor: '', playerBackdrop: true }),
 };
 
 /** Browser-Sprache als Startwert (Deutsch zuerst) */

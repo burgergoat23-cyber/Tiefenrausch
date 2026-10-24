@@ -61,6 +61,7 @@ export function useKeyboardShortcuts() {
       const target = e.target instanceof HTMLElement ? e.target : null;
       const onControl = !!target?.closest('button, a, [role="slider"], input, [role="menu"]');
       const onSlider = target instanceof HTMLInputElement && target.type === 'range';
+      if (target?.closest('[aria-roledescription="sortable"]')) return;
       const track = player.current;
       let handled = true;
       switch (e.key) {
@@ -74,7 +75,8 @@ export function useKeyboardShortcuts() {
           break;
         case 'ArrowLeft':
         case 'ArrowRight': {
-          if (onSlider) return;
+          // Pfeile auf Knöpfen gehören dem Knopf (Menüs, Verschieben per Tastatur)
+          if (onSlider || onControl) return;
           const dir = e.key === 'ArrowLeft' ? -1 : 1;
           if (e.shiftKey) {
             if (dir < 0) player.prev();
@@ -84,7 +86,7 @@ export function useKeyboardShortcuts() {
         }
         case 'ArrowUp':
         case 'ArrowDown':
-          if (onSlider || !track) return;
+          if (onSlider || onControl || !track) return;
           player.setVolume(player.state.volume + (e.key === 'ArrowUp' ? 0.1 : -0.1));
           break;
         case 'm':

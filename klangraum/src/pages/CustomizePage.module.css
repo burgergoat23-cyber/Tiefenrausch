@@ -86,3 +86,64 @@
   color: var(--kr-accent);
   font-size: 0.85rem;
 }
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--kr-border);
+  display: grid;
+  place-items: center;
+  color: #000;
+  padding: 0;
+}
+
+.swatch[aria-pressed='true'] {
+  outline: 2px solid var(--kr-text);
+  outline-offset: 2px;
+}
+
+.swatch[data-default] {
+  color: var(--kr-accent-text);
+}
+
+.custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px 0 6px;
+  border: 1px solid var(--kr-border);
+  border-radius: 22px;
+  cursor: pointer;
+}
+
+.custom input {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--kr-touch);
+}
+
+.toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--kr-accent);
+}

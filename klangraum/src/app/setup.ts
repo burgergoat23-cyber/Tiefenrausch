@@ -1,4 +1,4 @@
-import { applyTheme, findTheme } from '../customize/themes';
+import { applyTheme, findTheme, withAccent } from '../customize/themes';
 import { translate } from '../i18n';
 import { PlayerEngine, type PlayerNotice } from '../player/engine';
 import { coverFor, createCoverResolver, setCoverResolver, useCovers } from '../library/covers';
@@ -42,7 +42,7 @@ export function setupApp(): AppServices {
   // Theme + Sprache sofort anwenden und bei Änderungen nachziehen
   const applySettings = () => {
     const s = useSettings.getState().settings;
-    applyTheme(findTheme(s.themeId));
+    applyTheme(withAccent(findTheme(s.themeId), s.accentColor));
     document.documentElement.lang = s.language;
     document.title = translate(s.language, 'app.name');
   };
@@ -50,6 +50,7 @@ export function setupApp(): AppServices {
   useSettings.subscribe((s, prev) => {
     if (
       s.settings.themeId !== prev.settings.themeId ||
+      s.settings.accentColor !== prev.settings.accentColor ||
       s.settings.language !== prev.settings.language
     ) {
       applySettings();

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { usePlayerState } from '../app/context';
+import { useSettings } from '../app/settingsStore';
 import { TrackArtwork } from '../components/Artwork';
 import { useCover } from '../library/covers';
 import { Icon } from '../components/Icon';
@@ -28,7 +29,8 @@ export default function PlayerPage() {
   const navigate = useNavigate();
   const track = usePlayerState((s) => currentItem(s.queue)?.track ?? null);
   const cover = useCover(track);
-  const backdrop = cover ?? track?.artworkUrl;
+  const backdropOn = useSettings((s) => s.settings.playerBackdrop);
+  const backdrop = backdropOn ? (cover ?? track?.artworkUrl) : undefined;
   const buffering = usePlayerState((s) => s.buffering || s.status === 'loading');
   const closeRef = useRef<HTMLButtonElement>(null);
   const lyricsOn = usePlayerView((s) => s.lyrics);

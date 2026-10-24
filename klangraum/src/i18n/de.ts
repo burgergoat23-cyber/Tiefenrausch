@@ -145,6 +145,7 @@ export const de = {
     liveHint: 'Live-Radio – Spulen geht hier nicht.',
   },
   queue: {
+    saveAsPlaylist: 'Als Playlist speichern',
     title: 'Warteschlange',
     nowPlaying: 'Jetzt läuft',
     upNext: 'Als Nächstes',
@@ -175,6 +176,8 @@ export const de = {
     count: '{count} Songs',
   },
   collection: {
+    follow: 'Folgen',
+    following: 'Folge ich',
     album: 'Album',
     artist: 'Künstler',
     playlist: 'Playlist',
@@ -184,11 +187,19 @@ export const de = {
     by: 'von {name}',
   },
   customize: {
+    accent: 'Akzentfarbe',
+    accentHint: 'Für Knöpfe, Herz, Fortschritt und den aktiven Songtext. Gilt für jedes Theme.',
+    accentDefault: 'Farbe des Themes',
+    accentPick: 'Akzentfarbe {color}',
+    accentCustom: 'Eigene Farbe',
+    accentWeak:
+      'Diese Farbe ist auf dem Hintergrund schlecht zu sehen – nimm lieber eine hellere oder dunklere.',
+    player: 'Player',
+    backdrop: 'Verschwommenes Cover als Hintergrund',
     title: 'Anpassen',
     themes: 'Fertige Themes',
     active: 'Aktiv',
     choose: 'Theme „{name}“ wählen',
-    more: 'Bald mehr: eigener Theme-Editor, Hintergründe, Schriften und das Startseiten-Layout.',
   },
   settings: {
     playback: 'Abspielen',
@@ -348,6 +359,13 @@ export const de = {
     other: 'Installier Klangraum: eigenes Symbol, startet ohne Browser-Leiste.',
     button: 'Installieren',
     offline: 'Du bist offline. Deine Bibliothek ist da, Musik braucht aber Internet.',
+  },
+  mixes: {
+    title: 'Deine Mixe',
+    repeat: 'Auf Repeat',
+    liked: 'Lieblingssongs-Mix',
+    rediscover: 'Wiederentdecken',
+    play: '„{name}“ abspielen',
   },
   common: {
     close: 'Schließen',

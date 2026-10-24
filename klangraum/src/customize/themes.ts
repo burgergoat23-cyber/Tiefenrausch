@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { contrastRatio } from './contrast';
 
 /** Nur Farben als #rgb oder #rrggbb – so kann ein Import niemals CSS einschleusen. */
 export const hexColorSchema = z.string().regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/);
@@ -46,7 +47,7 @@ export function cssVarName(token: TokenName): string {
   return `--kr-${token.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
 }
 
-/** Fertige Themes. Phase 1: drei Stück – Phase 4 bringt mindestens zehn und einen Editor. */
+/** Fertige Themes (alle mit geprüftem Kontrast). Dazu kommt eine frei wählbare Akzentfarbe. */
 export const PRESET_THEMES: readonly Theme[] = [
   {
     id: 'oliv',
@@ -138,12 +139,113 @@ export const PRESET_THEMES: readonly Theme[] = [
       shadow: '#000000',
     },
   },
+  {
+    id: 'wald',
+    name: 'Wald',
+    scheme: 'dark',
+    tokens: {
+      bg: '#08100c',
+      surface: '#122019',
+      surfaceRaised: '#1b2d23',
+      text: '#eef4ef',
+      textMuted: '#9fb3a6',
+      accent: '#6fcf8f',
+      accentText: '#06120a',
+      border: '#26392e',
+      error: '#ff8a7a',
+      success: '#6fcf8f',
+      shadow: '#000000',
+    },
+  },
+  {
+    id: 'sand',
+    name: 'Sand',
+    scheme: 'light',
+    tokens: {
+      bg: '#f3efe4',
+      surface: '#fbf8f1',
+      surfaceRaised: '#e9e3d3',
+      text: '#1f1d16',
+      textMuted: '#5b5646',
+      accent: '#5d6b2c',
+      accentText: '#ffffff',
+      border: '#d6cfbc',
+      error: '#a3261c',
+      success: '#3f6b2a',
+      shadow: '#3a3423',
+    },
+  },
+  {
+    id: 'asphalt',
+    name: 'Asphalt',
+    scheme: 'dark',
+    tokens: {
+      bg: '#101112',
+      surface: '#1b1d1f',
+      surfaceRaised: '#26292c',
+      text: '#f1f2f3',
+      textMuted: '#a5a9ad',
+      accent: '#d9dcdf',
+      accentText: '#111213',
+      border: '#33373b',
+      error: '#ff8a7a',
+      success: '#8fd18a',
+      shadow: '#000000',
+    },
+  },
+  {
+    id: 'ozean',
+    name: 'Ozean',
+    scheme: 'dark',
+    tokens: {
+      bg: '#071114',
+      surface: '#0f1f24',
+      surfaceRaised: '#172d33',
+      text: '#ecf6f7',
+      textMuted: '#98b4b9',
+      accent: '#4fc6c8',
+      accentText: '#041214',
+      border: '#22393f',
+      error: '#ff8a7a',
+      success: '#7fd6a0',
+      shadow: '#000000',
+    },
+  },
+  {
+    id: 'kupfer',
+    name: 'Kupfer',
+    scheme: 'dark',
+    tokens: {
+      bg: '#110c09',
+      surface: '#1e1611',
+      surfaceRaised: '#2b2018',
+      text: '#f6efe9',
+      textMuted: '#b8a596',
+      accent: '#e09a5b',
+      accentText: '#170d05',
+      border: '#3b2c21',
+      error: '#ff8a7a',
+      success: '#9ccf86',
+      shadow: '#000000',
+    },
+  },
 ];
 
 export const DEFAULT_THEME_ID = 'oliv';
 
 export function findTheme(id: string): Theme {
   return PRESET_THEMES.find((t) => t.id === id) ?? (PRESET_THEMES[0] as Theme);
+}
+
+/** Schrift auf der Akzentfarbe: schwarz oder weiß, je nachdem was besser lesbar ist */
+export function textOn(color: string): string {
+  return contrastRatio('#000000', color) >= contrastRatio('#ffffff', color) ? '#000000' : '#ffffff';
+}
+
+/** Theme mit eigener Akzentfarbe (leer = Farbe des Themes) */
+export function withAccent(theme: Theme, accent: string): Theme {
+  if (!accent || !hexColorSchema.safeParse(accent).success) return theme;
+  return { ...theme, tokens: { ...theme.tokens, accent, accentText: textOn(accent) } };
 }
 
 /** Setzt alle Design-Tokens als CSS-Variablen. Komponenten benutzen nur diese Variablen. */

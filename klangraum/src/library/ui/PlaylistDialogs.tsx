@@ -68,7 +68,7 @@ export function NewPlaylistDialog({ tracks, onClose }: { tracks?: Track[]; onClo
           const id = create(name, tracks);
           onClose();
           if (tracks?.length) toast('library.added', { name: name.trim() });
-          else navigate(`/bibliothek/playlist/${id}`);
+          navigate(`/bibliothek/playlist/${id}`);
         }}
       />
     </Dialog>

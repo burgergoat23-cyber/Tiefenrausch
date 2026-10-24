@@ -10,6 +10,7 @@ import { useT } from '../i18n';
 import styles from './HomePage.module.css';
 import { InstallHint } from '../components/InstallHint';
 import { RecentShelf } from '../library/ui/RecentShelf';
+import { LocalMixes } from '../library/ui/LocalMixes';
 import { useActiveSources } from '../sources/useActiveSources';
 import type { MusicSource } from '../sources/types';
 
@@ -71,6 +72,7 @@ export default function HomePage() {
       </header>
       <InstallHint />
       <RecentShelf />
+      <LocalMixes />
       {ready && sources.length === 0 && (
         <div className="kr-card kr-section">
           <p>{t('home.noSources')}</p>

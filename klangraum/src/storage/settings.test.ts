@@ -95,6 +95,8 @@ describe('Echte Migrationen', () => {
       favoriteArtists: [...DEFAULT_FAVORITE_ARTISTS],
       favoriteGenres: ['Drill'],
       autoplay: true,
+      accentColor: '',
+      playerBackdrop: true,
     });
   });
 

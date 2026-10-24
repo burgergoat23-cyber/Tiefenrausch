@@ -1,4 +1,5 @@
 import { usePlayer, usePlayerState } from '../app/context';
+import { useDialogs } from '../app/dialogStore';
 import { Icon } from '../components/Icon';
 import { RepeatButton, ShuffleButton } from '../components/PlayerControls';
 import { QueueItemBody, UpNextList } from '../components/QueueList';
@@ -12,11 +13,24 @@ export default function QueuePage() {
   const current = queue.index >= 0 ? queue.items[queue.index] : undefined;
   const upcoming = queue.items.slice(queue.index + 1);
   const played = queue.index > 0 ? queue.items.slice(0, queue.index) : [];
+  const openDialog = useDialogs((s) => s.open);
+  const saveable = queue.items.filter((i) => !i.track.live).map((i) => i.track);
   return (
     <div className="kr-page">
       <div className="kr-section-head">
         <h1>{t('queue.title')}</h1>
         <div className={styles.tools}>
+          {saveable.length > 0 && (
+            <button
+              type="button"
+              className="kr-icon-btn"
+              aria-label={t('queue.saveAsPlaylist')}
+              title={t('queue.saveAsPlaylist')}
+              onClick={() => openDialog({ kind: 'newPlaylist', tracks: saveable })}
+            >
+              <Icon name="listPlus" size={22} />
+            </button>
+          )}
           <ShuffleButton />
           <RepeatButton />
         </div>

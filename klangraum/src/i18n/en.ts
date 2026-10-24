@@ -144,6 +144,7 @@ export const en: Dict = {
     liveHint: 'Live radio – seeking is not possible.',
   },
   queue: {
+    saveAsPlaylist: 'Save as playlist',
     title: 'Queue',
     nowPlaying: 'Now playing',
     upNext: 'Up next',
@@ -174,6 +175,8 @@ export const en: Dict = {
     count: '{count} songs',
   },
   collection: {
+    follow: 'Follow',
+    following: 'Following',
     album: 'Album',
     artist: 'Artist',
     playlist: 'Playlist',
@@ -183,11 +186,19 @@ export const en: Dict = {
     by: 'by {name}',
   },
   customize: {
+    accent: 'Accent colour',
+    accentHint:
+      'For buttons, the heart, progress and the active lyric line. Works with every theme.',
+    accentDefault: 'Theme colour',
+    accentPick: 'Accent colour {color}',
+    accentCustom: 'Custom colour',
+    accentWeak: 'This colour is hard to see on the background – pick a lighter or darker one.',
+    player: 'Player',
+    backdrop: 'Blurred cover as background',
     title: 'Customize',
     themes: 'Ready-made themes',
     active: 'Active',
     choose: 'Choose theme “{name}”',
-    more: 'More soon: your own theme editor, backgrounds, fonts and the home screen layout.',
   },
   settings: {
     playback: 'Playback',
@@ -346,6 +357,13 @@ export const en: Dict = {
     other: 'Install Klangraum: its own icon, starts without the browser bar.',
     button: 'Install',
     offline: 'You are offline. Your library is here, but music needs the internet.',
+  },
+  mixes: {
+    title: 'Your mixes',
+    repeat: 'On repeat',
+    liked: 'Liked songs mix',
+    rediscover: 'Rediscover',
+    play: 'Play “{name}”',
   },
   common: {
     close: 'Close',

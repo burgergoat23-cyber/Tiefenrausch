@@ -8,6 +8,8 @@ import { SourceBadge } from '../components/SourceBadge';
 import { TrackList } from '../components/TrackList';
 import { useAsync } from '../components/useAsync';
 import { useT } from '../i18n';
+import { useDialogs } from '../app/dialogStore';
+import { useSettings } from '../app/settingsStore';
 import { SourceError, sourceIdSchema, type Track } from '../sources/types';
 import styles from './CollectionPage.module.css';
 
@@ -16,6 +18,30 @@ interface Loaded {
   subtitle?: string;
   artworkUrl?: string;
   tracks: Track[];
+}
+
+/** Künstler folgen = Lieblingskünstler (fließt in „Für dich“, Song-Radio und Autoplay ein) */
+function FollowButton({ name }: { name: string }) {
+  const t = useT();
+  const favorites = useSettings((s) => s.settings.favoriteArtists);
+  const addFavorite = useSettings((s) => s.addFavorite);
+  const removeFavorite = useSettings((s) => s.removeFavorite);
+  const existing = favorites.find((f) => f.toLowerCase() === name.toLowerCase());
+  return (
+    <button
+      type="button"
+      className="kr-btn"
+      aria-pressed={!!existing}
+      onClick={() =>
+        existing
+          ? removeFavorite('favoriteArtists', existing)
+          : addFavorite('favoriteArtists', name)
+      }
+    >
+      <Icon name={existing ? 'check' : 'plus'} size={18} />
+      {existing ? t('collection.following') : t('collection.follow')}
+    </button>
+  );
 }
 
 /** Detailseite für Album, Künstler oder Playlist */
@@ -57,6 +83,7 @@ export default function CollectionPage({ kind }: { kind: CollectionKind }) {
   }, [source, kind, id]);
 
   const kindLabel = t(`collection.${kind}`);
+  const openDialog = useDialogs((s) => s.open);
 
   return (
     <div className="kr-page">
@@ -109,6 +136,21 @@ export default function CollectionPage({ kind }: { kind: CollectionKind }) {
                     <Icon name="shuffle" size={18} />
                     {t('collection.shuffle')}
                   </button>
+                  <button
+                    type="button"
+                    className="kr-icon-btn"
+                    aria-label={t('library.addTo')}
+                    title={t('library.addTo')}
+                    onClick={() =>
+                      openDialog({
+                        kind: 'addToPlaylist',
+                        tracks: state.data.tracks.filter((tr) => !tr.live),
+                      })
+                    }
+                  >
+                    <Icon name="listPlus" size={22} />
+                  </button>
+                  {kind === 'artist' && <FollowButton name={state.data.title} />}
                 </div>
               )}
             </div>

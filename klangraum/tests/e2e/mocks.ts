@@ -180,6 +180,17 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
       });
     if (p === '/v1/playlists/al1/tracks')
       return json(route, { data: [audiusTrack(1), audiusTrack(2), audiusTrack(3)] });
+    if (p === '/v1/users/u0')
+      return json(route, {
+        data: {
+          id: 'u0',
+          name: 'Lumen',
+          handle: 'lumen',
+          profile_picture: { '480x480': 'https://img.test/u0.svg' },
+        },
+      });
+    if (p === '/v1/users/u0/tracks')
+      return json(route, { data: [audiusTrack(0), audiusTrack(3), audiusTrack(6)] });
     if (p === '/v1/users/search')
       return json(route, {
         data: [
