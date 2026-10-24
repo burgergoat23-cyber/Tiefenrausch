@@ -11,6 +11,7 @@ import { useActiveSources } from '../sources/useActiveSources';
 import { useMultiSearch, type SourceSearchState } from '../sources/useMultiSearch';
 import type { MusicSource, SearchType, SourceId } from '../sources/types';
 import styles from './SearchPage.module.css';
+import { LibraryResults } from '../library/ui/LibraryResults';
 
 const TYPES: SearchType[] = ['track', 'album', 'artist', 'playlist'];
 const DEBOUNCE_MS = 450;
@@ -331,6 +332,8 @@ export default function SearchPage() {
           })}
         </p>
       )}
+
+      {q && <LibraryResults query={q} />}
 
       {q &&
         shown.map((source) =>

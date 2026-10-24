@@ -25,6 +25,7 @@ export interface SettingsStore {
   removeFavorite(kind: 'favoriteArtists' | 'favoriteGenres', name: string): void;
   setAutoplay(on: boolean): void;
   setAccentColor(color: string): void;
+  setFavorites(artists: string[], genres: string[]): void;
   setPlayerBackdrop(on: boolean): void;
   resetAll(): void;
 }
@@ -69,6 +70,17 @@ export const useSettings = create<SettingsStore>()((set, get) => {
         accentColor: /^#[0-9a-fA-F]{6}$/.test(accentColor) ? accentColor.toLowerCase() : '',
       }),
     setPlayerBackdrop: (playerBackdrop) => update({ playerBackdrop }),
+    setFavorites: (artists, genres) =>
+      update({
+        favoriteArtists: artists
+          .map((a) => a.trim())
+          .filter((a) => a && a.length <= 60)
+          .slice(0, 20),
+        favoriteGenres: genres
+          .map((g) => g.trim())
+          .filter((g) => g && g.length <= 40)
+          .slice(0, 10),
+      }),
     resetAll: () => update(defaultSettings(guessLanguage())),
   };
 });

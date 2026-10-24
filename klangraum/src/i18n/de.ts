@@ -36,6 +36,7 @@ export const de = {
     toSettings: 'Zu den Einstellungen',
   },
   search: {
+    inLibrary: 'In deiner Bibliothek',
     title: 'Suche',
     label: 'Wonach suchst du?',
     placeholder: 'Songs, Alben, Künstler …',
@@ -271,6 +272,10 @@ export const de = {
     tapHint: 'Am iPhone/iPad startet das Video manchmal erst, wenn du einmal direkt darauf tippst.',
   },
   stats: {
+    shareCard: 'Rückblick als Bild teilen',
+    cardHeading: 'Mein Klangraum',
+    cardFooter: 'Gehört mit Klangraum · {url}',
+    cardSaved: 'Bild gespeichert – du findest es bei deinen Downloads.',
     title: 'Rückblick',
     label: 'Dein Hörjahr',
     period: 'Zeitraum',
@@ -366,6 +371,14 @@ export const de = {
     liked: 'Lieblingssongs-Mix',
     rediscover: 'Wiederentdecken',
     play: '„{name}“ abspielen',
+  },
+  onboarding: {
+    title: 'Willkommen bei Klangraum',
+    intro:
+      'Was hörst du gern? Wähl ein paar Künstler und Genres – daraus baut die Startseite deinen Mix, und Autoplay weiß, was passt.',
+    privacy:
+      'Du brauchst kein Konto. Alles bleibt auf deinem Gerät und lässt sich später unter Einstellungen ändern.',
+    start: 'Los geht’s',
   },
   common: {
     close: 'Schließen',

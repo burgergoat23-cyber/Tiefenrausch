@@ -106,10 +106,15 @@ export interface MockOptions {
   /** Verzögerung für Jamendo in ms (zeigt: langsame Quelle blockiert nicht) */
   jamendoDelay?: number;
   audioSeconds?: number;
+  /** Begrüßung beim ersten Start zeigen */
+  welcome?: boolean;
 }
 
 /** Fängt alle Anfragen an Audius, Jamendo und Bilder ab */
 export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
+  // Begrüßung beim ersten Start überspringen (eigener Test in extras.spec.ts)
+  if (!opts.welcome)
+    await page.addInitScript(() => localStorage.setItem('klangraum.onboarded', '1'));
   const wav = toneWav(opts.audioSeconds ?? 30);
   // Mit Range-Anfragen (wie echte Server) – sonst kann der Browser nicht spulen
   const audio = (route: Route) => {

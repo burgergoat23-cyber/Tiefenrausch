@@ -1,8 +1,10 @@
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { DialogHost } from '../components/DialogHost';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { OfflineBanner } from '../components/InstallHint';
+import { Onboarding } from '../components/Onboarding';
+import { needsOnboarding } from '../components/onboardingState';
 import { Icon, type IconName } from '../components/Icon';
 import { LiveAnnouncer } from '../components/LiveAnnouncer';
 import { MiniPlayer } from '../components/MiniPlayer';
@@ -68,6 +70,9 @@ export function AppShell() {
   const navRef = useRef<HTMLElement>(null);
   const firstRender = useRef(true);
   useKeyboardShortcuts();
+  // Wer über einen geteilten Link kommt, sieht erst die Musik und wird danach begrüßt
+  const [welcome, setWelcome] = useState(needsOnboarding);
+  const showWelcome = welcome && location.pathname !== '/geteilt' && !inFullPlayer;
 
   // Der Vollbild-Player liegt über allem: Menü dahinter für Tastatur und Screenreader sperren
   useEffect(() => {
@@ -136,6 +141,7 @@ export function AppShell() {
       )}
       <VideoDock />
       <DialogHost />
+      {showWelcome && <Onboarding onDone={() => setWelcome(false)} />}
       <Toaster />
       <LiveAnnouncer />
     </div>

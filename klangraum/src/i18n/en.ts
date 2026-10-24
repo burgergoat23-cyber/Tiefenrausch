@@ -36,6 +36,7 @@ export const en: Dict = {
     toSettings: 'Go to settings',
   },
   search: {
+    inLibrary: 'In your library',
     title: 'Search',
     label: 'What are you looking for?',
     placeholder: 'Songs, albums, artists …',
@@ -269,6 +270,10 @@ export const en: Dict = {
     tapHint: 'On iPhone/iPad the video sometimes only starts after you tap it directly once.',
   },
   stats: {
+    shareCard: 'Share recap as image',
+    cardHeading: 'My Klangraum',
+    cardFooter: 'Played with Klangraum · {url}',
+    cardSaved: 'Image saved – find it in your downloads.',
     title: 'Recap',
     label: 'Your listening',
     period: 'Period',
@@ -364,6 +369,14 @@ export const en: Dict = {
     liked: 'Liked songs mix',
     rediscover: 'Rediscover',
     play: 'Play “{name}”',
+  },
+  onboarding: {
+    title: 'Welcome to Klangraum',
+    intro:
+      'What do you like? Pick a few artists and genres – the home page builds your mix from them, and autoplay knows what fits.',
+    privacy:
+      'No account needed. Everything stays on your device and can be changed later in Settings.',
+    start: 'Let’s go',
   },
   common: {
     close: 'Close',

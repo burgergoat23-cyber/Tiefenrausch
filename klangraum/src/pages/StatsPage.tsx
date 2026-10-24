@@ -7,6 +7,8 @@ import { useT } from '../i18n';
 import { useLibrary } from '../library/libraryStore';
 import { computeStats, favoriteDaytime, periodStart, type Period } from '../library/stats';
 import styles from './StatsPage.module.css';
+import { drawStatsCard, shareCard } from '../library/statsCard';
+import { useToasts } from '../app/toastStore';
 
 const PERIODS: Period[] = ['week', 'month', 'year', 'all'];
 
@@ -23,6 +25,29 @@ export default function StatsPage() {
   const daytime = favoriteDaytime(stats.hours);
   const topTracks = stats.topTracks.map((s) => s.track);
   const minutes = Math.round(stats.ms / 60000);
+  const toast = useToasts((s) => s.show);
+  const [busy, setBusy] = useState(false);
+  const onShare = async () => {
+    setBusy(true);
+    try {
+      const appUrl = `${window.location.origin}${window.location.pathname}`;
+      const blob = await drawStatsCard(stats, {
+        heading: t('stats.cardHeading'),
+        period: t(`stats.periods.${period}`),
+        minutesLabel: t('stats.minutes'),
+        artistsLabel: t('stats.topArtists'),
+        tracksLabel: t('stats.topTracks'),
+        footer: t('stats.cardFooter', { url: appUrl.replace(/^https?:\/\//, '') }),
+      });
+      const r = blob
+        ? await shareCard(blob, 'klangraum-rueckblick.png', t('stats.title'))
+        : 'failed';
+      if (r === 'downloaded') toast('stats.cardSaved');
+      else if (r === 'failed') toast('share.failed', undefined, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="kr-page">
@@ -46,6 +71,17 @@ export default function StatsPage() {
         <p className="kr-muted">{t('stats.empty')}</p>
       ) : (
         <>
+          <div>
+            <button
+              type="button"
+              className="kr-btn kr-btn--primary"
+              disabled={busy}
+              onClick={() => void onShare()}
+            >
+              <Icon name="share" size={18} />
+              {t('stats.shareCard')}
+            </button>
+          </div>
           <dl className={styles.numbers}>
             <div>
               <dt>{t('stats.minutes')}</dt>

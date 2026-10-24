@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import { Link } from 'react-router';
-import { usePlayerState } from '../app/context';
+import { usePlayer, usePlayerState } from '../app/context';
+import { LikeButton } from '../library/ui/LikeButton';
 import { useT } from '../i18n';
 import { currentItem } from '../player/queue';
 import { TrackArtwork } from './Artwork';
@@ -31,6 +33,9 @@ export function MiniPlayer() {
   const t = useT();
   const track = usePlayerState((s) => currentItem(s.queue)?.track ?? null);
   const buffering = usePlayerState((s) => s.buffering || s.status === 'loading');
+  const player = usePlayer();
+  // Wischen über Cover/Titel: nach links = nächster Song, nach rechts = vorheriger
+  const swipe = useRef<{ x: number; y: number; done: boolean } | null>(null);
   if (!track) return null;
   const artists = track.artists.join(', ') || t('track.unknownArtist');
   return (
@@ -40,6 +45,25 @@ export function MiniPlayer() {
         to="/player"
         className={styles.info}
         aria-label={`${t('player.open')}: ${track.title} – ${artists}`}
+        onPointerDown={(e) => {
+          swipe.current = { x: e.clientX, y: e.clientY, done: false };
+        }}
+        onPointerUp={(e) => {
+          const s = swipe.current;
+          if (!s) return;
+          const dx = e.clientX - s.x;
+          const dy = e.clientY - s.y;
+          if (Math.abs(dx) > 60 && Math.abs(dy) < 40) {
+            s.done = true;
+            if (dx < 0) player.next();
+            else player.prev();
+          }
+        }}
+        onClick={(e) => {
+          if (swipe.current?.done) e.preventDefault();
+          swipe.current = null;
+        }}
+        draggable={false}
       >
         <TrackArtwork track={track} size={44} eager />
         <span className={styles.text}>
@@ -64,6 +88,9 @@ export function MiniPlayer() {
         </span>
       </div>
       <div className={styles.actions}>
+        <span className={styles.wideOnly}>
+          <LikeButton track={track} size={20} />
+        </span>
         <span className={styles.volume}>
           <VolumeControl />
         </span>

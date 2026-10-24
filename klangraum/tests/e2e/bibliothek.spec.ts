@@ -189,6 +189,9 @@ test.describe('Bibliothek, Songtexte, Teilen', () => {
     await expect(page.getByText('Minuten')).toBeVisible();
     await expect(page.getByRole('definition').first()).toHaveText('7');
     await expect(page.getByText('King Von').first()).toBeVisible();
+    const card = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Rückblick als Bild teilen' }).click();
+    expect((await card).suggestedFilename()).toBe('klangraum-rueckblick.png');
 
     await page.goto('/#/einstellungen');
     const download = page.waitForEvent('download');

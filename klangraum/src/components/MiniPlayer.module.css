@@ -31,6 +31,8 @@
 }
 
 .info {
+  touch-action: pan-y;
+  -webkit-user-drag: none;
   flex: 1;
   min-width: 0;
   display: flex;

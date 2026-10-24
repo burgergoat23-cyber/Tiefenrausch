@@ -72,6 +72,9 @@ test('Screenshots Funktionen', async ({ page }, info) => {
   await page.goto('/#/rueckblick');
   await page.waitForTimeout(800);
   await shot('3-rueckblick');
+  const dl = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Rückblick als Bild teilen' }).click();
+  await (await dl).saveAs(`docs/screenshots/features/${info.project.name}-rueckblick-karte.png`);
   await page.evaluate(() => window.scrollTo(0, 900));
   await page.waitForTimeout(300);
   await shot('4-rueckblick-unten');

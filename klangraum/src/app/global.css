@@ -470,3 +470,8 @@ button {
     --kr-transition: 0ms linear;
   }
 }
+
+/* Herz: gefüllt in der Akzentfarbe */
+.kr-like[data-liked] {
+  color: var(--kr-accent);
+}
