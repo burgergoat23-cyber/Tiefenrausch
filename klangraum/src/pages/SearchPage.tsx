@@ -123,6 +123,8 @@ export default function SearchPage() {
   const type: SearchType = isType(typeParam) ? typeParam : 'track';
   const sourceFilter = (params.get('quelle') as SourceId | null) ?? null;
   const [input, setInput] = useState(q);
+  /** Suche, die mit Enter/„Suchen“ bestätigt wurde – nur dann fragen wir „teure“ Quellen (YouTube) */
+  const [committedQ, setCommittedQ] = useState(q);
   const inputRef = useRef<HTMLInputElement>(null);
   const history = useSettings((s) => s.settings.searchHistory);
   const addSearch = useSettings((s) => s.addSearch);
@@ -139,7 +141,14 @@ export default function SearchPage() {
     () => typeSources.filter((s) => !sourceFilter || s.id === sourceFilter),
     [typeSources, sourceFilter],
   );
-  const { states, retrySource } = useMultiSearch(q, type, shown);
+  const cheap = useMemo(() => shown.filter((s) => !s.costlySearch), [shown]);
+  const costly = useMemo(() => shown.filter((s) => s.costlySearch), [shown]);
+  const costlyQ = committedQ.trim() === q.trim() ? q : '';
+  const cheapSearch = useMultiSearch(q, type, cheap);
+  const costlySearch = useMultiSearch(costlyQ, type, costly);
+  const states = { ...cheapSearch.states, ...costlySearch.states };
+  const retrySource = (id: SourceId) =>
+    costly.some((s) => s.id === id) ? costlySearch.retrySource(id) : cheapSearch.retrySource(id);
 
   const setParam = (key: string, value: string | null) => {
     setParams(
@@ -163,7 +172,11 @@ export default function SearchPage() {
 
   // Zurück-Navigation o. Ä.: Eingabefeld an die Adresse anpassen
   useEffect(() => {
-    setInput((cur) => (cur.trim() === q.trim() ? cur : q));
+    if (input.trim() === q.trim()) return;
+    // kam nicht vom Tippen, sondern z. B. vom Zurück-Knopf → gilt als bestätigte Suche
+    setInput(q);
+    setCommittedQ(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
   const onSubmit = (e: FormEvent) => {
@@ -171,12 +184,14 @@ export default function SearchPage() {
     const v = input.trim();
     setParam('q', v || null);
     if (v) addSearch(v);
+    setCommittedQ(v);
     inputRef.current?.blur();
   };
 
   const runHistory = (h: string) => {
     setInput(h);
     setParam('q', h);
+    setCommittedQ(h);
     addSearch(h);
   };
 
@@ -300,16 +315,36 @@ export default function SearchPage() {
       )}
 
       {q &&
-        shown.map((source) => (
-          <SourceResults
-            key={source.id}
-            source={source}
-            type={type}
-            state={states[source.id]}
-            onRetry={() => retrySource(source.id)}
-            onUsed={() => addSearch(q)}
-          />
-        ))}
+        shown.map((source) =>
+          source.costlySearch && !costlyQ ? (
+            <section
+              key={source.id}
+              className="kr-section"
+              aria-label={t('search.resultsFrom', { source: source.name })}
+              data-testid={`results-${source.id}`}
+            >
+              <h2 className={styles.sourceHead}>
+                {t('search.resultsFrom', { source: source.name })}
+              </h2>
+              <p className="kr-muted">{t('search.costly', { source: source.name })}</p>
+              <div>
+                <button type="button" className="kr-btn" onClick={() => setCommittedQ(q)}>
+                  <Icon name="search" size={18} />
+                  {t('search.searchNow', { source: source.name })}
+                </button>
+              </div>
+            </section>
+          ) : (
+            <SourceResults
+              key={source.id}
+              source={source}
+              type={type}
+              state={states[source.id]}
+              onRetry={() => retrySource(source.id)}
+              onUsed={() => addSearch(q)}
+            />
+          ),
+        )}
     </div>
   );
 }

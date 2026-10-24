@@ -41,3 +41,7 @@
 .msg {
   flex: 1;
 }
+
+:global(html[data-video-float]) .stack {
+  bottom: calc(var(--kr-bottom-stack, 0px) + 12px + 256px);
+}

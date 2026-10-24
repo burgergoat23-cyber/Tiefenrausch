@@ -23,6 +23,7 @@ export const en: Dict = {
     trendingOn: 'Trending on {source}',
     radio: 'Popular radio stations',
     archive: 'Concerts and free music from the Internet Archive',
+    youtube: 'Music charts on YouTube',
     noSources: 'No music source is switched on. Turn on at least one in the settings.',
     toSettings: 'Go to settings',
   },
@@ -44,6 +45,8 @@ export const en: Dict = {
     resultsFrom: 'Results from {source}',
     retry: 'Try again',
     typeUnsupported: '{source} cannot be searched for {type}.',
+    costly: '{source} is only searched when you tap “Search” (saves your daily quota).',
+    searchNow: 'Search {source} now',
   },
   types: {
     track: 'Songs',
@@ -138,6 +141,14 @@ export const en: Dict = {
     jamendoHint:
       'Jamendo needs a free client ID from devportal.jamendo.com. Enter it here (it is not a secret).',
     jamendoClientId: 'Jamendo client ID',
+    youtubeKey: 'YouTube API key',
+    youtubeHint:
+      'Searching YouTube needs a free key from the Google Cloud Console (YouTube Data API v3). Videos play in the official YouTube player: it stays visible, and on iPhone it stops when you lock the screen. About 100 searches per day are free.',
+    invalidKey: 'The key may only contain letters, numbers, - and _.',
+    youtubeTerms:
+      'YouTube videos are subject to the YouTube Terms of Service and the Google Privacy Policy:',
+    youtubeTos: 'YouTube Terms of Service',
+    googlePrivacy: 'Google Privacy Policy',
     save: 'Save',
     saved: 'Saved.',
     invalidClientId: 'The client ID may only contain letters, numbers, - and _.',
@@ -157,6 +168,8 @@ export const en: Dict = {
     unavailable: '{source} is not set up.',
     notFound: 'That does not exist on {source} (anymore).',
     badResponse: '{source} sent something unexpected – try again later.',
+    quota: '{source}: all searches for today are used up – it works again tomorrow.',
+    badKey: '{source}: the key does not work – check it in the settings.',
     trackSkipped: '“{title}” cannot be played right now – playing the next song.',
     trackFailed: '“{title}” cannot be played right now.',
     unsupported: 'Songs from {source} cannot be played here yet.',
@@ -165,6 +178,12 @@ export const en: Dict = {
     reload: 'Reload',
     notFoundPage: 'This page does not exist.',
     backHome: 'Back to home',
+  },
+  video: {
+    dock: 'YouTube video',
+    expand: 'Show video large',
+    close: 'Pause and hide video',
+    tapHint: 'On iPhone/iPad the video sometimes only starts after you tap it directly once.',
   },
   common: {
     close: 'Close',

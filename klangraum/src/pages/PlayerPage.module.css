@@ -79,6 +79,28 @@
     color-mix(in srgb, var(--kr-shadow) var(--kr-shadow-strength), transparent);
 }
 
+/* YouTube-Video: 16:9, aber nie kleiner als 200 px hoch (Regel von YouTube) */
+.videoWrap {
+  width: min(100%, 720px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+  border-radius: var(--kr-radius);
+  background: #000;
+}
+
+.videoHint {
+  color: var(--kr-text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
 .panel {
   width: min(100%, 520px);
   display: flex;
@@ -126,6 +148,10 @@
 
   .coverWrap {
     width: min(42vw, 70vh, 560px);
+  }
+
+  .videoWrap {
+    width: min(52vw, 720px);
   }
 
   .title {

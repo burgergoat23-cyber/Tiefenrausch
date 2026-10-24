@@ -25,7 +25,9 @@ function TrendingSection({ source }: { source: MusicSource }) {
       ? t('home.radio')
       : source.id === 'archive'
         ? t('home.archive')
-        : t('home.trendingOn', { source: source.name });
+        : source.id === 'youtube'
+          ? t('home.youtube')
+          : t('home.trendingOn', { source: source.name });
   const tracks = state.status === 'done' ? state.data.slice(0, 10) : [];
   return (
     <section className="kr-section" aria-label={title}>

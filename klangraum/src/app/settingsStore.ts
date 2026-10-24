@@ -17,6 +17,7 @@ export interface SettingsStore {
   setLanguage(language: Settings['language']): void;
   setSourceEnabled(id: SourceId, on: boolean): void;
   setJamendoClientId(id: string): void;
+  setYoutubeApiKey(key: string): void;
   addSearch(query: string): void;
   removeSearch(query: string): void;
   clearSearchHistory(): void;
@@ -37,6 +38,7 @@ export const useSettings = create<SettingsStore>()((set, get) => {
     setLanguage: (language) => update({ language }),
     setSourceEnabled: (id, on) => update({ sources: { ...get().settings.sources, [id]: on } }),
     setJamendoClientId: (id) => update({ jamendoClientId: id.trim() }),
+    setYoutubeApiKey: (key) => update({ youtubeApiKey: key.trim() }),
     addSearch: (query) => {
       const q = query.trim();
       if (!q) return;

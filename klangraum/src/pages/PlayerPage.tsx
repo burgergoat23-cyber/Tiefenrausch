@@ -6,7 +6,9 @@ import { Icon } from '../components/Icon';
 import { PlayerControls } from '../components/PlayerControls';
 import { ProgressBar } from '../components/ProgressBar';
 import { SourceBadge } from '../components/SourceBadge';
+import { VideoSlot } from '../components/VideoDock';
 import { VolumeControl } from '../components/VolumeControl';
+import { isAppleTouchDevice } from '../app/setup';
 import { useT } from '../i18n';
 import { currentItem } from '../player/queue';
 import { sourceName } from '../sources/names';
@@ -77,9 +79,16 @@ export default function PlayerPage() {
         </div>
       ) : (
         <div className={styles.body}>
-          <div className={styles.coverWrap}>
-            <Artwork src={track.artworkUrl} size="100%" className={styles.cover} />
-          </div>
+          {track.sourceId === 'youtube' ? (
+            <div className={styles.videoWrap}>
+              <VideoSlot className={styles.video} />
+              {isAppleTouchDevice() && <p className={styles.videoHint}>{t('video.tapHint')}</p>}
+            </div>
+          ) : (
+            <div className={styles.coverWrap}>
+              <Artwork src={track.artworkUrl} size="100%" className={styles.cover} />
+            </div>
+          )}
           <div className={styles.panel}>
             <div className={styles.info}>
               <h1 className={styles.title}>{track.title}</h1>

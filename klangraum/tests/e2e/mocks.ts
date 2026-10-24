@@ -278,6 +278,34 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
   });
   await page.route(/^https:\/\/radio\.stream\.test\//, audio);
 
+  // YouTube Data API (Suche, Charts)
+  await page.route(/^https:\/\/www\.googleapis\.com\/youtube\/v3\//, async (route) => {
+    const url = new URL(route.request().url());
+    const kind = url.pathname.split('/').pop();
+    if (kind === 'search') {
+      const q = url.searchParams.get('q') ?? '';
+      return json(route, {
+        items: YT_VIDEOS.map((v) => ({ id: { videoId: v.id }, snippet: ytSnippet(v, q) })),
+      });
+    }
+    if (kind === 'videos') {
+      const ids = (url.searchParams.get('id') ?? YT_VIDEOS.map((v) => v.id).join(',')).split(',');
+      return json(route, {
+        items: YT_VIDEOS.filter((v) => ids.includes(v.id)).map((v) => ({
+          id: v.id,
+          snippet: ytSnippet(v, ''),
+          contentDetails: { duration: v.duration },
+          status: { embeddable: true },
+        })),
+      });
+    }
+    return json(route, { items: [] });
+  });
+  // Nachgebauter offizieller YouTube-Player (das echte Skript ist in der Testumgebung gesperrt)
+  await page.route('https://www.youtube.com/iframe_api', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/javascript', body: FAKE_YT_API }),
+  );
+
   await page.route(/^https:\/\/audio\.jamendo\.test\//, audio);
   await page.route(/^https:\/\/img\.test\//, (route) => {
     const name = new URL(route.request().url()).pathname;
@@ -292,3 +320,56 @@ export async function expectAudioPlaying(page: Page) {
     return !!a && !a.paused && a.currentTime > 0.2;
   });
 }
+
+const YT_VIDEOS = [
+  {
+    id: 'ytvideo0001',
+    title: 'Sommerhit 2026 (Official Video)',
+    channel: 'Popstar - Topic',
+    duration: 'PT3M12S',
+  },
+  {
+    id: 'ytvideo0002',
+    title: 'Ballade &amp; Klavier',
+    channel: 'SängerinVEVO',
+    duration: 'PT4M01S',
+  },
+  { id: 'ytvideo0003', title: 'Club Remix', channel: 'DJ Test', duration: 'PT2M45S' },
+];
+
+function ytSnippet(v: (typeof YT_VIDEOS)[number], q: string) {
+  return {
+    title: q ? `${q} – ${v.title}` : v.title,
+    channelTitle: v.channel,
+    thumbnails: { high: { url: `https://img.test/${v.id}.svg` } },
+    liveBroadcastContent: 'none',
+  };
+}
+
+/** Verhält sich wie die offizielle IFrame-API: Zustände 1 = läuft, 2 = Pause, 0 = Ende */
+const FAKE_YT_API = `
+(function () {
+  function Player(el, opts) {
+    var self = this;
+    var box = document.createElement('div');
+    box.setAttribute('data-testid', 'fake-youtube');
+    box.style.cssText = 'width:100%;height:100%;background:linear-gradient(135deg,#c4302b,#282828);color:#fff;display:grid;place-items:center;font:600 14px sans-serif';
+    el.appendChild(box);
+    self.box = box; self.t = 0; self.state = -1; self.vol = 100; self.muted = false; self.dur = 0; self.timer = null;
+    self.emit = function (s) { self.state = s; box.setAttribute('data-state', String(s)); opts.events && opts.events.onStateChange && opts.events.onStateChange({ data: s, target: self }); };
+    setTimeout(function () { opts.events && opts.events.onReady && opts.events.onReady({ target: self }); }, 30);
+  }
+  Player.prototype.cueVideoById = function (o) { this.id = o.videoId; this.t = o.startSeconds || 0; this.dur = 180; this.box.textContent = 'YouTube: ' + o.videoId; this.box.setAttribute('data-video', o.videoId); this.emit(5); };
+  Player.prototype.playVideo = function () { var self = this; clearInterval(self.timer); self.timer = setInterval(function () { self.t += 0.25; }, 250); setTimeout(function () { self.emit(1); }, 50); };
+  Player.prototype.pauseVideo = function () { clearInterval(this.timer); this.emit(2); };
+  Player.prototype.stopVideo = function () { clearInterval(this.timer); this.t = 0; this.emit(-1); };
+  Player.prototype.seekTo = function (s) { this.t = s; };
+  Player.prototype.setVolume = function (v) { this.vol = v; this.box.setAttribute('data-volume', String(v)); };
+  Player.prototype.mute = function () { this.muted = true; };
+  Player.prototype.unMute = function () { this.muted = false; };
+  Player.prototype.getCurrentTime = function () { return this.t; };
+  Player.prototype.getDuration = function () { return this.dur; };
+  window.YT = { Player: Player };
+  setTimeout(function () { window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady(); }, 10);
+})();
+`;

@@ -5,6 +5,7 @@ import { Icon, type IconName } from '../components/Icon';
 import { LiveAnnouncer } from '../components/LiveAnnouncer';
 import { MiniPlayer } from '../components/MiniPlayer';
 import { Toaster } from '../components/Toaster';
+import { VideoDock } from '../components/VideoDock';
 import { useT, type TKey } from '../i18n';
 import { usePlayerState } from './context';
 import styles from './AppShell.module.css';
@@ -93,6 +94,7 @@ export function AppShell() {
           <MiniPlayer />
         </div>
       )}
+      <VideoDock />
       <Toaster />
       <LiveAnnouncer />
     </div>

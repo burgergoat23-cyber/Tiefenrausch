@@ -152,3 +152,8 @@
     background: var(--kr-surface-raised);
   }
 }
+
+/* Schwebendes YouTube-Fenster: Inhalt und Meldungen weichen nach oben aus */
+:global(html[data-video-float]) .main {
+  padding-bottom: calc(var(--kr-bottom-stack) + 16px + 260px);
+}

@@ -2,6 +2,7 @@ import { ArchiveSource } from './archive';
 import { AudiusSource } from './audius';
 import { JamendoSource } from './jamendo';
 import { RadioSource } from './radio';
+import { YouTubeSource } from './youtube';
 import type { MusicSource, SourceId } from './types';
 
 export interface SourceRegistry {
@@ -22,14 +23,23 @@ export function browserCountryCode(): string {
   return lang.toLowerCase().startsWith('de') ? 'DE' : '';
 }
 
+export interface SourceKeys {
+  jamendoClientId(): string;
+  youtubeApiKey(): string;
+}
+
 /** Die echten Quellen der App. Weitere Quellen (Spotify, eigene Dateien …) folgen in späteren Phasen. */
-export function createDefaultRegistry(getJamendoClientId: () => string): SourceRegistry {
+export function createDefaultRegistry(keys: SourceKeys): SourceRegistry {
   return createRegistry([
     new AudiusSource(),
     new JamendoSource({
-      getClientId: () => getJamendoClientId() || import.meta.env.VITE_JAMENDO_CLIENT_ID || '',
+      getClientId: () => keys.jamendoClientId() || import.meta.env.VITE_JAMENDO_CLIENT_ID || '',
     }),
     new ArchiveSource(),
     new RadioSource({ getCountryCode: browserCountryCode }),
+    new YouTubeSource({
+      getApiKey: () => keys.youtubeApiKey() || import.meta.env.VITE_YOUTUBE_API_KEY || '',
+      getRegionCode: browserCountryCode,
+    }),
   ]);
 }

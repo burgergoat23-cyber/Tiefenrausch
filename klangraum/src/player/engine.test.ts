@@ -261,6 +261,51 @@ describe('PlayerEngine', () => {
   });
 });
 
+describe('Externe Ausgabe (YouTube-Player)', () => {
+  it('wechselt zwischen eigenem Audio und externem Player, alte Ausgabe wird angehalten', async () => {
+    const audio = new FakeOutput();
+    const video = new FakeOutput();
+    let audioStops = 0;
+    audio.stop = () => {
+      audioStops += 1;
+    };
+    const yt = fakeSource('youtube', { playbackMode: 'external', getStreamUrl: undefined });
+    const engine = new PlayerEngine({
+      getSource: (id) => (id === 'youtube' ? yt : fakeSource(id)),
+      output: audio,
+      getExternalOutput: (s) => (s.id === 'youtube' ? video : undefined),
+    });
+    engine.setVolume(0.3);
+    engine.playTracks([track('a'), track('vid12345678', { sourceId: 'youtube' })]);
+    await flush();
+    expect(audio.loaded).toEqual(['https://stream.test/audius/a']);
+    engine.next();
+    await flush();
+    expect(video.loaded).toEqual(['vid12345678']); // externe Player bekommen die ID
+    expect(video.volume).toBe(0.3);
+    expect(audioStops).toBe(1);
+    expect(engine.state.status).toBe('playing');
+    // Rückmeldungen der alten Ausgabe zählen nicht mehr
+    audio.listener.onEnded();
+    expect(engine.current?.id).toBe('vid12345678');
+    engine.pause();
+    expect(video.playing).toBe(false);
+  });
+
+  it('ohne passende Ausgabe: ehrliche Meldung statt Absturz', async () => {
+    const yt = fakeSource('youtube', { playbackMode: 'external', getStreamUrl: undefined });
+    const notices: PlayerNotice[] = [];
+    const engine = new PlayerEngine({
+      getSource: () => yt,
+      output: new FakeOutput(),
+      onNotice: (n) => notices.push(n),
+    });
+    engine.playTracks([track('v', { sourceId: 'youtube' })]);
+    await flush();
+    expect(notices).toEqual([{ kind: 'unsupported', sourceId: 'youtube' }]);
+  });
+});
+
 describe('Live-Radio', () => {
   it('kein Spulen, Zurück geht direkt zum vorigen Sender, Start immer „jetzt“', async () => {
     const live = (id: string) => track(id, { live: true, durationMs: 0 });

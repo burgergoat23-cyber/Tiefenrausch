@@ -1,6 +1,14 @@
 import { z } from 'zod';
 
-export const SOURCE_IDS = ['audius', 'jamendo', 'archive', 'radio', 'local', 'spotify'] as const;
+export const SOURCE_IDS = [
+  'audius',
+  'jamendo',
+  'archive',
+  'radio',
+  'youtube',
+  'local',
+  'spotify',
+] as const;
 export const sourceIdSchema = z.enum(SOURCE_IDS);
 export type SourceId = z.infer<typeof sourceIdSchema>;
 
@@ -83,6 +91,8 @@ export interface MusicSource {
   needsLogin: boolean;
   /** Welche Such-Arten die Quelle kann (fehlt = alle) */
   searchTypes?: SearchType[];
+  /** Suchen kosten Kontingent (YouTube) → nur nach Enter/„Suchen“, nicht schon beim Tippen */
+  costlySearch?: boolean;
   isAvailable(): Promise<boolean>;
   search(query: string, opts?: SearchOptions): Promise<SearchResult>;
   getTrack(id: string): Promise<Track>;
@@ -107,7 +117,16 @@ export function emptyResult(): SearchResult {
   return { tracks: [], albums: [], artists: [], playlists: [] };
 }
 
-export type SourceErrorKind = 'network' | 'unavailable' | 'notFound' | 'rateLimit' | 'badResponse';
+export type SourceErrorKind =
+  | 'network'
+  | 'unavailable'
+  | 'notFound'
+  | 'rateLimit'
+  | 'badResponse'
+  /** Tages-Kontingent verbraucht (YouTube) */
+  | 'quota'
+  /** API-Schlüssel ungültig oder gesperrt */
+  | 'badKey';
 
 /** Fehler einer Quelle. Die Oberfläche macht daraus eine freundliche Meldung. */
 export class SourceError extends Error {

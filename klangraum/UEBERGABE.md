@@ -40,8 +40,25 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Beliebte Sender nach Ländercode der Browser-Sprache. Start wird per `/json/url/{uuid}` gemeldet (Bitte
   des Verzeichnisses). `canUseWebAudio: false` (Radio-Streams haben meist kein CORS). Nur Such-Art „Songs“.
 - `MusicSource.searchTypes` (optional): Suche zeigt eine Quelle nur bei Such-Arten, die sie kann.
-- Bewusst **nicht**: YouTube-Ton herunterladen/abgreifen (verboten). Angeboten, aber vom Nutzer noch nicht
-  gewählt: offizieller YouTube-Player (Video muss sichtbar sein, stoppt am iPhone im Hintergrund, API-Schlüssel nötig).
+- `sources/youtube` – **offizielle** YouTube-Anbindung (Nutzer wollte „das mit den Videos“):
+  Suche über YouTube Data API v3 (`search` type=video, Kategorie 10 = Musik, `videoEmbeddable`, danach
+  `videos` für Länge/einbettbar/Altersfreigabe; Playlists über `playlists` + `playlistItems`; Charts
+  `videos?chart=mostPopular`). Schlüssel: Einstellungen (`youtubeApiKey`) oder `VITE_YOUTUBE_API_KEY`,
+  ohne Schlüssel still aus. Kontingent 10 000 Einheiten/Tag, Suche = 101 → `costlySearch: true`: YouTube
+  wird erst nach Enter/„Suchen“ gefragt (Knopf „Jetzt bei YouTube suchen“), Antworten werden gecacht.
+  Fehlerarten `quota` und `badKey` mit eigenen Meldungen. `playbackMode: 'external'`.
+- `player/youtubeOutput.ts` – zweite Ausgabe: offizieller IFrame-Player (youtube-nocookie.com,
+  `playsinline`). Das iframe liegt in einem festen `div.kr-video-host` im body und wird **nie umgehängt**;
+  `components/VideoDock.tsx` legt es per rAF genau über einen Platzhalter: `VideoSlot` im Vollbild-Player
+  (16:9, mind. 200 px hoch) oder ein schwebendes Fenster über dem Mini-Player (200 × 200 bzw. 356 × 200,
+  `box-sizing: content-box` wegen Rahmen!). „×“ pausiert und blendet aus. YouTube-Regeln: Video sichtbar,
+  mind. 200 × 200, nichts drüberlegen, kein Ton-Extrahieren, keine Hintergrund-Wiedergabe – am iPhone
+  stoppt es beim Sperren (ehrlicher Hinweis in Einstellungen). Am iPhone startet das Video evtl. erst nach
+  einem Tipp aufs Video (Timeout 4 s → NotAllowedError → pausiert + Hinweis im Player).
+  Links zu YouTube-Nutzungsbedingungen/Google-Datenschutz unter Einstellungen → Über.
+- Engine kann mehrere Ausgaben: `deps.output` (eigenes Audio) + `getExternalOutput(source)`; beim Wechsel
+  wird die alte Ausgabe gestoppt, Rückmeldungen nicht aktiver Ausgaben werden ignoriert, Lautstärke gilt für alle.
+- Einstellungen jetzt `schemaVersion: 2` (Migration 1 → 2 ergänzt `youtubeApiKey`).
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
   ursprüngliche Reihenfolge in `original` gemerkt; Wiederholen aus/alle/einer).
@@ -66,15 +83,15 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (104 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 14 Tests × PC/iPhone. Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (117 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 17 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).
 
 ## Ehrlich: noch nicht geprüft
 
-- Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org` und `*.api.radio-browser.info` gesperrt.
+- Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org`, `*.api.radio-browser.info`, `googleapis.com` und `youtube.com` gesperrt.
   Die Antwort-Formate stammen aus der Doku/Erfahrung; Adapter sind tolerant (zod, kaputte Einträge werden übersprungen).
 - Echtes iPhone/iPad (nur Chromium mit iPhone-Größe und -Kennung getestet).
 

@@ -26,7 +26,10 @@ export type PlayerNotice =
 
 export interface EngineDeps {
   getSource(id: SourceId): MusicSource | undefined;
+  /** Eigenes Audio (für Quellen mit playbackMode 'url') */
   output: PlaybackOutput;
+  /** Ausgabe für Quellen, die selbst abspielen (playbackMode 'external', z. B. YouTube-Player) */
+  getExternalOutput?(source: MusicSource): PlaybackOutput | undefined;
   random?: Q.Random;
   onNotice?(notice: PlayerNotice): void;
 }
@@ -59,6 +62,9 @@ export class PlayerEngine {
   private readonly random: Q.Random;
   private loadToken = 0;
   private errorStreak = 0;
+  /** Die Ausgabe, die gerade spielt – nur ihre Rückmeldungen zählen */
+  private active: PlaybackOutput;
+  private readonly outputs: PlaybackOutput[] = [];
 
   constructor(deps: EngineDeps, initial: Partial<PlayerState> = {}) {
     this.deps = deps;
@@ -70,10 +76,27 @@ export class PlayerEngine {
       loadedUid: null,
       buffering: false,
     }));
+    this.active = deps.output;
+    this.bind(deps.output);
+  }
+
+  /** Meldet eine Ausgabe bei der Engine an (Lautstärke übernehmen, Rückmeldungen empfangen) */
+  private bind(output: PlaybackOutput) {
+    if (this.outputs.includes(output)) return;
+    this.outputs.push(output);
     const s = this.store.getState();
-    deps.output.setVolume(s.volume);
-    deps.output.setMuted(s.muted);
-    deps.output.setListener(this.listener);
+    output.setVolume(s.volume);
+    output.setMuted(s.muted);
+    output.setListener(this.makeListener(output));
+  }
+
+  /** Wechsel z. B. von eigenem Audio zum YouTube-Player: die alte Ausgabe wird angehalten */
+  private switchTo(output: PlaybackOutput) {
+    this.bind(output);
+    if (output === this.active) return;
+    const old = this.active;
+    this.active = output;
+    old.stop();
   }
 
   get state(): PlayerState {
@@ -169,14 +192,14 @@ export class PlayerEngine {
       return;
     }
     try {
-      await this.deps.output.play();
+      await this.active.play();
     } catch (err) {
       this.handlePlayRejection(err);
     }
   }
 
   pause() {
-    this.deps.output.pause();
+    this.active.pause();
     if (this.state.status !== 'idle') this.set({ status: 'paused', buffering: false });
   }
 
@@ -214,19 +237,19 @@ export class PlayerEngine {
     const dur = this.state.durationMs;
     const clamped = Math.max(0, dur > 0 ? Math.min(ms, dur) : ms);
     this.set({ positionMs: clamped });
-    if (this.state.loadedUid) this.deps.output.seek(clamped / 1000);
+    if (this.state.loadedUid) this.active.seek(clamped / 1000);
   }
 
   setVolume(volume: number) {
     const v = Math.min(1, Math.max(0, volume));
-    this.deps.output.setVolume(v);
+    for (const o of this.outputs) o.setVolume(v);
     this.set({ volume: v, muted: v === 0 ? this.state.muted : false });
-    if (v > 0) this.deps.output.setMuted(false);
+    if (v > 0) for (const o of this.outputs) o.setMuted(false);
   }
 
   toggleMute() {
     const muted = !this.state.muted;
-    this.deps.output.setMuted(muted);
+    for (const o of this.outputs) o.setMuted(muted);
     this.set({ muted });
   }
 
@@ -241,7 +264,7 @@ export class PlayerEngine {
 
   stop() {
     this.loadToken += 1;
-    this.deps.output.stop();
+    this.active.stop();
     this.set({ status: 'idle', positionMs: 0, loadedUid: null, buffering: false });
   }
 
@@ -266,27 +289,37 @@ export class PlayerEngine {
       buffering: false,
     });
     const source = this.deps.getSource(item.track.sourceId);
-    if (!source || source.playbackMode !== 'url' || !source.getStreamUrl) {
+    const output =
+      source?.playbackMode === 'url' && source.getStreamUrl
+        ? this.deps.output
+        : source?.playbackMode === 'external'
+          ? this.deps.getExternalOutput?.(source)
+          : undefined;
+    if (!source || !output) {
       this.notice({ kind: 'unsupported', sourceId: item.track.sourceId });
       this.set({ status: 'paused' });
       return;
     }
-    let url: string;
-    try {
-      url = await source.getStreamUrl(item.track);
-    } catch (err) {
-      if (token !== this.loadToken) return;
-      const kind = err instanceof SourceError ? err.kind : 'network';
-      this.notice({ kind: 'sourceError', sourceId: source.id, errorKind: kind });
-      this.set({ status: 'paused' });
-      return;
+    // Eigenes Audio braucht eine Stream-Adresse; externe Player (YouTube) bekommen die ID
+    let ref = item.track.id;
+    if (source.playbackMode === 'url' && source.getStreamUrl) {
+      try {
+        ref = await source.getStreamUrl(item.track);
+      } catch (err) {
+        if (token !== this.loadToken) return;
+        const kind = err instanceof SourceError ? err.kind : 'network';
+        this.notice({ kind: 'sourceError', sourceId: source.id, errorKind: kind });
+        this.set({ status: 'paused' });
+        return;
+      }
     }
     if (token !== this.loadToken) return;
-    this.deps.output.load(url, startMs / 1000);
+    this.switchTo(output);
+    output.load(ref, startMs / 1000);
     this.set({ loadedUid: item.uid });
     if (!autoplay) return;
     try {
-      await this.deps.output.play();
+      await output.play();
     } catch (err) {
       if (token !== this.loadToken) return;
       this.handlePlayRejection(err);
@@ -305,14 +338,14 @@ export class PlayerEngine {
     const idx = Q.nextIndex(q, true);
     if (idx === null) {
       // Ende der Warteschlange: letzter Song bleibt stehen, zurück auf Anfang
-      this.deps.output.seek(0);
+      this.active.seek(0);
       this.set({ status: 'paused', positionMs: 0, buffering: false });
       return;
     }
     if (idx === q.index) {
-      this.deps.output.seek(0);
+      this.active.seek(0);
       this.set({ positionMs: 0 });
-      this.deps.output.play().catch((err) => this.handlePlayRejection(err));
+      this.active.play().catch((err) => this.handlePlayRejection(err));
       return;
     }
     this.setQueue(Q.jumpTo(q, idx));
@@ -335,23 +368,31 @@ export class PlayerEngine {
     }
   };
 
-  private readonly listener: OutputListener = {
-    onTime: (pos, dur) => {
-      const partial: Partial<PlayerState> = { positionMs: Math.round(pos * 1000) };
-      if (Number.isFinite(dur) && dur > 0) partial.durationMs = Math.round(dur * 1000);
-      this.set(partial);
-    },
-    onEnded: () => this.onEnded(),
-    onError: () => this.onError(),
-    onPlaying: () => {
-      this.errorStreak = 0;
-      this.set({ status: 'playing', buffering: false });
-    },
-    onPause: () => {
-      if (this.state.status === 'playing') this.set({ status: 'paused', buffering: false });
-    },
-    onWaiting: () => {
-      if (this.state.status === 'playing') this.set({ buffering: true });
-    },
-  };
+  /** Rückmeldungen einer Ausgabe – von nicht (mehr) aktiven Ausgaben werden sie ignoriert */
+  private makeListener(output: PlaybackOutput): OutputListener {
+    const ifActive =
+      <A extends unknown[]>(fn: (...args: A) => void) =>
+      (...args: A) => {
+        if (output === this.active) fn(...args);
+      };
+    return {
+      onTime: ifActive((pos: number, dur: number) => {
+        const partial: Partial<PlayerState> = { positionMs: Math.round(pos * 1000) };
+        if (Number.isFinite(dur) && dur > 0) partial.durationMs = Math.round(dur * 1000);
+        this.set(partial);
+      }),
+      onEnded: ifActive(() => this.onEnded()),
+      onError: ifActive(() => this.onError()),
+      onPlaying: ifActive(() => {
+        this.errorStreak = 0;
+        this.set({ status: 'playing', buffering: false });
+      }),
+      onPause: ifActive(() => {
+        if (this.state.status === 'playing') this.set({ status: 'paused', buffering: false });
+      }),
+      onWaiting: ifActive(() => {
+        if (this.state.status === 'playing') this.set({ buffering: true });
+      }),
+    };
+  }
 }

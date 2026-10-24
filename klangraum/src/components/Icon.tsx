@@ -97,6 +97,7 @@ const STROKE = {
     </>
   ),
   check: <path d="m5 12 5 5 9-10" />,
+  expand: <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />,
 } satisfies Record<string, ReactNode>;
 
 const FILL = {

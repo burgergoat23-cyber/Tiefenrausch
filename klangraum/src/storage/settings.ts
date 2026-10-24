@@ -4,7 +4,7 @@ import { sourceIdSchema } from '../sources/types';
 import { runMigrations, type Migration } from './migrations';
 
 export const SETTINGS_STORAGE_KEY = 'klangraum.settings';
-export const SETTINGS_VERSION = 1;
+export const SETTINGS_VERSION = 2;
 
 /**
  * EIN Einstellungs-Objekt für alles, was man anpassen kann.
@@ -21,6 +21,11 @@ export const settingsSchema = z.object({
     .string()
     .max(64)
     .regex(/^[A-Za-z0-9_-]*$/),
+  /** YouTube-API-Schlüssel (Browser-Schlüssel, in der Google-Konsole auf die eigene Seite beschränken) */
+  youtubeApiKey: z
+    .string()
+    .max(100)
+    .regex(/^[A-Za-z0-9_-]*$/),
   searchHistory: z.array(z.string().max(200)).max(20),
 });
 export type Settings = z.infer<typeof settingsSchema>;
@@ -32,12 +37,15 @@ export function defaultSettings(language: 'de' | 'en' = 'de'): Settings {
     language,
     sources: { audius: true, jamendo: true },
     jamendoClientId: '',
+    youtubeApiKey: '',
     searchHistory: [],
   };
 }
 
-/** Noch keine echten Migrationen – die erste kommt, sobald sich der Aufbau ändert. */
-export const SETTINGS_MIGRATIONS: Record<number, Migration> = {};
+export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
+  /** 1 → 2: Feld für den YouTube-Schlüssel */
+  1: (d) => ({ ...d, youtubeApiKey: '' }),
+};
 
 /** Browser-Sprache als Startwert (Deutsch zuerst) */
 export function guessLanguage(): 'de' | 'en' {

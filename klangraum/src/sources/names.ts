@@ -6,6 +6,7 @@ export const SOURCE_INFO: Record<SourceId, { name: string; short: string }> = {
   jamendo: { name: 'Jamendo', short: 'JA' },
   archive: { name: 'Internet Archive', short: 'IA' },
   radio: { name: 'Internetradio', short: 'FM' },
+  youtube: { name: 'YouTube', short: 'YT' },
   local: { name: 'Eigene Dateien', short: '♪' },
   spotify: { name: 'Spotify', short: 'SP' },
 };

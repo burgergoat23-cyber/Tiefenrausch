@@ -72,3 +72,26 @@ describe('Einstellungen', () => {
     expect(s.sources).toEqual({ jamendo: false });
   });
 });
+
+describe('Echte Migration 1 → 2', () => {
+  it('alte Einstellungen bekommen das YouTube-Feld, alles andere bleibt', () => {
+    const v1 = {
+      schemaVersion: 1,
+      themeId: 'hell',
+      language: 'en',
+      sources: { audius: false },
+      jamendoClientId: 'abc',
+      searchHistory: ['rock'],
+    };
+    const s = parseSettings(v1);
+    expect(s).toMatchObject({
+      schemaVersion: 2,
+      themeId: 'hell',
+      language: 'en',
+      sources: { audius: false },
+      jamendoClientId: 'abc',
+      youtubeApiKey: '',
+      searchHistory: ['rock'],
+    });
+  });
+});

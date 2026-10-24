@@ -22,6 +22,7 @@ export const de = {
     trendingOn: 'Angesagt auf {source}',
     radio: 'Beliebte Radiosender',
     archive: 'Konzerte und freie Musik aus dem Internet Archive',
+    youtube: 'Musik-Charts auf YouTube',
     noSources:
       'Keine Musik-Quelle ist eingeschaltet. Schalte in den Einstellungen mindestens eine ein.',
     toSettings: 'Zu den Einstellungen',
@@ -44,6 +45,9 @@ export const de = {
     resultsFrom: 'Ergebnisse von {source}',
     retry: 'Nochmal versuchen',
     typeUnsupported: 'Bei {source} kann man nicht nach {type} suchen.',
+    costly:
+      '{source} wird erst durchsucht, wenn du auf „Suchen“ tippst (spart dein Tages-Kontingent).',
+    searchNow: 'Jetzt bei {source} suchen',
   },
   types: {
     track: 'Songs',
@@ -138,6 +142,14 @@ export const de = {
     jamendoHint:
       'Jamendo braucht eine kostenlose Client-ID von devportal.jamendo.com. Trag sie hier ein (sie ist kein Geheimnis).',
     jamendoClientId: 'Jamendo Client-ID',
+    youtubeKey: 'YouTube-API-Schlüssel',
+    youtubeHint:
+      'Für die YouTube-Suche brauchst du einen kostenlosen Schlüssel aus der Google Cloud Console (YouTube Data API v3). Videos laufen im offiziellen YouTube-Player: Er bleibt sichtbar, und am iPhone hört er auf, wenn du den Bildschirm sperrst. Etwa 100 Suchen pro Tag sind kostenlos.',
+    invalidKey: 'Der Schlüssel darf nur Buchstaben, Zahlen, - und _ enthalten.',
+    youtubeTerms:
+      'Für YouTube-Videos gelten die Nutzungsbedingungen von YouTube und die Datenschutzerklärung von Google:',
+    youtubeTos: 'YouTube-Nutzungsbedingungen',
+    googlePrivacy: 'Google-Datenschutzerklärung',
     save: 'Speichern',
     saved: 'Gespeichert.',
     invalidClientId: 'Die Client-ID darf nur Buchstaben, Zahlen, - und _ enthalten.',
@@ -158,6 +170,8 @@ export const de = {
     unavailable: '{source} ist nicht eingerichtet.',
     notFound: 'Das gibt es bei {source} nicht (mehr).',
     badResponse: '{source} hat etwas Unerwartetes geschickt – versuch es später nochmal.',
+    quota: '{source}: Für heute sind alle Suchen verbraucht – morgen geht es wieder.',
+    badKey: '{source}: Der Schlüssel funktioniert nicht – prüf ihn in den Einstellungen.',
     trackSkipped: '„{title}“ lässt sich gerade nicht abspielen – ich spiele den nächsten Song.',
     trackFailed: '„{title}“ lässt sich gerade nicht abspielen.',
     unsupported: 'Songs von {source} kann ich hier noch nicht abspielen.',
@@ -166,6 +180,12 @@ export const de = {
     reload: 'Neu laden',
     notFoundPage: 'Diese Seite gibt es nicht.',
     backHome: 'Zur Startseite',
+  },
+  video: {
+    dock: 'YouTube-Video',
+    expand: 'Video groß anzeigen',
+    close: 'Video anhalten und ausblenden',
+    tapHint: 'Am iPhone/iPad startet das Video manchmal erst, wenn du einmal direkt darauf tippst.',
   },
   common: {
     close: 'Schließen',

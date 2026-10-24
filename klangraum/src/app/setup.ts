@@ -3,6 +3,7 @@ import { translate } from '../i18n';
 import { PlayerEngine, type PlayerNotice } from '../player/engine';
 import { connectMediaSession } from '../player/mediaSession';
 import { HtmlAudioOutput } from '../player/output';
+import { YouTubeOutput } from '../player/youtubeOutput';
 import { loadPlayerState, persistPlayer } from '../player/persist';
 import { sourceName } from '../sources/names';
 import { createDefaultRegistry } from '../sources/registry';
@@ -48,10 +49,21 @@ export function setupApp(): AppServices {
     }
   });
 
-  const sources = createDefaultRegistry(() => useSettings.getState().settings.jamendoClientId);
+  const sources = createDefaultRegistry({
+    jamendoClientId: () => useSettings.getState().settings.jamendoClientId,
+    youtubeApiKey: () => useSettings.getState().settings.youtubeApiKey,
+  });
   const output = new HtmlAudioOutput();
+  // Der YouTube-Player wird erst gebaut, wenn wirklich ein YouTube-Video läuft
+  let youtube: YouTubeOutput | null = null;
   const player = new PlayerEngine(
-    { getSource: (id) => sources.get(id), output, onNotice: showNotice },
+    {
+      getSource: (id) => sources.get(id),
+      output,
+      getExternalOutput: (source) =>
+        source.id === 'youtube' ? (youtube ??= new YouTubeOutput()) : undefined,
+      onNotice: showNotice,
+    },
     loadPlayerState(storage) ?? {},
   );
   persistPlayer(player, storage);

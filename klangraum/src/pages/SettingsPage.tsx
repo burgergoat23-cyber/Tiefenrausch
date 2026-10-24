@@ -4,30 +4,45 @@ import { useT } from '../i18n';
 import { useSourceStatus } from '../sources/useActiveSources';
 import styles from './SettingsPage.module.css';
 
-const CLIENT_ID_RE = /^[A-Za-z0-9_-]*$/;
+const KEY_RE = /^[A-Za-z0-9_-]*$/;
 
-function JamendoForm() {
+/** Eingabefeld für einen öffentlichen Schlüssel (Jamendo-Client-ID, YouTube-API-Schlüssel) */
+function KeyForm({
+  id,
+  label,
+  hint,
+  invalidText,
+  saved,
+  maxLength,
+  onSave,
+}: {
+  id: string;
+  label: string;
+  hint: string;
+  invalidText: string;
+  saved: string;
+  maxLength: number;
+  onSave(value: string): void;
+}) {
   const t = useT();
-  const saved = useSettings((s) => s.settings.jamendoClientId);
-  const save = useSettings((s) => s.setJamendoClientId);
   const [value, setValue] = useState(saved);
   const [msg, setMsg] = useState<'saved' | 'invalid' | null>(null);
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     const v = value.trim();
-    if (!CLIENT_ID_RE.test(v) || v.length > 64) {
+    if (!KEY_RE.test(v) || v.length > maxLength) {
       setMsg('invalid');
       return;
     }
-    save(v);
+    onSave(v);
     setMsg('saved');
   };
   return (
     <form className={styles.form} onSubmit={onSubmit}>
-      <label htmlFor="kr-jamendo">{t('settings.jamendoClientId')}</label>
+      <label htmlFor={id}>{label}</label>
       <div className={styles.inline}>
         <input
-          id="kr-jamendo"
+          id={id}
           className="kr-input"
           value={value}
           autoComplete="off"
@@ -41,13 +56,9 @@ function JamendoForm() {
           {t('settings.save')}
         </button>
       </div>
-      <p className="kr-muted">{t('settings.jamendoHint')}</p>
+      <p className="kr-muted">{hint}</p>
       <p role="status" className={msg === 'invalid' ? 'kr-error-text' : 'kr-muted'}>
-        {msg === 'saved'
-          ? t('settings.saved')
-          : msg === 'invalid'
-            ? t('settings.invalidClientId')
-            : ''}
+        {msg === 'saved' ? t('settings.saved') : msg === 'invalid' ? invalidText : ''}
       </p>
     </form>
   );
@@ -58,6 +69,10 @@ export default function SettingsPage() {
   const language = useSettings((s) => s.settings.language);
   const setLanguage = useSettings((s) => s.setLanguage);
   const setSourceEnabled = useSettings((s) => s.setSourceEnabled);
+  const jamendoClientId = useSettings((s) => s.settings.jamendoClientId);
+  const setJamendoClientId = useSettings((s) => s.setJamendoClientId);
+  const youtubeApiKey = useSettings((s) => s.settings.youtubeApiKey);
+  const setYoutubeApiKey = useSettings((s) => s.setYoutubeApiKey);
   const { statuses } = useSourceStatus();
 
   return (
@@ -84,7 +99,24 @@ export default function SettingsPage() {
             </li>
           ))}
         </ul>
-        <JamendoForm />
+        <KeyForm
+          id="kr-jamendo"
+          label={t('settings.jamendoClientId')}
+          hint={t('settings.jamendoHint')}
+          invalidText={t('settings.invalidClientId')}
+          saved={jamendoClientId}
+          maxLength={64}
+          onSave={setJamendoClientId}
+        />
+        <KeyForm
+          id="kr-youtube"
+          label={t('settings.youtubeKey')}
+          hint={t('settings.youtubeHint')}
+          invalidText={t('settings.invalidKey')}
+          saved={youtubeApiKey}
+          maxLength={100}
+          onSave={setYoutubeApiKey}
+        />
       </section>
 
       <section className="kr-section kr-card" aria-labelledby="s-lang">
@@ -103,6 +135,16 @@ export default function SettingsPage() {
       <section className="kr-section kr-card" aria-labelledby="s-about">
         <h2 id="s-about">{t('settings.about')}</h2>
         <p className="kr-muted">{t('settings.legal')}</p>
+        <p className="kr-muted">
+          {t('settings.youtubeTerms')}{' '}
+          <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">
+            {t('settings.youtubeTos')}
+          </a>
+          {' · '}
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
+            {t('settings.googlePrivacy')}
+          </a>
+        </p>
         <p className="kr-muted">{t('settings.version', { version: __APP_VERSION__ })}</p>
       </section>
     </div>
