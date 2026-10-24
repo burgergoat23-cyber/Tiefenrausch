@@ -26,6 +26,7 @@ export const en: Dict = {
     off: 'Internet radio is switched off. You can turn it on in the settings.',
   },
   home: {
+    showAll: 'All',
     title: 'Home',
     trendingOn: 'Trending on {source}',
     radio: 'Popular radio stations',
@@ -338,6 +339,13 @@ export const en: Dict = {
     import: 'Load backup',
     invalid: 'This file is not a valid Klangraum backup.',
     imported: 'Loaded: {likes} liked songs, {playlists} playlists.',
+  },
+  install: {
+    title: 'Klangraum as an app',
+    ios: 'In Safari tap “Share” and then “Add to Home Screen” – Klangraum then starts like a real app.',
+    other: 'Install Klangraum: its own icon, starts without the browser bar.',
+    button: 'Install',
+    offline: 'You are offline. Your library is here, but music needs the internet.',
   },
   common: {
     close: 'Close',

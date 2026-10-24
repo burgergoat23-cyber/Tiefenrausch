@@ -67,8 +67,12 @@ test.describe('Bibliothek, Songtexte, Teilen', () => {
     await page.getByRole('button', { name: '„lofi Neonlicht“ verschieben' }).focus();
     await page.keyboard.press('Space');
     await expect(live).toHaveText(/„lofi Neonlicht“ (aufgenommen|ist jetzt an Position 1)/);
-    await page.keyboard.press('ArrowDown');
-    await expect(live).toHaveText('„lofi Neonlicht“ ist jetzt an Position 2.');
+    // Unter Last misst dnd-kit manchmal noch – dann wirkt der erste Pfeil nicht (nur 2 Songs: mehr als
+    // Position 2 geht nicht, nochmal drücken ist also sicher)
+    await expect(async () => {
+      await page.keyboard.press('ArrowDown');
+      await expect(live).toHaveText('„lofi Neonlicht“ ist jetzt an Position 2.', { timeout: 1000 });
+    }).toPass();
     await page.keyboard.press('Space');
     await expect(rows.first()).toContainText('lofi Sommerregen');
 

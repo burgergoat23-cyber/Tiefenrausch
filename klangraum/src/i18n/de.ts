@@ -25,6 +25,7 @@ export const de = {
     off: 'Internetradio ist ausgeschaltet. Du kannst es in den Einstellungen einschalten.',
   },
   home: {
+    showAll: 'Alle',
     title: 'Start',
     trendingOn: 'Angesagt auf {source}',
     radio: 'Beliebte Radiosender',
@@ -340,6 +341,13 @@ export const de = {
     import: 'Sicherung laden',
     invalid: 'Diese Datei ist keine gültige Klangraum-Sicherung.',
     imported: 'Geladen: {likes} Lieblingssongs, {playlists} Playlists.',
+  },
+  install: {
+    title: 'Klangraum als App',
+    ios: 'Tipp in Safari auf „Teilen“ und dann auf „Zum Home-Bildschirm“ – dann startet Klangraum wie eine echte App.',
+    other: 'Installier Klangraum: eigenes Symbol, startet ohne Browser-Leiste.',
+    button: 'Installieren',
+    offline: 'Du bist offline. Deine Bibliothek ist da, Musik braucht aber Internet.',
   },
   common: {
     close: 'Schließen',

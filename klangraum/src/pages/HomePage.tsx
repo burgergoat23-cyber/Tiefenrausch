@@ -8,6 +8,8 @@ import { useAsync } from '../components/useAsync';
 import { useSettings } from '../app/settingsStore';
 import { useT } from '../i18n';
 import styles from './HomePage.module.css';
+import { InstallHint } from '../components/InstallHint';
+import { RecentShelf } from '../library/ui/RecentShelf';
 import { useActiveSources } from '../sources/useActiveSources';
 import type { MusicSource } from '../sources/types';
 
@@ -67,6 +69,8 @@ export default function HomePage() {
         <p className="kr-label">{today}</p>
         <h1>{t('home.title')}</h1>
       </header>
+      <InstallHint />
+      <RecentShelf />
       {ready && sources.length === 0 && (
         <div className="kr-card kr-section">
           <p>{t('home.noSources')}</p>

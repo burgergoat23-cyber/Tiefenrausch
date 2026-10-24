@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { DialogHost } from '../components/DialogHost';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { OfflineBanner } from '../components/InstallHint';
 import { Icon, type IconName } from '../components/Icon';
 import { LiveAnnouncer } from '../components/LiveAnnouncer';
 import { MiniPlayer } from '../components/MiniPlayer';
@@ -121,6 +122,7 @@ export function AppShell() {
         ))}
       </nav>
       <main id="main" ref={mainRef} tabIndex={-1} className={styles.main}>
+        <OfflineBanner />
         <ErrorBoundary key={location.pathname}>
           <Suspense fallback={<PageFallback />}>
             <Outlet />

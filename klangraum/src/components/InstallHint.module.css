@@ -1,0 +1,33 @@
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px 12px 14px;
+  border: 1px solid var(--kr-border);
+  border-radius: var(--kr-radius);
+  background: var(--kr-surface);
+}
+
+.icon {
+  flex: none;
+  border-radius: 10px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.92rem;
+}
+
+.offline {
+  margin: 0;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 0.88rem;
+  background: var(--kr-surface-raised);
+  color: var(--kr-text);
+  border-bottom: 1px solid var(--kr-border);
+}
