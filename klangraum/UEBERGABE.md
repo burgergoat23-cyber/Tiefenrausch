@@ -7,7 +7,7 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 - Deutsch, kein Programmierer: kurz, einfach, Schritt für Schritt; Klick-Anleitungen eine Aktion nach der anderen.
 - Will nach jeder Phase: 3–6 Sätze (neu / ausprobieren / als Nächstes), Screenshots PC + Handy, Git-Commit.
 - Vermutlich minderjährig → bei Konten (Jamendo, Firebase, Spotify Premium) auf Eltern hinweisen.
-- Nutzt iPad/iPhone; zum Testen am iPhone braucht er eine Online-Adresse (noch offen, siehe unten).
+- Nutzt iPad/iPhone. Online zum Testen: https://burgergoat23-cyber.github.io/Tiefenrausch/klangraum/
 
 ## Wo was liegt
 
@@ -136,6 +136,18 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).
 
+## Online (GitHub Pages)
+
+- Adresse: https://burgergoat23-cyber.github.io/Tiefenrausch/klangraum/ (Nutzer hat am 2026-10-24 erlaubt).
+- Dort liegt nur der **gebaute** Stand im Ordner `klangraum/` des Pages-Branches
+  `claude/tiefen-raush-code-review-jb306f` (das Spiel `index.html` daneben nicht anfassen).
+- Neu veröffentlichen (nach grünen Checks und Commit hier):
+  1. `cd klangraum && npm run build` (ohne `.env` → keine Schlüssel im Build; Nutzer trägt sie in den Einstellungen ein)
+  2. `git worktree add <scratchpad>/pages claude/tiefen-raush-code-review-jb306f` (vorher `git fetch origin claude/tiefen-raush-code-review-jb306f` und Branch auf `origin/…` bringen)
+  3. Ordner `<scratchpad>/pages/klangraum/` **leeren** (alte Dateinamen mit Hash), dann `cp -r klangraum/dist/. <scratchpad>/pages/klangraum/`
+  4. Dort committen, `git push -u origin claude/tiefen-raush-code-review-jb306f`, danach `git worktree remove <scratchpad>/pages`. Nach ~2 Min. live.
+- Kein Service Worker (weder Spiel noch App) → kein Cache-Ärger. Kommt mit Phase 6 (PWA) einer dazu: Scope auf `/Tiefenrausch/klangraum/` begrenzen.
+
 ## Ehrlich: noch nicht geprüft
 
 - Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org`, `*.api.radio-browser.info`, `googleapis.com`, `youtube.com`, `musicbrainz.org` und `coverartarchive.org` gesperrt.
@@ -144,7 +156,5 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Offen / nächste Schritte
 
-- Online-Adresse zum Testen am iPhone (Vorschlag: gebaute App unter `…/Tiefenrausch/klangraum/` auf den
-  Pages-Branch – nur mit Erlaubnis des Nutzers; Firebase Hosting kommt in Phase 6).
 - Phase 2: Favoriten, Playlists, Verlauf (idb), Firebase Auth (Google + anonym) + Firestore-Sync,
   `firestore.rules` + Emulator-Tests, E2E „in Playlist legen“. Eigenes Firebase-Projekt empfehlen (nicht das Spiel-Projekt).
