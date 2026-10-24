@@ -67,6 +67,8 @@ export const en: Dict = {
     empty: 'Nothing found yet – try again in a moment.',
     setup: 'Tell me what you like: add artists and genres under Settings → Your music.',
     yourArtists: 'Your artists',
+    mix: 'Your mix',
+    mixCount: '{count} songs',
     playlists: 'Playlists: {genres}',
     moreSongs: 'The mix has {count} songs – “Play mix” plays them all.',
   },

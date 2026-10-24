@@ -238,7 +238,7 @@ export default function SearchPage() {
       </form>
 
       <div className={styles.filters}>
-        <div className="kr-chips" role="group" aria-label={t('search.filterType')}>
+        <div className="kr-chips kr-chips--scroll" role="group" aria-label={t('search.filterType')}>
           {TYPES.map((ty) => (
             <button
               key={ty}
@@ -252,7 +252,11 @@ export default function SearchPage() {
           ))}
         </div>
         {typeSources.length > 1 && (
-          <div className="kr-chips" role="group" aria-label={t('search.filterSource')}>
+          <div
+            className="kr-chips kr-chips--scroll"
+            role="group"
+            aria-label={t('search.filterSource')}
+          >
             <button
               type="button"
               className="kr-chip"

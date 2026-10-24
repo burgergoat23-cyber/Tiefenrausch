@@ -22,8 +22,9 @@
   z-index: 30;
   height: calc(var(--kr-tabbar-height) + var(--kr-safe-bottom));
   padding: 0 var(--kr-safe-right) var(--kr-safe-bottom) var(--kr-safe-left);
-  background: var(--kr-surface);
-  border-top: 1px solid var(--kr-border);
+  background: color-mix(in srgb, var(--kr-bg) 78%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(22px);
+  backdrop-filter: saturate(1.6) blur(22px);
 }
 
 .nav ul {
@@ -46,11 +47,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   color: var(--kr-text-muted);
   text-decoration: none;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 600;
   min-width: 0;
+}
+
+/* Symbol in einer kleinen „Pille“, die beim aktiven Menüpunkt aufleuchtet */
+.link :global(.kr-icon) {
+  box-sizing: content-box;
+  padding: 3px 16px;
+  border-radius: 999px;
+  transition: background var(--kr-transition);
 }
 
 .linkText {
@@ -66,6 +76,7 @@
 
 .link:global(.active) :global(.kr-icon) {
   color: var(--kr-accent);
+  background: color-mix(in srgb, var(--kr-accent) 18%, transparent);
 }
 
 .miniSlot {
@@ -74,7 +85,7 @@
   right: 0;
   bottom: calc(var(--kr-tabbar-height) + var(--kr-safe-bottom));
   z-index: 31;
-  padding: 0 var(--kr-safe-right) 0 var(--kr-safe-left);
+  padding: 0 calc(8px + var(--kr-safe-right)) 6px calc(8px + var(--kr-safe-left));
 }
 
 @media (min-width: 768px) {
@@ -96,9 +107,10 @@
     bottom: var(--kr-bottom-stack);
     width: calc(var(--kr-nav-width) + var(--kr-safe-left));
     height: auto;
-    padding: calc(20px + var(--kr-safe-top)) 12px 12px calc(12px + var(--kr-safe-left));
-    border-top: 0;
-    border-right: 1px solid var(--kr-border);
+    padding: calc(24px + var(--kr-safe-top)) 14px 14px calc(14px + var(--kr-safe-left));
+    background: var(--kr-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -134,7 +146,12 @@
     padding: 0 12px;
     border-radius: var(--kr-radius-sm);
     font-size: 0.98rem;
-    font-weight: 600;
+    font-weight: 650;
+  }
+
+  .link :global(.kr-icon) {
+    padding: 0;
+    background: none !important;
   }
 
   .link:hover {
@@ -148,8 +165,10 @@
 
   .miniSlot {
     bottom: 0;
-    padding-bottom: var(--kr-safe-bottom);
-    background: var(--kr-surface-raised);
+    padding: 0 0 var(--kr-safe-bottom);
+    background: color-mix(in srgb, var(--kr-surface-raised) 86%, transparent);
+    -webkit-backdrop-filter: saturate(1.6) blur(22px);
+    backdrop-filter: saturate(1.6) blur(22px);
   }
 }
 

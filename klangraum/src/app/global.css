@@ -16,8 +16,8 @@
   --kr-shadow: #000000;
 
   /* Form & Abstände (Phase 4 macht sie einstellbar) */
-  --kr-radius: 14px;
-  --kr-radius-sm: 8px;
+  --kr-radius: 16px;
+  --kr-radius-sm: 10px;
   --kr-gap: 16px;
   --kr-touch: 44px;
   --kr-shadow-strength: 35%;
@@ -62,7 +62,9 @@ body {
   color: var(--kr-text);
   font-family: var(--kr-font-body);
   line-height: 1.45;
-  overflow-x: hidden;
+  /* clip statt hidden: schneidet seitlich ab, ohne den body zu einem eigenen Scroll-Bereich zu machen
+     (sonst versuchen z. B. Drag & Drop und „nach oben scrollen“ den falschen Bereich zu scrollen) */
+  overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
@@ -76,11 +78,20 @@ h3 {
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
 
 h2 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 
 p {
@@ -156,10 +167,10 @@ button {
   min-height: var(--kr-touch);
   padding: 0 18px;
   border-radius: 999px;
-  border: 1px solid var(--kr-border);
-  background: var(--kr-surface-raised);
+  border: 0;
+  background: color-mix(in srgb, var(--kr-text) 9%, transparent);
   color: var(--kr-text);
-  font-weight: 600;
+  font-weight: 650;
   text-decoration: none;
   transition:
     transform var(--kr-transition),
@@ -168,7 +179,7 @@ button {
 
 @media (hover: hover) {
   .kr-btn:hover {
-    background: color-mix(in srgb, var(--kr-surface-raised) 80%, var(--kr-text));
+    background: color-mix(in srgb, var(--kr-text) 14%, transparent);
   }
 }
 
@@ -179,7 +190,6 @@ button {
 .kr-btn--primary {
   background: var(--kr-accent);
   color: var(--kr-accent-text);
-  border-color: transparent;
 }
 
 @media (hover: hover) {
@@ -252,28 +262,58 @@ button {
   min-height: 36px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--kr-border);
-  background: transparent;
+  border: 0;
+  background: color-mix(in srgb, var(--kr-text) 9%, transparent);
   color: var(--kr-text);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  font-weight: 550;
+  white-space: nowrap;
+  transition: background var(--kr-transition);
+}
+
+@media (hover: hover) {
+  .kr-chip:hover {
+    background: color-mix(in srgb, var(--kr-text) 14%, transparent);
+  }
 }
 
 .kr-chip[aria-pressed='true'] {
   background: var(--kr-text);
   color: var(--kr-bg);
-  border-color: var(--kr-text);
+}
+
+/* Eine Reihe zum seitlichen Wischen statt mehrerer Zeilen (Handy) */
+.kr-chips--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--kr-page-x));
+  padding: 0 var(--kr-page-x);
+  scrollbar-width: none;
+}
+
+.kr-chips--scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* ---------- Seiten ---------- */
 
 .kr-page {
-  padding: calc(20px + var(--kr-safe-top)) calc(16px + var(--kr-safe-right)) 24px
-    calc(16px + var(--kr-safe-left));
-  max-width: 1200px;
+  --kr-page-x: 16px;
+  padding: calc(24px + var(--kr-safe-top)) calc(var(--kr-page-x) + var(--kr-safe-right)) 24px
+    calc(var(--kr-page-x) + var(--kr-safe-left));
+  max-width: 1240px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .kr-page {
+    --kr-page-x: 36px;
+    padding-top: calc(36px + var(--kr-safe-top));
+    gap: 40px;
+  }
 }
 
 .kr-section {
@@ -296,9 +336,8 @@ button {
 
 .kr-card {
   background: var(--kr-surface);
-  border: 1px solid var(--kr-border);
   border-radius: var(--kr-radius);
-  padding: 16px;
+  padding: 18px;
 }
 
 .kr-error-text {
@@ -310,9 +349,14 @@ button {
   min-height: var(--kr-touch);
   padding: 0 14px;
   border-radius: var(--kr-radius-sm);
-  border: 1px solid var(--kr-border);
-  background: var(--kr-surface);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--kr-text) 7%, transparent);
   color: var(--kr-text);
+}
+
+.kr-input:focus {
+  border-color: var(--kr-accent);
+  outline: none;
 }
 
 .kr-input::placeholder {

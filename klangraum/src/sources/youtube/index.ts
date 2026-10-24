@@ -94,7 +94,8 @@ function cleanChannel(name: string | undefined): string | undefined {
 }
 
 function thumb(t: z.infer<typeof thumbsSchema>): string | undefined {
-  return safeHttpsUrl(t?.high?.url ?? t?.medium?.url ?? t?.default?.url);
+  // medium = 16:9 ohne schwarze Balken (high hat oben/unten Balken)
+  return safeHttpsUrl(t?.medium?.url ?? t?.high?.url ?? t?.default?.url);
 }
 
 function errorKind(status: number, body: unknown): SourceErrorKind {

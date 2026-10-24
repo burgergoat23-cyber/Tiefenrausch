@@ -1,26 +1,33 @@
+/* Handy: schwebende Karte mit Milchglas. PC: Leiste unten über die volle Breite. */
 .mini {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: var(--kr-mini-height);
-  padding: 0 8px 0 10px;
-  background: var(--kr-surface-raised);
-  border-top: 1px solid var(--kr-border);
+  gap: 10px;
+  height: 64px;
+  padding: 0 6px 0 10px;
+  border-radius: var(--kr-radius);
+  background: color-mix(in srgb, var(--kr-surface-raised) 88%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(22px);
+  backdrop-filter: saturate(1.6) blur(22px);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--kr-shadow) 35%, transparent);
+  overflow: hidden;
 }
 
 .progress {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 3px;
-  background: color-mix(in srgb, var(--kr-text) 15%, transparent);
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--kr-text) 14%, transparent);
 }
 
 .progressFill {
   height: 100%;
-  background: var(--kr-accent);
+  border-radius: 2px;
+  background: var(--kr-text);
 }
 
 .info {
@@ -39,11 +46,12 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 650;
+  font-size: 0.95rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -55,7 +63,7 @@
   gap: 6px;
   min-width: 0;
   color: var(--kr-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .artist {
@@ -80,8 +88,27 @@
 
 @media (min-width: 768px) {
   .mini {
-    padding: 0 16px;
+    height: var(--kr-mini-height);
+    padding: 0 20px;
     gap: 16px;
+    border-radius: 0;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .progress {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: auto;
+    border-radius: 0;
+  }
+
+  .progressFill {
+    background: var(--kr-accent);
   }
 
   .wideOnly {

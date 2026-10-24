@@ -409,7 +409,7 @@ describe('Media Session (Sperrbildschirm)', () => {
     expect(made.at(-1)).toMatchObject({
       title: 'Song a',
       artist: 'Artist a',
-      artwork: [{ src: 'https://img.test/a.jpg', sizes: '480x480' }],
+      artwork: [{ src: 'https://img.test/a.jpg', sizes: '500x500' }],
     });
     expect(session.playbackState).toBe('playing');
     handlers.get('nexttrack')?.({ action: 'nexttrack' });

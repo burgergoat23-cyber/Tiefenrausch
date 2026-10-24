@@ -1,7 +1,9 @@
 import { applyTheme, findTheme } from '../customize/themes';
 import { translate } from '../i18n';
 import { PlayerEngine, type PlayerNotice } from '../player/engine';
+import { coverFor, createCoverResolver, setCoverResolver, useCovers } from '../library/covers';
 import { connectMediaSession } from '../player/mediaSession';
+import { createCache } from '../storage/cache';
 import { HtmlAudioOutput } from '../player/output';
 import { YouTubeOutput } from '../player/youtubeOutput';
 import { loadPlayerState, persistPlayer } from '../player/persist';
@@ -67,7 +69,11 @@ export function setupApp(): AppServices {
     loadPlayerState(storage) ?? {},
   );
   persistPlayer(player, storage);
-  connectMediaSession(player);
+  setCoverResolver(createCoverResolver({ cache: createCache(storage) }));
+  connectMediaSession(player, undefined, undefined, {
+    get: coverFor,
+    subscribe: (cb) => useCovers.subscribe(cb),
+  });
 
   // iPhone/iPad: Audio beim allerersten Tippen freischalten
   if (isAppleTouchDevice()) {

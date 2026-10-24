@@ -3,37 +3,36 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 22px 16px;
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px;
-  border-radius: var(--kr-radius);
-  background: var(--kr-surface);
+  gap: 8px;
   color: var(--kr-text);
   text-decoration: none;
-  height: 100%;
-  transition: background var(--kr-transition);
-}
-
-/* Nur mit Maus: am Handy bliebe der Effekt nach dem Tippen hängen */
-@media (hover: hover) {
-  .card:hover {
-    background: var(--kr-surface-raised);
-  }
+  border-radius: var(--kr-radius);
 }
 
 .art {
   aspect-ratio: 1;
   height: auto !important;
+  border-radius: var(--kr-radius) !important;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--kr-shadow) 28%, transparent);
+  transition: transform var(--kr-transition);
+}
+
+@media (hover: hover) {
+  .card:hover .art {
+    transform: translateY(-2px);
+  }
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 650;
+  font-size: 0.95rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -44,8 +43,9 @@
   align-items: center;
   gap: 6px;
   min-width: 0;
+  margin-top: -4px;
   color: var(--kr-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
 }
 
 .sub {

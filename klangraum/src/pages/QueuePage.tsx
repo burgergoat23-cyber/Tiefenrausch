@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { usePlayer, usePlayerState } from '../app/context';
-import { Artwork } from '../components/Artwork';
+import { TrackArtwork } from '../components/Artwork';
 import { Icon } from '../components/Icon';
 import { RepeatButton, ShuffleButton } from '../components/PlayerControls';
 import { SourceBadge } from '../components/SourceBadge';
@@ -30,7 +30,7 @@ function ItemBody({ item }: { item: QueueItem }) {
   const { track } = item;
   return (
     <>
-      <Artwork src={track.artworkUrl} size={44} />
+      <TrackArtwork track={track} size={48} />
       <span className={styles.text}>
         <span className={styles.title}>{track.title}</span>
         <span className={styles.meta}>

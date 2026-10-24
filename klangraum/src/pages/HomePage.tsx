@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { usePlayer } from '../app/context';
 import { errorText } from '../components/errorText';
 import { Icon } from '../components/Icon';
-import { TrackList } from '../components/TrackList';
+import { TrackShelf } from '../components/Shelf';
 import { ForYouSection } from './ForYouSection';
 import { useAsync } from '../components/useAsync';
 import { useT, type TKey } from '../i18n';
@@ -29,22 +29,19 @@ function TrendingSection({ source }: { source: MusicSource }) {
         : source.id === 'youtube'
           ? t('home.youtube')
           : t('home.trendingOn', { source: source.name });
-  const tracks = state.status === 'done' ? state.data.slice(0, 10) : [];
+  const tracks = state.status === 'done' ? state.data : [];
+  const playAll = (
+    <button type="button" className="kr-btn" onClick={() => player.playTracks(tracks)}>
+      <Icon name="play" size={16} />
+      {t('collection.playAll')}
+    </button>
+  );
+  if (state.status === 'done' && tracks.length > 0) {
+    return <TrackShelf title={title} tracks={tracks} actions={playAll} />;
+  }
   return (
     <section className="kr-section" aria-label={title}>
-      <div className="kr-section-head">
-        <h2>{title}</h2>
-        {tracks.length > 0 && (
-          <button
-            type="button"
-            className="kr-btn"
-            onClick={() => player.playTracks(state.data ?? [])}
-          >
-            <Icon name="play" size={18} />
-            {t('collection.playAll')}
-          </button>
-        )}
-      </div>
+      <h2>{title}</h2>
       {state.status === 'loading' && <p className="kr-muted">{t('app.loading')}</p>}
       {state.status === 'error' && (
         <div className="kr-section-head">
@@ -55,7 +52,7 @@ function TrendingSection({ source }: { source: MusicSource }) {
           </button>
         </div>
       )}
-      {state.status === 'done' && <TrackList tracks={tracks} label={title} />}
+      {state.status === 'done' && <p className="kr-muted">{t('forYou.empty')}</p>}
     </section>
   );
 }

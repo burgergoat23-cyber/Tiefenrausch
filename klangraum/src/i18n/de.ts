@@ -68,6 +68,8 @@ export const de = {
     empty: 'Noch nichts gefunden – versuch es gleich nochmal.',
     setup: 'Sag mir, was du magst: Trag unter Einstellungen → Deine Musik Künstler und Genres ein.',
     yourArtists: 'Deine Künstler',
+    mix: 'Dein Mix',
+    mixCount: '{count} Songs',
     playlists: 'Playlists: {genres}',
     moreSongs: 'Im Mix sind {count} Songs – „Mix abspielen“ spielt alle.',
   },

@@ -20,7 +20,13 @@ export function MediaCard({ kind, sourceId, id, title, subtitle, artworkUrl }: P
   return (
     <li>
       <Link className={styles.card} to={collectionPath(kind, sourceId, id)}>
-        <Artwork src={artworkUrl} size="100%" round={kind === 'artist'} className={styles.art} />
+        <Artwork
+          srcs={[artworkUrl]}
+          seed={title}
+          size="100%"
+          round={kind === 'artist'}
+          className={styles.art}
+        />
         <span className={styles.title}>{title}</span>
         <span className={styles.meta}>
           <SourceBadge sourceId={sourceId} />

@@ -25,6 +25,12 @@ export interface MediaSessionLike {
 
 export type MetadataFactory = (init: MediaMetadataInit) => MediaMetadata;
 
+/** Woher das Cover kommt (originales Cover, sobald gefunden – sonst das Bild der Quelle) */
+export interface CoverSource {
+  get(track: Track): string | undefined;
+  subscribe(onChange: () => void): () => void;
+}
+
 const SKIP_SECONDS = 10;
 
 /**
@@ -38,6 +44,7 @@ export function connectMediaSession(
   makeMetadata: MetadataFactory | null = typeof MediaMetadata !== 'undefined'
     ? (init) => new MediaMetadata(init)
     : null,
+  covers?: CoverSource,
 ): () => void {
   if (!session) return () => {};
 
@@ -64,16 +71,19 @@ export function connectMediaSession(
   }
 
   let lastTrack: Track | null | undefined;
+  let lastArt: string | undefined;
   const update = (s: PlayerState) => {
     const track = currentItem(s.queue)?.track ?? null;
-    if (track !== lastTrack) {
+    const art = track ? (covers?.get(track) ?? track.artworkUrl) : undefined;
+    if (track !== lastTrack || art !== lastArt) {
       lastTrack = track;
+      lastArt = art;
       if (track && makeMetadata) {
         session.metadata = makeMetadata({
           title: track.title,
           artist: track.artists.join(', '),
           album: track.album ?? '',
-          artwork: track.artworkUrl ? [{ src: track.artworkUrl, sizes: '480x480' }] : [],
+          artwork: art ? [{ src: art, sizes: '500x500' }] : [],
         });
       } else if (!track) {
         session.metadata = null;
@@ -98,6 +108,7 @@ export function connectMediaSession(
     }
   };
   update(engine.state);
+  const unsubCovers = covers?.subscribe(() => update(engine.state));
   const unsub = engine.store.subscribe((s, prev) => {
     if (
       s.queue !== prev.queue ||
@@ -110,6 +121,7 @@ export function connectMediaSession(
   });
   return () => {
     unsub();
+    unsubCovers?.();
     for (const action of Object.keys(handlers)) {
       try {
         session.setActionHandler(action as Action, null);

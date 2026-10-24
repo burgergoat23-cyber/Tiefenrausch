@@ -71,6 +71,21 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Vorschläge zum Antippen in `library/suggestions.ts`. Zwischenspeicher jetzt allgemein
   (`storage/cache.ts`: `get(key, zodSchema)`). Kontingent bei 10 Künstlern + 1 Genre ≈ 1 100 Einheiten/Tag. Suche zeigt bei leerem
   Feld „Deine Künstler“ als Schnellwahl (zählt als bestätigte Suche). Es wird nichts heruntergeladen.
+- **Originale Cover** (`library/covers.ts`): Für YouTube-Songs (nur Video-Standbilder) und Songs ohne
+  Bild sucht die App per MusicBrainz (`/ws/2/recording?query=recording:"…" AND artist:"…"`) die erste
+  offizielle Single/EP/Album-Veröffentlichung (keine Sampler/Live), Bild vom Cover Art Archive
+  (`/release-group/{id}/front-500`). Titel werden bereinigt (`parseArtistTitle`: „Künstler - Titel
+  (Official Video)“). Max. 1 Anfrage/s (Regel von MusicBrainz), Treffer 30 Tage gemerkt, „nichts
+  gefunden“ 7 Tage, Netzfehler gar nicht. Gesucht wird erst, wenn das Cover sichtbar ist
+  (`TrackArtwork`, IntersectionObserver auf dem Bild selbst – nicht auf `display: contents`!).
+  Bilder werden nur verlinkt, nie gespeichert. `useCovers`-Store auch für Sperrbildschirm
+  (`connectMediaSession(…, covers)`). In Unit-Tests aus (`setCoverResolver(null)` in `test/setup.ts`).
+  Ohne Bild: Farbverlauf aus Theme-Farben + Anfangsbuchstaben (`Artwork`, `srcs`-Kette mit Rückfall).
+- **Design „cleaner“** (24.10.): keine harten Rahmen, gefüllte Knöpfe/Chips, mehr Abstand
+  (`--kr-page-x`), Menüleiste und Mini-Player mit Milchglas (Mini-Player am Handy als schwebende Karte),
+  Startseite mit Cover-Reihen zum Wischen (`components/Shelf.tsx`: `Shelf`, `TrackShelf`, `CoverMosaic`),
+  „Für dich“ mit Collage aus 4 Covern. Wichtig: `body { overflow-x: clip }` statt `hidden` – sonst gilt
+  `body` als Scroll-Bereich und dnd-kit (Tastatur-Verschieben) bewegt nichts.
 - `sources/registry.ts`, `useActiveSources.ts` (an + verfügbar), `useMultiSearch.ts` (jede Quelle einzeln).
 - `player/queue.ts` – reine Warteschlangen-Logik (Zufall = Fisher-Yates nur für kommende Songs,
   ursprüngliche Reihenfolge in `original` gemerkt; Wiederholen aus/alle/einer).
@@ -95,15 +110,15 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 
 ## Tests
 
-- `npm run lint`, `npm run typecheck`, `npm test` (130 Unit-Tests) – vor jedem Commit grün.
-- `npm run e2e` – 21 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
+- `npm run lint`, `npm run typecheck`, `npm test` (136 Unit-Tests) – vor jedem Commit grün.
+- `npm run e2e` – 23 Tests × PC/iPhone (YouTube mit nachgebautem IFrame-Player `FAKE_YT_API` in `mocks.ts`). Baut mit `--mode e2e` (`.env.e2e` = ausgedachte Jamendo-ID) nach
   `dist-e2e/`, alle Netz-Anfragen werden in `tests/e2e/mocks.ts` abgefangen (Test-Ton als WAV, SVG-Cover).
   Browser-Sprache im Test: `de-DE`.
 - Screenshots: `SCREENS=1 npx playwright test screens` → `docs/screenshots/phase1/` (nicht in Git, zu groß).
 
 ## Ehrlich: noch nicht geprüft
 
-- Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org`, `*.api.radio-browser.info`, `googleapis.com` und `youtube.com` gesperrt.
+- Echte Server: in der Cloud-Sitzung sind `api.audius.co`, `api.jamendo.com`, `archive.org`, `*.api.radio-browser.info`, `googleapis.com`, `youtube.com`, `musicbrainz.org` und `coverartarchive.org` gesperrt.
   Die Antwort-Formate stammen aus der Doku/Erfahrung; Adapter sind tolerant (zod, kaputte Einträge werden übersprungen).
 - Echtes iPhone/iPad (nur Chromium mit iPhone-Größe und -Kennung getestet).
 

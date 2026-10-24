@@ -2,11 +2,11 @@ import { memo, useCallback } from 'react';
 import { usePlayer, usePlayerState } from '../app/context';
 import { useT } from '../i18n';
 import { currentItem } from '../player/queue';
-import { sourceName } from '../sources/names';
 import { trackKey, type Track } from '../sources/types';
-import { Artwork } from './Artwork';
+import { TrackArtwork } from './Artwork';
 import { formatDuration } from './format';
 import { SourceBadge } from './SourceBadge';
+import { trackPlayLabel } from './trackLabel';
 import { TrackMenu } from './TrackMenu';
 import styles from './TrackList.module.css';
 
@@ -21,14 +21,7 @@ interface RowProps {
 const TrackRow = memo(function TrackRow({ track, index, active, playing, onPlay }: RowProps) {
   const t = useT();
   const artists = track.artists.join(', ') || t('track.unknownArtist');
-  const label = [
-    t('track.play', { title: track.title }),
-    artists,
-    t('track.source', { source: sourceName(track.sourceId) }),
-    track.license ? t('track.license', { license: track.license.name }) : '',
-  ]
-    .filter(Boolean)
-    .join(', ');
+  const label = trackPlayLabel(t, track);
   return (
     <li className={styles.row} data-active={active || undefined}>
       <button
@@ -39,7 +32,7 @@ const TrackRow = memo(function TrackRow({ track, index, active, playing, onPlay 
         onClick={() => onPlay(index)}
       >
         <span className={styles.art}>
-          <Artwork src={track.artworkUrl} size={44} />
+          <TrackArtwork track={track} size={48} />
           {active && playing && <span className={styles.eq} aria-hidden="true" />}
         </span>
         <span className={styles.text}>

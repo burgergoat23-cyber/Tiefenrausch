@@ -1,17 +1,34 @@
 .art {
+  position: relative;
   display: grid;
   place-items: center;
   flex: none;
   overflow: hidden;
   border-radius: var(--kr-radius-sm);
   background: var(--kr-surface-raised);
-  color: var(--kr-text-muted);
 }
 
 .art img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Platzhalter ohne Bild: Farbverlauf aus den Theme-Farben + Anfangsbuchstaben */
+.art[data-placeholder] {
+  background: linear-gradient(
+    var(--kr-art-angle, 135deg),
+    color-mix(in srgb, var(--kr-accent) var(--kr-art-mix, 40%), var(--kr-surface-raised)),
+    var(--kr-surface-raised)
+  );
+}
+
+.initials {
+  color: color-mix(in srgb, var(--kr-text) 80%, transparent);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: inherit;
+  line-height: 1;
 }
 
 .round {

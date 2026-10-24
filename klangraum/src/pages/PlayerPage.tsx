@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { usePlayerState } from '../app/context';
-import { Artwork } from '../components/Artwork';
+import { TrackArtwork } from '../components/Artwork';
+import { useCover } from '../library/covers';
 import { Icon } from '../components/Icon';
 import { PlayerControls } from '../components/PlayerControls';
 import { ProgressBar } from '../components/ProgressBar';
@@ -19,6 +20,8 @@ export default function PlayerPage() {
   const t = useT();
   const navigate = useNavigate();
   const track = usePlayerState((s) => currentItem(s.queue)?.track ?? null);
+  const cover = useCover(track);
+  const backdrop = cover ?? track?.artworkUrl;
   const buffering = usePlayerState((s) => s.buffering || s.status === 'loading');
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -45,10 +48,10 @@ export default function PlayerPage() {
       aria-label={t('player.nowPlaying')}
       data-testid="full-player"
     >
-      {track?.artworkUrl && (
+      {backdrop && (
         <div
           className={styles.backdrop}
-          style={{ backgroundImage: `url("${track.artworkUrl}")` }}
+          style={{ backgroundImage: `url("${backdrop}")` }}
           aria-hidden="true"
         />
       )}
@@ -86,7 +89,7 @@ export default function PlayerPage() {
             </div>
           ) : (
             <div className={styles.coverWrap}>
-              <Artwork src={track.artworkUrl} size="100%" className={styles.cover} />
+              <TrackArtwork track={track} size="100%" className={styles.cover} eager />
             </div>
           )}
           <div className={styles.panel}>

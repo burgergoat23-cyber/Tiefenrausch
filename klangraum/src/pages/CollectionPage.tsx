@@ -76,7 +76,8 @@ export default function CollectionPage({ kind }: { kind: CollectionKind }) {
         <>
           <header className={styles.head}>
             <Artwork
-              src={state.data.artworkUrl}
+              srcs={[state.data.artworkUrl, state.data.tracks[0]?.artworkUrl]}
+              seed={state.data.title}
               size={160}
               round={kind === 'artist'}
               className={styles.art}

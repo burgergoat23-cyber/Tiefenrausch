@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { usePlayerState } from '../app/context';
 import { useT } from '../i18n';
 import { currentItem } from '../player/queue';
-import { Artwork } from './Artwork';
+import { TrackArtwork } from './Artwork';
 import { Icon } from './Icon';
 import { NextButton, PlayPauseButton, PrevButton } from './PlayerControls';
 import { SourceBadge } from './SourceBadge';
@@ -35,7 +35,7 @@ export function MiniPlayer() {
         className={styles.info}
         aria-label={`${t('player.open')}: ${track.title} – ${artists}`}
       >
-        <Artwork src={track.artworkUrl} size={48} />
+        <TrackArtwork track={track} size={44} eager />
         <span className={styles.text}>
           <span className={styles.title}>{track.title}</span>
           <span className={styles.meta}>

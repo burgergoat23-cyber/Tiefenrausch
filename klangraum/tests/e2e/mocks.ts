@@ -330,6 +330,34 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
     route.fulfill({ status: 200, contentType: 'text/javascript', body: FAKE_YT_API }),
   );
 
+  // MusicBrainz (Album/Single zum Song) und Cover Art Archive (Bild)
+  await page.route(/^https:\/\/musicbrainz\.org\/ws\/2\//, (route) =>
+    json(route, {
+      recordings: [
+        {
+          score: 100,
+          releases: [
+            {
+              status: 'Official',
+              date: '2020-01-01',
+              'release-group': {
+                id: '0f0f0f0f-1111-2222-3333-444444444444',
+                'primary-type': 'Single',
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.route(/^https:\/\/coverartarchive\.org\//, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#e9c46a"/><circle cx="5" cy="5" r="3" fill="#264653"/></svg>',
+    }),
+  );
+
   await page.route(/^https:\/\/audio\.jamendo\.test\//, audio);
   await page.route(/^https:\/\/img\.test\//, (route) => {
     const name = new URL(route.request().url()).pathname;
