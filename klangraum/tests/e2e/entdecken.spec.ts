@@ -5,8 +5,10 @@ test('Entdecken lädt beim Scrollen nach, Endlos-Mix spielt weiter', async ({ pa
   await mockMusicApis(page, { audioSeconds: 2 });
   await page.goto('/#/entdecken');
   await expect(page.getByRole('heading', { level: 1, name: 'Entdecken' })).toBeVisible();
-  // Gesamtzahl aus Jamendo (41.250) + Internet Archive (8.750); Audius verrät keine
-  await expect(page.getByTestId('discover-count')).toContainText('Mindestens 50.000 Songs: Drill');
+  // Gesamtzahl: YouTube-Playlists (42.000 + 8.000) + Jamendo (41.250) + Internet Archive (8.750)
+  await expect(page.getByTestId('discover-count')).toContainText('Mindestens 100.000 Songs: Drill');
+  await expect(page.getByTestId('discover-count')).toContainText('Videos aus 2 großen Playlists');
+  await expect(page.getByRole('img', { name: 'Quelle: YouTube' }).first()).toBeVisible();
   await expect(page.getByTestId('discover-count')).toContainText('Audius verrät keine Zahl');
   const rows = page.getByRole('list', { name: 'Songs: Drill' }).getByRole('listitem');
   await expect(rows.first()).toBeVisible();

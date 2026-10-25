@@ -391,6 +391,7 @@ export const de = {
     sped: 'Sped up',
   },
   discover: {
+    youtubeCounted: 'YouTube: Videos aus {playlists} großen Playlists (doppelte möglich).',
     label: 'Freie Musik ohne Ende',
     title: 'Entdecken',
     genre: 'Genre',
@@ -405,7 +406,7 @@ export const de = {
     more: 'Mehr laden',
     end: 'Mehr gibt es zu diesem Genre gerade nicht.',
     about:
-      'Die Songs kommen live von Audius, Jamendo und dem Internet Archive – kostenlos und legal. Der Endlos-Mix lädt immer weiter nach, solange du hörst.',
+      'Die Songs kommen live von YouTube (große Playlists), Audius, Jamendo und dem Internet Archive. Der Endlos-Mix lädt immer weiter nach, solange du hörst. YouTube: einmal pro Genre und Woche eine Suche (100 Einheiten), danach kostet jede Seite mit 50 Songs nur 2 Einheiten.',
   },
   common: {
     close: 'Schließen',

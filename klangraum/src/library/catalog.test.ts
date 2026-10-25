@@ -61,6 +61,38 @@ describe('Gesamtzahl', () => {
       src('archive', 10, { countTracks: async () => 8750 }),
     ]);
     const c = await countCatalog(reg, 'Drill', { isEnabled: () => true });
-    expect(c).toEqual({ total: 50000, counted: ['jamendo', 'archive'], uncounted: ['audius'] });
+    expect(c).toEqual({
+      total: 50000,
+      counted: ['jamendo', 'archive'],
+      uncounted: ['audius'],
+      youtubePlaylists: 0,
+    });
+  });
+});
+
+describe('YouTube im Katalog', () => {
+  it('blättert große Playlists seitenweise durch und zählt ihre Videos', async () => {
+    const pages: Record<string, { tracks: ReturnType<typeof track>[]; next?: string }> = {
+      'A:': { tracks: [track('a1', { sourceId: 'youtube' })], next: 'p2' },
+      'A:p2': { tracks: [track('a2', { sourceId: 'youtube' })] },
+      'B:': { tracks: [track('b1', { sourceId: 'youtube' })] },
+    };
+    const yt = Object.assign(src('youtube', 0, { costlySearch: true }), {
+      findPlaylists: async () => [
+        { id: 'B', title: 'klein', count: 300 },
+        { id: 'A', title: 'groß', count: 5000 },
+      ],
+      playlistPage: async (id: string, token?: string) =>
+        pages[`${id}:${token ?? ''}`] ?? { tracks: [] },
+    });
+    const reg = createRegistry([yt]);
+    const opts = { isEnabled: () => true };
+    const ids: string[] = [];
+    for (let page = 0; page < 4; page++)
+      ids.push(...(await loadCatalogPage(reg, 'Phonk', page, opts)).tracks.map((t) => t.id));
+    expect(ids).toEqual(['a1', 'a2', 'b1']);
+    const c = await countCatalog(reg, 'Phonk', opts);
+    expect(c.total).toBe(5300);
+    expect(c.youtubePlaylists).toBe(2);
   });
 });

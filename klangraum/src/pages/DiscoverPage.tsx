@@ -154,7 +154,10 @@ export default function DiscoverPage() {
                 {t('discover.total', { count: count.total.toLocaleString(), genre })}
               </p>
               <p className="kr-muted">
-                {t('discover.counted', { sources: count.counted.join(', ') })}
+                {count.youtubePlaylists > 0 &&
+                  `${t('discover.youtubeCounted', { playlists: count.youtubePlaylists })} `}
+                {count.counted.length > 0 &&
+                  t('discover.counted', { sources: count.counted.join(', ') })}
                 {count.uncounted.length > 0 &&
                   ` ${t('discover.uncounted', { sources: count.uncounted.join(', ') })}`}
               </p>

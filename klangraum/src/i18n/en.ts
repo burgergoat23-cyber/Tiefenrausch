@@ -389,6 +389,7 @@ export const en: Dict = {
     sped: 'Sped up',
   },
   discover: {
+    youtubeCounted: 'YouTube: videos from {playlists} big playlists (duplicates possible).',
     label: 'Free music without end',
     title: 'Discover',
     genre: 'Genre',
@@ -402,7 +403,7 @@ export const en: Dict = {
     more: 'Load more',
     end: 'No more songs for this genre right now.',
     about:
-      'Songs stream live from Audius, Jamendo and the Internet Archive – free and legal. The endless mix keeps loading more as long as you listen.',
+      'Songs stream live from YouTube (big playlists), Audius, Jamendo and the Internet Archive. The endless mix keeps loading more as long as you listen. YouTube: one search per genre and week (100 units), after that every page of 50 songs costs only 2 units.',
   },
   common: {
     close: 'Close',

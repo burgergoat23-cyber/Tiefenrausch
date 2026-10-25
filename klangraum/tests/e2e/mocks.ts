@@ -350,6 +350,12 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
         })),
       });
     }
+    if (kind === 'playlists' && url.searchParams.get('part') === 'contentDetails') {
+      const ids = (url.searchParams.get('id') ?? '').split(',');
+      return json(route, {
+        items: ids.map((id, i) => ({ id, contentDetails: { itemCount: i === 0 ? 42000 : 8000 } })),
+      });
+    }
     if (kind === 'playlists') {
       const id = url.searchParams.get('id') ?? '';
       return json(route, {

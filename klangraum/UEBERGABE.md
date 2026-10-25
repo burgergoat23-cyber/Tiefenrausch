@@ -157,6 +157,9 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Entdecken statt Radio (Radio-Knopf auf Entdecken). 36 Genres. Anzeige „Mindestens X Songs“ =
   `countCatalog` (Jamendo `fullcount=true` → `results_fullcount`, Archive `rows=0` → `numFound` nur mit
   Lizenz/etree; Audius verrät keine Zahl und wird als „noch mehr“ genannt).
+  **YouTube im Katalog**: pro Genre 1× Suche nach „<Genre> music playlist“ (25 Playlists, 100 Einheiten,
+  7 Tage in localStorage `yt-genre:*`), Anzahl über `playlists?part=contentDetails` (itemCount, doppelte möglich),
+  Blättern über `playlistItems` + `videos` (2 Einheiten je 50 Songs; `YouTubeSource.findPlaylists/playlistPage`).
 - **YouTube-Start am iPad/iPhone** (`player/youtubeOutput.ts`): Player wird vorab geladen (`prewarm`, sobald
   Schlüssel da oder YouTube in der Warteschlange), `load`/`play` ohne `await`, wenn bereit (Tipp bleibt gültig).
   Startet es nach 1,2 s nicht: stumm starten (immer erlaubt), dann `unMute`; bleibt es stumm →

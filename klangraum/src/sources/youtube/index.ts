@@ -54,7 +54,11 @@ const searchItemSchema = z.object({
   snippet: snippetSchema,
 });
 
-const listSchema = z.object({ items: z.array(z.unknown()) });
+const listSchema = z.object({
+  items: z.array(z.unknown()),
+  nextPageToken: z.string().max(200).optional(),
+});
+type ListBody = z.infer<typeof listSchema>;
 
 /** YouTube liefert Titel mit HTML-Zeichen wie &amp; oder &#39; – hier werden sie normal lesbar */
 export function decodeEntities(s: string): string {
@@ -165,12 +169,20 @@ export class YouTubeSource implements MusicSource {
     params: Record<string, string | number | undefined>,
     signal?: AbortSignal,
   ): Promise<unknown[]> {
+    return (await this.requestBody(path, params, signal)).items;
+  }
+
+  private async requestBody(
+    path: string,
+    params: Record<string, string | number | undefined>,
+    signal?: AbortSignal,
+  ): Promise<ListBody> {
     const key = this.key();
     if (!key) throw new SourceError('youtube', 'unavailable');
     const url = withParams(`${YOUTUBE_API}${path}`, { ...params, key });
     const cacheKey = withParams(path, params);
     const cached = this.cache.get(cacheKey);
-    if (cached) return cached as unknown[];
+    if (cached) return cached as ListBody;
 
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 10000);
@@ -202,8 +214,53 @@ export class YouTubeSource implements MusicSource {
       const oldest = this.cache.keys().next().value;
       if (oldest !== undefined) this.cache.delete(oldest);
     }
-    this.cache.set(cacheKey, r.data.items);
-    return r.data.items;
+    this.cache.set(cacheKey, r.data);
+    return r.data;
+  }
+
+  /**
+   * Große Playlists zu einem Suchbegriff mit Anzahl der Videos.
+   * Kostet einmal 100 Einheiten (Suche) + 1 Einheit – danach ist Blättern sehr günstig.
+   */
+  async findPlaylists(
+    query: string,
+    max = 25,
+    signal?: AbortSignal,
+  ): Promise<{ id: string; title: string; count: number }[]> {
+    const found = await this.search(query, { type: 'playlist', limit: max, signal });
+    const ids = found.playlists.map((p) => p.id);
+    if (ids.length === 0) return [];
+    const meta = await this.request(
+      '/playlists',
+      { part: 'contentDetails', id: ids.join(','), maxResults: 50 },
+      signal,
+    );
+    const counts = new Map<string, number>();
+    for (const m of meta) {
+      const r = z
+        .object({ id: z.string(), contentDetails: z.object({ itemCount: z.coerce.number() }) })
+        .safeParse(m);
+      if (r.success) counts.set(r.data.id, r.data.contentDetails.itemCount);
+    }
+    return found.playlists.map((p) => ({ id: p.id, title: p.title, count: counts.get(p.id) ?? 0 }));
+  }
+
+  /** Eine Seite (bis 50 Songs) einer Playlist – kostet 2 Einheiten (Liste + Details) */
+  async playlistPage(
+    id: string,
+    pageToken?: string,
+    signal?: AbortSignal,
+  ): Promise<{ tracks: Track[]; next?: string }> {
+    const body = await this.requestBody(
+      '/playlistItems',
+      { part: 'contentDetails', playlistId: id, maxResults: 50, pageToken },
+      signal,
+    );
+    const ids = body.items
+      .map((i) => z.object({ contentDetails: z.object({ videoId: videoIdSchema }) }).safeParse(i))
+      .filter((r) => r.success)
+      .map((r) => r.data.contentDetails.videoId);
+    return { tracks: await this.videos(ids, signal), next: body.nextPageToken };
   }
 
   private mapVideo(v: ApiVideo): Track | null {
