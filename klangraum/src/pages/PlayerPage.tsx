@@ -11,7 +11,7 @@ import { TrackMenu } from '../components/TrackMenu';
 import { useMediaQuery } from '../components/useMediaQuery';
 import { ProgressBar } from '../components/ProgressBar';
 import { SourceBadge } from '../components/SourceBadge';
-import { VideoSlot } from '../components/VideoDock';
+import { UnmuteButton, VideoSlot } from '../components/VideoDock';
 import { VolumeControl } from '../components/VolumeControl';
 import { isAppleTouchDevice } from '../app/setup';
 import { useT } from '../i18n';
@@ -100,6 +100,7 @@ export default function PlayerPage() {
             {track.sourceId === 'youtube' ? (
               <div className={styles.videoWrap}>
                 <VideoSlot className={styles.video} />
+                <UnmuteButton />
                 {isAppleTouchDevice() && <p className={styles.videoHint}>{t('video.tapHint')}</p>}
                 {lyrics && <LyricsView track={track} compact />}
               </div>

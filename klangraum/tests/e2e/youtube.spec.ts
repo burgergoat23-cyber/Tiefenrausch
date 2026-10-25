@@ -97,3 +97,30 @@ test('YouTube-Schlüssel in den Einstellungen, Hinweise und Links zu den Bedingu
     'https://www.youtube.com/t/terms',
   );
 });
+
+test('iPhone/iPad-Sperre: Video startet stumm von selbst, „Ton an“ schaltet den Ton ein', async ({
+  page,
+}) => {
+  // Nachgebaut wie am iPad: Ton erst nach einem echten Tipp, stumm darf es immer starten
+  await page.addInitScript(() => {
+    (window as unknown as { __ytNeedsTap: boolean }).__ytNeedsTap = true;
+  });
+  await page.goto('/#/suche');
+  await page.getByRole('searchbox').fill('hit');
+  const yt = page.getByTestId('results-youtube');
+  await yt.getByRole('button', { name: 'Jetzt bei YouTube suchen' }).click();
+  await yt.getByRole('button', { name: /„Sommerhit 2026 \(Official Video\)“ abspielen/ }).click();
+
+  const fake = page.getByTestId('fake-youtube');
+  await expect(fake).toHaveAttribute('data-state', '1');
+  const unmute = page.getByRole('button', { name: 'Ton an' });
+  await expect(unmute).toBeVisible();
+  await page.evaluate(() => {
+    (window as unknown as { __ytGesture: boolean }).__ytGesture = true;
+  });
+  await unmute.click();
+  await expect(unmute).toHaveCount(0);
+  await expect(
+    page.getByTestId('mini-player').getByRole('button', { name: 'Pause' }),
+  ).toBeVisible();
+});

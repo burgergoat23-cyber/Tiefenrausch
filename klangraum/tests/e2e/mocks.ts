@@ -488,13 +488,14 @@ const FAKE_YT_API = `
     setTimeout(function () { opts.events && opts.events.onReady && opts.events.onReady({ target: self }); }, 30);
   }
   Player.prototype.cueVideoById = function (o) { this.id = o.videoId; this.t = o.startSeconds || 0; this.dur = 180; this.box.textContent = 'YouTube: ' + o.videoId; this.box.setAttribute('data-video', o.videoId); this.emit(5); };
-  Player.prototype.playVideo = function () { var self = this; clearInterval(self.timer); self.timer = setInterval(function () { self.t += 0.25; }, 250); setTimeout(function () { self.emit(1); }, 50); };
+  Player.prototype.isMuted = function () { return this.muted; };
+  Player.prototype.playVideo = function () { var self = this; if (window.__ytNeedsTap && !self.muted && !self.tapped) return; clearInterval(self.timer); self.timer = setInterval(function () { self.t += 0.25; }, 250); setTimeout(function () { self.emit(1); }, 50); };
   Player.prototype.pauseVideo = function () { clearInterval(this.timer); this.emit(2); };
   Player.prototype.stopVideo = function () { clearInterval(this.timer); this.t = 0; this.emit(-1); };
   Player.prototype.seekTo = function (s) { this.t = s; };
   Player.prototype.setVolume = function (v) { this.vol = v; this.box.setAttribute('data-volume', String(v)); };
   Player.prototype.mute = function () { this.muted = true; };
-  Player.prototype.unMute = function () { this.muted = false; };
+  Player.prototype.unMute = function () { if (window.__ytNeedsTap && !window.__ytGesture) return; this.muted = false; this.tapped = true; };
   Player.prototype.getCurrentTime = function () { return this.t; };
   Player.prototype.getDuration = function () { return this.dur; };
   window.YT = { Player: Player };

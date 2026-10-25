@@ -12,6 +12,9 @@ interface VideoDockStore {
   fullSlot: HTMLElement | null;
   setHost(el: HTMLElement | null): void;
   setFullSlot(el: HTMLElement | null): void;
+  /** iPhone/iPad: Video läuft nur stumm – ein Tipp auf „Ton an“ schaltet den Ton ein */
+  needsUnmute: boolean;
+  unmute: (() => void) | null;
 }
 
 export const useVideoDock = create<VideoDockStore>()((set) => ({
@@ -19,4 +22,6 @@ export const useVideoDock = create<VideoDockStore>()((set) => ({
   fullSlot: null,
   setHost: (host) => set({ host }),
   setFullSlot: (fullSlot) => set({ fullSlot }),
+  needsUnmute: false,
+  unmute: null,
 }));

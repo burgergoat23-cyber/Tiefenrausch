@@ -32,3 +32,10 @@
     width: 356px;
   }
 }
+
+.unmuteCompact {
+  margin-right: auto;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.85rem;
+}

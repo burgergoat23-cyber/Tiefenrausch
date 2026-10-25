@@ -76,6 +76,19 @@ export function setupApp(): AppServices {
     loadPlayerState(storage) ?? {},
   );
   persistPlayer(player, storage);
+
+  // YouTube-Player schon bereitstellen, sobald YouTube im Spiel ist – dann startet Play beim ersten Tipp
+  const warmYouTube = () => {
+    const hasKey = !!useSettings.getState().settings.youtubeApiKey;
+    const inQueue = player.state.queue.items.some((i) => i.track.sourceId === 'youtube');
+    if (!hasKey && !inQueue) return;
+    youtube ??= new YouTubeOutput();
+    youtube.prewarm();
+  };
+  setTimeout(warmYouTube, 1500);
+  player.store.subscribe((s, prev) => {
+    if (s.queue !== prev.queue && !youtube) warmYouTube();
+  });
   void connectLibrary(idbPersistence());
   trackPlays(
     player.store,

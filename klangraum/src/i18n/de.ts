@@ -267,6 +267,7 @@ export const de = {
     backHome: 'Zur Startseite',
   },
   video: {
+    unmute: 'Ton an',
     dock: 'YouTube-Video',
     expand: 'Video groß anzeigen',
     close: 'Video anhalten und ausblenden',

@@ -265,6 +265,7 @@ export const en: Dict = {
     backHome: 'Back to home',
   },
   video: {
+    unmute: 'Sound on',
     dock: 'YouTube video',
     expand: 'Show video large',
     close: 'Pause and hide video',

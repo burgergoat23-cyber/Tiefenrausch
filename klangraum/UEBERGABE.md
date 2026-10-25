@@ -157,6 +157,10 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   Entdecken statt Radio (Radio-Knopf auf Entdecken). 36 Genres. Anzeige „Mindestens X Songs“ =
   `countCatalog` (Jamendo `fullcount=true` → `results_fullcount`, Archive `rows=0` → `numFound` nur mit
   Lizenz/etree; Audius verrät keine Zahl und wird als „noch mehr“ genannt).
+- **YouTube-Start am iPad/iPhone** (`player/youtubeOutput.ts`): Player wird vorab geladen (`prewarm`, sobald
+  Schlüssel da oder YouTube in der Warteschlange), `load`/`play` ohne `await`, wenn bereit (Tipp bleibt gültig).
+  Startet es nach 1,2 s nicht: stumm starten (immer erlaubt), dann `unMute`; bleibt es stumm →
+  `useVideoDock.needsUnmute` → Knopf „Ton an“ (Video-Fenster und großer Player). Am echten Gerät ungeprüft.
 - Künstlern folgen (= Lieblingskünstler), Warteschlange als Playlist, Suche zeigt Bibliotheks-Treffer,
   Mini-Player: Herz (PC), Wischen = nächster/vorheriger Song. Einstellungen jetzt v6.
 

@@ -68,6 +68,7 @@ export function VideoDock() {
   return (
     <section className={styles.float} aria-label={t('video.dock')} data-testid="video-float">
       <div className={styles.bar}>
+        <UnmuteButton compact />
         <Link
           to="/player"
           className="kr-icon-btn"
@@ -103,4 +104,22 @@ export function VideoSlot({ className }: { className?: string }) {
     return () => setFullSlot(null);
   }, [el, setFullSlot]);
   return <div ref={setEl} className={className} data-testid="video-slot" />;
+}
+
+/** iPhone/iPad: Video läuft stumm, bis man einmal tippt – dieser Knopf schaltet den Ton ein */
+export function UnmuteButton({ compact = false }: { compact?: boolean }) {
+  const t = useT();
+  const needs = useVideoDock((s) => s.needsUnmute);
+  const unmute = useVideoDock((s) => s.unmute);
+  if (!needs || !unmute) return null;
+  return (
+    <button
+      type="button"
+      className={`kr-btn kr-btn--primary ${compact ? styles.unmuteCompact : ''}`}
+      onClick={() => unmute()}
+    >
+      <Icon name="volume" size={18} />
+      {t('video.unmute')}
+    </button>
+  );
 }
