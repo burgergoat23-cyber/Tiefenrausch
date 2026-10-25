@@ -840,7 +840,8 @@ public class ArsenalScreen extends Screen {
 		if (c.lungeDelay > 0) {
 			y = paragraph(ctx, x, y, w, "⚠ Mit Wartezeit setzt Minecraft die Aufladung zurück – der Stoß klappt dann meist nicht.", 0xFFFF7060);
 		}
-		y = slider(ctx, x, y, w, "Zurückwechseln nach", 0, 20, c.lungeReturnDelay, 1, ticks(c.lungeReturnDelay), v -> c.lungeReturnDelay = (int) v);
+		y = slider(ctx, x, y, w, "Zurückwechseln nach", 0, 20, c.lungeReturnDelay, 1,
+				c.lungeReturnDelay == 0 ? "sofort" : ticks(c.lungeReturnDelay), v -> c.lungeReturnDelay = (int) v);
 		y = toggle(ctx, x, y, w, "Automatisch nach dem Werfen einer Windladung", c.lungeAfterWind, v -> c.lungeAfterWind = v);
 		y = slider(ctx, x, y, w, "… Wartezeit nach der Windladung", 1, 20, c.lungeAfterWindDelay, 1, ticks(c.lungeAfterWindDelay), v -> c.lungeAfterWindDelay = (int) v);
 

@@ -143,10 +143,13 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			sp.getServer().runCommand("kill @e[type=minecraft:husk]");
 			sp.getServer().runCommand("item replace entity @p hotbar.4 with netherite_spear[enchantments={lunge:3}]");
 			sp.getServer().runCommand("execute at @p run fill ~-10 ~-1 ~-10 ~10 ~-1 ~10 minecraft:glass");
-			for (int delay : new int[]{1, 0, 0}) {
+			int[][] runs = {{0, 1, 1}, {1, 1, 1}, {1, 0, 1}, {1, 0, 0}, {1, 0, 0}};
+			for (int[] run : runs) {
+				int delay = run[1];
+				sp.getServer().runCommand(run[0] == 1 ? "gamemode survival @a" : "gamemode creative @a");
 				ctx.runOnClient(mc -> {
 					ArsenalConfig.get().lungeDelay = delay;
-					ArsenalConfig.get().lungeReturnDelay = 1;
+					ArsenalConfig.get().lungeReturnDelay = run[2];
 					mc.player.getInventory().setSelectedSlot(6);
 				});
 				sp.getServer().runCommand("execute at @p run tp @p ~ ~ ~ 180 0");
@@ -159,10 +162,14 @@ public class ArsenalGameTest implements FabricClientGameTest {
 				double[] after = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
 				int slotAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
 				double moved = Math.hypot(after[0] - before[0], after[1] - before[1]);
-				ArsenalClient.LOG.info("TEST Lunge-Stoss (Wartezeit {} Ticks): bewegt {} Bloecke, Slot nach 1 Tick={}, danach={} (erwartet bei 0: bewegt > 1, danach 6)",
-						delay, String.format(java.util.Locale.ROOT, "%.2f", moved), slotDuring, slotAfter);
+				ArsenalClient.LOG.info("TEST Lunge-Stoss ({}, Stoss nach {} Ticks, zurueck nach {}): bewegt {} Bloecke, Slot nach 1 Tick={}, danach={}",
+						run[0] == 1 ? "Ueberleben" : "Kreativ", delay, run[2], String.format(java.util.Locale.ROOT, "%.2f", moved), slotDuring, slotAfter);
 			}
-			ctx.runOnClient(mc -> ArsenalConfig.get().lungeDelay = 0);
+			sp.getServer().runCommand("gamemode creative @a");
+			ctx.runOnClient(mc -> {
+				ArsenalConfig.get().lungeDelay = 0;
+				ArsenalConfig.get().lungeReturnDelay = 0;
+			});
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(25);
 

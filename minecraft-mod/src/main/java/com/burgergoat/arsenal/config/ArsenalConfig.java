@@ -94,7 +94,7 @@ public class ArsenalConfig {
 	public boolean lungeReturn = true;
 	/** 0 = Stoss im selben Tick wie der Wechsel (noetig, damit der Speer voll aufgeladen ist). */
 	public int lungeDelay = 0;
-	public int lungeReturnDelay = 1;
+	public int lungeReturnDelay = 0;
 	public boolean lungeAfterWind = false;
 	public int lungeAfterWindDelay = 6;
 
@@ -141,9 +141,9 @@ public class ArsenalConfig {
 		if (instance.trackTypes == null) instance.trackTypes = new LinkedHashSet<>();
 		if (instance.filter == null) instance.filter = "none";
 		if (instance.configVersion < 2) {
-			// Ab 1.2: Lunge-Swap sticht sofort (sonst setzt Minecraft die Aufladung zurueck und es passiert nichts)
+			// Ab 1.2: Lunge-Swap sticht und wechselt sofort zurueck (alles im selben Tick)
 			instance.lungeDelay = 0;
-			instance.lungeReturnDelay = 1;
+			instance.lungeReturnDelay = 0;
 			instance.configVersion = 2;
 			save();
 		}
