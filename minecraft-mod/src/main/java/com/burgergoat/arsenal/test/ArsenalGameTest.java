@@ -5,6 +5,7 @@ import com.burgergoat.arsenal.config.ArsenalConfig;
 import com.burgergoat.arsenal.feature.Macros;
 import com.burgergoat.arsenal.feature.Viewmodel;
 import com.burgergoat.arsenal.gui.ArsenalScreen;
+import com.burgergoat.arsenal.skin.SkinPacks;
 import com.burgergoat.arsenal.tracker.StructureTracker;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -24,15 +25,10 @@ public class ArsenalGameTest implements FabricClientGameTest {
 	public void runTest(ClientGameTestContext ctx) {
 		ctx.runOnClient(mc -> {
 			ArsenalConfig c = ArsenalConfig.get();
-			c.skins.put("netherite_sword", "knife_karambit_fade");
+			SkinPacks.apply(SkinPacks.all().get(0));
 			c.skins.put("diamond_sword", "knife_butterfly_doppler");
-			c.skins.put("netherite_axe", "axe_dz_axe_tiger_tooth");
-			c.skins.put("mace", "mace_mjolnir_ruby");
-			c.skins.put("netherite_spear", "spear_naginata_fade");
+			c.skins.put("golden_sword", "knife_shadow_daggers_sapphire");
 			c.skins.put("shield", "shield_riot");
-			c.skins.put("ender_pearl", "grenade_he");
-			c.skins.put("wind_charge", "wind_vortex");
-			c.skins.put("totem_of_undying", "totem_medishot");
 			c.chEnabled = true;
 			c.hudInfo = true;
 			ArsenalConfig.save();
@@ -53,7 +49,10 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			sp.getServer().runCommand("item replace entity @p hotbar.4 with netherite_spear");
 			sp.getServer().runCommand("item replace entity @p hotbar.5 with ender_pearl 16");
 			sp.getServer().runCommand("item replace entity @p hotbar.6 with wind_charge 16");
-			sp.getServer().runCommand("item replace entity @p hotbar.7 with totem_of_undying");
+			sp.getServer().runCommand("item replace entity @p hotbar.7 with golden_sword");
+			sp.getServer().runCommand("item replace entity @p inventory.0 with totem_of_undying");
+			sp.getServer().runCommand("item replace entity @p inventory.1 with iron_sword");
+			sp.getServer().runCommand("item replace entity @p inventory.2 with wooden_sword");
 			sp.getServer().runCommand("item replace entity @p weapon.offhand with shield");
 			ctx.waitTicks(20);
 			for (int slot : new int[]{0, 1, 2, 3, 4, 5}) {
@@ -61,14 +60,44 @@ public class ArsenalGameTest implements FabricClientGameTest {
 				ctx.waitTicks(12);
 				ctx.takeScreenshot("hand_" + slot);
 			}
+			// Zieh- und Inspect-Animationen: Karambit (0), Butterfly (1), Schattendolche (7)
+			for (int slot : new int[]{0, 1, 7}) {
+				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(8));
+				ctx.waitTicks(6);
+				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(slot));
+				ctx.waitTicks(3);
+				ctx.takeScreenshot("draw_" + slot + "_a");
+				ctx.waitTicks(5);
+				ctx.takeScreenshot("draw_" + slot + "_b");
+				ctx.waitTicks(20);
+				ctx.runOnClient(Viewmodel::startInspect);
+				ctx.waitTicks(10);
+				ctx.takeScreenshot("inspect_" + slot + "_a");
+				ctx.waitTicks(16);
+				ctx.takeScreenshot("inspect_" + slot + "_b");
+				ctx.waitTicks(18);
+				ctx.takeScreenshot("inspect_" + slot + "_c");
+				ctx.waitTicks(50);
+			}
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
-			ctx.waitTicks(12);
-			ctx.runOnClient(Viewmodel::startInspect);
-			ctx.waitTicks(12);
-			ctx.takeScreenshot("inspect_a");
-			ctx.waitTicks(10);
-			ctx.takeScreenshot("inspect_b");
 			ctx.waitTicks(30);
+			// Viewmodel verstellt
+			ctx.runOnClient(mc -> {
+				ArsenalConfig c = ArsenalConfig.get();
+				c.vmX = -0.4f;
+				c.vmY = 0.2f;
+				c.vmRotZ = 35f;
+				c.vmScale = 0.7f;
+			});
+			ctx.waitTicks(3);
+			ctx.takeScreenshot("viewmodel_custom");
+			ctx.runOnClient(mc -> {
+				ArsenalConfig c = ArsenalConfig.get();
+				c.vmX = 0;
+				c.vmY = 0;
+				c.vmRotZ = 0;
+				c.vmScale = 1;
+			});
 
 			// Schild hochnehmen (Hand leer, Schild in der zweiten Hand)
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(8));
@@ -131,17 +160,6 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			ctx.takeScreenshot("inventory");
 			ctx.setScreen(() -> null);
 
-			ctx.runOnClient(mc -> {
-				ArsenalScreen.setTab(1);
-				ArsenalScreen.testRoll = true;
-			});
-			ctx.setScreen(ArsenalScreen::new);
-			ctx.waitTicks(30);
-			ctx.takeScreenshot("case_rolling");
-			ctx.waitTicks(100);
-			ctx.takeScreenshot("case_done");
-			ctx.setScreen(() -> null);
-
 			for (int t = 0; t < ArsenalScreen.TABS.length; t++) {
 				int tab = t;
 				ctx.runOnClient(mc -> ArsenalScreen.setTab(tab));
@@ -151,7 +169,7 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			}
 			ctx.setScreen(() -> null);
 
-			for (String f : new String[]{"vibrance", "noir", "nightvision"}) {
+			for (String f : new String[]{"clear", "vivid", "cinematic", "golden", "frost", "dream", "hdr", "noir", "comic", "nightvision"}) {
 				ctx.runOnClient(mc -> ArsenalConfig.get().filter = f);
 				ctx.waitTicks(5);
 				ctx.takeScreenshot("filter_" + f);

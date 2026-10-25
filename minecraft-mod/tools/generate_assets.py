@@ -298,6 +298,7 @@ def f_blue_steel(u, v, x, y):
 
 def f_lore(u, v, x, y):
     base = mix((196, 146, 46), (250, 214, 110), (1 - v) / 2)
+    x, y = int(x), int(y)
     a = (x + y) % 5
     b = (x - y) % 5
     if a == 0 or b == 0:
@@ -307,6 +308,7 @@ def f_lore(u, v, x, y):
 
 def f_autotronic(u, v, x, y):
     base = mix((176, 22, 26), (226, 52, 44), (1 - v) / 2)
+    x, y = int(x), int(y)
     n = h2(x // 3, y // 3, 151)
     if (x % 4 == 0 and n > 0.4) or (y % 5 == 0 and n < 0.55):
         return (26, 20, 22)
@@ -343,7 +345,7 @@ def f_ddpat(u, v, x, y):
 
 def f_safari(u, v, x, y):
     base = mix((150, 130, 88), (196, 176, 124), fbm(x, y, 191, 4.0))
-    if x % 3 == 0 or y % 3 == 0:
+    if int(x) % 3 == 0 or int(y) % 3 == 0:
         return mul(base, 0.72)
     return base
 
@@ -363,7 +365,7 @@ def f_boreal(u, v, x, y):
 def f_rust(u, v, x, y):
     n = fbm(x, y, 231, 2.5)
     c = grad([(0, (96, 44, 22)), (0.5, (152, 72, 30)), (1, (196, 112, 52))], n)
-    if h2(x, y, 232) > 0.86:
+    if h2(int(x * 2), int(y * 2), 232) > 0.86:
         return steel(u, v)
     return c
 
@@ -482,102 +484,346 @@ def render(shape, size, start, end, finish, flip_light=False, outline=0.58):
 
 
 # ---------------------------------------------------------------- Messer
+# ---------------------------------------------------------------- Messer (64x64, echte 3D-Tiefe)
+KNIFE_SIZE = 64
+KNIFE_START, KNIFE_END = (4.0, 60.0), (60.0, 4.0)
+THICK = {'E': 0.5, 'S': 1.0, 'H': 1.75, 'R': 1.5, 'G': 2.25, 'V': 2.0}
+
+
+class KShape(Shape):
+    def __init__(self, prims, x0=0, x1=100, blade_x=(40, 100), half=8, double=False, fuller=None):
+        super().__init__(prims, x0, x1, blade_x, half)
+        self.double = double
+        self.fuller = fuller  # (x_start, x_end, v_mitte)
+
+
+def RIV(x, y, r=1.7, brass=False):
+    return C('rivet_brass' if brass else 'rivet', x, y, r)
+
+
+def cross_interval(prim, x, y):
+    """Unter-/Obergrenze (y) des Polygons auf der Senkrechten durch x, die y enthaelt."""
+    if 'circle' in prim:
+        cx, cy, r = prim['circle']
+        h = math.sqrt(max(0.0, r * r - (x - cx) ** 2))
+        return cy - h, cy + h
+    poly = prim['poly']
+    ys = []
+    n = len(poly)
+    for i in range(n):
+        x1, y1 = poly[i]
+        x2, y2 = poly[(i + 1) % n]
+        if (x1 <= x < x2) or (x2 <= x < x1):
+            t = (x - x1) / (x2 - x1)
+            ys.append(y1 + t * (y2 - y1))
+    ys.sort()
+    for i in range(0, len(ys) - 1, 2):
+        if ys[i] <= y <= ys[i + 1]:
+            return ys[i], ys[i + 1]
+    if len(ys) >= 2:
+        return ys[0], ys[-1]
+    return y - 1, y + 1
+
+
+def prim_for(shape, part, x, y):
+    found = None
+    for pr in shape.prims:
+        if pr['part'] == part and prim_has(pr, x, y):
+            found = pr
+    return found
+
+
+def handle_color(part, x, y, v, px, py):
+    """Griff-Materialien in Profil-Koordinaten (x entlang, y quer), v = 0..1 quer."""
+    roll = 1.12 - 0.42 * abs(v - 0.62) * 2  # runde Form: oben heller
+    if part in ('g10', 'ring'):
+        n = fbm(x * 1.4, y * 1.4, 501, 2.0)
+        grip = ((x * 1.1 + y * 1.1) % 2.6) < 0.7
+        c = (30 + 12 * n, 31 + 12 * n, 37 + 14 * n)
+        if grip and part == 'g10':
+            c = mul(c, 1.35)
+    elif part == 'carbon':
+        c = (44, 46, 52) if (int(x * 0.9) + int(y * 0.9)) % 2 else (26, 27, 31)
+    elif part == 'wood':
+        g = (math.sin(y * 2.3 + fbm(x, y * 3, 503, 6.0) * 5) + 1) / 2
+        c = mix((104, 62, 32), (156, 104, 58), g * 0.8)
+    elif part == 'ribbed':
+        c = (58, 60, 66) if int(x * 0.75) % 2 else (34, 36, 40)
+    elif part in ('cord', 'cord_orange'):
+        band = (x * 0.9 + y * 0.55) % 3.0
+        if part == 'cord':
+            c = mix((54, 62, 40), (104, 114, 74), band / 3.0)
+        else:
+            c = mix((150, 66, 18), (236, 128, 44), band / 3.0)
+        if band < 0.35:
+            c = mul(c, 0.55)
+    elif part in ('steel', 'guard_steel'):
+        c = mix((120, 126, 138), (214, 220, 230), 0.5 + 0.5 * math.sin(v * 3.1))
+    elif part in ('darksteel', 'guard_dark'):
+        c = mix((64, 68, 78), (132, 138, 150), 0.5 + 0.5 * math.sin(v * 3.1))
+    elif part in ('brass', 'guard_brass'):
+        c = mix((150, 106, 40), (240, 196, 104), 0.5 + 0.5 * math.sin(v * 3.1))
+    elif part == 'leather':
+        c = (98, 60, 34)
+        if int(x * 1.2) % 3 == 0 and abs(v - 0.5) < 0.12:
+            c = (196, 170, 120)
+    elif part == 'rivet':
+        d = v
+        return mix((230, 234, 240), (120, 124, 134), d)
+    elif part == 'rivet_brass':
+        return mix((252, 220, 140), (150, 110, 46), v)
+    else:
+        c = PART_COLORS.get(part, (200, 0, 200))
+    return mul(c, roll)
+
+
+def knife_class(part, e):
+    if part == 'blade':
+        return 'E' if e < 0.34 else 'S'
+    if part.startswith('guard'):
+        return 'G'
+    if part.startswith('rivet'):
+        return 'V'
+    if part == 'ring':
+        return 'R'
+    return 'H'
+
+
+_KNIFE_RASTER = {}
+
+
+def knife_raster(sid, shape):
+    if sid not in _KNIFE_RASTER:
+        _KNIFE_RASTER[sid] = raster(shape, KNIFE_SIZE, KNIFE_START, KNIFE_END)
+    return _KNIFE_RASTER[sid]
+
+
+def render_knife(sid, shape, finish):
+    size = KNIFE_SIZE
+    parts, prof, (nx, ny) = knife_raster(sid, shape)
+    L = math.hypot(KNIFE_END[0] - KNIFE_START[0], KNIFE_END[1] - KNIFE_START[1])
+    px_per_unit = L / (shape.x1 - shape.x0)
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    cls = [[None] * size for _ in range(size)]
+    info = [[None] * size for _ in range(size)]
+    b0, b1 = shape.blade_x
+    sc = size / 32.0
+    for py in range(size):
+        for px in range(size):
+            p = parts[py][px]
+            if p is None:
+                continue
+            x, y = prof[py][px]
+            pr = prim_for(shape, p, x, y)
+            if pr is not None and 'poly' in pr or (pr is not None and 'circle' in pr):
+                lo, hi = cross_interval(pr, x, y)
+            else:
+                lo, hi = y - 1, y + 1
+            width = max(1e-3, hi - lo)
+            v = max(0.0, min(1.0, (y - lo) / width))
+            e = min(v, 1 - v) * 2 if (p == 'blade' and shape.double) else v
+            if p.startswith('rivet') and pr is not None and 'circle' in pr:
+                cx, cy, r = pr['circle']
+                v = min(1.0, math.hypot(x - cx + r * 0.3, y - cy - r * 0.3) / (r * 1.3))
+            fx, fy = px / sc, py / sc
+            if p == 'blade':
+                u = (x - b0) / max(1e-6, b1 - b0)
+                c = FIN[finish][3](u, 2 * e - 1, fx, fy)
+                bevel = 0.34
+                if e < bevel:
+                    k = 1 - e / bevel
+                    c = mix(mul(c, 1.05 + 0.2 * k), (255, 255, 255), 0.05 + 0.14 * k * k)
+                else:
+                    c = mul(c, 0.98 - 0.14 * (e - bevel) / (1 - bevel))
+                line = 0.75 / max(1.0, width * px_per_unit)
+                if abs(e - bevel) < line:
+                    c = mul(c, 0.72)
+                if shape.fuller:
+                    f0, f1, fv = shape.fuller
+                    if f0 <= x <= f1 and abs(v - fv) < 0.11:
+                        c = mul(c, 0.68 if v > fv else 0.82)
+                spec = math.exp(-((u - 0.52) * 5.5) ** 2) * 0.13 * (0.4 + 0.6 * e)
+                c = mix(c, (255, 255, 255), spec)
+            else:
+                c = handle_color(p, x, y, v, px, py)
+            cls[py][px] = knife_class(p, e)
+            info[py][px] = (p, e)
+            img.putpixel((px, py), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
+    # Umriss: dunkler Rand, an der Schneide ein heller Glanz
+    out = img.copy()
+    for py in range(size):
+        for px in range(size):
+            if parts[py][px] is None:
+                continue
+
+            def empty(qx, qy):
+                return not (0 <= qx < size and 0 <= qy < size) or parts[qy][qx] is None
+
+            border = empty(px + 1, py) or empty(px - 1, py) or empty(px, py + 1) or empty(px, py - 1)
+            if not border:
+                continue
+            p, e = info[py][px]
+            r, g, b, a = img.getpixel((px, py))
+            if p == 'blade' and e < 0.2:
+                c = mix((r, g, b), (255, 255, 255), 0.35)
+            else:
+                c = mul((r, g, b), 0.52)
+            out.putpixel((px, py), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
+    return out, cls
+
+
+def knife_shape_model(cls):
+    size = KNIFE_SIZE
+    s = 16.0 / size
+    elements = []
+    for py in range(size):
+        px = 0
+        while px < size:
+            k = cls[py][px]
+            if k is None:
+                px += 1
+                continue
+            x0 = px
+            while px < size and cls[py][px] == k:
+                px += 1
+            x1 = px
+            t = THICK[k]
+            y0 = round(16 - (py + 1) * s, 4)
+            y1 = round(16 - py * s, 4)
+            u0, u1 = round(x0 * s, 4), round(x1 * s, 4)
+            v0, v1 = round(py * s, 4), round((py + 1) * s, 4)
+            elements.append({
+                "from": [u0, y0, round(8 - t / 2, 4)],
+                "to": [u1, y1, round(8 + t / 2, 4)],
+                "faces": {
+                    "south": {"uv": [u0, v0, u1, v1], "texture": "#tex"},
+                    "north": {"uv": [u1, v0, u0, v1], "texture": "#tex"},
+                    "up": {"uv": [u0, v0, u1, v1], "texture": "#tex"},
+                    "down": {"uv": [u0, v0, u1, v1], "texture": "#tex"},
+                    "east": {"uv": [round(u1 - s, 4), v0, u1, v1], "texture": "#tex"},
+                    "west": {"uv": [u0, v0, round(u0 + s, 4), v1], "texture": "#tex"},
+                },
+            })
+    return {
+        "gui_light": "front",
+        "textures": {"particle": "#tex"},
+        "elements": elements,
+        "display": {
+            "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4.0, 0.5], "scale": [0.85, 0.85, 0.85]},
+            "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4.0, 0.5], "scale": [0.85, 0.85, 0.85]},
+            "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+            "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+            "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+            "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
+            "fixed": {"rotation": [0, 180, 0], "scale": [1, 1, 1]},
+        },
+    }
+
+
 def knives():
     K = {}
-    # Karambit: Ring am Griffende, Klauenklinge
-    K['karambit'] = ('Karambit', Shape([
-        C('black', 6, 0, 8.5), HOLE_C(6, 0, 4.6),
-        P('black', (11, 5), (44, 5.5), (46, -5), (12, -5.5)),
+    K['karambit'] = ('Karambit', KShape([
+        C('ring', 6, 0, 8.5), HOLE_C(6, 0, 4.6),
+        P('g10', (11, 5), (20, 6.5), (30, 5.2), (44, 5.8), (46, -5), (30, -5.6), (20, -4.2), (12, -5.5)),
+        RIV(23, 0.4), RIV(36, 0.2),
         blade([(44, 6), (62, 7), (78, 3.5), (90, -5), (98, -17)],
               [(44, -4.5), (58, -4), (72, -6), (84, -10), (98, -17)]),
     ], x0=-3, x1=100, blade_x=(44, 98), half=7))
-    # Butterfly: geteilter Griff mit Loechern, schlanke Klinge
-    K['butterfly'] = ('Butterfly', Shape([
+    K['butterfly'] = ('Butterfly', KShape([
         R('steel', -2, -2, 4, 2),
         R('steel', 2, -6.5, 48, 6.5), HOLE_P((8, -1.2), (44, -1.2), (44, 1.2), (8, 1.2)),
+        HOLE_C(16, 3.9, 1.25), HOLE_C(26, 3.9, 1.25), HOLE_C(36, 3.9, 1.25),
+        HOLE_C(16, -3.9, 1.25), HOLE_C(26, -3.9, 1.25), HOLE_C(36, -3.9, 1.25),
+        RIV(45.5, 3.9, 1.4), RIV(45.5, -3.9, 1.4),
         blade([(48, 4), (78, 4), (90, 3), (100, 0)], [(48, -4), (70, -4.5), (88, -3.5), (100, 0)]),
     ], x0=-2, x1=100, blade_x=(48, 100), half=4.5))
-    K['bayonet'] = ('Bajonett', Shape([
-        R('steel', 0, -6.5, 4, 6.5), R('ribbed', 4, -5.5, 38, 5.5),
-        R('darksteel', 38, -9, 42, 9), C('darksteel', 40, 9.5, 3), HOLE_C(40, 9.5, 1.4),
+    K['bayonet'] = ('Bajonett', KShape([
+        R('guard_steel', 0, -6.5, 4, 6.5), R('ribbed', 4, -5.5, 38, 5.5),
+        R('guard_dark', 38, -9, 42, 9), C('guard_dark', 40, 9.5, 3), HOLE_C(40, 9.5, 1.4),
         blade([(42, 5.5), (84, 5.5), (100, 0)], [(42, -5.5), (84, -5.5), (100, 0)]),
-    ], blade_x=(42, 100), half=5.5))
-    K['m9'] = ('M9-Bajonett', Shape([
-        R('steel', 0, -7, 4, 7), R('ribbed', 4, -6, 38, 6),
-        R('darksteel', 38, -10, 42, 10), C('darksteel', 40, -10, 3.4), HOLE_C(40, -10, 1.6),
+    ], blade_x=(42, 100), half=5.5, fuller=(47, 80, 0.62)))
+    K['m9'] = ('M9-Bajonett', KShape([
+        R('guard_steel', 0, -7, 4, 7), R('ribbed', 4, -6, 38, 6),
+        R('guard_dark', 38, -10, 42, 10), C('guard_dark', 40, -10, 3.4), HOLE_C(40, -10, 1.6),
         blade([(42, 7), (52, 7), (54, 8.6), (56, 7), (58, 8.6), (60, 7), (62, 8.6), (64, 7), (66, 8.6), (68, 7), (80, 6.5), (100, 0)],
               [(42, -7), (86, -6.5), (100, 0)]),
-    ], blade_x=(42, 100), half=7.5))
-    K['flip'] = ('Flip', Shape([
-        P('black', (0, 3.5), (4, 5), (44, 5), (44, -5), (4, -5), (0, -3.5)),
+    ], blade_x=(42, 100), half=7.5, fuller=(46, 78, 0.6)))
+    K['flip'] = ('Flip', KShape([
+        P('g10', (0, 3.5), (4, 5), (44, 5), (44, -5), (4, -5), (0, -3.5)),
+        RIV(8, 0), RIV(40, 0), C('darksteel', 46, 5.5, 1.4),
         blade([(44, 4.5), (80, 4.5), (100, -1.5)], [(44, -4.5), (82, -5), (94, -4), (100, -1.5)]),
     ], blade_x=(44, 100), half=5))
-    K['gut'] = ('Gut-Messer', Shape([
-        P('black', (0, 4), (4, 5.5), (42, 5.5), (42, -5.5), (4, -5.5), (0, -4)),
+    K['gut'] = ('Gut-Messer', KShape([
+        P('g10', (0, 4), (4, 5.5), (42, 5.5), (42, -5.5), (4, -5.5), (0, -4)),
+        RIV(12, 0), RIV(32, 0),
         blade([(42, 6), (66, 6), (69, 2), (73, 2.5), (76, 6), (86, 5), (100, -2.5)],
               [(42, -6), (80, -6.5), (94, -5), (100, -2.5)]),
     ], blade_x=(42, 100), half=6.5))
-    K['huntsman'] = ('Huntsman', Shape([
-        P('black', (0, 5), (12, 6), (16, 4.5), (22, 6), (28, 4.5), (34, 6), (40, 6), (40, -6), (0, -5)),
-        R('darksteel', 40, -9, 43, 9),
+    K['huntsman'] = ('Huntsman', KShape([
+        P('g10', (0, 5), (12, 6), (16, 4.5), (22, 6), (28, 4.5), (34, 6), (40, 6), (40, -6), (0, -5)),
+        R('guard_dark', 40, -9, 43, 9),
         blade([(43, 7.5), (50, 7.5), (52, 9), (54, 7.5), (56, 9), (58, 7.5), (60, 9), (62, 7.5), (76, 7.5), (100, 0)],
               [(43, -7.5), (88, -7), (100, 0)]),
-    ], blade_x=(43, 100), half=8))
-    K['falchion'] = ('Falchion', Shape([
-        P('black', (0, 4.5), (44, 6), (44, -5), (0, -5.5)),
+    ], blade_x=(43, 100), half=8, fuller=(47, 74, 0.58)))
+    K['falchion'] = ('Falchion', KShape([
+        P('g10', (0, 4.5), (44, 6), (44, -5), (0, -5.5)), RIV(10, 0), RIV(36, 0.4),
         blade([(44, 5.5), (70, 6.5), (86, 5), (100, -3)], [(44, -5), (72, -6.5), (92, -6), (100, -3)]),
     ], blade_x=(44, 100), half=6.5))
-    K['bowie'] = ('Bowie', Shape([
-        R('brass', 0, -6.8, 4, 6.8), R('wood', 4, -6, 38, 6), R('brass', 38, -10.5, 42, 10.5),
+    K['bowie'] = ('Bowie', KShape([
+        R('guard_brass', 0, -6.8, 4, 6.8), R('wood', 4, -6, 38, 6), RIV(14, 0, 1.6, True), RIV(28, 0, 1.6, True),
+        R('guard_brass', 38, -10.5, 42, 10.5),
         blade([(42, 8.5), (72, 8.5), (100, 1.5)], [(42, -8.5), (84, -8.5), (95, -5), (100, 1.5)]),
-    ], blade_x=(42, 100), half=8.5))
-    K['shadow_daggers'] = ('Schattendolche', Shape([
-        R('black', 0, -11, 8, 11), R('black', 8, -3.5, 18, 3.5),
+    ], blade_x=(42, 100), half=8.5, fuller=(46, 70, 0.66)))
+    K['shadow_daggers'] = ('Schattendolche', KShape([
+        R('g10', 0, -11, 8, 11), R('g10', 8, -3.5, 18, 3.5), RIV(4, 6, 1.4), RIV(4, -6, 1.4),
         blade([(18, 4.5), (34, 6.5), (62, 0.5)], [(18, -4.5), (34, -6.5), (62, -0.5)]),
-    ], x0=-6, x1=66, blade_x=(18, 62), half=6.5))
-    K['ursus'] = ('Ursus', Shape([
-        P('black', (0, 4), (6, 5.5), (44, 5.5), (44, -5.5), (6, -5.5), (0, -4)),
+    ], x0=-6, x1=66, blade_x=(18, 62), half=6.5, double=True))
+    K['ursus'] = ('Ursus', KShape([
+        P('g10', (0, 4), (6, 5.5), (44, 5.5), (44, -5.5), (6, -5.5), (0, -4)), RIV(12, 0), RIV(36, 0),
         blade([(44, 5.5), (88, 5.5), (100, -1)], [(44, -5.5), (90, -5.5), (100, -1)]),
     ], blade_x=(44, 100), half=6))
-    K['navaja'] = ('Navaja', Shape([
+    K['navaja'] = ('Navaja', KShape([
         blade([(0, 2), (20, 6.5), (40, 6), (50, 4)], [(0, -3.5), (22, 0), (40, -2), (50, -3.5)], part='wood'),
-        R('brass', 47, -4, 50, 4.5),
+        RIV(10, -0.5, 1.3, True), RIV(42, 1.2, 1.3, True),
+        R('guard_brass', 47, -4, 50, 4.5),
         blade([(50, 3.5), (84, 3.5), (100, 1.5)], [(50, -3.5), (80, -3.2), (94, -1.5), (100, 1.5)]),
     ], blade_x=(50, 100), half=3.8))
-    K['stiletto'] = ('Stiletto', Shape([
-        R('steel', 0, -4.6, 4, 4.6), R('wood', 4, -3.6, 42, 3.6), R('steel', 42, -5, 46, 5),
+    K['stiletto'] = ('Stiletto', KShape([
+        R('guard_steel', 0, -4.6, 4, 4.6), R('wood', 4, -3.6, 42, 3.6), R('guard_steel', 42, -5, 46, 5),
         blade([(46, 3.2), (86, 3), (100, 0)], [(46, -3.2), (86, -3), (100, 0)]),
-    ], blade_x=(46, 100), half=3.4))
-    K['talon'] = ('Talon', Shape([
-        C('black', 6, 0, 9), HOLE_C(6, 0, 5.4),
-        P('black', (12, 5.5), (44, 6), (46, -5.5), (12, -6)), HOLE_C(24, 0, 1.5), HOLE_C(34, 0, 1.5),
+    ], blade_x=(46, 100), half=3.4, double=True))
+    K['talon'] = ('Talon', KShape([
+        C('ring', 6, 0, 9), HOLE_C(6, 0, 5.4),
+        P('g10', (12, 5.5), (44, 6), (46, -5.5), (12, -6)), HOLE_C(24, 0, 1.5), HOLE_C(34, 0, 1.5),
         blade([(44, 6.5), (64, 8.5), (82, 5), (93, -4), (99, -18)],
               [(44, -5), (60, -3), (76, -6), (88, -11), (99, -18)]),
     ], x0=-4, x1=100, blade_x=(44, 99), half=8))
-    K['skeleton'] = ('Skeleton', Shape([
+    K['skeleton'] = ('Skeleton', KShape([
         P('steel', (0, 3.5), (4, 6), (42, 6), (42, -6), (4, -6), (0, -3.5)),
         HOLE_P((8, 2.1), (37, 2.3), (37, -2.3), (8, -2.1)),
+        R('cord', 14, -2.1, 31, 2.1),
         blade([(42, 6), (80, 6), (100, -1.5)], [(42, -6), (84, -6), (96, -4), (100, -1.5)]),
     ], blade_x=(42, 100), half=6))
-    K['classic'] = ('Classic', Shape([
-        P('black', (0, 4.5), (36, 5.5), (40, 9), (42, 9), (42, -6), (0, -5)),
+    K['classic'] = ('Classic', KShape([
+        P('g10', (0, 4.5), (36, 5.5), (40, 9), (42, 9), (42, -6), (0, -5)), RIV(10, 0), RIV(26, 0),
         blade([(42, 6), (78, 6), (100, 0)], [(42, -6), (86, -5.5), (100, 0)]),
-    ], blade_x=(42, 100), half=6))
-    K['paracord'] = ('Paracord', Shape([
-        R('steel', 0, -3, 3, 3), R('cord', 3, -5, 42, 5),
+    ], blade_x=(42, 100), half=6, fuller=(46, 72, 0.64)))
+    K['paracord'] = ('Paracord', KShape([
+        R('guard_steel', 0, -3, 3, 3), R('cord', 3, -5, 42, 5),
         blade([(42, 6), (80, 6), (100, -1)], [(42, -6), (60, -5), (84, -6.5), (100, -1)]),
     ], blade_x=(42, 100), half=6.5))
-    K['survival'] = ('Survival', Shape([
-        R('steel', 0, -3, 3, 3), R('cord_orange', 3, -5, 42, 5),
+    K['survival'] = ('Survival', KShape([
+        R('guard_steel', 0, -3, 3, 3), R('cord_orange', 3, -5, 42, 5),
         blade([(42, 7), (80, 7), (100, -1)],
               [(42, -7), (46, -8.6), (48, -7), (50, -8.6), (52, -7), (54, -8.6), (56, -7), (86, -7), (100, -1)]),
     ], blade_x=(42, 100), half=7.5))
-    K['nomad'] = ('Nomad', Shape([
-        P('black', (0, 4.5), (44, 5.5), (44, -5.5), (0, -4.5)), HOLE_C(4.5, 0, 1.6),
+    K['nomad'] = ('Nomad', KShape([
+        P('g10', (0, 4.5), (44, 5.5), (44, -5.5), (0, -4.5)), HOLE_C(4.5, 0, 1.6), RIV(18, 0), RIV(36, 0),
         blade([(44, 6.5), (76, 6.5), (100, -5)], [(44, -6), (100, -5.5)]),
     ], blade_x=(44, 100), half=6.5))
-    K['kukri'] = ('Kukri', Shape([
-        P('wood', (0, 7), (4, 5), (38, 4.5), (38, -4.5), (4, -5), (0, -7)), R('brass', 36, -6, 39, 6),
+    K['kukri'] = ('Kukri', KShape([
+        P('wood', (0, 7), (4, 5), (38, 4.5), (38, -4.5), (4, -5), (0, -7)), RIV(16, 0, 1.5, True), RIV(28, 0, 1.5, True),
+        R('guard_brass', 36, -6, 39, 6),
         blade([(39, 4.5), (60, 6), (78, 2), (92, -6), (100, -13)],
               [(39, -4.5), (56, -7), (70, -13), (86, -16.5), (100, -13)]),
     ], blade_x=(39, 100), half=9))
@@ -1065,7 +1311,21 @@ def simple_model(name, parent, tex=None):
                {"parent": parent, "textures": {"layer0": f"{NS}:item/{tex or name}"}})
 
 
+def knife_preview(out, names):
+    sheet = Image.new('RGBA', (len(names) * 260, 260), (54, 57, 63, 255))
+    K = knives()
+    for i, (sid, fid) in enumerate(names):
+        img, _ = render_knife(sid, K[sid][1], fid)
+        sheet.alpha_composite(img.resize((256, 256), Image.NEAREST), (i * 260, 2))
+    sheet.save(out)
+
+
 def main():
+    if '--knife-preview' in sys.argv:
+        out = sys.argv[sys.argv.index('--knife-preview') + 1]
+        pairs = [a.split(':') for a in sys.argv[sys.argv.index('--knife-preview') + 2:]]
+        knife_preview(out, pairs)
+        return
     preview_dir = None
     if '--preview' in sys.argv:
         preview_dir = sys.argv[sys.argv.index('--preview') + 1]
@@ -1106,10 +1366,31 @@ def main():
         cats.append({"id": cid, "name": name, "items": items, "shapes": sh_list, "finishes": finish_list(finishes)})
         previews[cid] = rows
 
+    def knife_cat(items):
+        sh_list = []
+        rows = []
+        finishes = [f[0] for f in FINISHES]
+        for sid, (sname, shape) in knives().items():
+            sh_list.append({"id": sid, "name": sname})
+            row = []
+            shape_written = False
+            for fid in finishes:
+                key = f"knife_{sid}_{fid}"
+                img, cls = render_knife(sid, shape, fid)
+                if not shape_written:
+                    write_json(os.path.join(RES, 'models', 'item', f'knife_shape_{sid}.json'), knife_shape_model(cls))
+                    shape_written = True
+                save_png(img, key)
+                row.append(img)
+                write_json(os.path.join(RES, 'models', 'item', key + '.json'),
+                           {"parent": f"{NS}:item/knife_shape_{sid}", "textures": {"tex": f"{NS}:item/{key}"}})
+                item_def(key, {"model": {"type": "minecraft:model", "model": f"{NS}:item/{key}"}})
+            rows.append(row)
+        cats.append({"id": "knife", "name": "Messer", "items": items, "shapes": sh_list, "finishes": finish_list(finishes)})
+        previews['knife'] = rows
+
     mats = ['wooden', 'stone', 'copper', 'iron', 'golden', 'diamond', 'netherite']
-    knife_start, knife_end = (2.0, 30.0), (30.0, 2.0)
-    tool_cat('knife', 'Messer', knives(), [f[0] for f in FINISHES], 'minecraft:item/handheld', 32,
-             [m + '_sword' for m in mats], knife_start, knife_end)
+    knife_cat([m + '_sword' for m in mats])
     tool_cat('axe', 'Äxte', axes(), TOOL_FINISHES, 'minecraft:item/handheld', 32,
              [m + '_axe' for m in mats], (3.0, 30.0), (29.0, 3.0))
     tool_cat('mace', 'Kolben', maces(), TOOL_FINISHES, 'minecraft:item/handheld_mace', 32,

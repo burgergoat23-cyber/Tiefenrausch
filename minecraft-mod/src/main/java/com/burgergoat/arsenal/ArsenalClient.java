@@ -43,6 +43,8 @@ public class ArsenalClient implements ClientModInitializer {
 	public static KeyBinding windKey;
 	public static KeyBinding zoomKey;
 	public static KeyBinding trackerKey;
+	public static KeyBinding maceToggleKey;
+	public static KeyBinding shieldToggleKey;
 
 	private static boolean greeted;
 
@@ -59,6 +61,8 @@ public class ArsenalClient implements ClientModInitializer {
 		windKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.wind", GLFW.GLFW_KEY_B, cat));
 		zoomKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.zoom", GLFW.GLFW_KEY_C, cat));
 		trackerKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.tracker", GLFW.GLFW_KEY_UNKNOWN, cat));
+		maceToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.mace_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
+		shieldToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.shield_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
 
 		ClientTickEvents.END_CLIENT_TICK.register(ArsenalClient::tick);
 		ServerTickEvents.END_SERVER_TICK.register(ServerSearch::serverTick);
@@ -89,6 +93,13 @@ public class ArsenalClient implements ClientModInitializer {
 		LOG.info("Arsenal geladen");
 	}
 
+	private static void status(MinecraftClient client, String name, boolean on) {
+		if (client.player != null) {
+			client.player.sendMessage(Text.literal(name + ": ").withColor(0xFFE8A33D)
+					.append(Text.literal(on ? "AN" : "AUS").withColor(on ? 0xFF55FF55 : 0xFFFF5555)), true);
+		}
+	}
+
 	private static void tick(MinecraftClient client) {
 		while (menuKey.wasPressed()) {
 			if (client.currentScreen == null) client.setScreen(new ArsenalScreen());
@@ -98,6 +109,16 @@ public class ArsenalClient implements ClientModInitializer {
 		while (pearlKey.wasPressed()) Macros.quickUse(client, Items.ENDER_PEARL, "Enderperle");
 		while (windKey.wasPressed()) Macros.quickUse(client, Items.WIND_CHARGE, "Windladung");
 		while (trackerKey.wasPressed()) StructureTracker.search(client);
+		while (maceToggleKey.wasPressed()) {
+			ArsenalConfig.get().maceSwap = !ArsenalConfig.get().maceSwap;
+			ArsenalConfig.save();
+			status(client, "Attribut-Swap", ArsenalConfig.get().maceSwap);
+		}
+		while (shieldToggleKey.wasPressed()) {
+			ArsenalConfig.get().shieldBreaker = !ArsenalConfig.get().shieldBreaker;
+			ArsenalConfig.save();
+			status(client, "Schild-Brecher", ArsenalConfig.get().shieldBreaker);
+		}
 
 		Macros.tick(client);
 		Viewmodel.tick(client);

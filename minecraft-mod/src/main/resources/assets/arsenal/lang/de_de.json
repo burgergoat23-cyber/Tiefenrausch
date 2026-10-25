@@ -6,5 +6,7 @@
 	"key.arsenal.pearl": "Schnell-Enderperle",
 	"key.arsenal.wind": "Schnell-Windladung",
 	"key.arsenal.zoom": "Zoom (halten)",
-	"key.arsenal.tracker": "Tracker: jetzt suchen"
+	"key.arsenal.tracker": "Tracker: jetzt suchen",
+	"key.arsenal.mace_toggle": "Attribut-Swap an/aus",
+	"key.arsenal.shield_toggle": "Schild-Brecher an/aus"
 }

@@ -6,5 +6,7 @@
 	"key.arsenal.pearl": "Quick ender pearl",
 	"key.arsenal.wind": "Quick wind charge",
 	"key.arsenal.zoom": "Zoom (hold)",
-	"key.arsenal.tracker": "Tracker: search now"
+	"key.arsenal.tracker": "Tracker: search now",
+	"key.arsenal.mace_toggle": "Toggle attribute swap",
+	"key.arsenal.shield_toggle": "Toggle shield breaker"
 }

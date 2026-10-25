@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_falchion",
  "textures": {
-  "layer0": "arsenal:item/knife_falchion_black_pearl"
+  "tex": "arsenal:item/knife_falchion_black_pearl"
  }
 }

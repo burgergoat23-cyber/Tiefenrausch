@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_butterfly",
  "textures": {
-  "layer0": "arsenal:item/knife_butterfly_tiger_tooth"
+  "tex": "arsenal:item/knife_butterfly_tiger_tooth"
  }
 }

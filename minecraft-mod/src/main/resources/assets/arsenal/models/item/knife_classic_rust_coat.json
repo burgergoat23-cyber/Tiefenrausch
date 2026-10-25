@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_classic",
  "textures": {
-  "layer0": "arsenal:item/knife_classic_rust_coat"
+  "tex": "arsenal:item/knife_classic_rust_coat"
  }
 }

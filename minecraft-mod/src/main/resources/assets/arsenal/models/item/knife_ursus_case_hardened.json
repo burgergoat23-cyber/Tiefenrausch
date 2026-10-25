@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_ursus",
  "textures": {
-  "layer0": "arsenal:item/knife_ursus_case_hardened"
+  "tex": "arsenal:item/knife_ursus_case_hardened"
  }
 }

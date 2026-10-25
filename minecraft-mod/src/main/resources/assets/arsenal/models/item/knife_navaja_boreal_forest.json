@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_navaja",
  "textures": {
-  "layer0": "arsenal:item/knife_navaja_boreal_forest"
+  "tex": "arsenal:item/knife_navaja_boreal_forest"
  }
 }

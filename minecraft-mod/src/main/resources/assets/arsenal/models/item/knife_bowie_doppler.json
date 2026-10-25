@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_bowie",
  "textures": {
-  "layer0": "arsenal:item/knife_bowie_doppler"
+  "tex": "arsenal:item/knife_bowie_doppler"
  }
 }

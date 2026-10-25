@@ -4,8 +4,10 @@ import com.burgergoat.arsenal.ArsenalClient;
 import com.burgergoat.arsenal.config.ArsenalConfig;
 import com.burgergoat.arsenal.feature.Crosshair;
 import com.burgergoat.arsenal.feature.Filters;
+import com.burgergoat.arsenal.feature.Viewmodel;
 import com.burgergoat.arsenal.skin.SkinCatalog;
 import com.burgergoat.arsenal.skin.SkinManager;
+import com.burgergoat.arsenal.skin.SkinPacks;
 import com.burgergoat.arsenal.tracker.StructureTracker;
 import com.burgergoat.arsenal.tracker.TrackType;
 import net.minecraft.client.gui.Click;
@@ -13,6 +15,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -39,16 +42,13 @@ public class ArsenalScreen extends Screen {
 	private static final int TEXT = 0xFFE3E7EC;
 	private static final int GRAY = 0xFF98A2AE;
 
-	public static final String[] TABS = {"Skins", "Kisten", "Fadenkreuz", "Viewmodel", "Filter", "Tracker", "Makros", "HUD & Zoom"};
-	private static final Item[] TAB_ICONS = {Items.NETHERITE_SWORD, Items.CHEST, Items.TARGET, Items.ARMOR_STAND, Items.ENDER_EYE, Items.COMPASS, Items.REDSTONE, Items.CLOCK};
+	public static final String[] TABS = {"Skins", "Pakete", "Fadenkreuz", "Viewmodel", "Shader", "Tracker", "Makros", "Tasten & HUD"};
+	private static final Item[] TAB_ICONS = {Items.NETHERITE_SWORD, Items.BUNDLE, Items.TARGET, Items.ARMOR_STAND, Items.ENDER_EYE, Items.COMPASS, Items.REDSTONE, Items.CLOCK};
 
 	private static int tab;
 	private static String skinCat = "knife";
 	private static String skinTarget = "*";
 	private static String skinShape;
-	private static String caseCat = "knife";
-	/** Nur fuer den automatischen Test: Kiste beim Oeffnen sofort drehen. */
-	public static boolean testRoll;
 
 	private record Hit(int x, int y, int w, int h, boolean content, @Nullable Runnable click, @Nullable DoubleConsumer drag) {
 	}
@@ -63,8 +63,9 @@ public class ArsenalScreen extends Screen {
 	private int cx, cy, cw, ch;
 	private boolean dirty;
 	private List<Text> tooltip;
-	private CaseRoll roll;
 	private final Random random = new Random();
+	/** Tastenbelegung, die gerade auf einen Tastendruck wartet. */
+	private KeyBinding listening;
 
 	public ArsenalScreen() {
 		super(Text.literal("Arsenal"));
@@ -81,7 +82,8 @@ public class ArsenalScreen extends Screen {
 
 	@Override
 	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float deltaTicks) {
-		ctx.fill(0, 0, width, height, 0x60000000);
+		// Im Viewmodel-Reiter frei lassen, damit man die Hand live sieht
+		if (tab != 3) ctx.fill(0, 0, width, height, 0x60000000);
 	}
 
 	@Override
@@ -91,6 +93,10 @@ public class ArsenalScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyInput input) {
+		if (listening != null) {
+			bind(listening, input.isEscape() ? InputUtil.UNKNOWN_KEY : InputUtil.fromKeyCode(input));
+			return true;
+		}
 		if (ArsenalClient.menuKey.matchesKey(input)) {
 			close();
 			return true;
@@ -115,6 +121,11 @@ public class ArsenalScreen extends Screen {
 	@Override
 	public boolean mouseClicked(Click click, boolean doubled) {
 		updateMouse();
+		if (listening != null && click.button() >= 2) {
+			// Maustasten 3, 4, 5 … (Mausrad-Klick, Seitentasten) koennen auch belegt werden
+			bind(listening, InputUtil.Type.MOUSE.createFromCode(click.button()));
+			return true;
+		}
 		if (click.button() == 0) {
 			for (int i = hits.size() - 1; i >= 0; i--) {
 				Hit h = hits.get(i);
@@ -165,6 +176,14 @@ public class ArsenalScreen extends Screen {
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
+	private void bind(KeyBinding key, InputUtil.Key code) {
+		key.setBoundKey(code);
+		KeyBinding.updateKeysByCode();
+		if (client != null) client.options.write();
+		listening = null;
+		playClick(1.4f);
+	}
+
 	private void playClick(float pitch) {
 		if (client != null) client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK, pitch));
 	}
@@ -187,6 +206,11 @@ public class ArsenalScreen extends Screen {
 		ph = Math.min(height - 12, 330);
 		px = (width - pw) / 2;
 		py = (height - ph) / 2;
+		if (tab == 3) {
+			// Viewmodel: Menue nach links, rechts bleibt die Hand sichtbar
+			pw = Math.min(pw, Math.max(250, width / 2 + 10));
+			px = 6;
+		}
 		cx = px + 102;
 		cy = py + 30;
 		cw = pw - 110;
@@ -233,7 +257,7 @@ public class ArsenalScreen extends Screen {
 		int top = cy + 2 - scroll;
 		int end = switch (tab) {
 			case 0 -> drawSkins(ctx, cx, top, cw - 6);
-			case 1 -> drawCases(ctx, cx, top, cw - 6);
+			case 1 -> drawPacks(ctx, cx, top, cw - 6);
 			case 2 -> drawCrosshair(ctx, cx, top, cw - 6);
 			case 3 -> drawViewmodel(ctx, cx, top, cw - 6);
 			case 4 -> drawFilters(ctx, cx, top, cw - 6);
@@ -528,126 +552,39 @@ public class ArsenalScreen extends Screen {
 		}
 	}
 
-	// ------------------------------------------------------------------ Reiter: Kisten
+	// ------------------------------------------------------------------ Reiter: Pakete
 
-	private final class CaseRoll {
-		static final int CELL = 46;
-		static final long DURATION = 5600;
-		final List<SkinCatalog.Skin> items = new ArrayList<>();
-		final SkinCatalog.Category cat;
-		final int win = 42;
-		final double target;
-		final long start = System.currentTimeMillis();
-		int lastCell = -1;
-		boolean done;
-
-		CaseRoll(SkinCatalog.Category cat) {
-			this.cat = cat;
-			for (int i = 0; i < 50; i++) items.add(pick(cat));
-			target = win * CELL + (random.nextDouble() - 0.5) * CELL * 0.8;
-		}
-
-		double pos() {
-			double t = Math.min(1.0, (System.currentTimeMillis() - start) / (double) DURATION);
-			double e = 1 - Math.pow(1 - t, 4);
-			return e * target;
-		}
-	}
-
-	private static final int[] RARITY_WEIGHT = {0, 30, 22, 24, 14, 8, 2};
-
-	private SkinCatalog.Skin pick(SkinCatalog.Category cat) {
-		int total = 0;
-		for (SkinCatalog.Skin s : cat.skins) total += RARITY_WEIGHT[Math.min(6, s.rarity())] * 100 / Math.max(1, countRarity(cat, s.rarity()));
-		int r = random.nextInt(Math.max(1, total));
-		for (SkinCatalog.Skin s : cat.skins) {
-			r -= RARITY_WEIGHT[Math.min(6, s.rarity())] * 100 / Math.max(1, countRarity(cat, s.rarity()));
-			if (r < 0) return s;
-		}
-		return cat.skins.get(random.nextInt(cat.skins.size()));
-	}
-
-	private static int countRarity(SkinCatalog.Category cat, int rarity) {
-		int n = 0;
-		for (SkinCatalog.Skin s : cat.skins) if (s.rarity() == rarity) n++;
-		return n;
-	}
-
-	private int drawCases(DrawContext ctx, int x, int y, int w) {
-		y = paragraph(ctx, x, y, w, "Kiste öffnen wie in CS – nur zum Spaß, kostet nichts. Den gezogenen Skin kannst du direkt ausrüsten.", GRAY);
-		y = categoryChips(ctx, x, y, w, caseCat, id -> {
-			caseCat = id;
-			roll = null;
-		});
-		SkinCatalog.Category cat = SkinCatalog.category(caseCat);
-		if (cat == null) return y;
-		if (testRoll) {
-			testRoll = false;
-			roll = new CaseRoll(cat);
-		}
-		int stripY = y + 4;
-		int stripH = 56;
-		ctx.fill(x, stripY, x + w, stripY + stripH, 0xFF0C1015);
-		border(ctx, x, stripY, w, stripH, LINE);
-		ctx.enableScissor(Math.max(x + 1, cx - 4), Math.max(stripY + 1, cy - 2), x + w - 1, Math.min(stripY + stripH - 1, cy + ch));
-		if (roll != null) {
-			double pos = roll.pos();
-			int center = x + w / 2;
-			for (int i = 0; i < roll.items.size(); i++) {
-				int cellX = (int) Math.round(center - pos + i * CaseRoll.CELL - CaseRoll.CELL / 2.0);
-				if (cellX + CaseRoll.CELL < x || cellX > x + w) continue;
-				SkinCatalog.Skin s = roll.items.get(i);
-				int col = SkinCatalog.rarityColor(s.rarity());
-				ctx.fillGradient(cellX + 2, stripY + 4, cellX + CaseRoll.CELL - 2, stripY + stripH - 4, 0xFF222A33, (col & 0x00FFFFFF) | 0x60000000);
-				ctx.fill(cellX + 2, stripY + stripH - 7, cellX + CaseRoll.CELL - 2, stripY + stripH - 4, col);
-				ctx.getMatrices().pushMatrix();
-				ctx.getMatrices().translate(cellX + 7, stripY + 9);
-				ctx.getMatrices().scale(2f, 2f);
-				ctx.drawItem(SkinManager.preview(s, baseItem(cat, "*")), 0, 0);
-				ctx.getMatrices().popMatrix();
+	private int drawPacks(DrawContext ctx, int x, int y, int w) {
+		y = paragraph(ctx, x, y, w, "Wie ein Resourcepack: Ein Klick, und jede Schwert-Stufe bekommt ein anderes CS-Messer "
+				+ "(Netherite = Karambit, Diamant = Butterfly, Eisen = M9, Gold = Talon, Kupfer = Flip, Stein = Gut, Holz = Bajonett) "
+				+ "im selben Muster – dazu passende Axt, Kolben, Speer, Schild, Granaten und Totem.", GRAY);
+		int colW = (w - 4) / 2;
+		int cardH = 46;
+		List<SkinPacks.Pack> packs = SkinPacks.all();
+		String[] showItems = {"netherite_sword", "diamond_sword", "iron_sword", "golden_sword", "netherite_axe", "shield"};
+		for (int i = 0; i < packs.size(); i++) {
+			SkinPacks.Pack pack = packs.get(i);
+			int bx = x + (i % 2) * (colW + 4);
+			int by = y + (i / 2) * (cardH + 4);
+			boolean active = pack.active();
+			boolean hov = hovered(bx, by, colW, cardH, true);
+			ctx.fillGradient(bx, by, bx + colW, by + cardH, active ? 0xFF4A3A1C : hov ? 0xFF2C3744 : 0xFF222B35, 0xFF161C23);
+			border(ctx, bx, by, colW, cardH, active ? ACCENT : hov ? 0xFF56677A : LINE);
+			ctx.drawTextWithShadow(textRenderer, pack.name() + (active ? "  ✔" : ""), bx + 5, by + 4, active ? ACCENT : 0xFFFFFFFF);
+			ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(pack.desc(), colW - 10), bx + 5, by + 15, GRAY);
+			int ix = bx + 4;
+			for (String it : showItems) {
+				SkinCatalog.Skin sk = SkinCatalog.skin(pack.skins().get(it));
+				if (ix + 16 > bx + colW - 2) break;
+				ctx.drawItem(SkinManager.preview(sk, it), ix, by + 27);
+				ix += 18;
 			}
-			int cell = (int) Math.floor((pos + CaseRoll.CELL / 2.0) / CaseRoll.CELL);
-			if (cell != roll.lastCell && !roll.done) {
-				roll.lastCell = cell;
-				playClick(1.6f + random.nextFloat() * 0.3f);
-			}
-			if (!roll.done && System.currentTimeMillis() - roll.start >= CaseRoll.DURATION) {
-				roll.done = true;
-				if (client != null) client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.ENTITY_PLAYER_LEVELUP, 1.2f, 0.6f));
-			}
-		} else {
-			ctx.drawTextWithShadow(textRenderer, "Drücke „Kiste öffnen“", x + 8, stripY + 24, GRAY);
+			hit(bx, by, colW, cardH, true, () -> SkinPacks.apply(pack));
 		}
-		ctx.disableScissor();
-		ctx.fill(x + w / 2, stripY - 3, x + w / 2 + 1, stripY + stripH + 3, ACCENT);
-		y = stripY + stripH + 6;
-
-		boolean rolling = roll != null && !roll.done;
-		button(ctx, x, y, 120, 20, rolling ? "Läuft …" : "Kiste öffnen", false, () -> {
-			if (roll == null || roll.done) roll = new CaseRoll(cat);
-		});
-		if (roll != null && roll.done) {
-			SkinCatalog.Skin won = roll.items.get(roll.win);
-			button(ctx, x + 124, y, Math.min(170, w - 124), 20, "Ausrüsten (alle " + cat.name + ")", false, () -> {
-				for (String it : cat.items) ArsenalConfig.get().skins.put(it, won.id());
-				ArsenalConfig.save();
-				if (won.shape() != null) skinShape = won.shape().id();
-			});
-			y += 24;
-			ctx.drawTextWithShadow(textRenderer, "Gezogen: ", x, y + 2, GRAY);
-			ctx.drawTextWithShadow(textRenderer, won.displayName(), x + textRenderer.getWidth("Gezogen: "), y + 2, SkinCatalog.rarityColor(won.rarity()));
-			y += 12;
-		} else {
-			y += 24;
-		}
-		StringBuilder sb = new StringBuilder("Chancen: ");
-		int total = 0;
-		for (int r = 1; r <= 6; r++) if (countRarity(cat, r) > 0) total += RARITY_WEIGHT[r];
-		for (int r = 6; r >= 1; r--) {
-			if (countRarity(cat, r) == 0) continue;
-			sb.append(SkinCatalog.RARITY_NAMES[r]).append(' ').append(Math.round(RARITY_WEIGHT[r] * 1000.0 / Math.max(1, total)) / 10.0).append("%  ");
-		}
-		return paragraph(ctx, x, y + 2, w, sb.toString().trim(), GRAY);
+		y += ((packs.size() + 1) / 2) * (cardH + 4) + 4;
+		button(ctx, x, y, 150, 18, "Alle Skins entfernen", false, SkinPacks::clear);
+		y += 24;
+		return paragraph(ctx, x, y, w, "Einzelne Teile kannst du danach im Reiter „Skins“ noch ändern.", GRAY);
 	}
 
 	// ------------------------------------------------------------------ Reiter: Fadenkreuz
@@ -726,29 +663,69 @@ public class ArsenalScreen extends Screen {
 
 	private int drawViewmodel(DrawContext ctx, int x, int y, int w) {
 		ArsenalConfig c = ArsenalConfig.get();
-		y = paragraph(ctx, x, y, w, "Wie viewmodel_offset in CS: verschiebt die Hand mit dem Item. Schließ das Menü, um das Ergebnis zu sehen.", GRAY);
-		y = slider(ctx, x, y, w, "Links / Rechts (X)", -1, 1, c.vmX, 0.05, fmt(c.vmX), v -> c.vmX = (float) v);
-		y = slider(ctx, x, y, w, "Unten / Oben (Y)", -1, 1, c.vmY, 0.05, fmt(c.vmY), v -> c.vmY = (float) v);
-		y = slider(ctx, x, y, w, "Nah / Fern (Z)", -1, 1, c.vmZ, 0.05, fmt(c.vmZ), v -> c.vmZ = (float) v);
-		y = slider(ctx, x, y, w, "Größe", 0.4, 1.5, c.vmScale, 0.05, Math.round(c.vmScale * 100) + " %", v -> c.vmScale = (float) v);
-		y = toggle(ctx, x, y, w, "Inspect-Animation (Taste " + keyName(ArsenalClient.inspectKey) + ")", c.inspect, v -> c.inspect = v);
-		button(ctx, x, y + 2, 110, 18, "Zurücksetzen", false, () -> {
-			c.vmX = 0;
-			c.vmY = 0;
-			c.vmZ = 0;
-			c.vmScale = 1;
+		y = paragraph(ctx, x, y, w, "Live-Vorschau: rechts siehst du deine Hand. Halte dein Messer in der Hand und stell alles ein.", 0xFF8FD18F);
+		button(ctx, x, y, (w - 4) / 3, 18, "▶ Inspect", false, () -> {
+			if (client != null) Viewmodel.startInspect(client);
+		});
+		button(ctx, x + (w - 4) / 3 + 2, y, (w - 4) / 3, 18, "▶ Ziehen", false, () -> {
+			if (client != null) Viewmodel.playDraw(client);
+		});
+		button(ctx, x + 2 * ((w - 4) / 3) + 4, y, (w - 4) / 3, 18, "Zurücksetzen", false, () -> {
+			ArsenalConfig d = new ArsenalConfig();
+			c.vmX = d.vmX;
+			c.vmY = d.vmY;
+			c.vmZ = d.vmZ;
+			c.vmScale = d.vmScale;
+			c.vmRotX = d.vmRotX;
+			c.vmRotY = d.vmRotY;
+			c.vmRotZ = d.vmRotZ;
+			c.vmOffX = d.vmOffX;
+			c.vmOffY = d.vmOffY;
+			c.vmOffZ = d.vmOffZ;
+			c.vmOffScale = d.vmOffScale;
+			c.vmOffRotX = d.vmOffRotX;
+			c.vmOffRotY = d.vmOffRotY;
+			c.vmOffRotZ = d.vmOffRotZ;
 			changed();
 		});
-		y += 26;
-		return paragraph(ctx, x, y, w, "Inspect: Karambit und Talon wirbeln um den Finger, das Butterfly klappt hin und her, "
-				+ "andere Messer werden gedreht und angeschaut – wie in CS.", GRAY);
+		y += 24;
+		y = header(ctx, x, y, w, "Rechte Hand (Haupthand)");
+		y = slider(ctx, x, y, w, "Links ↔ Rechts", -1.5, 1.5, c.vmX, 0.05, fmt(c.vmX), v -> c.vmX = (float) v);
+		y = slider(ctx, x, y, w, "Unten ↕ Oben", -1.5, 1.5, c.vmY, 0.05, fmt(c.vmY), v -> c.vmY = (float) v);
+		y = slider(ctx, x, y, w, "Nah ↔ Fern", -1.5, 1.5, -c.vmZ, 0.05, fmt(-c.vmZ), v -> c.vmZ = (float) -v);
+		y = slider(ctx, x, y, w, "Kippen (vor/zurück)", -180, 180, c.vmRotX, 5, Math.round(c.vmRotX) + "°", v -> c.vmRotX = (float) v);
+		y = slider(ctx, x, y, w, "Drehen (links/rechts)", -180, 180, c.vmRotY, 5, Math.round(c.vmRotY) + "°", v -> c.vmRotY = (float) v);
+		y = slider(ctx, x, y, w, "Neigen (seitlich)", -180, 180, c.vmRotZ, 5, Math.round(c.vmRotZ) + "°", v -> c.vmRotZ = (float) v);
+		y = slider(ctx, x, y, w, "Größe", 0.3, 1.6, c.vmScale, 0.05, Math.round(c.vmScale * 100) + " %", v -> c.vmScale = (float) v);
+
+		y = header(ctx, x, y + 2, w, "Linke Hand (zweite Hand)");
+		y = toggle(ctx, x, y, w, "Eigene Werte (sonst gespiegelt wie rechts)", c.vmOffSeparate, v -> c.vmOffSeparate = v);
+		if (c.vmOffSeparate) {
+			y = slider(ctx, x, y, w, "Links ↔ Rechts", -1.5, 1.5, c.vmOffX, 0.05, fmt(c.vmOffX), v -> c.vmOffX = (float) v);
+			y = slider(ctx, x, y, w, "Unten ↕ Oben", -1.5, 1.5, c.vmOffY, 0.05, fmt(c.vmOffY), v -> c.vmOffY = (float) v);
+			y = slider(ctx, x, y, w, "Nah ↔ Fern", -1.5, 1.5, -c.vmOffZ, 0.05, fmt(-c.vmOffZ), v -> c.vmOffZ = (float) -v);
+			y = slider(ctx, x, y, w, "Kippen (vor/zurück)", -180, 180, c.vmOffRotX, 5, Math.round(c.vmOffRotX) + "°", v -> c.vmOffRotX = (float) v);
+			y = slider(ctx, x, y, w, "Drehen (links/rechts)", -180, 180, c.vmOffRotY, 5, Math.round(c.vmOffRotY) + "°", v -> c.vmOffRotY = (float) v);
+			y = slider(ctx, x, y, w, "Neigen (seitlich)", -180, 180, c.vmOffRotZ, 5, Math.round(c.vmOffRotZ) + "°", v -> c.vmOffRotZ = (float) v);
+			y = slider(ctx, x, y, w, "Größe", 0.3, 1.6, c.vmOffScale, 0.05, Math.round(c.vmOffScale * 100) + " %", v -> c.vmOffScale = (float) v);
+		}
+
+		y = header(ctx, x, y + 2, w, "Messer-Animationen");
+		y = toggle(ctx, x, y, w, "Zieh-Animation beim Wechseln aufs Messer", c.drawAnim, v -> c.drawAnim = v);
+		y = toggle(ctx, x, y, w, "Inspect-Animation", c.inspect, v -> c.inspect = v);
+		y = toggle(ctx, x, y, w, "Geräusche (Klicken, Schwung)", c.knifeSounds, v -> c.knifeSounds = v);
+		y = slider(ctx, x, y, w, "Tempo", 0.5, 2.0, c.animSpeed, 0.1, Math.round(c.animSpeed * 100) + " %", v -> c.animSpeed = (float) v);
+		y = keyRow(ctx, x, y, w, "Inspect-Taste", ArsenalClient.inspectKey);
+		return paragraph(ctx, x, y + 2, w, "Jedes Messer hat eigene Bewegungen: Karambit und Talon wirbeln um den Finger, das Butterfly "
+				+ "klappt auf und wird hochgeworfen, die Schattendolche drehen sich, M9 und Bajonett werden geworfen und gefangen, "
+				+ "Flip, Falchion, Navaja und Stiletto klappen auf.", GRAY);
 	}
 
-	// ------------------------------------------------------------------ Reiter: Filter
+	// ------------------------------------------------------------------ Reiter: Shader
 
 	private int drawFilters(DrawContext ctx, int x, int y, int w) {
 		ArsenalConfig c = ArsenalConfig.get();
-		y = paragraph(ctx, x, y, w, "Bild-Filter (eingebaute Shader). Wähle einen aus und schließe das Menü, um ihn zu sehen.", GRAY);
+		y = paragraph(ctx, x, y, w, "Eingebaute Shader mit Leuchten (Bloom), Kino-Farben und Filmkorn. Wählen und das Menü schließen, um sie zu sehen.", GRAY);
 		int colW = (w - 4) / 2;
 		for (int i = 0; i < Filters.LIST.length; i++) {
 			String[] f = Filters.LIST[i];
@@ -760,14 +737,15 @@ public class ArsenalScreen extends Screen {
 			border(ctx, bx, by, colW, 29, sel ? ACCENT : LINE);
 			ctx.drawTextWithShadow(textRenderer, f[1], bx + 5, by + 5, sel ? 0xFFFFFFFF : TEXT);
 			ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(f[2], colW - 10), bx + 5, by + 17, GRAY);
+			if (hov) tooltip = List.of(Text.literal(f[1]).withColor(ACCENT), Text.literal(f[2]));
 			hit(bx, by, colW, 29, true, () -> {
 				c.filter = f[0];
 				ArsenalConfig.save();
 			});
 		}
 		y += ((Filters.LIST.length + 1) / 2) * 32 + 4;
-		return paragraph(ctx, x, y, w, "Tipp: Für richtige Shader-Pakete (Schatten, Wasser …) zusätzlich Iris + Sodium installieren. "
-				+ "Arsenal funktioniert zusammen mit ihnen; die Filter hier sind dann am besten aus.", GRAY);
+		return paragraph(ctx, x, y, w, "Für Schatten, Wasser und Licht wie in großen Shader-Paketen zusätzlich Iris + Sodium installieren. "
+				+ "Arsenal läuft zusammen mit ihnen; die Shader hier dann am besten auf „Aus“.", GRAY);
 	}
 
 	// ------------------------------------------------------------------ Reiter: Tracker
@@ -848,8 +826,9 @@ public class ArsenalScreen extends Screen {
 		paragraph(ctx, x + 5, y + 4, w - 10, "Makros sind auf vielen Servern verboten. Nur dort benutzen, wo es erlaubt ist (Einzelspieler immer ok).", 0xFFFFD27A);
 		y += 40;
 
-		y = header(ctx, x, y, w, "Lunge-Swap (Speer)  –  Taste: " + keyName(ArsenalClient.lungeKey));
-		y = paragraph(ctx, x, y, w, "Wechselt blitzschnell auf den Speer, macht den Stoß mit Sprungangriff (Lunge) und wechselt zurück – so umgehst du die Abklingzeit.", GRAY);
+		y = header(ctx, x, y, w, "Lunge-Swap (Speer)");
+		y = keyRow(ctx, x, y, w, "Taste für Lunge-Swap", ArsenalClient.lungeKey);
+		y = paragraph(ctx, x, y, w, "Drückst du die Taste, wechselt die Mod blitzschnell auf den Speer, sticht mit Sprungangriff (Lunge) zu und wechselt zurück.", GRAY);
 		y = toggle(ctx, x, y, w, "Lunge-Swap an", c.lungeEnabled, v -> c.lungeEnabled = v);
 		y = toggle(ctx, x, y, w, "Nur Speere mit Sprungangriff (Lunge) benutzen", c.lungeOnlyEnchanted, v -> c.lungeOnlyEnchanted = v);
 		y = toggle(ctx, x, y, w, "Danach zurück zum alten Item", c.lungeReturn, v -> c.lungeReturn = v);
@@ -861,6 +840,7 @@ public class ArsenalScreen extends Screen {
 		y = header(ctx, x, y + 2, w, "Attribut-Swap (Streitkolben)");
 		y = paragraph(ctx, x, y, w, "Schlägst du mit Schwert oder Axt zu, wechselt die Mod genau für diesen Schlag auf den Streitkolben (Mace) und danach zurück.", GRAY);
 		y = toggle(ctx, x, y, w, "Attribut-Swap an", c.maceSwap, v -> c.maceSwap = v);
+		y = keyRow(ctx, x, y, w, "Taste: an/aus schalten", ArsenalClient.maceToggleKey);
 		y = toggle(ctx, x, y, w, "Nur beim Fallen (für den Smash-Angriff)", c.maceOnlyFalling, v -> c.maceOnlyFalling = v);
 		y = slider(ctx, x, y, w, "Mindest-Fallhöhe", 0, 10, c.maceMinFall, 0.5, fmt(c.maceMinFall) + " Blöcke", v -> c.maceMinFall = (float) v);
 		y = toggle(ctx, x, y, w, "Vom Schwert aus", c.maceFromSword, v -> c.maceFromSword = v);
@@ -869,48 +849,64 @@ public class ArsenalScreen extends Screen {
 
 		y = header(ctx, x, y + 2, w, "Schild-Brecher (Axt)");
 		y = toggle(ctx, x, y, w, "Blockt der Gegner mit Schild: für den Schlag auf die Axt wechseln", c.shieldBreaker, v -> c.shieldBreaker = v);
+		y = keyRow(ctx, x, y, w, "Taste: an/aus schalten", ArsenalClient.shieldToggleKey);
 
 		y = header(ctx, x, y + 2, w, "Schnell-Wurf");
-		y = paragraph(ctx, x, y, w, "Enderperle: Taste " + keyName(ArsenalClient.pearlKey) + "   •   Windladung: Taste " + keyName(ArsenalClient.windKey)
-				+ "\nWechselt auf das Item, wirft es und wechselt zurück.", GRAY);
+		y = keyRow(ctx, x, y, w, "Enderperle werfen", ArsenalClient.pearlKey);
+		y = keyRow(ctx, x, y, w, "Windladung werfen", ArsenalClient.windKey);
 		y = toggle(ctx, x, y, w, "Nach dem Wurf zurückwechseln", c.quickReturn, v -> c.quickReturn = v);
-		return paragraph(ctx, x, y + 2, w, "Tasten ändern: Optionen → Steuerung → Tastenbelegung → Kategorie „Arsenal“.", GRAY);
+		return paragraph(ctx, x, y + 2, w, "Taste ändern: auf den Knopf klicken und dann die gewünschte Taste (oder Maus-Seitentaste) drücken. "
+				+ "Esc = Taste entfernen.", GRAY);
 	}
 
 	private static String ticks(int t) {
 		return t + " Ticks (" + String.format("%.2f", t / 20.0).replace('.', ',') + " s)";
 	}
 
-	// ------------------------------------------------------------------ Reiter: HUD
+	// ------------------------------------------------------------------ Reiter: Tasten & HUD
+
+	private int keyRow(DrawContext ctx, int x, int y, int w, String label, KeyBinding key) {
+		boolean wait = listening == key;
+		int bw = Math.min(110, w / 2);
+		ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(label, w - bw - 8), x + 3, y + 5, TEXT);
+		button(ctx, x + w - bw, y, bw, 17, wait ? "> Taste drücken <" : keyName(key), wait, () -> listening = wait ? null : key);
+		y += 19;
+		if (!key.isUnbound() && client != null) {
+			for (KeyBinding other : client.options.allKeys) {
+				if (other != key && other.equals(key)) {
+					ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth("⚠ Auch belegt: " + Text.translatable(other.getId()).getString(), w - 6),
+							x + 3, y, 0xFFFF7060);
+					y += 11;
+					break;
+				}
+			}
+		}
+		return y + 1;
+	}
 
 	private int drawHud(DrawContext ctx, int x, int y, int w) {
 		ArsenalConfig c = ArsenalConfig.get();
-		y = header(ctx, x, y, w, "Info-Anzeige (oben links)");
+		y = header(ctx, x, y, w, "Tasten (anklicken, dann Taste drücken)");
+		y = keyRow(ctx, x, y, w, "Menü öffnen", ArsenalClient.menuKey);
+		y = keyRow(ctx, x, y, w, "Inspect (Messer ansehen)", ArsenalClient.inspectKey);
+		y = keyRow(ctx, x, y, w, "Lunge-Swap", ArsenalClient.lungeKey);
+		y = keyRow(ctx, x, y, w, "Schnell-Enderperle", ArsenalClient.pearlKey);
+		y = keyRow(ctx, x, y, w, "Schnell-Windladung", ArsenalClient.windKey);
+		y = keyRow(ctx, x, y, w, "Attribut-Swap an/aus", ArsenalClient.maceToggleKey);
+		y = keyRow(ctx, x, y, w, "Schild-Brecher an/aus", ArsenalClient.shieldToggleKey);
+		y = keyRow(ctx, x, y, w, "Zoom (halten)", ArsenalClient.zoomKey);
+		y = keyRow(ctx, x, y, w, "Tracker: jetzt suchen", ArsenalClient.trackerKey);
+		y = paragraph(ctx, x, y + 2, w, "Esc während „Taste drücken“ = Taste entfernen. Maus-Seitentasten gehen auch.", GRAY);
+
+		y = header(ctx, x, y + 2, w, "Zoom");
+		y = slider(ctx, x, y, w, "Zoom-Stärke", 1.5, 10, c.zoom, 0.5, fmt(c.zoom) + "×", v -> c.zoom = (float) v);
+
+		y = header(ctx, x, y + 2, w, "Info-Anzeige (oben links)");
 		y = toggle(ctx, x, y, w, "Info-Anzeige an", c.hudInfo, v -> c.hudInfo = v);
 		y = toggle(ctx, x, y, w, "FPS", c.hudFps, v -> c.hudFps = v);
 		y = toggle(ctx, x, y, w, "CPS (Klicks pro Sekunde, links | rechts)", c.hudCps, v -> c.hudCps = v);
 		y = toggle(ctx, x, y, w, "Koordinaten", c.hudCoords, v -> c.hudCoords = v);
 		y = toggle(ctx, x, y, w, "Himmelsrichtung", c.hudDirection, v -> c.hudDirection = v);
-		y = toggle(ctx, x, y, w, "Ping (auf Servern)", c.hudPing, v -> c.hudPing = v);
-
-		y = header(ctx, x, y + 2, w, "Zoom  –  Taste: " + keyName(ArsenalClient.zoomKey) + " (gedrückt halten)");
-		y = slider(ctx, x, y, w, "Zoom-Stärke", 1.5, 10, c.zoom, 0.5, fmt(c.zoom) + "×", v -> c.zoom = (float) v);
-
-		y = header(ctx, x, y + 2, w, "Alle Tasten");
-		String[][] keys = {
-				{"Menü öffnen", keyName(ArsenalClient.menuKey)},
-				{"Inspect (Messer ansehen)", keyName(ArsenalClient.inspectKey)},
-				{"Lunge-Swap", keyName(ArsenalClient.lungeKey)},
-				{"Schnell-Enderperle", keyName(ArsenalClient.pearlKey)},
-				{"Schnell-Windladung", keyName(ArsenalClient.windKey)},
-				{"Zoom", keyName(ArsenalClient.zoomKey)},
-				{"Tracker: jetzt suchen", keyName(ArsenalClient.trackerKey)},
-		};
-		for (String[] k : keys) {
-			ctx.drawTextWithShadow(textRenderer, k[0], x + 3, y + 2, TEXT);
-			ctx.drawTextWithShadow(textRenderer, k[1], x + w - textRenderer.getWidth(k[1]) - 3, y + 2, ACCENT);
-			y += 12;
-		}
-		return paragraph(ctx, x, y + 4, w, "Ändern unter Optionen → Steuerung → Tastenbelegung → „Arsenal“.", GRAY);
+		return toggle(ctx, x, y, w, "Ping (auf Servern)", c.hudPing, v -> c.hudPing = v);
 	}
 }

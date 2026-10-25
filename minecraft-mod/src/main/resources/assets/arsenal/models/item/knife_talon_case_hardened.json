@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_talon",
  "textures": {
-  "layer0": "arsenal:item/knife_talon_case_hardened"
+  "tex": "arsenal:item/knife_talon_case_hardened"
  }
 }

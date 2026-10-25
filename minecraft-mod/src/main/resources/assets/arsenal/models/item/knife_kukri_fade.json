@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_kukri",
  "textures": {
-  "layer0": "arsenal:item/knife_kukri_fade"
+  "tex": "arsenal:item/knife_kukri_fade"
  }
 }

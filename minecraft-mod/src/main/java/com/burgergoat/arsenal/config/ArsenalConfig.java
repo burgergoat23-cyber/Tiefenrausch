@@ -35,7 +35,22 @@ public class ArsenalConfig {
 	public float vmY = 0f;
 	public float vmZ = 0f;
 	public float vmScale = 1f;
+	public float vmRotX = 0f;
+	public float vmRotY = 0f;
+	public float vmRotZ = 0f;
+	/** Linke (zweite) Hand eigene Werte statt gespiegelt */
+	public boolean vmOffSeparate = false;
+	public float vmOffX = 0f;
+	public float vmOffY = 0f;
+	public float vmOffZ = 0f;
+	public float vmOffScale = 1f;
+	public float vmOffRotX = 0f;
+	public float vmOffRotY = 0f;
+	public float vmOffRotZ = 0f;
 	public boolean inspect = true;
+	public boolean drawAnim = true;
+	public boolean knifeSounds = true;
+	public float animSpeed = 1f;
 
 	// ---- Fadenkreuz
 	public boolean chEnabled = false;

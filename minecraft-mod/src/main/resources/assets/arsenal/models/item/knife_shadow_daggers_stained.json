@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_shadow_daggers",
  "textures": {
-  "layer0": "arsenal:item/knife_shadow_daggers_stained"
+  "tex": "arsenal:item/knife_shadow_daggers_stained"
  }
 }

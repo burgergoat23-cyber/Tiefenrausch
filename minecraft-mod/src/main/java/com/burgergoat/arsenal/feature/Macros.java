@@ -41,6 +41,11 @@ public final class Macros {
 	private Macros() {
 	}
 
+	/** Laeuft gerade ein Makro (dann keine Zieh-Animation beim schnellen Wechseln). */
+	public static boolean isBusy() {
+		return busy;
+	}
+
 	public static void tick(MinecraftClient client) {
 		tick++;
 		if (client.player == null || client.interactionManager == null) {

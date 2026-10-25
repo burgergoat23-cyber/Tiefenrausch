@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_survival",
  "textures": {
-  "layer0": "arsenal:item/knife_survival_emerald"
+  "tex": "arsenal:item/knife_survival_emerald"
  }
 }

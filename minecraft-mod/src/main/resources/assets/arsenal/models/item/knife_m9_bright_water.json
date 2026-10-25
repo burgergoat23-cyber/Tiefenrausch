@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_m9",
  "textures": {
-  "layer0": "arsenal:item/knife_m9_bright_water"
+  "tex": "arsenal:item/knife_m9_bright_water"
  }
 }

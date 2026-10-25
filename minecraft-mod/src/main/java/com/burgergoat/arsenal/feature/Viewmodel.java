@@ -1,54 +1,124 @@
 package com.burgergoat.arsenal.feature;
 
+import com.burgergoat.arsenal.anim.KnifeAnimations;
 import com.burgergoat.arsenal.config.ArsenalConfig;
 import com.burgergoat.arsenal.skin.SkinCatalog;
 import com.burgergoat.arsenal.skin.SkinManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 
-/** Position/Groesse der Hand (wie viewmodel_offset in CS) und die Inspect-Animation. */
+/**
+ * Viewmodel wie in CS: Hand verschieben, drehen und skalieren (rechte und linke Hand),
+ * dazu Zieh- und Inspect-Animationen je Messer.
+ */
 public final class Viewmodel {
-	public static final int INSPECT_TICKS = 46;
-	private static int inspect = -1;
-	private static int style;
-	private static int inspectSlot = -1;
+	private static KnifeAnimations.Anim anim;
+	private static boolean animIsDraw;
+	private static float animTime = -1f;
+	private static float lastAnimTime = -1f;
+	private static int animSlot = -1;
+	private static int lastSlot = -1;
+	private static Item lastItem;
+	private static int cueIndex;
 
 	private Viewmodel() {
+	}
+
+	// ------------------------------------------------------------------ Steuerung
+
+	private static String knifeShape(ItemStack stack) {
+		SkinCatalog.Skin skin = SkinManager.skinFor(stack);
+		if (skin != null && skin.shape() != null) return skin.shape().id();
+		return null;
 	}
 
 	public static void startInspect(MinecraftClient client) {
 		if (!ArsenalConfig.get().inspect || client.player == null) return;
 		ItemStack held = client.player.getMainHandStack();
 		if (held.isEmpty()) return;
-		style = 0;
-		SkinCatalog.Skin skin = SkinManager.skinFor(held);
-		if (skin != null && skin.shape() != null) {
-			String s = skin.shape().id();
-			if (s.equals("butterfly")) style = 2;
-			else if (s.equals("karambit") || s.equals("talon")) style = 1;
-			else if (s.equals("shadow_daggers") || s.equals("navaja") || s.equals("stiletto")) style = 3;
-		}
-		inspect = 0;
-		inspectSlot = client.player.getInventory().getSelectedSlot();
+		String shape = knifeShape(held);
+		start(client, shape == null ? KnifeAnimations.INSPECT_LOOK : KnifeAnimations.inspect(shape), false);
 	}
 
-	public static void tick(MinecraftClient client) {
-		if (inspect < 0) return;
-		inspect++;
-		boolean stop = inspect > INSPECT_TICKS || client.player == null
-				|| client.player.getInventory().getSelectedSlot() != inspectSlot
-				|| client.options.attackKey.isPressed() || client.options.useKey.isPressed();
-		if (stop) inspect = -1;
+	public static void playDraw(MinecraftClient client) {
+		if (client.player == null) return;
+		String shape = knifeShape(client.player.getMainHandStack());
+		start(client, shape == null ? KnifeAnimations.DRAW_RAISE : KnifeAnimations.draw(shape), true);
+	}
+
+	private static void start(MinecraftClient client, KnifeAnimations.Anim a, boolean draw) {
+		anim = a;
+		animIsDraw = draw;
+		animTime = 0f;
+		lastAnimTime = 0f;
+		cueIndex = 0;
+		animSlot = client.player.getInventory().getSelectedSlot();
+	}
+
+	public static void stop() {
+		anim = null;
+		animTime = -1f;
+		lastAnimTime = -1f;
 	}
 
 	public static boolean inspecting() {
-		return inspect >= 0;
+		return anim != null && !animIsDraw;
 	}
+
+	public static boolean drawing() {
+		return anim != null && animIsDraw;
+	}
+
+	public static void tick(MinecraftClient client) {
+		if (client.player == null) {
+			stop();
+			lastSlot = -1;
+			lastItem = null;
+			return;
+		}
+		ArsenalConfig c = ArsenalConfig.get();
+		int slot = client.player.getInventory().getSelectedSlot();
+		ItemStack held = client.player.getMainHandStack();
+		Item item = held.isEmpty() ? null : held.getItem();
+		boolean changed = lastSlot != -1 && (slot != lastSlot || item != lastItem);
+		lastSlot = slot;
+		lastItem = item;
+		if (changed) {
+			stop();
+			String shape = knifeShape(held);
+			if (shape != null && c.drawAnim && !Macros.isBusy()) start(client, KnifeAnimations.draw(shape), true);
+		}
+		if (anim == null) return;
+		lastAnimTime = animTime;
+		animTime += Math.max(0.25f, c.animSpeed);
+		boolean interrupted = slot != animSlot
+				|| (!animIsDraw && (client.options.attackKey.isPressed() || client.options.useKey.isPressed()));
+		playCues(client);
+		if (animTime >= anim.ticks() || interrupted) stop();
+	}
+
+	private static void playCues(MinecraftClient client) {
+		if (!ArsenalConfig.get().knifeSounds) return;
+		KnifeAnimations.Cue[] cues = anim.cues();
+		float t = animTime / anim.ticks();
+		while (cueIndex < cues.length && cues[cueIndex].t() <= t) {
+			SoundEvent s = cues[cueIndex].sound() == 0 ? SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP : SoundEvents.BLOCK_TRIPWIRE_CLICK_ON;
+			float pitch = cues[cueIndex].sound() == 0 ? 1.75f + client.player.getRandom().nextFloat() * 0.2f : 1.9f;
+			client.getSoundManager().play(PositionedSoundInstance.ui(s, pitch, cues[cueIndex].sound() == 0 ? 0.18f : 0.35f));
+			cueIndex++;
+		}
+	}
+
+	// ------------------------------------------------------------------ Zeichnen
 
 	private static int side(Hand hand) {
 		MinecraftClient mc = MinecraftClient.getInstance();
@@ -57,39 +127,48 @@ public final class Viewmodel {
 		return arm == Arm.RIGHT ? 1 : -1;
 	}
 
+	private static boolean useOff(Hand hand) {
+		return hand == Hand.OFF_HAND && ArsenalConfig.get().vmOffSeparate;
+	}
+
+	/** Nach matrices.push(): Position der ganzen Hand (mit Arm). */
 	public static void applyOffset(MatrixStack matrices, Hand hand) {
 		ArsenalConfig c = ArsenalConfig.get();
-		if (c.vmX == 0 && c.vmY == 0 && c.vmZ == 0) return;
-		matrices.translate(side(hand) * c.vmX * 0.5f, c.vmY * 0.5f, c.vmZ * 0.5f);
+		boolean off = useOff(hand);
+		float x = off ? c.vmOffX : c.vmX;
+		float y = off ? c.vmOffY : c.vmY;
+		float z = off ? c.vmOffZ : c.vmZ;
+		if (x == 0 && y == 0 && z == 0) return;
+		matrices.translate(side(hand) * x * 0.5f, y * 0.5f, z * 0.5f);
 	}
 
-	private static float smooth(float t) {
-		t = MathHelper.clamp(t, 0f, 1f);
-		return t * t * (3f - 2f * t);
-	}
-
+	/** Direkt vor dem Zeichnen des Items: Drehung, Groesse und Animation. */
 	public static void applyItem(MatrixStack matrices, Hand hand, ItemStack item, float tickProgress) {
 		ArsenalConfig c = ArsenalConfig.get();
-		if (c.vmScale != 1f) {
-			float s = MathHelper.clamp(c.vmScale, 0.2f, 2f);
+		boolean off = useOff(hand);
+		int sd = side(hand);
+		float rx = off ? c.vmOffRotX : c.vmRotX;
+		float ry = off ? c.vmOffRotY : c.vmRotY;
+		float rz = off ? c.vmOffRotZ : c.vmRotZ;
+		float scale = off ? c.vmOffScale : c.vmScale;
+		if (rx != 0) matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rx));
+		if (ry != 0) matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(sd * ry));
+		if (rz != 0) matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(sd * rz));
+		if (scale != 1f) {
+			float s = MathHelper.clamp(scale, 0.2f, 2f);
 			matrices.scale(s, s, s);
 		}
-		if (inspect < 0 || hand != Hand.MAIN_HAND) return;
-		float t = MathHelper.clamp((inspect + tickProgress) / INSPECT_TICKS, 0f, 1f);
-		float env = t < 0.2f ? smooth(t / 0.2f) : t > 0.82f ? smooth((1f - t) / 0.18f) : 1f;
-		float mid = smooth((t - 0.18f) / 0.64f);
-		int sd = side(hand);
-		matrices.translate(-0.08f * sd * env, 0.12f * env, 0.06f * env);
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(sd * 28f * env));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(sd * -25f * env));
-		switch (style) {
-			case 1 -> matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-720f * mid));
-			case 2 -> {
-				matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(sd * 720f * mid));
-				matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(25f * (float) Math.sin(mid * Math.PI * 4)));
-			}
-			case 3 -> matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(sd * 360f * mid));
-			default -> matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(sd * 180f * (float) Math.sin(mid * Math.PI)));
-		}
+		if (anim == null || hand != Hand.MAIN_HAND) return;
+		float time = MathHelper.lerp(tickProgress, lastAnimTime, animTime);
+		float[] v = anim.sample(MathHelper.clamp(time / anim.ticks(), 0f, 1f));
+		matrices.translate(sd * v[0], v[1], v[2]);
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(sd * v[4]));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(v[3]));
+		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(sd * v[5]));
+	}
+
+	/** Waehrend der Zieh-Animation soll das Item nicht zusaetzlich von unten hochfahren. */
+	public static float equipProgress(Hand hand, float original) {
+		return hand == Hand.MAIN_HAND && drawing() ? 0f : original;
 	}
 }

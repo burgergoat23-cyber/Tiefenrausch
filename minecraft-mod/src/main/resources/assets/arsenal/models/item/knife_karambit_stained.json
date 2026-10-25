@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "arsenal:item/knife_shape_karambit",
  "textures": {
-  "layer0": "arsenal:item/knife_karambit_stained"
+  "tex": "arsenal:item/knife_karambit_stained"
  }
 }
