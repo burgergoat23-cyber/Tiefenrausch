@@ -35,6 +35,8 @@ public final class Macros {
 	private static int tick;
 	private static boolean busy;
 	private static boolean internalAttack;
+	/** Zaehler fuer den automatischen Test. */
+	public static int attributeSwaps;
 
 	private Macros() {
 	}
@@ -169,6 +171,7 @@ public final class Macros {
 			int mace = find(p, s -> s.isOf(Items.MACE));
 			if (mace >= 0) {
 				busy = true;
+				attributeSwaps++;
 				select(client, mace);
 				swapBackLater(client, mace, current, Math.max(1, c.maceReturnDelay));
 				return;

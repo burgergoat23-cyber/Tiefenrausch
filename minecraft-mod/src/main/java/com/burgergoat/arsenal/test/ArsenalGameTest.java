@@ -2,6 +2,7 @@ package com.burgergoat.arsenal.test;
 
 import com.burgergoat.arsenal.ArsenalClient;
 import com.burgergoat.arsenal.config.ArsenalConfig;
+import com.burgergoat.arsenal.feature.Macros;
 import com.burgergoat.arsenal.feature.Viewmodel;
 import com.burgergoat.arsenal.gui.ArsenalScreen;
 import com.burgergoat.arsenal.tracker.StructureTracker;
@@ -115,7 +116,8 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			int maceDuring = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
 			ctx.waitTicks(10);
 			int maceAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
-			ArsenalClient.LOG.info("TEST Attribut-Swap: Ziel={} waehrend={} danach={} (erwartet 3 und 2)", target, maceDuring, maceAfter);
+			int swaps = ctx.computeOnClient(mc -> Macros.attributeSwaps);
+			ArsenalClient.LOG.info("TEST Attribut-Swap: Ziel={} Swaps={} waehrend={} danach={} (erwartet Swaps=1, danach 2)", target, swaps, maceDuring, maceAfter);
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(25);
 

@@ -787,6 +787,24 @@ public class ArsenalScreen extends Screen {
 		ctx.drawTextWithShadow(textRenderer, "Status: " + StructureTracker.status(), x + 2, y, GRAY);
 		y += 13;
 
+		y = header(ctx, x, y, w, "Gefunden");
+		List<StructureTracker.Found> found = client == null || client.player == null ? List.of() : StructureTracker.results(client);
+		if (found.isEmpty()) {
+			y = paragraph(ctx, x, y, w, "Noch nichts gefunden.", GRAY);
+		} else {
+			int shown = 0;
+			for (StructureTracker.Found f : found) {
+				if (shown++ >= 10) break;
+				BlockPos p = f.pos();
+				ctx.drawTextWithShadow(textRenderer, StructureTracker.arrow(client, p) + " " + f.type().label, x + 2, y + 3, f.type().color);
+				String info = "X " + p.getX() + "  Z " + p.getZ() + "   " + StructureTracker.distance(client, p);
+				ctx.drawTextWithShadow(textRenderer, info, x + w - 26 - textRenderer.getWidth(info), y + 3, TEXT);
+				button(ctx, x + w - 20, y, 18, 14, "✕", false, () -> StructureTracker.ignore(p));
+				y += 16;
+			}
+			y += 4;
+		}
+
 		y = typeGroup(ctx, x, y, w, "Nether", new TrackType[]{TrackType.BASTION, TrackType.FORTRESS, TrackType.RUINED_PORTAL});
 		y = typeGroup(ctx, x, y, w, "Das Ende", new TrackType[]{TrackType.END_CITY, TrackType.END_SHIP});
 		y = typeGroup(ctx, x, y, w, "Oberwelt", new TrackType[]{TrackType.STRONGHOLD, TrackType.ANCIENT_CITY, TrackType.TRIAL_CHAMBERS,
@@ -801,20 +819,6 @@ public class ArsenalScreen extends Screen {
 		y = toggle(ctx, x, y, w, "Auf Servern erlauben (nur geladene Chunks)", c.trackerServers, v -> c.trackerServers = v);
 		y = paragraph(ctx, x, y, w, "Achtung: Manche Server verbieten solche Hilfen. Vorher die Regeln lesen.", 0xFFE0C070);
 
-		y = header(ctx, x, y, w, "Gefunden");
-		if (client == null || client.player == null) return y;
-		List<StructureTracker.Found> found = StructureTracker.results(client);
-		if (found.isEmpty()) return paragraph(ctx, x, y, w, "Noch nichts gefunden.", GRAY);
-		int shown = 0;
-		for (StructureTracker.Found f : found) {
-			if (shown++ >= 16) break;
-			BlockPos p = f.pos();
-			ctx.drawTextWithShadow(textRenderer, StructureTracker.arrow(client, p) + " " + f.type().label, x + 2, y + 3, f.type().color);
-			String info = "X " + p.getX() + "  Z " + p.getZ() + "   " + StructureTracker.distance(client, p);
-			ctx.drawTextWithShadow(textRenderer, info, x + w - 26 - textRenderer.getWidth(info), y + 3, TEXT);
-			button(ctx, x + w - 20, y, 18, 14, "✕", false, () -> StructureTracker.ignore(p));
-			y += 16;
-		}
 		return y;
 	}
 
