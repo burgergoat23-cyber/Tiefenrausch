@@ -847,7 +847,7 @@ def shield_model(name, blocking):
         "elements": [
             {"from": [-6, -11, 1], "to": [6, 11, 2], "faces": {
                 "south": {"uv": [0, 0, 6, 11], "texture": "#shield"},
-                "north": {"uv": [6, 0, 12, 11], "texture": "#shield"},
+                "north": {"uv": [0, 0, 6, 11], "texture": "#shield"},
                 "east": {"uv": edge_ns, "texture": "#shield"},
                 "west": {"uv": edge_ns, "texture": "#shield"},
                 "up": {"uv": edge_ud, "texture": "#shield"},
@@ -1112,7 +1112,7 @@ def main():
              [m + '_sword' for m in mats], knife_start, knife_end)
     tool_cat('axe', 'Äxte', axes(), TOOL_FINISHES, 'minecraft:item/handheld', 32,
              [m + '_axe' for m in mats], (3.0, 30.0), (29.0, 3.0))
-    tool_cat('mace', 'Streitkolben', maces(), TOOL_FINISHES, 'minecraft:item/handheld_mace', 32,
+    tool_cat('mace', 'Kolben', maces(), TOOL_FINISHES, 'minecraft:item/handheld_mace', 32,
              ['mace'], (3.0, 30.0), (29.0, 3.0))
     tool_cat('spear', 'Speere', spears(), TOOL_FINISHES, None, 32,
              [m + '_spear' for m in mats], (31.0, 31.0), (0.5, 0.5), spear=True)
@@ -1146,11 +1146,11 @@ def main():
                      "finishes": [{"id": e, "name": n, "rarity": r} for e, n, r in entries]})
         previews[cid] = [row]
 
-    flat_cat('grenade', 'Enderperlen', ['ender_pearl'], [
+    flat_cat('grenade', 'Perlen', ['ender_pearl'], [
         ('he', 'HE-Granate', 3), ('flash', 'Blendgranate', 3), ('smoke', 'Rauchgranate', 3),
         ('molotov', 'Molotow', 4), ('incendiary', 'Brandgranate', 4), ('decoy', 'Lockvogel', 2),
         ('ta', 'Taktische Granate', 5)], grenade)
-    flat_cat('wind', 'Windladungen', ['wind_charge'], [
+    flat_cat('wind', 'Wind', ['wind_charge'], [
         ('smoke_bomb', 'Rauchbombe', 3), ('vortex', 'Wirbel', 4), ('lightning', 'Blitzkugel', 5),
         ('frost', 'Frostkugel', 4)], wind_skin)
     flat_cat('totem', 'Totems', ['totem_of_undying'], [

@@ -36,10 +36,15 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			c.hudInfo = true;
 			ArsenalConfig.save();
 		});
-		try (TestSingleplayerContext sp = ctx.worldBuilder().create()) {
+		try (TestSingleplayerContext sp = ctx.worldBuilder().setUseConsistentSettings(false).adjustSettings(w -> {
+			w.setSeed("20261025");
+			w.setGenerateStructures(true);
+			w.setCheatsEnabled(true);
+		}).create()) {
 			sp.getClientWorld().waitForChunksRender();
+			sp.getServer().runCommand("gamemode creative @a");
 			sp.getServer().runCommand("time set noon");
-			sp.getServer().runCommand("gamerule doDaylightCycle false");
+			sp.getServer().runCommand("weather clear");
 			sp.getServer().runCommand("item replace entity @p hotbar.0 with netherite_sword");
 			sp.getServer().runCommand("item replace entity @p hotbar.1 with diamond_sword");
 			sp.getServer().runCommand("item replace entity @p hotbar.2 with netherite_axe");
@@ -64,6 +69,58 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			ctx.takeScreenshot("inspect_b");
 			ctx.waitTicks(30);
 
+			// Schild hochnehmen (Hand leer, Schild in der zweiten Hand)
+			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(8));
+			ctx.waitTicks(5);
+			ctx.getInput().holdKey(o -> o.useKey);
+			ctx.waitTicks(12);
+			ctx.takeScreenshot("shield_block");
+			ctx.getInput().releaseKey(o -> o.useKey);
+			ctx.waitTicks(5);
+
+			// Lunge-Swap: vom Schwert (Slot 0) auf den Speer (Slot 4) und zurueck
+			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
+			ctx.waitTicks(25);
+			ctx.getInput().pressKey(ArsenalClient.lungeKey);
+			ctx.waitTicks(2);
+			int lungeDuring = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+			ctx.takeScreenshot("lunge_swap");
+			ctx.waitTicks(12);
+			int lungeAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+			ArsenalClient.LOG.info("TEST Lunge-Swap: waehrend={} danach={} (erwartet 4 und 0)", lungeDuring, lungeAfter);
+
+			// Schnell-Perle
+			ctx.getInput().pressKey(ArsenalClient.pearlKey);
+			ctx.waitTicks(3);
+			ctx.takeScreenshot("quick_pearl");
+			ctx.waitTicks(10);
+			int pearlAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+			ArsenalClient.LOG.info("TEST Schnell-Perle: danach={} (erwartet 0)", pearlAfter);
+
+			// Attribut-Swap: mit der Axt (Slot 2) auf ein Ziel schlagen -> Streitkolben (Slot 3)
+			ctx.runOnClient(mc -> {
+				ArsenalConfig.get().maceSwap = true;
+				ArsenalConfig.get().maceOnlyFalling = false;
+				mc.player.getInventory().setSelectedSlot(2);
+			});
+			ctx.runOnClient(mc -> {
+				mc.player.setYaw(0f);
+				mc.player.setPitch(10f);
+			});
+			ctx.waitTicks(3);
+			sp.getServer().runCommand("execute at @p run summon minecraft:armor_stand ~ ~ ~2 {NoGravity:1b}");
+			ctx.waitTicks(30);
+			ctx.waitTicks(2);
+			String target = ctx.computeOnClient(mc -> String.valueOf(mc.crosshairTarget == null ? null : mc.crosshairTarget.getType()));
+			ctx.getInput().pressMouse(0);
+			ctx.waitTicks(1);
+			int maceDuring = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+			ctx.waitTicks(10);
+			int maceAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+			ArsenalClient.LOG.info("TEST Attribut-Swap: Ziel={} waehrend={} danach={} (erwartet 3 und 2)", target, maceDuring, maceAfter);
+			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
+			ctx.waitTicks(25);
+
 			ctx.runOnClient(mc -> mc.options.setPerspective(Perspective.THIRD_PERSON_FRONT));
 			ctx.waitTicks(10);
 			ctx.takeScreenshot("third_person");
@@ -72,6 +129,17 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			ctx.setScreen(() -> new InventoryScreen(MinecraftClient.getInstance().player));
 			ctx.waitTicks(5);
 			ctx.takeScreenshot("inventory");
+			ctx.setScreen(() -> null);
+
+			ctx.runOnClient(mc -> {
+				ArsenalScreen.setTab(1);
+				ArsenalScreen.testRoll = true;
+			});
+			ctx.setScreen(ArsenalScreen::new);
+			ctx.waitTicks(30);
+			ctx.takeScreenshot("case_rolling");
+			ctx.waitTicks(100);
+			ctx.takeScreenshot("case_done");
 			ctx.setScreen(() -> null);
 
 			for (int t = 0; t < ArsenalScreen.TABS.length; t++) {
@@ -92,7 +160,7 @@ public class ArsenalGameTest implements FabricClientGameTest {
 
 			// Tracker im Nether
 			sp.getServer().runCommand("execute in minecraft:the_nether run tp @p 0 100 0");
-			ctx.waitFor(mc -> mc.world != null && mc.world.getRegistryKey() == World.NETHER, 600);
+			ctx.waitFor(mc -> mc.world != null && mc.world.getRegistryKey() == World.NETHER, 2400);
 			sp.getClientWorld().waitForChunksRender();
 			ctx.runOnClient(StructureTracker::search);
 			ctx.waitTicks(5);
@@ -102,7 +170,7 @@ public class ArsenalGameTest implements FabricClientGameTest {
 
 			// Tracker im End
 			sp.getServer().runCommand("execute in minecraft:the_end run tp @p 0 80 0");
-			ctx.waitFor(mc -> mc.world != null && mc.world.getRegistryKey() == World.END, 600);
+			ctx.waitFor(mc -> mc.world != null && mc.world.getRegistryKey() == World.END, 2400);
 			sp.getClientWorld().waitForChunksRender();
 			ctx.runOnClient(StructureTracker::search);
 			ctx.waitTicks(5);

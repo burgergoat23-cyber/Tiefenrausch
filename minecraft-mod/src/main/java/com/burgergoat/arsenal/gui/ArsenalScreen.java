@@ -47,6 +47,8 @@ public class ArsenalScreen extends Screen {
 	private static String skinTarget = "*";
 	private static String skinShape;
 	private static String caseCat = "knife";
+	/** Nur fuer den automatischen Test: Kiste beim Oeffnen sofort drehen. */
+	public static boolean testRoll;
 
 	private record Hit(int x, int y, int w, int h, boolean content, @Nullable Runnable click, @Nullable DoubleConsumer drag) {
 	}
@@ -579,6 +581,10 @@ public class ArsenalScreen extends Screen {
 		});
 		SkinCatalog.Category cat = SkinCatalog.category(caseCat);
 		if (cat == null) return y;
+		if (testRoll) {
+			testRoll = false;
+			roll = new CaseRoll(cat);
+		}
 		int stripY = y + 4;
 		int stripH = 56;
 		ctx.fill(x, stripY, x + w, stripY + stripH, 0xFF0C1015);
@@ -610,7 +616,7 @@ public class ArsenalScreen extends Screen {
 				if (client != null) client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.ENTITY_PLAYER_LEVELUP, 1.2f, 0.6f));
 			}
 		} else {
-			ctx.drawCenteredTextWithShadow(textRenderer, "Drücke „Kiste öffnen“", x + w / 2, stripY + 24, GRAY);
+			ctx.drawTextWithShadow(textRenderer, "Drücke „Kiste öffnen“", x + 8, stripY + 24, GRAY);
 		}
 		ctx.disableScissor();
 		ctx.fill(x + w / 2, stripY - 3, x + w / 2 + 1, stripY + stripH + 3, ACCENT);
@@ -659,23 +665,23 @@ public class ArsenalScreen extends Screen {
 
 		int yy = y;
 		yy = toggle(ctx, x, yy, lw, "Eigenes Fadenkreuz benutzen", c.chEnabled, v -> c.chEnabled = v);
-		ctx.drawTextWithShadow(textRenderer, "Stil", x + 3, yy + 4, GRAY);
-		int sw = (lw - 30) / Crosshair.STYLES.length;
+		int sw = (lw - 2) / 2;
 		for (int i = 0; i < Crosshair.STYLES.length; i++) {
 			int idx = i;
-			button(ctx, x + 28 + i * sw, yy, sw - 2, 16, Crosshair.STYLES[i], c.chStyle == i, () -> {
+			button(ctx, x + (i % 2) * (sw + 2), yy + (i / 2) * 18, sw, 16, Crosshair.STYLES[i], c.chStyle == i, () -> {
 				c.chStyle = idx;
 				changed();
 			});
 		}
-		yy += 20;
+		yy += 38;
 		ctx.drawTextWithShadow(textRenderer, "Farbe", x + 3, yy + 4, GRAY);
+		int swatch = Math.max(10, Math.min(15, (lw - 40) / Crosshair.COLORS.length - 2));
 		for (int i = 0; i < Crosshair.COLORS.length; i++) {
 			int col = Crosshair.COLORS[i];
-			int sx = x + 34 + i * 17;
-			ctx.fill(sx, yy, sx + 15, yy + 15, 0xFF000000 | col);
-			if ((c.chColor & 0xFFFFFF) == col) border(ctx, sx - 1, yy - 1, 17, 17, 0xFFFFFFFF);
-			hit(sx, yy, 15, 15, true, () -> {
+			int sx = x + 38 + i * (swatch + 2);
+			ctx.fill(sx, yy, sx + swatch, yy + swatch, 0xFF000000 | col);
+			if ((c.chColor & 0xFFFFFF) == col) border(ctx, sx - 1, yy - 1, swatch + 2, swatch + 2, 0xFFFFFFFF);
+			hit(sx, yy, swatch, swatch, true, () -> {
 				c.chColor = col;
 				changed();
 			});

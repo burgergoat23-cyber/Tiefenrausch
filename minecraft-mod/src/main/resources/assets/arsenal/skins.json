@@ -367,7 +367,7 @@
   },
   {
    "id": "mace",
-   "name": "Streitkolben",
+   "name": "Kolben",
    "items": [
     "mace"
    ],
@@ -691,7 +691,7 @@
   },
   {
    "id": "grenade",
-   "name": "Enderperlen",
+   "name": "Perlen",
    "items": [
     "ender_pearl"
    ],
@@ -736,7 +736,7 @@
   },
   {
    "id": "wind",
-   "name": "Windladungen",
+   "name": "Wind",
    "items": [
     "wind_charge"
    ],
