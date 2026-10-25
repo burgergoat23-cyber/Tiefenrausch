@@ -103,12 +103,10 @@ public class ArsenalGameTest implements FabricClientGameTest {
 				ArsenalConfig.get().maceOnlyFalling = false;
 				mc.player.getInventory().setSelectedSlot(2);
 			});
-			ctx.runOnClient(mc -> {
-				mc.player.setYaw(0f);
-				mc.player.setPitch(10f);
-			});
-			ctx.waitTicks(3);
-			sp.getServer().runCommand("execute at @p run summon minecraft:armor_stand ~ ~ ~2 {NoGravity:1b}");
+			sp.getServer().runCommand("execute at @p run fill ~-3 ~30 ~-3 ~3 ~30 ~6 minecraft:glass");
+			sp.getServer().runCommand("execute at @p run tp @p ~ ~31 ~ 0 0");
+			ctx.waitTicks(20);
+			sp.getServer().runCommand("execute at @p run summon minecraft:husk ~ ~ ~2.5 {NoAI:1b,PersistenceRequired:1b}");
 			ctx.waitTicks(30);
 			ctx.waitTicks(2);
 			String target = ctx.computeOnClient(mc -> String.valueOf(mc.crosshairTarget == null ? null : mc.crosshairTarget.getType()));
