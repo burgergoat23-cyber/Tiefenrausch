@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createRegistry } from '../sources/registry';
 import type { MusicSource, SourceId } from '../sources/types';
 import { track } from '../test/fixtures';
-import { loadCatalogPage, mergeUnique } from './catalog';
+import { countCatalog, loadCatalogPage, mergeUnique } from './catalog';
 
 function src(id: SourceId, total: number, extra: Partial<MusicSource> = {}): MusicSource {
   return {
@@ -50,5 +50,17 @@ describe('Katalog zum Durchblättern', () => {
     expect(
       mergeUnique([track('a')], [track('a'), track('b'), track('b')]).map((t) => t.id),
     ).toEqual(['a', 'b']);
+  });
+});
+
+describe('Gesamtzahl', () => {
+  it('zählt nur Quellen, die eine Zahl verraten', async () => {
+    const reg = createRegistry([
+      src('audius', 10),
+      src('jamendo', 10, { countTracks: async () => 41250 }),
+      src('archive', 10, { countTracks: async () => 8750 }),
+    ]);
+    const c = await countCatalog(reg, 'Drill', { isEnabled: () => true });
+    expect(c).toEqual({ total: 50000, counted: ['jamendo', 'archive'], uncounted: ['audius'] });
   });
 });

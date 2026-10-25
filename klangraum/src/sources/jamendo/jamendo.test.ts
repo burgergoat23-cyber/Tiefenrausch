@@ -136,3 +136,16 @@ describe('Jamendo-Adapter', () => {
     expect(parseCcLicense(null)).toBeUndefined();
   });
 });
+
+describe('Jamendo: Gesamtzahl', () => {
+  it('liest results_fullcount', async () => {
+    const fetch = async (url: string) => {
+      expect(url).toContain('fullcount=true');
+      return new Response(
+        JSON.stringify({ headers: { status: 'success', results_fullcount: 1234 }, results: [] }),
+      );
+    };
+    const s = new JamendoSource({ getClientId: () => 'abc', fetch });
+    expect(await s.countTracks('drill')).toBe(1234);
+  });
+});

@@ -230,6 +230,11 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
         results,
       });
     if (url.pathname === '/v3.0/tracks/') {
+      if (url.searchParams.get('fullcount') === 'true')
+        return json(route, {
+          headers: { status: 'success', code: 0, results_count: 1, results_fullcount: 41250 },
+          results: [jamendoTrack(0)],
+        });
       const id = url.searchParams.get('id');
       if (id) return ok([jamendoTrack(Number(id) - 1000)]);
       const q = url.searchParams.get('search');
@@ -243,6 +248,8 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
     const url = new URL(route.request().url());
     const p = url.pathname;
     if (p === '/advancedsearch.php') {
+      if (url.searchParams.get('rows') === '0')
+        return json(route, { response: { numFound: 8750, docs: [] } });
       return json(route, {
         response: {
           docs: [

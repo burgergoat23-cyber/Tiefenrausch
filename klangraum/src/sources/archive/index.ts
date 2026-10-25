@@ -42,7 +42,7 @@ const docSchema = z.object({
 type Doc = z.infer<typeof docSchema>;
 
 const searchResponseSchema = z.object({
-  response: z.object({ docs: z.array(z.unknown()) }),
+  response: z.object({ docs: z.array(z.unknown()), numFound: z.coerce.number().optional() }),
 });
 
 const fileSchema = z.object({
@@ -145,6 +145,31 @@ export class ArchiveSource implements MusicSource {
 
   async isAvailable(): Promise<boolean> {
     return true;
+  }
+
+  /**
+   * Anzahl der Aufnahmen mit klarer Lizenz (Konzerte des Live Music Archive + Netlabels mit Lizenz).
+   * Jede Aufnahme hat mindestens einen Song – die Zahl ist also eine Untergrenze.
+   */
+  async countTracks(query: string, signal?: AbortSignal): Promise<number> {
+    const q = cleanQuery(query);
+    if (!q) return 0;
+    const params = new URLSearchParams();
+    params.set(
+      'q',
+      `(${q}) AND mediatype:audio AND (collection:etree OR (collection:netlabels AND licenseurl:[* TO *]))`,
+    );
+    params.append('fl[]', 'identifier');
+    params.set('rows', '0');
+    params.set('output', 'json');
+    const json = await getJson(
+      this.fetchImpl,
+      'archive',
+      `${ARCHIVE_ORIGIN}/advancedsearch.php?${params.toString()}`,
+      { signal },
+    );
+    const r = searchResponseSchema.safeParse(json);
+    return r.success ? (r.data.response.numFound ?? 0) : 0;
   }
 
   private async searchDocs(

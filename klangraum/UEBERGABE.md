@@ -154,7 +154,9 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
 - **Entdecken** (`/entdecken`, `library/catalog.ts`): blättert Audius/Jamendo/Archive nach Genre seitenweise
   (50 je Quelle), lädt beim Scrollen nach (max. 1500 Zeilen sichtbar, danach Knopf), hört nach 2 Seiten ohne
   Neues auf. **Endlos-Mix** = `useStation`; Autoplay holt dann die nächste Katalog-Seite. Handy-Leiste:
-  Entdecken statt Radio (Radio-Knopf auf Entdecken).
+  Entdecken statt Radio (Radio-Knopf auf Entdecken). 36 Genres. Anzeige „Mindestens X Songs“ =
+  `countCatalog` (Jamendo `fullcount=true` → `results_fullcount`, Archive `rows=0` → `numFound` nur mit
+  Lizenz/etree; Audius verrät keine Zahl und wird als „noch mehr“ genannt).
 - Künstlern folgen (= Lieblingskünstler), Warteschlange als Playlist, Suche zeigt Bibliotheks-Treffer,
   Mini-Player: Herz (PC), Wischen = nächster/vorheriger Song. Einstellungen jetzt v6.
 

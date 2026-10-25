@@ -110,6 +110,8 @@ export interface MusicSource {
   getArtist?(id: string): Promise<Artist>;
   getPlaylist?(id: string): Promise<Playlist>;
   getTrending?(): Promise<Track[]>;
+  /** Wie viele abspielbare Songs es zur Suche insgesamt gibt (fehlt = die Quelle verrät es nicht) */
+  countTracks?(query: string, signal?: AbortSignal): Promise<number>;
   /** 'url' = wir spielen selbst über <audio> ab; 'external' = Quelle spielt selbst ab (Spotify) */
   playbackMode: 'url' | 'external';
   getStreamUrl?(track: Track): Promise<string>;

@@ -5,13 +5,14 @@ test('Entdecken lädt beim Scrollen nach, Endlos-Mix spielt weiter', async ({ pa
   await mockMusicApis(page, { audioSeconds: 2 });
   await page.goto('/#/entdecken');
   await expect(page.getByRole('heading', { level: 1, name: 'Entdecken' })).toBeVisible();
-  const count = page.getByTestId('discover-count');
-  await expect(count).toContainText(/^\d+ Songs geladen/);
-  const before = Number((await count.textContent())?.match(/\d+/)?.[0]);
-  await page.getByRole('main').evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await expect
-    .poll(async () => Number((await count.textContent())?.replace(/\D/g, '').slice(0, 4)))
-    .toBeGreaterThan(before);
+  // Gesamtzahl aus Jamendo (41.250) + Internet Archive (8.750); Audius verrät keine
+  await expect(page.getByTestId('discover-count')).toContainText('Mindestens 50.000 Songs: Drill');
+  await expect(page.getByTestId('discover-count')).toContainText('Audius verrät keine Zahl');
+  const rows = page.getByRole('list', { name: 'Songs: Drill' }).getByRole('listitem');
+  await expect(rows.first()).toBeVisible();
+  const before = await rows.count();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect.poll(() => rows.count()).toBeGreaterThan(before);
 
   await page.getByRole('button', { name: 'Hip-Hop' }).click();
   await expect(page.getByRole('list', { name: 'Songs: Hip-Hop' })).toBeVisible();

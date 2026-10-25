@@ -392,7 +392,12 @@ export const de = {
     label: 'Freie Musik ohne Ende',
     title: 'Entdecken',
     genre: 'Genre',
-    count: '{count} Songs geladen – beim Scrollen kommen immer mehr.',
+    counting: 'Zähle Songs …',
+    total: 'Mindestens {count} Songs: {genre}',
+    counted: 'Gezählt bei {sources}.',
+    uncounted: '{sources} verrät keine Zahl – dort gibt es noch mehr.',
+    noCount:
+      'Die Quellen verraten keine Gesamtzahl – beim Scrollen kommen einfach immer mehr Songs.',
     endless: 'Endlos-Mix',
     listLabel: 'Songs: {genre}',
     more: 'Mehr laden',

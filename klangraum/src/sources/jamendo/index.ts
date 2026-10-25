@@ -57,6 +57,7 @@ const responseSchema = z.object({
     status: z.string(),
     code: z.coerce.number().optional(),
     error_message: z.string().nullish(),
+    results_fullcount: z.coerce.number().optional(),
   }),
   results: z.array(z.unknown()),
 });
@@ -123,6 +124,22 @@ export class JamendoSource implements MusicSource {
 
   async isAvailable(): Promise<boolean> {
     return this.clientId().length > 0;
+  }
+
+  async countTracks(query: string, signal?: AbortSignal): Promise<number> {
+    const clientId = this.clientId();
+    const q = query.trim();
+    if (!clientId || !q) return 0;
+    const url = withParams(`${JAMENDO_API}/tracks/`, {
+      client_id: clientId,
+      format: 'json',
+      search: q,
+      limit: 1,
+      fullcount: 'true',
+    });
+    const json = await getJson(this.fetchImpl, 'jamendo', url, { signal });
+    const r = responseSchema.safeParse(json);
+    return r.success ? (r.data.headers.results_fullcount ?? 0) : 0;
   }
 
   private async request(

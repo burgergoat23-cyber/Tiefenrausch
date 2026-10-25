@@ -5,8 +5,16 @@ import { useSettings } from '../app/settingsStore';
 import { Icon } from '../components/Icon';
 import { TrackList } from '../components/TrackList';
 import { useT } from '../i18n';
-import { DISCOVER_GENRES, loadCatalogPage, mergeUnique, useStation } from '../library/catalog';
+import {
+  countCatalog,
+  DISCOVER_GENRES,
+  loadCatalogPage,
+  mergeUnique,
+  useStation,
+  type CatalogCount,
+} from '../library/catalog';
 import { trackKey, type Track } from '../sources/types';
+import styles from './DiscoverPage.module.css';
 
 /** Höchstens so viele Zeilen gleichzeitig anzeigen (das Handy bleibt flüssig); gespielt wird alles */
 const MAX_ROWS = 1500;
@@ -57,6 +65,19 @@ export default function DiscoverPage() {
       }
     }
   }, [registry, genre, page, done, sources]);
+
+  // Wie viele Songs es insgesamt gibt (nur Quellen, die das verraten)
+  const [count, setCount] = useState<CatalogCount | null>(null);
+  useEffect(() => {
+    let alive = true;
+    setCount(null);
+    void countCatalog(registry, genre, { isEnabled: (s) => sources[s.id] ?? true }).then((c) => {
+      if (alive) setCount(c);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [registry, genre, sources]);
 
   // Neues Genre: von vorn
   useEffect(() => {
@@ -124,9 +145,24 @@ export default function DiscoverPage() {
         ))}
       </div>
       <div className="kr-section-head">
-        <p className="kr-muted" role="status" data-testid="discover-count">
-          {t('discover.count', { count: tracks.length.toLocaleString() })}
-        </p>
+        <div role="status" data-testid="discover-count">
+          {count === null ? (
+            <p className="kr-muted">{t('discover.counting')}</p>
+          ) : count.total > 0 ? (
+            <>
+              <p className={styles.total}>
+                {t('discover.total', { count: count.total.toLocaleString(), genre })}
+              </p>
+              <p className="kr-muted">
+                {t('discover.counted', { sources: count.counted.join(', ') })}
+                {count.uncounted.length > 0 &&
+                  ` ${t('discover.uncounted', { sources: count.uncounted.join(', ') })}`}
+              </p>
+            </>
+          ) : (
+            <p className="kr-muted">{t('discover.noCount')}</p>
+          )}
+        </div>
         <button
           type="button"
           className="kr-btn kr-btn--primary"

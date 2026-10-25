@@ -5,21 +5,44 @@ import { trackKey, type MusicSource, type Track } from '../sources/types';
 /** Songs pro Quelle und Seite */
 export const PAGE_SIZE = 50;
 
+/** Genres und Richtungen, in denen viele kleine, unabhängige Künstler veröffentlichen */
 export const DISCOVER_GENRES = [
   'Drill',
   'Hip-Hop',
   'Trap',
   'Rap',
+  'Boom Bap',
+  'Phonk',
+  'Grime',
   'R&B',
+  'Soul',
   'Pop',
+  'Indie',
   'Electronic',
   'House',
+  'Techno',
+  'Drum and Bass',
+  'Dubstep',
   'Lo-Fi',
-  'Rock',
-  'Jazz',
+  'Chill',
   'Ambient',
+  'Synthwave',
+  'Rock',
+  'Punk',
+  'Metal',
+  'Folk',
+  'Acoustic',
+  'Jazz',
+  'Blues',
+  'Funk',
   'Reggae',
   'Afrobeats',
+  'Latin',
+  'Reggaeton',
+  'Classical',
+  'Piano',
+  'Soundtrack',
+  'Experimental',
 ] as const;
 
 export interface CatalogOptions {
@@ -62,6 +85,35 @@ export async function loadCatalogPage(
   const longest = Math.max(0, ...groups.map((g) => g.length));
   for (let i = 0; i < longest; i++) for (const g of groups) if (g[i]) tracks.push(g[i] as Track);
   return { tracks, done: tracks.length === 0 };
+}
+
+export interface CatalogCount {
+  /** Summe der Quellen, die ihre Gesamtzahl verraten */
+  total: number;
+  /** Quellen, die mitgezählt wurden bzw. keine Zahl liefern */
+  counted: string[];
+  uncounted: string[];
+}
+
+/** Wie viele Songs es zum Genre mindestens gibt (Quellen ohne Zählung kommen noch dazu) */
+export async function countCatalog(
+  registry: SourceRegistry,
+  genre: string,
+  opts: CatalogOptions,
+): Promise<CatalogCount> {
+  const sources = await pageableSources(registry, opts);
+  const counts = await Promise.all(
+    sources.map((s) => (s.countTracks ? s.countTracks(genre).catch(() => null) : null)),
+  );
+  const out: CatalogCount = { total: 0, counted: [], uncounted: [] };
+  sources.forEach((s, i) => {
+    const n = counts[i];
+    if (typeof n === 'number' && n > 0) {
+      out.total += n;
+      out.counted.push(s.name);
+    } else out.uncounted.push(s.name);
+  });
+  return out;
 }
 
 /** Neue Songs anhängen, ohne Doppelte */
