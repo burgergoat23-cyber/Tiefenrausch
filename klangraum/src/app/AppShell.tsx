@@ -29,7 +29,8 @@ const NAV_GROUPS: { title?: TKey; items: NavItem[] }[] = [
     items: [
       { to: '/', icon: 'home', label: 'nav.home', tab: true },
       { to: '/suche', icon: 'search', label: 'nav.search', tab: true },
-      { to: '/radio', icon: 'radio', label: 'nav.radio', tab: true },
+      { to: '/entdecken', icon: 'spark', label: 'nav.discover', tab: true },
+      { to: '/radio', icon: 'radio', label: 'nav.radio' },
     ],
   },
   {

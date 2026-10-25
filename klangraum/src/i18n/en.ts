@@ -7,6 +7,7 @@ export const en: Dict = {
     loading: 'Loading …',
   },
   nav: {
+    discover: 'Discover',
     main: 'Main menu',
     home: 'Home',
     search: 'Search',
@@ -384,6 +385,18 @@ export const en: Dict = {
     normal: 'Normal',
     slowed: 'Slowed',
     sped: 'Sped up',
+  },
+  discover: {
+    label: 'Free music without end',
+    title: 'Discover',
+    genre: 'Genre',
+    count: '{count} songs loaded – more keep coming as you scroll.',
+    endless: 'Endless mix',
+    listLabel: 'Songs: {genre}',
+    more: 'Load more',
+    end: 'No more songs for this genre right now.',
+    about:
+      'Songs stream live from Audius, Jamendo and the Internet Archive – free and legal. The endless mix keeps loading more as long as you listen.',
   },
   common: {
     close: 'Close',

@@ -6,6 +6,7 @@ export const de = {
     loading: 'Lädt …',
   },
   nav: {
+    discover: 'Entdecken',
     main: 'Hauptmenü',
     home: 'Start',
     search: 'Suche',
@@ -386,6 +387,18 @@ export const de = {
     normal: 'Normal',
     slowed: 'Slowed',
     sped: 'Sped up',
+  },
+  discover: {
+    label: 'Freie Musik ohne Ende',
+    title: 'Entdecken',
+    genre: 'Genre',
+    count: '{count} Songs geladen – beim Scrollen kommen immer mehr.',
+    endless: 'Endlos-Mix',
+    listLabel: 'Songs: {genre}',
+    more: 'Mehr laden',
+    end: 'Mehr gibt es zu diesem Genre gerade nicht.',
+    about:
+      'Die Songs kommen live von Audius, Jamendo und dem Internet Archive – kostenlos und legal. Der Endlos-Mix lädt immer weiter nach, solange du hörst.',
   },
   common: {
     close: 'Schließen',

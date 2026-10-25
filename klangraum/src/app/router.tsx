@@ -19,6 +19,7 @@ const HistoryPage = lazy(() => import('../pages/HistoryPage'));
 const LocalPlaylistPage = lazy(() => import('../pages/LocalPlaylistPage'));
 const StatsPage = lazy(() => import('../pages/StatsPage'));
 const SharedPage = lazy(() => import('../pages/SharedPage'));
+const DiscoverPage = lazy(() => import('../pages/DiscoverPage'));
 
 export const routes: RouteObject[] = [
   {
@@ -29,6 +30,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'suche', element: <SearchPage /> },
       { path: 'radio', element: <RadioPage /> },
+      { path: 'entdecken', element: <DiscoverPage /> },
       { path: 'bibliothek', element: <LibraryPage /> },
       { path: 'bibliothek/lieblingssongs', element: <LikedPage /> },
       { path: 'bibliothek/verlauf', element: <HistoryPage /> },

@@ -6,6 +6,7 @@ import { trackKey, type SourceId, type Track } from '../sources/types';
 import { recentTracks } from './library';
 import { useLibrary } from './libraryStore';
 import { similarTracks } from './songRadio';
+import { loadCatalogPage, useStation } from './catalog';
 
 /** Gemeinsame Optionen für Song-Radio und Autoplay */
 export function radioOptions(extraExclude: Track[] = [], allowCostly = false) {
@@ -22,6 +23,21 @@ export function radioOptions(extraExclude: Track[] = [], allowCostly = false) {
 /** Autoplay für die Engine: nur wenn in den Einstellungen an */
 export function autoplayProvider(registry: SourceRegistry) {
   return async (last: Track, played: Track[]): Promise<Track[]> => {
+    // Endlos-Mix aus „Entdecken“: nächste Seite des Genres (gilt, solange dieser Mix in der Warteschlange ist)
+    const station = useStation.getState().station;
+    if (station && played.some((t) => trackKey(t) === station.anchorKey)) {
+      const settings = useSettings.getState().settings;
+      const have = new Set(played.map(trackKey));
+      for (let page = station.nextPage; page < station.nextPage + 3; page++) {
+        const r = await loadCatalogPage(registry, station.genre, page, {
+          isEnabled: (s) => settings.sources[s.id] ?? true,
+        });
+        useStation.getState().set({ ...station, nextPage: page + 1 });
+        const fresh = r.tracks.filter((t) => !have.has(trackKey(t)));
+        if (fresh.length > 0 || r.done) return fresh;
+      }
+      return [];
+    }
     if (!useSettings.getState().settings.autoplay) return [];
     const tracks = await similarTracks(last, registry, {
       ...radioOptions(played, last.sourceId === 'youtube'),

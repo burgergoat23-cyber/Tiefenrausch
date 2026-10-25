@@ -7,7 +7,9 @@ test.beforeEach(async ({ page }) => {
 
 test('Radio-Seite: beliebte Sender und Sender nach Genre', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('navigation').getByRole('link', { name: 'Radio' }).click();
+  // Am Handy liegt Radio unter „Entdecken“ (die Leiste hat nur Platz für fünf)
+  await page.getByRole('navigation').getByRole('link', { name: 'Entdecken' }).click();
+  await page.getByRole('main').getByRole('link', { name: 'Radio' }).click();
   await expect(page.getByRole('heading', { name: 'Radio', level: 1 })).toBeVisible();
   await expect(
     page.getByTestId('radio-popular').getByRole('button', { name: /„Welle Nord“ abspielen/ }),

@@ -150,7 +150,18 @@ export async function mockMusicApis(page: Page, opts: MockOptions = {}) {
       return json(route, { data: Array.from({ length: 8 }, (_, i) => audiusTrack(i)) });
     if (p === '/v1/tracks/search') {
       const q = url.searchParams.get('query') ?? '';
-      return json(route, { data: Array.from({ length: 6 }, (_, i) => audiusTrack(i, `${q} `)) });
+      // Blättern: neue Songs bis Offset 150, danach ist Schluss
+      const offset = Number(url.searchParams.get('offset') ?? '0');
+      if (offset >= 150) return json(route, { data: [] });
+      const n = offset === 0 ? 6 : 50;
+      return json(route, {
+        data: Array.from({ length: n }, (_, i) => {
+          const t = audiusTrack(i, `${q} `);
+          return offset === 0
+            ? t
+            : { ...t, id: `au${offset + i}`, title: `${q} Song ${offset + i}` };
+        }),
+      });
     }
     if (p === '/v1/playlists/search')
       return json(route, {

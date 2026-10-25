@@ -151,6 +151,10 @@ Stand: 24.10.2026, **Phase 1 fertig** (Grundgerüst) + **zusätzliche Quellen In
   (`components/Onboarding.tsx`, Flag `klangraum.onboarded`; E2E überspringen sie per `addInitScript`).
 - **PWA** (`vite-plugin-pwa`): Manifest, Symbole in `public/` (Skript in der Sitzung: SVG → PNG per Playwright),
   Service Worker cacht nur App-Dateien, Bereich `/Tiefenrausch/klangraum/`. Installations-Tipp + Offline-Hinweis.
+- **Entdecken** (`/entdecken`, `library/catalog.ts`): blättert Audius/Jamendo/Archive nach Genre seitenweise
+  (50 je Quelle), lädt beim Scrollen nach (max. 1500 Zeilen sichtbar, danach Knopf), hört nach 2 Seiten ohne
+  Neues auf. **Endlos-Mix** = `useStation`; Autoplay holt dann die nächste Katalog-Seite. Handy-Leiste:
+  Entdecken statt Radio (Radio-Knopf auf Entdecken).
 - Künstlern folgen (= Lieblingskünstler), Warteschlange als Playlist, Suche zeigt Bibliotheks-Treffer,
   Mini-Player: Herz (PC), Wischen = nächster/vorheriger Song. Einstellungen jetzt v6.
 
