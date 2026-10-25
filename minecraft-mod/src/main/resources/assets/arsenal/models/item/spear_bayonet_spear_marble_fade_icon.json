@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "arsenal:item/spear_bayonet_spear_marble_fade_icon"
+ }
+}

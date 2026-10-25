@@ -3,13 +3,24 @@
 	"id": "arsenal",
 	"version": "${version}",
 	"name": "Arsenal",
-	"description": "CS-Skins, PvP-Makros und Struktur-Tracker.",
-	"authors": ["BurgerGoat"],
+	"description": "CS-Skins für Schwerter, Äxte, Streitkolben, Speere, Schilde, Perlen und Totems, Inspect-Animation, Kisten, CS-Fadenkreuz, Viewmodel, Bild-Filter, Struktur-Tracker (Bastion, End-City, End-Schiff …) und PvP-Makros (Lunge-Swap, Attribut-Swap).",
+	"authors": [
+		"BurgerGoat"
+	],
 	"license": "MIT",
+	"icon": "assets/arsenal/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["com.burgergoat.arsenal.ArsenalClient"]
+		"client": [
+			"com.burgergoat.arsenal.ArsenalClient"
+		],
+		"fabric-client-gametest": [
+			"com.burgergoat.arsenal.test.ArsenalGameTest"
+		]
 	},
+	"mixins": [
+		"arsenal.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.17.0",
 		"minecraft": "~1.21.11",

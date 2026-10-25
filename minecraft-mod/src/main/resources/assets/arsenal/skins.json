@@ -1,0 +1,803 @@
+{
+ "rarities": [
+  "Konsum",
+  "Industrie",
+  "Militär",
+  "Begrenzt",
+  "Geheim",
+  "Verdeckt",
+  "★ Gold"
+ ],
+ "categories": [
+  {
+   "id": "knife",
+   "name": "Messer",
+   "items": [
+    "wooden_sword",
+    "stone_sword",
+    "copper_sword",
+    "iron_sword",
+    "golden_sword",
+    "diamond_sword",
+    "netherite_sword"
+   ],
+   "shapes": [
+    {
+     "id": "karambit",
+     "name": "Karambit"
+    },
+    {
+     "id": "butterfly",
+     "name": "Butterfly"
+    },
+    {
+     "id": "bayonet",
+     "name": "Bajonett"
+    },
+    {
+     "id": "m9",
+     "name": "M9-Bajonett"
+    },
+    {
+     "id": "flip",
+     "name": "Flip"
+    },
+    {
+     "id": "gut",
+     "name": "Gut-Messer"
+    },
+    {
+     "id": "huntsman",
+     "name": "Huntsman"
+    },
+    {
+     "id": "falchion",
+     "name": "Falchion"
+    },
+    {
+     "id": "bowie",
+     "name": "Bowie"
+    },
+    {
+     "id": "shadow_daggers",
+     "name": "Schattendolche"
+    },
+    {
+     "id": "ursus",
+     "name": "Ursus"
+    },
+    {
+     "id": "navaja",
+     "name": "Navaja"
+    },
+    {
+     "id": "stiletto",
+     "name": "Stiletto"
+    },
+    {
+     "id": "talon",
+     "name": "Talon"
+    },
+    {
+     "id": "skeleton",
+     "name": "Skeleton"
+    },
+    {
+     "id": "classic",
+     "name": "Classic"
+    },
+    {
+     "id": "paracord",
+     "name": "Paracord"
+    },
+    {
+     "id": "survival",
+     "name": "Survival"
+    },
+    {
+     "id": "nomad",
+     "name": "Nomad"
+    },
+    {
+     "id": "kukri",
+     "name": "Kukri"
+    }
+   ],
+   "finishes": [
+    {
+     "id": "vanilla",
+     "name": "Vanilla",
+     "rarity": 5
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "marble_fade",
+     "name": "Marble Fade",
+     "rarity": 5
+    },
+    {
+     "id": "doppler",
+     "name": "Doppler",
+     "rarity": 5
+    },
+    {
+     "id": "ruby",
+     "name": "Doppler (Ruby)",
+     "rarity": 6
+    },
+    {
+     "id": "sapphire",
+     "name": "Doppler (Sapphire)",
+     "rarity": 6
+    },
+    {
+     "id": "black_pearl",
+     "name": "Doppler (Black Pearl)",
+     "rarity": 6
+    },
+    {
+     "id": "gamma_doppler",
+     "name": "Gamma Doppler",
+     "rarity": 5
+    },
+    {
+     "id": "emerald",
+     "name": "Gamma Doppler (Emerald)",
+     "rarity": 6
+    },
+    {
+     "id": "tiger_tooth",
+     "name": "Tiger Tooth",
+     "rarity": 4
+    },
+    {
+     "id": "slaughter",
+     "name": "Slaughter",
+     "rarity": 4
+    },
+    {
+     "id": "crimson_web",
+     "name": "Crimson Web",
+     "rarity": 4
+    },
+    {
+     "id": "case_hardened",
+     "name": "Case Hardened",
+     "rarity": 4
+    },
+    {
+     "id": "lore",
+     "name": "Lore",
+     "rarity": 4
+    },
+    {
+     "id": "autotronic",
+     "name": "Autotronic",
+     "rarity": 4
+    },
+    {
+     "id": "ultraviolet",
+     "name": "Ultraviolet",
+     "rarity": 3
+    },
+    {
+     "id": "damascus",
+     "name": "Damascus Steel",
+     "rarity": 3
+    },
+    {
+     "id": "blue_steel",
+     "name": "Blue Steel",
+     "rarity": 3
+    },
+    {
+     "id": "night",
+     "name": "Night",
+     "rarity": 3
+    },
+    {
+     "id": "freehand",
+     "name": "Freehand",
+     "rarity": 3
+    },
+    {
+     "id": "bright_water",
+     "name": "Bright Water",
+     "rarity": 3
+    },
+    {
+     "id": "stained",
+     "name": "Stained",
+     "rarity": 2
+    },
+    {
+     "id": "forest_ddpat",
+     "name": "Forest DDPAT",
+     "rarity": 1
+    },
+    {
+     "id": "boreal_forest",
+     "name": "Boreal Forest",
+     "rarity": 1
+    },
+    {
+     "id": "urban_masked",
+     "name": "Urban Masked",
+     "rarity": 1
+    },
+    {
+     "id": "safari_mesh",
+     "name": "Safari Mesh",
+     "rarity": 1
+    },
+    {
+     "id": "scorched",
+     "name": "Scorched",
+     "rarity": 1
+    },
+    {
+     "id": "rust_coat",
+     "name": "Rust Coat",
+     "rarity": 1
+    }
+   ]
+  },
+  {
+   "id": "axe",
+   "name": "Äxte",
+   "items": [
+    "wooden_axe",
+    "stone_axe",
+    "copper_axe",
+    "iron_axe",
+    "golden_axe",
+    "diamond_axe",
+    "netherite_axe"
+   ],
+   "shapes": [
+    {
+     "id": "dz_axe",
+     "name": "Danger-Zone-Axt"
+    },
+    {
+     "id": "tomahawk",
+     "name": "Tomahawk"
+    },
+    {
+     "id": "battle_axe",
+     "name": "Doppelaxt"
+    },
+    {
+     "id": "ice_axe",
+     "name": "Eispickel"
+    },
+    {
+     "id": "viking",
+     "name": "Wikinger-Axt"
+    },
+    {
+     "id": "cleaver",
+     "name": "Hackebeil"
+    },
+    {
+     "id": "fire_axe",
+     "name": "Feuerwehraxt"
+    },
+    {
+     "id": "shovel",
+     "name": "Klappspaten"
+    }
+   ],
+   "finishes": [
+    {
+     "id": "vanilla",
+     "name": "Vanilla",
+     "rarity": 5
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "doppler",
+     "name": "Doppler",
+     "rarity": 5
+    },
+    {
+     "id": "ruby",
+     "name": "Doppler (Ruby)",
+     "rarity": 6
+    },
+    {
+     "id": "sapphire",
+     "name": "Doppler (Sapphire)",
+     "rarity": 6
+    },
+    {
+     "id": "emerald",
+     "name": "Gamma Doppler (Emerald)",
+     "rarity": 6
+    },
+    {
+     "id": "tiger_tooth",
+     "name": "Tiger Tooth",
+     "rarity": 4
+    },
+    {
+     "id": "crimson_web",
+     "name": "Crimson Web",
+     "rarity": 4
+    },
+    {
+     "id": "case_hardened",
+     "name": "Case Hardened",
+     "rarity": 4
+    },
+    {
+     "id": "lore",
+     "name": "Lore",
+     "rarity": 4
+    },
+    {
+     "id": "night",
+     "name": "Night",
+     "rarity": 3
+    },
+    {
+     "id": "damascus",
+     "name": "Damascus Steel",
+     "rarity": 3
+    },
+    {
+     "id": "marble_fade",
+     "name": "Marble Fade",
+     "rarity": 5
+    },
+    {
+     "id": "slaughter",
+     "name": "Slaughter",
+     "rarity": 4
+    }
+   ]
+  },
+  {
+   "id": "mace",
+   "name": "Streitkolben",
+   "items": [
+    "mace"
+   ],
+   "shapes": [
+    {
+     "id": "dz_hammer",
+     "name": "Danger-Zone-Hammer"
+    },
+    {
+     "id": "wrench",
+     "name": "Schraubenschlüssel"
+    },
+    {
+     "id": "morning_star",
+     "name": "Morgenstern"
+    },
+    {
+     "id": "war_hammer",
+     "name": "Kriegshammer"
+    },
+    {
+     "id": "mjolnir",
+     "name": "Thors Hammer"
+    },
+    {
+     "id": "sledgehammer",
+     "name": "Vorschlaghammer"
+    },
+    {
+     "id": "baseball",
+     "name": "Baseballschläger"
+    },
+    {
+     "id": "scepter",
+     "name": "Zepter"
+    }
+   ],
+   "finishes": [
+    {
+     "id": "vanilla",
+     "name": "Vanilla",
+     "rarity": 5
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "doppler",
+     "name": "Doppler",
+     "rarity": 5
+    },
+    {
+     "id": "ruby",
+     "name": "Doppler (Ruby)",
+     "rarity": 6
+    },
+    {
+     "id": "sapphire",
+     "name": "Doppler (Sapphire)",
+     "rarity": 6
+    },
+    {
+     "id": "emerald",
+     "name": "Gamma Doppler (Emerald)",
+     "rarity": 6
+    },
+    {
+     "id": "tiger_tooth",
+     "name": "Tiger Tooth",
+     "rarity": 4
+    },
+    {
+     "id": "crimson_web",
+     "name": "Crimson Web",
+     "rarity": 4
+    },
+    {
+     "id": "case_hardened",
+     "name": "Case Hardened",
+     "rarity": 4
+    },
+    {
+     "id": "lore",
+     "name": "Lore",
+     "rarity": 4
+    },
+    {
+     "id": "night",
+     "name": "Night",
+     "rarity": 3
+    },
+    {
+     "id": "damascus",
+     "name": "Damascus Steel",
+     "rarity": 3
+    },
+    {
+     "id": "marble_fade",
+     "name": "Marble Fade",
+     "rarity": 5
+    },
+    {
+     "id": "slaughter",
+     "name": "Slaughter",
+     "rarity": 4
+    }
+   ]
+  },
+  {
+   "id": "spear",
+   "name": "Speere",
+   "items": [
+    "wooden_spear",
+    "stone_spear",
+    "copper_spear",
+    "iron_spear",
+    "golden_spear",
+    "diamond_spear",
+    "netherite_spear"
+   ],
+   "shapes": [
+    {
+     "id": "lance",
+     "name": "Lanze"
+    },
+    {
+     "id": "naginata",
+     "name": "Naginata"
+    },
+    {
+     "id": "halberd",
+     "name": "Hellebarde"
+    },
+    {
+     "id": "trident_spear",
+     "name": "Dreizack"
+    },
+    {
+     "id": "bayonet_spear",
+     "name": "Bajonett-Speer"
+    },
+    {
+     "id": "glaive",
+     "name": "Glefe"
+    }
+   ],
+   "finishes": [
+    {
+     "id": "vanilla",
+     "name": "Vanilla",
+     "rarity": 5
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "doppler",
+     "name": "Doppler",
+     "rarity": 5
+    },
+    {
+     "id": "ruby",
+     "name": "Doppler (Ruby)",
+     "rarity": 6
+    },
+    {
+     "id": "sapphire",
+     "name": "Doppler (Sapphire)",
+     "rarity": 6
+    },
+    {
+     "id": "emerald",
+     "name": "Gamma Doppler (Emerald)",
+     "rarity": 6
+    },
+    {
+     "id": "tiger_tooth",
+     "name": "Tiger Tooth",
+     "rarity": 4
+    },
+    {
+     "id": "crimson_web",
+     "name": "Crimson Web",
+     "rarity": 4
+    },
+    {
+     "id": "case_hardened",
+     "name": "Case Hardened",
+     "rarity": 4
+    },
+    {
+     "id": "lore",
+     "name": "Lore",
+     "rarity": 4
+    },
+    {
+     "id": "night",
+     "name": "Night",
+     "rarity": 3
+    },
+    {
+     "id": "damascus",
+     "name": "Damascus Steel",
+     "rarity": 3
+    },
+    {
+     "id": "marble_fade",
+     "name": "Marble Fade",
+     "rarity": 5
+    },
+    {
+     "id": "slaughter",
+     "name": "Slaughter",
+     "rarity": 4
+    }
+   ]
+  },
+  {
+   "id": "shield",
+   "name": "Schilde",
+   "items": [
+    "shield"
+   ],
+   "shapes": [],
+   "finishes": [
+    {
+     "id": "riot",
+     "name": "Riot (SWAT)",
+     "rarity": 4
+    },
+    {
+     "id": "ballistic",
+     "name": "Ballistik-Schild",
+     "rarity": 3
+    },
+    {
+     "id": "spartan",
+     "name": "Spartaner",
+     "rarity": 4
+    },
+    {
+     "id": "crusader",
+     "name": "Kreuzritter",
+     "rarity": 3
+    },
+    {
+     "id": "star",
+     "name": "Sternschild",
+     "rarity": 5
+    },
+    {
+     "id": "dragon",
+     "name": "Drache",
+     "rarity": 5
+    },
+    {
+     "id": "neon",
+     "name": "Neon",
+     "rarity": 4
+    },
+    {
+     "id": "wood",
+     "name": "Holz & Eisen",
+     "rarity": 1
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "doppler",
+     "name": "Doppler",
+     "rarity": 5
+    },
+    {
+     "id": "ruby",
+     "name": "Ruby",
+     "rarity": 6
+    },
+    {
+     "id": "sapphire",
+     "name": "Sapphire",
+     "rarity": 6
+    },
+    {
+     "id": "emerald",
+     "name": "Emerald",
+     "rarity": 6
+    },
+    {
+     "id": "tiger_tooth",
+     "name": "Tiger Tooth",
+     "rarity": 4
+    },
+    {
+     "id": "crimson_web",
+     "name": "Crimson Web",
+     "rarity": 4
+    },
+    {
+     "id": "case_hardened",
+     "name": "Case Hardened",
+     "rarity": 4
+    },
+    {
+     "id": "marble_fade",
+     "name": "Marble Fade",
+     "rarity": 5
+    },
+    {
+     "id": "night",
+     "name": "Night",
+     "rarity": 3
+    }
+   ]
+  },
+  {
+   "id": "grenade",
+   "name": "Enderperlen",
+   "items": [
+    "ender_pearl"
+   ],
+   "shapes": [],
+   "finishes": [
+    {
+     "id": "he",
+     "name": "HE-Granate",
+     "rarity": 3
+    },
+    {
+     "id": "flash",
+     "name": "Blendgranate",
+     "rarity": 3
+    },
+    {
+     "id": "smoke",
+     "name": "Rauchgranate",
+     "rarity": 3
+    },
+    {
+     "id": "molotov",
+     "name": "Molotow",
+     "rarity": 4
+    },
+    {
+     "id": "incendiary",
+     "name": "Brandgranate",
+     "rarity": 4
+    },
+    {
+     "id": "decoy",
+     "name": "Lockvogel",
+     "rarity": 2
+    },
+    {
+     "id": "ta",
+     "name": "Taktische Granate",
+     "rarity": 5
+    }
+   ]
+  },
+  {
+   "id": "wind",
+   "name": "Windladungen",
+   "items": [
+    "wind_charge"
+   ],
+   "shapes": [],
+   "finishes": [
+    {
+     "id": "smoke_bomb",
+     "name": "Rauchbombe",
+     "rarity": 3
+    },
+    {
+     "id": "vortex",
+     "name": "Wirbel",
+     "rarity": 4
+    },
+    {
+     "id": "lightning",
+     "name": "Blitzkugel",
+     "rarity": 5
+    },
+    {
+     "id": "frost",
+     "name": "Frostkugel",
+     "rarity": 4
+    }
+   ]
+  },
+  {
+   "id": "totem",
+   "name": "Totems",
+   "items": [
+    "totem_of_undying"
+   ],
+   "shapes": [],
+   "finishes": [
+    {
+     "id": "medishot",
+     "name": "Medi-Shot",
+     "rarity": 4
+    },
+    {
+     "id": "defuse_kit",
+     "name": "Entschärfer-Set",
+     "rarity": 3
+    },
+    {
+     "id": "c4",
+     "name": "C4",
+     "rarity": 5
+    },
+    {
+     "id": "dogtags",
+     "name": "Erkennungsmarken",
+     "rarity": 3
+    },
+    {
+     "id": "heart",
+     "name": "Kristallherz",
+     "rarity": 5
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "model": {
+  "type": "minecraft:select",
+  "property": "minecraft:display_context",
+  "cases": [
+   {
+    "when": [
+     "gui",
+     "ground",
+     "fixed",
+     "on_shelf"
+    ],
+    "model": {
+     "type": "minecraft:model",
+     "model": "arsenal:item/spear_naginata_marble_fade_icon"
+    }
+   }
+  ],
+  "fallback": {
+   "type": "minecraft:model",
+   "model": "arsenal:item/spear_naginata_marble_fade"
+  }
+ },
+ "swap_animation_scale": 1.95
+}

@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.burgergoat.arsenal.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ClientPlayerInteractionManagerAccessor",
+		"GameRendererAccessor",
+		"GameRendererMixin",
+		"HeldItemRendererMixin",
+		"ItemModelManagerMixin",
+		"MinecraftClientAccessor",
+		"MinecraftClientMixin",
+		"SimpleStructurePieceAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "arsenal:item/knife_falchion_bright_water"
+ }
+}
