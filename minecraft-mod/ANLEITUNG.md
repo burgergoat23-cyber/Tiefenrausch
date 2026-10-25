@@ -53,7 +53,7 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `arsenal-1.2.0+mc1.2
 - **Server:** nur in geladenen Chunks und nur, wenn du es im Menü erlaubst. Weiter weg ginge nur mit dem Seed – das wäre Cheaten und ist absichtlich nicht drin.
 
 **Makros (alles einzeln an/aus):**
-- **Lunge-Swap (R):** wechselt auf den Speer (am liebsten mit Sprungangriff/Lunge), sticht und wechselt zurück. Wartezeiten in Ticks einstellbar (1 Tick = 0,05 s). Optional automatisch nach einer Windladung.
+- **Lunge-Swap (R):** Taste drücken → im selben Moment Speer (am liebsten mit Sprungangriff/Lunge), Stoß, zurück zum vorherigen Item. Halte vorher kurz ein anderes Item (z. B. Windladung), dessen volle Aufladung zählt für den Stoß. Optional: „Auch beim Werfen einer Windladung (Rechtsklick)“ – dann löst jeder Windladungs-Wurf sofort den Lunge-Swap aus.
 - **Attribut-Swap:** schlägst du mit Schwert/Axt zu, wird für genau diesen Schlag auf den Streitkolben gewechselt (optional nur beim Fallen).
 - **Schild-Brecher:** blockt der Gegner mit Schild, wird für den Schlag auf die Axt gewechselt.
 - **Schnell-Perle / Schnell-Windladung.**
