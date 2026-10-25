@@ -842,8 +842,9 @@ public class ArsenalScreen extends Screen {
 		}
 		y = slider(ctx, x, y, w, "Zurückwechseln nach", 0, 20, c.lungeReturnDelay, 1,
 				c.lungeReturnDelay == 0 ? "sofort" : ticks(c.lungeReturnDelay), v -> c.lungeReturnDelay = (int) v);
-		y = toggle(ctx, x, y, w, "Automatisch nach dem Werfen einer Windladung", c.lungeAfterWind, v -> c.lungeAfterWind = v);
-		y = slider(ctx, x, y, w, "… Wartezeit nach der Windladung", 1, 20, c.lungeAfterWindDelay, 1, ticks(c.lungeAfterWindDelay), v -> c.lungeAfterWindDelay = (int) v);
+		y = toggle(ctx, x, y, w, "Auch beim Werfen einer Windladung (Rechtsklick)", c.lungeAfterWind, v -> c.lungeAfterWind = v);
+		y = slider(ctx, x, y, w, "… Wartezeit nach dem Wurf", 0, 20, c.lungeAfterWindDelay, 1,
+				c.lungeAfterWindDelay == 0 ? "sofort" : ticks(c.lungeAfterWindDelay), v -> c.lungeAfterWindDelay = (int) v);
 
 		y = header(ctx, x, y + 2, w, "Attribut-Swap (Streitkolben)");
 		y = paragraph(ctx, x, y, w, "Schlägst du mit Schwert oder Axt zu, wechselt die Mod genau für diesen Schlag auf den Streitkolben (Mace) und danach zurück.", GRAY);

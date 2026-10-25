@@ -96,7 +96,7 @@ public class ArsenalConfig {
 	public int lungeDelay = 0;
 	public int lungeReturnDelay = 0;
 	public boolean lungeAfterWind = false;
-	public int lungeAfterWindDelay = 6;
+	public int lungeAfterWindDelay = 0;
 
 	public boolean maceSwap = false;
 	public boolean maceOnlyFalling = true;
@@ -144,6 +144,7 @@ public class ArsenalConfig {
 			// Ab 1.2: Lunge-Swap sticht und wechselt sofort zurueck (alles im selben Tick)
 			instance.lungeDelay = 0;
 			instance.lungeReturnDelay = 0;
+			instance.lungeAfterWindDelay = 0;
 			instance.configVersion = 2;
 			save();
 		}

@@ -37,6 +37,8 @@ public final class Macros {
 	private static boolean internalAttack;
 	/** Zaehler fuer den automatischen Test. */
 	public static int attributeSwaps;
+	/** Ergebnis des letzten Speer-Stosses (fuer den Test). */
+	public static boolean lastJab;
 
 	private Macros() {
 	}
@@ -111,7 +113,7 @@ public final class Macros {
 		if (client.player == null) return;
 		internalAttack = true;
 		try {
-			((MinecraftClientAccessor) client).arsenal$doAttack();
+			lastJab = ((MinecraftClientAccessor) client).arsenal$doAttack();
 		} finally {
 			internalAttack = false;
 		}
@@ -155,11 +157,14 @@ public final class Macros {
 		});
 	}
 
-	/** Nach dem Werfen einer Windladung automatisch Lunge-Swap (falls eingeschaltet). */
+	/**
+	 * Nach dem Werfen einer Windladung automatisch Lunge-Swap (falls eingeschaltet).
+	 * Wartezeit 0 = noch im selben Tick (am Ende des Ticks, nachdem der Wurf abgeschickt ist).
+	 */
 	public static void afterUse(MinecraftClient client, ItemStack used) {
 		ArsenalConfig c = ArsenalConfig.get();
 		if (c.lungeAfterWind && used.isOf(Items.WIND_CHARGE)) {
-			TASKS.add(new Task(tick + Math.max(1, c.lungeAfterWindDelay), () -> lungeSwap(client)));
+			TASKS.add(new Task(tick + Math.max(0, c.lungeAfterWindDelay), () -> lungeSwap(client)));
 		}
 	}
 

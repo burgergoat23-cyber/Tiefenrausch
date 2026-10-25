@@ -142,33 +142,45 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			// Lunge-Swap mit echtem Sprungangriff: misst, ob der Spieler wirklich nach vorne springt
 			sp.getServer().runCommand("kill @e[type=minecraft:husk]");
 			sp.getServer().runCommand("item replace entity @p hotbar.4 with netherite_spear[enchantments={lunge:3}]");
-			sp.getServer().runCommand("execute at @p run fill ~-10 ~-1 ~-10 ~10 ~-1 ~10 minecraft:glass");
-			int[][] runs = {{0, 1, 1}, {1, 1, 1}, {1, 0, 1}, {1, 0, 0}, {1, 0, 0}};
+			sp.getServer().runCommand("execute at @p run fill ~-12 ~-1 ~-12 ~12 ~-1 ~12 minecraft:glass");
+			ctx.waitTicks(5);
+			double[] center = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getY(), mc.player.getZ()});
+			String tpCenter = String.format(java.util.Locale.ROOT, "tp @p %.2f %.2f %.2f 180 0", center[0], center[1], center[2]);
+			// {Modus 1=Ueberleben, Stoss-Wartezeit, Zurueck-Wartezeit, Ausloeser 0=Taste 1=Windladung-Rechtsklick 2=Windladung ohne Makro}
+			int[][] runs = {{0, 1, 1, 0}, {1, 1, 1, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 1}, {1, 0, 0, 2}};
 			for (int[] run : runs) {
 				int delay = run[1];
 				sp.getServer().runCommand(run[0] == 1 ? "gamemode survival @a" : "gamemode creative @a");
+				sp.getServer().runCommand(tpCenter);
 				ctx.runOnClient(mc -> {
 					ArsenalConfig.get().lungeDelay = delay;
 					ArsenalConfig.get().lungeReturnDelay = run[2];
+					ArsenalConfig.get().lungeAfterWind = run[3] == 1;
+					ArsenalConfig.get().lungeAfterWindDelay = 0;
+					Macros.lastJab = false;
 					mc.player.getInventory().setSelectedSlot(6);
 				});
-				sp.getServer().runCommand("execute at @p run tp @p ~ ~ ~ 180 0");
 				ctx.waitTicks(40);
 				double[] before = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
-				ctx.getInput().pressKey(ArsenalClient.lungeKey);
+				if (run[3] == 0) ctx.getInput().pressKey(ArsenalClient.lungeKey);
+				else ctx.getInput().pressMouse(1);
 				ctx.waitTicks(1);
 				int slotDuring = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
 				ctx.waitTicks(9);
 				double[] after = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
 				int slotAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
 				double moved = Math.hypot(after[0] - before[0], after[1] - before[1]);
-				ArsenalClient.LOG.info("TEST Lunge-Stoss ({}, Stoss nach {} Ticks, zurueck nach {}): bewegt {} Bloecke, Slot nach 1 Tick={}, danach={}",
-						run[0] == 1 ? "Ueberleben" : "Kreativ", delay, run[2], String.format(java.util.Locale.ROOT, "%.2f", moved), slotDuring, slotAfter);
+				boolean jab = ctx.computeOnClient(mc -> Macros.lastJab);
+				String trigger = run[3] == 0 ? "Taste" : run[3] == 1 ? "Windladung+Makro" : "Windladung ohne Makro";
+				ArsenalClient.LOG.info("TEST Lunge-Stoss ({}, {}, Stoss nach {} Ticks, zurueck nach {}): bewegt {} Bloecke, doAttack={}, Slot nach 1 Tick={}, danach={}",
+						run[0] == 1 ? "Ueberleben" : "Kreativ", trigger, delay, run[2], String.format(java.util.Locale.ROOT, "%.2f", moved), jab, slotDuring, slotAfter);
 			}
 			sp.getServer().runCommand("gamemode creative @a");
+			sp.getServer().runCommand(tpCenter);
 			ctx.runOnClient(mc -> {
 				ArsenalConfig.get().lungeDelay = 0;
 				ArsenalConfig.get().lungeReturnDelay = 0;
+				ArsenalConfig.get().lungeAfterWind = false;
 			});
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(25);
