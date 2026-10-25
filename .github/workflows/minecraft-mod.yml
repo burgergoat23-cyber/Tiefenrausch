@@ -1,0 +1,62 @@
+name: Minecraft-Mod bauen
+
+on:
+  push:
+    paths:
+      - 'minecraft-mod/**'
+      - '!minecraft-mod/download/**'
+      - '.github/workflows/minecraft-mod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: minecraft-mod-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: minecraft-mod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Neueste Yarn-Version für 1.21.11 suchen
+        run: |
+          YARN=$(curl -sf https://meta.fabricmc.net/v2/versions/yarn/1.21.11 | jq -r '.[0].version')
+          echo "Yarn: $YARN"
+          echo "YARN=$YARN" >> "$GITHUB_ENV"
+
+      - name: Bauen
+        run: |
+          chmod +x gradlew
+          ./gradlew build -Pyarn_mappings="$YARN" --no-daemon --stacktrace
+
+      - name: Jar hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: arsenal-mod
+          path: minecraft-mod/build/libs/*.jar
+
+      - name: Jar in den Ordner download legen
+        run: |
+          mkdir -p download
+          rm -f download/*.jar
+          for f in build/libs/*.jar; do case "$f" in *-sources.jar) ;; *) cp "$f" download/ ;; esac; done
+          ls -la download
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add download
+          if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
+          git commit -m "Mod-Jar automatisch gebaut [skip ci]"
+          for i in 1 2 3; do git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; sleep 5; done

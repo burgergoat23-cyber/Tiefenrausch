@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "arsenal",
+	"version": "${version}",
+	"name": "Arsenal",
+	"description": "CS-Skins, PvP-Makros und Struktur-Tracker.",
+	"authors": ["BurgerGoat"],
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["com.burgergoat.arsenal.ArsenalClient"]
+	},
+	"depends": {
+		"fabricloader": ">=0.17.0",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
