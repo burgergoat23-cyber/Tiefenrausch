@@ -1,1 +1,1 @@
-Spieltest: failure
+Spieltest: success
