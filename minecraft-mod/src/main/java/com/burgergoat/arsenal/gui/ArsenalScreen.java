@@ -875,7 +875,8 @@ public class ArsenalScreen extends Screen {
 		y += 19;
 		if (!key.isUnbound() && client != null) {
 			for (KeyBinding other : client.options.allKeys) {
-				if (other != key && other.equals(key)) {
+				// F3-Debug-Kombinationen (F3+B usw.) sind keine echten Konflikte
+				if (other != key && other.equals(key) && !other.getId().contains("debug")) {
 					ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth("⚠ Auch belegt: " + Text.translatable(other.getId()).getString(), w - 6),
 							x + 3, y, 0xFFFF7060);
 					y += 11;
