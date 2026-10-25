@@ -112,11 +112,11 @@ public final class KnifeAnimations {
 	// ------------------------------------------------------------------ Inspect
 	// Positionen: das Messer wird zur Bildmitte geholt (LX/LY = "anschauen", SX/SY = Tricks in der Hand)
 
-	private static final float LX = -0.2f;
-	private static final float LY = 0.16f;
-	private static final float LZ = 0.03f;
-	private static final float SX = -0.12f;
-	private static final float SY = 0.14f;
+	private static final float LX = -0.36f;
+	private static final float LY = 0.22f;
+	private static final float LZ = 0.05f;
+	private static final float SX = -0.26f;
+	private static final float SY = 0.2f;
 
 	public static final Anim INSPECT_LOOK = a("look", 64, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
