@@ -830,11 +830,16 @@ public class ArsenalScreen extends Screen {
 
 		y = header(ctx, x, y, w, "Lunge-Swap (Speer)");
 		y = keyRow(ctx, x, y, w, "Taste für Lunge-Swap", ArsenalClient.lungeKey);
-		y = paragraph(ctx, x, y, w, "Drückst du die Taste, wechselt die Mod blitzschnell auf den Speer, sticht mit Sprungangriff (Lunge) zu und wechselt zurück.", GRAY);
+		y = paragraph(ctx, x, y, w, "Drückst du die Taste, wechselt die Mod im selben Moment auf den Speer, sticht mit Sprungangriff (Lunge) zu "
+				+ "und wechselt sofort zurück. Halte vorher kurz ein anderes Item (z. B. Windladung) – dessen volle Aufladung wird für den Stoß benutzt.", GRAY);
 		y = toggle(ctx, x, y, w, "Lunge-Swap an", c.lungeEnabled, v -> c.lungeEnabled = v);
 		y = toggle(ctx, x, y, w, "Nur Speere mit Sprungangriff (Lunge) benutzen", c.lungeOnlyEnchanted, v -> c.lungeOnlyEnchanted = v);
 		y = toggle(ctx, x, y, w, "Danach zurück zum alten Item", c.lungeReturn, v -> c.lungeReturn = v);
-		y = slider(ctx, x, y, w, "Wartezeit vor dem Stoß", 0, 10, c.lungeDelay, 1, ticks(c.lungeDelay), v -> c.lungeDelay = (int) v);
+		y = slider(ctx, x, y, w, "Wartezeit vor dem Stoß", 0, 10, c.lungeDelay, 1,
+				c.lungeDelay == 0 ? "sofort (empfohlen)" : ticks(c.lungeDelay), v -> c.lungeDelay = (int) v);
+		if (c.lungeDelay > 0) {
+			y = paragraph(ctx, x, y, w, "⚠ Mit Wartezeit setzt Minecraft die Aufladung zurück – der Stoß klappt dann meist nicht.", 0xFFFF7060);
+		}
 		y = slider(ctx, x, y, w, "Zurückwechseln nach", 0, 20, c.lungeReturnDelay, 1, ticks(c.lungeReturnDelay), v -> c.lungeReturnDelay = (int) v);
 		y = toggle(ctx, x, y, w, "Automatisch nach dem Werfen einer Windladung", c.lungeAfterWind, v -> c.lungeAfterWind = v);
 		y = slider(ctx, x, y, w, "… Wartezeit nach der Windladung", 1, 20, c.lungeAfterWindDelay, 1, ticks(c.lungeAfterWindDelay), v -> c.lungeAfterWindDelay = (int) v);

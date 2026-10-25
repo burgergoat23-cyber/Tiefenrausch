@@ -128,7 +128,12 @@ public final class Macros {
 
 	// ------------------------------------------------------------ Lunge-Swap
 
-	/** Wechselt auf den Speer, macht den Stoss (mit Lunge) und wechselt zurueck. */
+	/**
+	 * Wechselt auf den Speer, macht den Stoss (mit Lunge) und wechselt zurueck.
+	 * Speere brauchen volle Angriffs-Aufladung (minimum_attack_charge = 1). Minecraft setzt die Aufladung erst im
+	 * naechsten Spieler-Tick nach einem Item-Wechsel zurueck – deshalb muss der Stoss im selben Tick wie der Wechsel
+	 * passieren (lungeDelay = 0), dann zaehlt noch die Aufladung des vorherigen Items.
+	 */
 	public static void lungeSwap(MinecraftClient client) {
 		ArsenalConfig c = ArsenalConfig.get();
 		ClientPlayerEntity p = client.player;

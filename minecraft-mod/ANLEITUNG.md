@@ -2,7 +2,7 @@
 
 CS-Skins für deine Waffen, PvP-Makros und ein Struktur-Tracker – alles in **einer** Jar-Datei.
 
-Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `arsenal-1.1.0+mc1.21.11.jar`).
+Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `arsenal-1.2.0+mc1.21.11.jar`).
 
 ## Installieren (einmalig)
 

@@ -109,17 +109,6 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			ctx.getInput().releaseKey(o -> o.useKey);
 			ctx.waitTicks(5);
 
-			// Lunge-Swap: vom Schwert (Slot 0) auf den Speer (Slot 4) und zurueck
-			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
-			ctx.waitTicks(25);
-			ctx.getInput().pressKey(ArsenalClient.lungeKey);
-			ctx.waitTicks(2);
-			int lungeDuring = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
-			ctx.takeScreenshot("lunge_swap");
-			ctx.waitTicks(12);
-			int lungeAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
-			ArsenalClient.LOG.info("TEST Lunge-Swap: waehrend={} danach={} (erwartet 4 und 0)", lungeDuring, lungeAfter);
-
 			// Schnell-Perle
 			ctx.getInput().pressKey(ArsenalClient.pearlKey);
 			ctx.waitTicks(3);
@@ -149,6 +138,31 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			int maceAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
 			int swaps = ctx.computeOnClient(mc -> Macros.attributeSwaps);
 			ArsenalClient.LOG.info("TEST Attribut-Swap: Ziel={} Swaps={} waehrend={} danach={} (erwartet Swaps=1, danach 2)", target, swaps, maceDuring, maceAfter);
+
+			// Lunge-Swap mit echtem Sprungangriff: misst, ob der Spieler wirklich nach vorne springt
+			sp.getServer().runCommand("kill @e[type=minecraft:husk]");
+			sp.getServer().runCommand("item replace entity @p hotbar.4 with netherite_spear[enchantments={lunge:3}]");
+			sp.getServer().runCommand("execute at @p run fill ~-10 ~-1 ~-10 ~10 ~-1 ~10 minecraft:glass");
+			for (int delay : new int[]{1, 0, 0}) {
+				ctx.runOnClient(mc -> {
+					ArsenalConfig.get().lungeDelay = delay;
+					ArsenalConfig.get().lungeReturnDelay = 1;
+					mc.player.getInventory().setSelectedSlot(6);
+				});
+				sp.getServer().runCommand("execute at @p run tp @p ~ ~ ~ 180 0");
+				ctx.waitTicks(40);
+				double[] before = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
+				ctx.getInput().pressKey(ArsenalClient.lungeKey);
+				ctx.waitTicks(1);
+				int slotDuring = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+				ctx.waitTicks(9);
+				double[] after = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
+				int slotAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+				double moved = Math.hypot(after[0] - before[0], after[1] - before[1]);
+				ArsenalClient.LOG.info("TEST Lunge-Stoss (Wartezeit {} Ticks): bewegt {} Bloecke, Slot nach 1 Tick={}, danach={} (erwartet bei 0: bewegt > 1, danach 6)",
+						delay, String.format(java.util.Locale.ROOT, "%.2f", moved), slotDuring, slotAfter);
+			}
+			ctx.runOnClient(mc -> ArsenalConfig.get().lungeDelay = 0);
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(25);
 

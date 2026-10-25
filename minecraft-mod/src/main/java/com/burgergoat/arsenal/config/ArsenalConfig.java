@@ -92,8 +92,9 @@ public class ArsenalConfig {
 	public boolean lungeEnabled = true;
 	public boolean lungeOnlyEnchanted = false;
 	public boolean lungeReturn = true;
-	public int lungeDelay = 1;
-	public int lungeReturnDelay = 3;
+	/** 0 = Stoss im selben Tick wie der Wechsel (noetig, damit der Speer voll aufgeladen ist). */
+	public int lungeDelay = 0;
+	public int lungeReturnDelay = 1;
 	public boolean lungeAfterWind = false;
 	public int lungeAfterWindDelay = 6;
 
@@ -106,6 +107,9 @@ public class ArsenalConfig {
 
 	public boolean shieldBreaker = false;
 	public boolean quickReturn = true;
+
+	/** Version der gespeicherten Einstellungen (fuer Umstellungen zwischen Mod-Versionen). */
+	public int configVersion = 0;
 
 	public static ArsenalConfig get() {
 		return instance;
@@ -136,6 +140,13 @@ public class ArsenalConfig {
 		if (instance.statTrakKills == null) instance.statTrakKills = new HashMap<>();
 		if (instance.trackTypes == null) instance.trackTypes = new LinkedHashSet<>();
 		if (instance.filter == null) instance.filter = "none";
+		if (instance.configVersion < 2) {
+			// Ab 1.2: Lunge-Swap sticht sofort (sonst setzt Minecraft die Aufladung zurueck und es passiert nichts)
+			instance.lungeDelay = 0;
+			instance.lungeReturnDelay = 1;
+			instance.configVersion = 2;
+			save();
+		}
 		version++;
 	}
 
