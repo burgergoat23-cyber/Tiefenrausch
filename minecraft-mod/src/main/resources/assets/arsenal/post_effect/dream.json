@@ -21,12 +21,12 @@
      {
       "name": "Threshold",
       "type": "float",
-      "value": 0.45
+      "value": 0.72
      },
      {
       "name": "Knee",
       "type": "float",
-      "value": 0.45
+      "value": 0.28
      }
     ]
    }
@@ -181,7 +181,7 @@
        1.0,
        0.78,
        0.92,
-       0.22
+       0.16
       ]
      },
      {
@@ -202,7 +202,7 @@
      {
       "name": "Contrast",
       "type": "float",
-      "value": 0.94
+      "value": 0.97
      },
      {
       "name": "Saturation",
@@ -217,12 +217,12 @@
      {
       "name": "BloomStrength",
       "type": "float",
-      "value": 0.95
+      "value": 0.6
      },
      {
       "name": "Vignette",
       "type": "float",
-      "value": 0.25
+      "value": 0.2
      },
      {
       "name": "Sharpen",
@@ -242,7 +242,7 @@
      {
       "name": "Tonemap",
       "type": "float",
-      "value": 0.4
+      "value": 0.0
      },
      {
       "name": "NightVision",
@@ -252,7 +252,7 @@
      {
       "name": "Fade",
       "type": "float",
-      "value": 0.05
+      "value": 0.03
      },
      {
       "name": "Posterize",

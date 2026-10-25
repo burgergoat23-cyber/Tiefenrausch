@@ -487,7 +487,7 @@ def render(shape, size, start, end, finish, flip_light=False, outline=0.58):
 # ---------------------------------------------------------------- Messer (64x64, echte 3D-Tiefe)
 KNIFE_SIZE = 64
 KNIFE_START, KNIFE_END = (4.0, 60.0), (60.0, 4.0)
-THICK = {'E': 0.5, 'S': 1.0, 'H': 1.75, 'R': 1.5, 'G': 2.25, 'V': 2.0}
+THICK = {'E': 0.3, 'S': 0.6, 'H': 1.1, 'R': 0.9, 'G': 1.6, 'V': 1.3}
 
 
 class KShape(Shape):

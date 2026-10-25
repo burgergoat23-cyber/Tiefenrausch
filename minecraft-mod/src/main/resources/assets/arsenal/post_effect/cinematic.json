@@ -21,12 +21,12 @@
      {
       "name": "Threshold",
       "type": "float",
-      "value": 0.68
+      "value": 0.86
      },
      {
       "name": "Knee",
       "type": "float",
-      "value": 0.25
+      "value": 0.12
      }
     ]
    }
@@ -168,10 +168,10 @@
       "name": "ShadowTint",
       "type": "vec4",
       "value": [
-       0.15,
+       0.1,
        0.55,
-       0.75,
-       0.22
+       0.8,
+       0.28
       ]
      },
      {
@@ -179,9 +179,9 @@
       "type": "vec4",
       "value": [
        1.0,
-       0.72,
-       0.45,
-       0.18
+       0.7,
+       0.4,
+       0.16
       ]
      },
      {
@@ -197,12 +197,12 @@
      {
       "name": "Exposure",
       "type": "float",
-      "value": 1.18
+      "value": 0.98
      },
      {
       "name": "Contrast",
       "type": "float",
-      "value": 1.08
+      "value": 1.18
      },
      {
       "name": "Saturation",
@@ -217,12 +217,12 @@
      {
       "name": "BloomStrength",
       "type": "float",
-      "value": 0.35
+      "value": 0.22
      },
      {
       "name": "Vignette",
       "type": "float",
-      "value": 0.5
+      "value": 0.42
      },
      {
       "name": "Sharpen",
@@ -232,17 +232,17 @@
      {
       "name": "Grain",
       "type": "float",
-      "value": 0.035
+      "value": 0.03
      },
      {
       "name": "Aberration",
       "type": "float",
-      "value": 0.0035
+      "value": 0.0025
      },
      {
       "name": "Tonemap",
       "type": "float",
-      "value": 1.0
+      "value": 0.0
      },
      {
       "name": "NightVision",
@@ -252,7 +252,7 @@
      {
       "name": "Fade",
       "type": "float",
-      "value": 0.025
+      "value": 0.02
      },
      {
       "name": "Posterize",

@@ -73,8 +73,9 @@ void main() {
         c = clamp(c + (c - avg) * Sharpen * 2.0, mn, mx * 1.05 + 0.02);
     }
 
-    // Leuchten dazu
-    c += texture(BloomSampler, uv).rgb * BloomStrength;
+    // Leuchten dazu (Screen-Mischung: wird nie zu reinem Weiss)
+    vec3 glow = clamp(texture(BloomSampler, uv).rgb * BloomStrength, 0.0, 1.0);
+    c = 1.0 - (1.0 - c) * (1.0 - glow);
 
     // Weissabgleich und Belichtung
     c *= Balance.rgb * Exposure;
@@ -115,7 +116,10 @@ void main() {
 
     // Comic: Farbstufen und dunkle Umrisse
     if (Posterize > 1.0) {
-        c = floor(c * Posterize + 0.5) / Posterize;
+        // Helligkeit in Stufen, Farbton bleibt erhalten
+        float pl = luma(c);
+        float ql = floor(pl * Posterize + 0.5) / Posterize;
+        c = clamp(c * (ql / max(pl, 0.001)), 0.0, 1.0);
     }
     if (Outline > 0.0) {
         float e = abs(luma(n1) - luma(n2)) + abs(luma(n3) - luma(n4));

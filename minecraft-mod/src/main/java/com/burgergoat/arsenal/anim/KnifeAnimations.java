@@ -110,79 +110,86 @@ public final class KnifeAnimations {
 			k(1, 0, 0, 0, -360, 0, 0)}, swish(0.35f), click(0.8f));
 
 	// ------------------------------------------------------------------ Inspect
+	// Positionen: das Messer wird zur Bildmitte geholt (LX/LY = "anschauen", SX/SY = Tricks in der Hand)
+
+	private static final float LX = -0.2f;
+	private static final float LY = 0.16f;
+	private static final float LZ = 0.03f;
+	private static final float SX = -0.12f;
+	private static final float SY = 0.14f;
 
 	public static final Anim INSPECT_LOOK = a("look", 64, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.15f, -0.05f, 0.08f, 0.05f, -10, -55, 20),
-			k(0.35f, -0.05f, 0.09f, 0.05f, -12, -58, 22),
-			k(0.55f, -0.02f, 0.1f, 0.05f, -10, 125, -20),
-			k(0.75f, -0.02f, 0.1f, 0.05f, -12, 128, -22),
+			k(0.15f, LX, LY, LZ, -10, -55, 20),
+			k(0.35f, LX, LY + 0.01f, LZ, -12, -58, 22),
+			k(0.55f, LX + 0.03f, LY + 0.02f, LZ, -10, 125, -20),
+			k(0.75f, LX + 0.03f, LY + 0.02f, LZ, -12, 128, -22),
 			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.45f));
 
 	public static final Anim INSPECT_KARAMBIT = a("karambit", 72, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.1f, 0, 0.05f, 0, -10, 0, 0),
-			k(0.3f, 0, 0.05f, 0, -10, 0, -360),
-			k(0.38f, 0, 0.05f, 0, -10, 0, -360),
-			k(0.58f, 0, 0.05f, 0, -10, 0, -720),
-			k(0.7f, -0.05f, 0.1f, 0.05f, -10, -50, -700),
-			k(0.85f, -0.05f, 0.1f, 0.05f, -12, -52, -698),
+			k(0.1f, SX, SY, 0, -10, 0, 0),
+			k(0.3f, SX, SY, 0, -10, 0, -360),
+			k(0.38f, SX, SY, 0, -10, 0, -360),
+			k(0.58f, SX, SY, 0, -10, 0, -720),
+			k(0.7f, LX, LY, LZ, -10, -50, -700),
+			k(0.85f, LX, LY, LZ, -12, -52, -698),
 			k(1, 0, 0, 0, 0, 0, -720)}, swish(0.2f), swish(0.48f));
 
 	public static final Anim INSPECT_BUTTERFLY = a("butterfly", 80, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.1f, 0, 0.06f, 0, -5, 180, 0),
-			k(0.2f, 0, 0.06f, 0, -5, 360, 15),
-			k(0.3f, 0, 0.08f, 0, -5, 540, -15),
-			k(0.4f, 0, 0.08f, 0, -5, 720, 0),
-			k(0.55f, 0, 0.4f, 0, -380, 720, 0),
-			k(0.7f, 0, 0.06f, 0, -720, 720, 0),
-			k(0.8f, 0, 0.06f, 0, -720, 900, 10),
-			k(0.9f, 0, 0.04f, 0, -720, 1080, 0),
+			k(0.1f, SX, SY, 0, -5, 180, 0),
+			k(0.2f, SX, SY, 0, -5, 360, 15),
+			k(0.3f, SX, SY + 0.02f, 0, -5, 540, -15),
+			k(0.4f, SX, SY + 0.02f, 0, -5, 720, 0),
+			k(0.55f, SX, SY + 0.4f, 0, -380, 720, 0),
+			k(0.7f, SX, SY, 0, -720, 720, 0),
+			k(0.8f, SX, SY, 0, -720, 900, 10),
+			k(0.9f, SX, SY - 0.02f, 0, -720, 1080, 0),
 			k(1, 0, 0, 0, -720, 1080, 0)},
 			click(0.1f), click(0.2f), click(0.3f), click(0.4f), swish(0.5f), click(0.7f), click(0.8f), click(0.9f));
 
 	public static final Anim INSPECT_DAGGERS = a("daggers", 70, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.2f, 0, 0.08f, 0, -10, 0, -360),
-			k(0.3f, 0, 0.08f, 0, -10, 0, -360),
-			k(0.5f, -0.04f, 0.1f, 0.04f, -10, -60, -360),
-			k(0.65f, -0.04f, 0.1f, 0.04f, -10, 120, -360),
-			k(0.85f, 0, 0.05f, 0, -5, 0, -720),
+			k(0.2f, SX, SY, 0, -10, 0, -360),
+			k(0.3f, SX, SY, 0, -10, 0, -360),
+			k(0.5f, LX, LY, LZ, -10, -60, -360),
+			k(0.65f, LX, LY, LZ, -10, 120, -360),
+			k(0.85f, SX, SY, 0, -5, 0, -720),
 			k(1, 0, 0, 0, 0, 0, -720)}, swish(0.12f), swish(0.75f));
 
 	public static final Anim INSPECT_FLIP = a("flip", 66, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.12f, 0, 0.06f, 0, -8, 0, -180),
-			k(0.25f, 0, 0.06f, 0, -8, 0, 0),
-			k(0.45f, -0.05f, 0.1f, 0.05f, -10, -55, 15),
-			k(0.6f, -0.05f, 0.1f, 0.05f, -12, -57, 17),
-			k(0.8f, -0.03f, 0.1f, 0.05f, -10, 125, -15),
+			k(0.12f, SX, SY, 0, -8, 0, -180),
+			k(0.25f, SX, SY, 0, -8, 0, 0),
+			k(0.45f, LX, LY, LZ, -10, -55, 15),
+			k(0.6f, LX, LY, LZ, -12, -57, 17),
+			k(0.8f, LX + 0.03f, LY, LZ, -10, 125, -15),
 			k(1, 0, 0, 0, 0, 0, 0)}, click(0.12f), click(0.25f), swish(0.7f));
 
 	public static final Anim INSPECT_TOSS = a("toss", 74, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.12f, 0, 0.04f, 0, 10, 0, 0),
-			k(0.35f, 0, 0.45f, 0, -400, 0, 0),
-			k(0.55f, 0, 0.02f, 0, -720, 0, 0),
-			k(0.7f, -0.05f, 0.1f, 0.05f, -730, -55, 15),
-			k(0.85f, -0.05f, 0.1f, 0.05f, -732, -57, 17),
+			k(0.12f, SX, SY - 0.04f, 0, 10, 0, 0),
+			k(0.35f, SX, SY + 0.42f, 0, -400, 0, 0),
+			k(0.55f, SX, SY, 0, -720, 0, 0),
+			k(0.7f, LX, LY, LZ, -730, -55, 15),
+			k(0.85f, LX, LY, LZ, -732, -57, 17),
 			k(1, 0, 0, 0, -720, 0, 0)}, swish(0.2f), click(0.55f));
 
 	public static final Anim INSPECT_FALCHION = a("falchion", 70, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.3f, 0, 0.06f, 0, -5, 0, -720),
-			k(0.4f, 0, 0.06f, 0, -5, 0, -720),
-			k(0.6f, -0.05f, 0.1f, 0.05f, -10, -55, -700),
-			k(0.8f, -0.03f, 0.1f, 0.05f, -10, 125, -740),
+			k(0.3f, SX, SY, 0, -5, 0, -720),
+			k(0.4f, SX, SY, 0, -5, 0, -720),
+			k(0.6f, LX, LY, LZ, -10, -55, -700),
+			k(0.8f, LX + 0.03f, LY, LZ, -10, 125, -740),
 			k(1, 0, 0, 0, 0, 0, -720)}, swish(0.1f), swish(0.22f), swish(0.7f));
 
 	public static final Anim INSPECT_NAVAJA = a("navaja", 64, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.15f, 0, 0.05f, 0, -5, 0, -360),
-			k(0.3f, -0.04f, 0.08f, 0.04f, -10, -55, -360),
-			k(0.55f, -0.04f, 0.08f, 0.04f, -10, 125, -360),
-			k(0.75f, 0, 0.05f, 0, -5, 0, -720),
+			k(0.15f, SX, SY, 0, -5, 0, -360),
+			k(0.3f, LX, LY, LZ, -10, -55, -360),
+			k(0.55f, LX, LY, LZ, -10, 125, -360),
+			k(0.75f, SX, SY, 0, -5, 0, -720),
 			k(1, 0, 0, 0, 0, 0, -720)}, click(0.15f), swish(0.45f), click(0.75f));
 
 	private static final Map<String, Anim[]> BY_SHAPE = new HashMap<>();

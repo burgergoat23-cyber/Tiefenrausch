@@ -55,6 +55,7 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			sp.getServer().runCommand("item replace entity @p inventory.2 with wooden_sword");
 			sp.getServer().runCommand("item replace entity @p weapon.offhand with shield");
 			ctx.waitTicks(20);
+			ctx.runOnClient(mc -> mc.inGameHud.getChatHud().clear(false));
 			for (int slot : new int[]{0, 1, 2, 3, 4, 5}) {
 				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(slot));
 				ctx.waitTicks(12);
@@ -138,6 +139,7 @@ public class ArsenalGameTest implements FabricClientGameTest {
 			ctx.waitTicks(20);
 			sp.getServer().runCommand("execute at @p run summon minecraft:husk ~ ~ ~2.5 {NoAI:1b,PersistenceRequired:1b}");
 			ctx.waitTicks(30);
+			ctx.runOnClient(mc -> mc.inGameHud.getChatHud().clear(false));
 			ctx.waitTicks(2);
 			String target = ctx.computeOnClient(mc -> String.valueOf(mc.crosshairTarget == null ? null : mc.crosshairTarget.getType()));
 			ctx.getInput().pressMouse(0);

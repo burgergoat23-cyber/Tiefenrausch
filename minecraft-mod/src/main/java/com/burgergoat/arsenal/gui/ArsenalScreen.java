@@ -208,7 +208,7 @@ public class ArsenalScreen extends Screen {
 		py = (height - ph) / 2;
 		if (tab == 3) {
 			// Viewmodel: Menue nach links, rechts bleibt die Hand sichtbar
-			pw = Math.min(pw, Math.max(250, width / 2 + 10));
+			pw = Math.min(pw, Math.max(280, width * 11 / 20));
 			px = 6;
 		}
 		cx = px + 102;
@@ -664,13 +664,15 @@ public class ArsenalScreen extends Screen {
 	private int drawViewmodel(DrawContext ctx, int x, int y, int w) {
 		ArsenalConfig c = ArsenalConfig.get();
 		y = paragraph(ctx, x, y, w, "Live-Vorschau: rechts siehst du deine Hand. Halte dein Messer in der Hand und stell alles ein.", 0xFF8FD18F);
-		button(ctx, x, y, (w - 4) / 3, 18, "▶ Inspect", false, () -> {
+		int half = (w - 2) / 2;
+		button(ctx, x, y, half, 18, "▶ Inspect", false, () -> {
 			if (client != null) Viewmodel.startInspect(client);
 		});
-		button(ctx, x + (w - 4) / 3 + 2, y, (w - 4) / 3, 18, "▶ Ziehen", false, () -> {
+		button(ctx, x + half + 2, y, half, 18, "▶ Ziehen", false, () -> {
 			if (client != null) Viewmodel.playDraw(client);
 		});
-		button(ctx, x + 2 * ((w - 4) / 3) + 4, y, (w - 4) / 3, 18, "Zurücksetzen", false, () -> {
+		y += 20;
+		button(ctx, x, y, w, 18, "Alles zurücksetzen", false, () -> {
 			ArsenalConfig d = new ArsenalConfig();
 			c.vmX = d.vmX;
 			c.vmY = d.vmY;

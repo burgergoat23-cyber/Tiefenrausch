@@ -21,12 +21,12 @@
      {
       "name": "Threshold",
       "type": "float",
-      "value": 0.7
+      "value": 0.86
      },
      {
       "name": "Knee",
       "type": "float",
-      "value": 0.25
+      "value": 0.12
      }
     ]
    }
@@ -202,7 +202,7 @@
      {
       "name": "Contrast",
       "type": "float",
-      "value": 1.06
+      "value": 1.08
      },
      {
       "name": "Saturation",
