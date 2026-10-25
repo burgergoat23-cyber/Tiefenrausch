@@ -69,12 +69,12 @@ public class ArsenalClient implements ClientModInitializer {
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> SkinManager.appendTooltip(stack, lines));
 
 		AttackEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			if (world.isClient) SkinManager.onAttack(entity, player.getStackInHand(hand));
+			if (world.isClient()) SkinManager.onAttack(entity, player.getStackInHand(hand));
 			return ActionResult.PASS;
 		});
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			MinecraftClient mc = MinecraftClient.getInstance();
-			if (world.isClient && player == mc.player) Macros.afterUse(mc, player.getStackInHand(hand));
+			if (world.isClient() && player == mc.player) Macros.afterUse(mc, player.getStackInHand(hand));
 			return ActionResult.PASS;
 		});
 
