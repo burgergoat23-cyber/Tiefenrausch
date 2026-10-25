@@ -14,6 +14,8 @@ interface VideoDockStore {
   setFullSlot(el: HTMLElement | null): void;
   /** iPhone/iPad: Video läuft nur stumm – ein Tipp auf „Ton an“ schaltet den Ton ein */
   needsUnmute: boolean;
+  /** Browser lässt das Video gar nicht von selbst starten → Hinweis „einmal aufs Video tippen“ */
+  needsTap: boolean;
   unmute: (() => void) | null;
 }
 
@@ -23,5 +25,6 @@ export const useVideoDock = create<VideoDockStore>()((set) => ({
   setHost: (host) => set({ host }),
   setFullSlot: (fullSlot) => set({ fullSlot }),
   needsUnmute: false,
+  needsTap: false,
   unmute: null,
 }));

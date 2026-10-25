@@ -110,7 +110,14 @@ export function VideoSlot({ className }: { className?: string }) {
 export function UnmuteButton({ compact = false }: { compact?: boolean }) {
   const t = useT();
   const needs = useVideoDock((s) => s.needsUnmute);
+  const needsTap = useVideoDock((s) => s.needsTap);
   const unmute = useVideoDock((s) => s.unmute);
+  if (needsTap && !needs)
+    return (
+      <span className={compact ? styles.tapHint : 'kr-muted'} role="status">
+        {t('video.tapOnce')}
+      </span>
+    );
   if (!needs || !unmute) return null;
   return (
     <button

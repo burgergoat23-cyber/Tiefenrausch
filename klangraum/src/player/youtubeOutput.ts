@@ -14,6 +14,7 @@ interface YTPlayer {
   getDuration(): number;
   cueVideoById(opts: { videoId: string; startSeconds?: number }): void;
   isMuted?(): boolean;
+  loadVideoById?(opts: { videoId: string; startSeconds?: number }): void;
   setPlaybackRate?(rate: number): void;
 }
 
@@ -201,6 +202,7 @@ export class YouTubeOutput implements PlaybackOutput {
 
   private onState(state: number) {
     if (state === STATE.PLAYING) {
+      useVideoDock.setState({ needsTap: false });
       // Stumm gestartet: Ton gleich wieder versuchen; klappt es nicht, zeigt die App „Ton an“
       if (this.autoMuted && !this.muted && this.player) {
         this.player.unMute();
@@ -290,8 +292,13 @@ export class YouTubeOutput implements PlaybackOutput {
         // Gerät blockt Ton ohne Tipp aufs Video → stumm starten (immer erlaubt), Ton danach
         this.autoMuted = true;
         p.mute();
-        p.playVideo();
+        // loadVideoById startet von selbst – manche Geräte lassen das eher zu als playVideo
+        if (p.loadVideoById && this.videoId)
+          p.loadVideoById({ videoId: this.videoId, startSeconds: p.getCurrentTime() || 0 });
+        else p.playVideo();
         const last = setTimeout(() => {
+          // Gerät/Browser lässt gar kein automatisches Starten zu: Hinweis „aufs Video tippen“
+          useVideoDock.setState({ needsTap: true });
           this.settlePlay(new DOMException('Bitte aufs Video tippen', 'NotAllowedError'));
         }, PLAY_TIMEOUT_MS);
         if (this.pendingPlay) this.pendingPlay.timer = last;
@@ -335,7 +342,7 @@ export class YouTubeOutput implements PlaybackOutput {
   stop() {
     this.videoId = null;
     this.cuedId = null;
-    useVideoDock.setState({ needsUnmute: false });
+    useVideoDock.setState({ needsUnmute: false, needsTap: false });
     this.settlePlay(new DOMException('Stopp', 'AbortError'));
     this.stopTimer();
     this.player?.stopVideo();
