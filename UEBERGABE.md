@@ -101,3 +101,9 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Mit nur dem Start-Schwert (1 Schaden) ist der erste Boss (Ebene 3, 66 Leben) sehr zäh.
 - Koop-Lobby: „Abbrechen“ und sofort neu „Raum erstellen“ (innerhalb ~2 s) zeigt „Raum wird erstellt …“ ohne Fortschritt – nochmal Abbrechen hilft (Lösung wäre ein Zähler `CO.gen`).
 - Bomben-Gegner, die sich selbst sprengen (`e.nolo`), zählen trotzdem als besiegt (Beute, Aufgaben). Boss-Beute, die beim Verlassen noch am Boden lag, ist nach „Fortsetzen“ weg (Absicht: kein doppeltes Plündern).
+
+## Minecraft-Mod „Arsenal“ (Branch `claude/amazing-davinci-7k6itv`, Ordner `minecraft-mod/`)
+- Fabric-Mod für Minecraft **1.21.11** (Yarn-Mappings, Loom `fabric-loom-remap` 1.19, Java 25 zum Bauen). Nur Client. Anleitung für den Nutzer: `minecraft-mod/ANLEITUNG.md`.
+- In der Cloud-Sitzung sind `maven.fabricmc.net` und die Mojang-Server gesperrt → **gebaut wird auf GitHub Actions** (`.github/workflows/minecraft-mod.yml`): legt die Jar nach `minecraft-mod/download/` und startet einen Spieltest (`runProductionClientGameTest`, Klasse `test/ArsenalGameTest`), Screenshots + Log nach `minecraft-mod/test-screenshots/` (Commit vom Bot, danach `git pull`). Minecraft-Namen vorher in den Yarn-Dateien prüfen: `https://raw.githubusercontent.com/FabricMC/yarn/1.21.11/mappings/<pfad>.mapping`.
+- Skins: Grafiken/Modelle/`skins.json` erzeugt `python3 tools/generate_assets.py` (Formen als Umrisse, Muster als Funktionen). Austausch beim Zeichnen per Mixin in `ItemModelManager.update` (`SkinManager.resolve`).
+- Tracker: Einzelspieler über den eingebauten Server (`ServerSearch`, Raster-Suche wie `/locate`, Endschiff über Bauteil „ship“), Server nur geladene Chunks und nur mit Erlaubnis-Schalter. Kein Seed-Cracking (bewusst).
