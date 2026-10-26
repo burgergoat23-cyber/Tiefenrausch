@@ -241,7 +241,8 @@ public class VantageGameTest implements FabricClientGameTest {
 			for (int hit = 0; hit < 3; hit++) {
 				ctx.getInput().pressMouse(0);
 				ctx.waitTicks(14);
-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+				int n = ctx.computeOnClient(mc -> ComboCounter.combo());
+				combos.append(n).append(' ');
 			}
 			VantageClient.LOG.info("TEST Combo: {}(erwartet 1 2 3)", combos);
 			ctx.takeScreenshot("combo");
