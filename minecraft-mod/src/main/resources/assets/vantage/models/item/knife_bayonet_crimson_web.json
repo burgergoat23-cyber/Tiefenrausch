@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_bayonet",
+ "textures": {
+  "tex": "vantage:item/knife_bayonet_crimson_web"
+ }
+}

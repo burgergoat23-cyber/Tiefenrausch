@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_gut",
+ "textures": {
+  "tex": "vantage:item/knife_gut_safari_mesh"
+ }
+}

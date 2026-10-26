@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_stiletto",
- "textures": {
-  "tex": "arsenal:item/knife_stiletto_forest_ddpat"
- }
-}

@@ -1,25 +1,25 @@
 {
 	"schemaVersion": 1,
-	"id": "arsenal",
+	"id": "vantage",
 	"version": "${version}",
-	"name": "Arsenal",
-	"description": "CS-Skins für Schwerter, Äxte, Streitkolben, Speere, Schilde, Perlen und Totems, Inspect-Animation, Kisten, CS-Fadenkreuz, Viewmodel, Bild-Filter, Struktur-Tracker (Bastion, End-City, End-Schiff …) und PvP-Makros (Lunge-Swap, Attribut-Swap).",
+	"name": "Vantage Client",
+	"description": "Vantage Client: CS-Messer und Skins mit Animationen, Viewmodel, CS-Fadenkreuz, Shader, Struktur-Tracker mit Plünder-Status (Elytra, Drachenkopf, Kisten) und PvP-Makros (Lunge-Swap, Attribut-Swap).",
 	"authors": [
 		"BurgerGoat"
 	],
 	"license": "MIT",
-	"icon": "assets/arsenal/icon.png",
+	"icon": "assets/vantage/icon.png",
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"com.burgergoat.arsenal.ArsenalClient"
+			"com.burgergoat.vantage.VantageClient"
 		],
 		"fabric-client-gametest": [
-			"com.burgergoat.arsenal.test.ArsenalGameTest"
+			"com.burgergoat.vantage.test.VantageGameTest"
 		]
 	},
 	"mixins": [
-		"arsenal.mixins.json"
+		"vantage.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.17.0",

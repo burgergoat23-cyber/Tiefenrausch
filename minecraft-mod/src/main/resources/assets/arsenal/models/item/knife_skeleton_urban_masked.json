@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_skeleton",
- "textures": {
-  "tex": "arsenal:item/knife_skeleton_urban_masked"
- }
-}

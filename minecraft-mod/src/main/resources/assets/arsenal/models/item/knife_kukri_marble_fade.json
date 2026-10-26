@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_kukri",
- "textures": {
-  "tex": "arsenal:item/knife_kukri_marble_fade"
- }
-}

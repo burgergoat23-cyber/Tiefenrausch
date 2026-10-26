@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_nomad",
+ "textures": {
+  "tex": "vantage:item/knife_nomad_boreal_forest"
+ }
+}

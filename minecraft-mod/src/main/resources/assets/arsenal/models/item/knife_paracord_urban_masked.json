@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_paracord",
- "textures": {
-  "tex": "arsenal:item/knife_paracord_urban_masked"
- }
-}

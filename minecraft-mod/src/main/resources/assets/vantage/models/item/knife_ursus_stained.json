@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_ursus",
+ "textures": {
+  "tex": "vantage:item/knife_ursus_stained"
+ }
+}

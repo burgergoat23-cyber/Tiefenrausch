@@ -1,6 +1,0 @@
-{
- "parent": "minecraft:item/generated",
- "textures": {
-  "layer0": "arsenal:item/spear_bayonet_spear_vanilla_icon"
- }
-}

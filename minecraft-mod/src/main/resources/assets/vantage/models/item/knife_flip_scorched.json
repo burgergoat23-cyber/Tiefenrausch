@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_flip",
+ "textures": {
+  "tex": "vantage:item/knife_flip_scorched"
+ }
+}

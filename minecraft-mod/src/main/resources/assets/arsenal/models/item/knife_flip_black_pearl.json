@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_flip",
- "textures": {
-  "tex": "arsenal:item/knife_flip_black_pearl"
- }
-}

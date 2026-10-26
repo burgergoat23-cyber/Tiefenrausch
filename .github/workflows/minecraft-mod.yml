@@ -47,7 +47,7 @@ jobs:
       - name: Jar hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: arsenal-mod
+          name: vantage-client
           path: minecraft-mod/build/libs/*.jar
 
       - name: Spieltest (Minecraft startet ohne Bildschirm)
@@ -67,7 +67,7 @@ jobs:
           if [ -f run/logs/latest.log ]; then
             {
               echo "=== Wichtige Zeilen ==="
-              grep -n -E "Arsenal|arsenal|TEST |ERROR|Exception|Mixin|FATAL|Caused by" run/logs/latest.log | head -n 400
+              grep -n -E "Vantage|vantage|TEST |ERROR|Exception|Mixin|FATAL|Caused by" run/logs/latest.log | head -n 400
               echo
               echo "=== Ende des Logs ==="
               tail -n 150 run/logs/latest.log

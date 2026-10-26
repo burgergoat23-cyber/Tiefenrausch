@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "vantage:item/spear_halberd_doppler_icon"
+ }
+}

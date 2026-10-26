@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_nomad",
- "textures": {
-  "tex": "arsenal:item/knife_nomad_vanilla"
- }
-}

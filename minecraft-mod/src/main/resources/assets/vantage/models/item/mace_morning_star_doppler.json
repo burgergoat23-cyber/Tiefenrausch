@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:item/handheld_mace",
+ "textures": {
+  "layer0": "vantage:item/mace_morning_star_doppler"
+ }
+}

@@ -1,0 +1,13 @@
+{
+	"key.arsenal.menu": "Open Vantage Client menu",
+	"key.arsenal.inspect": "Inspect (look at knife)",
+	"key.arsenal.lunge": "Lunge swap (spear)",
+	"key.arsenal.pearl": "Quick ender pearl",
+	"key.arsenal.wind": "Quick wind charge",
+	"key.arsenal.zoom": "Zoom (hold)",
+	"key.arsenal.tracker": "Tracker: search now",
+	"key.vantage.tracker_cycle": "Tracker: next target type",
+	"key.arsenal.mace_toggle": "Toggle attribute swap",
+	"key.arsenal.shield_toggle": "Toggle shield breaker",
+	"key.category.vantage.main": "Vantage Client"
+}

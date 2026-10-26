@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_kukri",
+ "textures": {
+  "tex": "vantage:item/knife_kukri_case_hardened"
+ }
+}

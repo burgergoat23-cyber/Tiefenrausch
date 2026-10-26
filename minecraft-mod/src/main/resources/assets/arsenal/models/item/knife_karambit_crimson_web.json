@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_karambit",
- "textures": {
-  "tex": "arsenal:item/knife_karambit_crimson_web"
- }
-}

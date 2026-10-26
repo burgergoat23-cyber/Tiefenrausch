@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_stiletto",
+ "textures": {
+  "tex": "vantage:item/knife_stiletto_ruby"
+ }
+}

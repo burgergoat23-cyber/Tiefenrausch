@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_m9",
- "textures": {
-  "tex": "arsenal:item/knife_m9_stained"
- }
-}

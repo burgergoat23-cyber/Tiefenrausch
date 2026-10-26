@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_paracord",
+ "textures": {
+  "tex": "vantage:item/knife_paracord_gamma_doppler"
+ }
+}

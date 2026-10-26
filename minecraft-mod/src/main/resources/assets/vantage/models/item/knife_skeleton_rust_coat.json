@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_skeleton",
+ "textures": {
+  "tex": "vantage:item/knife_skeleton_rust_coat"
+ }
+}

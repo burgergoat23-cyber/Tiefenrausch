@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_karambit",
+ "textures": {
+  "tex": "vantage:item/knife_karambit_marble_fade"
+ }
+}

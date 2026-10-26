@@ -1,6 +1,0 @@
-{
- "parent": "arsenal:item/knife_shape_talon",
- "textures": {
-  "tex": "arsenal:item/knife_talon_slaughter"
- }
-}

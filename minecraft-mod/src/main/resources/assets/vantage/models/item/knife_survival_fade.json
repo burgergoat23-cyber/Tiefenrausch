@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/knife_shape_survival",
+ "textures": {
+  "tex": "vantage:item/knife_survival_fade"
+ }
+}

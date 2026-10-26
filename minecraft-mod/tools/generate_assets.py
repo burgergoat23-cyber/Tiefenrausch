@@ -14,8 +14,8 @@ import sys
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RES = os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'arsenal')
-NS = 'arsenal'
+RES = os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'vantage')
+NS = 'vantage'
 
 
 # ---------------------------------------------------------------- Hilfen
