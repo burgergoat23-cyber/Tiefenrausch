@@ -94,6 +94,16 @@ public class VantageConfig {
 	/** Akzentfarbe des Menues (Index in VantageScreen.THEMES) */
 	public int menuTheme = 0;
 
+	// ---- GUI-Design
+	/** Design fuer Kisten, Oefen, Inventar usw. (Index in GuiThemes.NAMES, 0 = normal) */
+	public int guiTheme = 0;
+	/** Hotbar-Stil (Index in Hotbar.STYLES, 0 = normal) */
+	public int hotbarStyle = 0;
+	public boolean hotbarNumbers = false;
+	public boolean hotbarSmooth = true;
+	/** Brau-Rezepte neben dem Braustand */
+	public boolean brewHelper = true;
+
 	// ---- Tracker
 	/** Dimension ("overworld", "the_nether", "the_end") -> gesuchter Typ (immer nur einer pro Dimension). */
 	public Map<String, String> trackTarget = new HashMap<>(Map.of("overworld", "stronghold", "the_nether", "bastion", "the_end", "end_ship"));

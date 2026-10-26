@@ -20,6 +20,15 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
+import net.minecraft.client.gui.screen.ingame.CrafterScreen;
+import net.minecraft.client.gui.screen.ingame.FurnaceScreen;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.screen.BrewingStandScreenHandler;
+import net.minecraft.screen.CrafterScreenHandler;
+import net.minecraft.screen.FurnaceScreenHandler;
+import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.text.Text;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -321,23 +330,76 @@ public class VantageGameTest implements FabricClientGameTest {
 			ctx.takeScreenshot("inventory");
 			ctx.setScreen(() -> null);
 
-			for (int t = 0; t < VantageScreen.TABS.length; t++) {
-				int tab = t;
-				ctx.runOnClient(mc -> VantageScreen.setTab(tab));
+			// Neues Menue: Startseite mit Kacheln, dann jede Einstellungs-Seite
+			ctx.runOnClient(mc -> VantageScreen.setPage(VantageScreen.HOME));
+			ctx.setScreen(VantageScreen::new);
+			ctx.waitTicks(10);
+			ctx.takeScreenshot("menu_home");
+			for (int t = 0; t < VantageScreen.PAGES.length; t++) {
+				int pg = t;
+				ctx.runOnClient(mc -> VantageScreen.setPage(pg));
 				ctx.setScreen(VantageScreen::new);
-				ctx.waitTicks(4);
+				ctx.waitTicks(5);
 				ctx.takeScreenshot("menu_" + t);
 			}
-			// Andere Menue-Farbe (Lila) im Reiter Fadenkreuz
+			// Andere Menue-Farbe (Lila) auf der Startseite
 			ctx.runOnClient(mc -> {
 				VantageConfig.get().menuTheme = 2;
-				VantageScreen.setTab(2);
+				VantageScreen.setPage(VantageScreen.HOME);
 			});
 			ctx.setScreen(VantageScreen::new);
-			ctx.waitTicks(4);
+			ctx.waitTicks(10);
 			ctx.takeScreenshot("menu_theme");
 			ctx.runOnClient(mc -> VantageConfig.get().menuTheme = 0);
 			ctx.setScreen(() -> null);
+
+			// GUI-Designs: Kiste, Ofen, Crafter, Braustand (mit Rezepten) und Inventar
+			String[] themeNames = {"normal", "dunkel", "mitternacht", "glas", "menuefarbe"};
+			ctx.setScreen(() -> new BrewingStandScreen(new BrewingStandScreenHandler(1, inv()), inv(), Text.literal("Braustand")));
+			ctx.waitTicks(5);
+			ctx.takeScreenshot("gui_brewing_normal");
+			for (int theme : new int[]{1, 2, 3, 4}) {
+				ctx.runOnClient(mc -> VantageConfig.get().guiTheme = theme);
+				ctx.setScreen(() -> new GenericContainerScreen(GenericContainerScreenHandler.createGeneric9x3(1, inv()), inv(), Text.literal("Kiste")));
+				ctx.waitTicks(4);
+				ctx.takeScreenshot("gui_chest_" + themeNames[theme]);
+				if (theme == 1 || theme == 3) {
+					ctx.setScreen(() -> new FurnaceScreen(new FurnaceScreenHandler(1, inv()), inv(), Text.literal("Ofen")));
+					ctx.waitTicks(4);
+					ctx.takeScreenshot("gui_furnace_" + themeNames[theme]);
+					ctx.setScreen(() -> new CrafterScreen(new CrafterScreenHandler(1, inv()), inv(), Text.literal("Crafter")));
+					ctx.waitTicks(4);
+					ctx.takeScreenshot("gui_crafter_" + themeNames[theme]);
+					ctx.setScreen(() -> new BrewingStandScreen(new BrewingStandScreenHandler(1, inv()), inv(), Text.literal("Braustand")));
+					ctx.waitTicks(4);
+					ctx.takeScreenshot("gui_brewing_" + themeNames[theme]);
+					ctx.setScreen(() -> new InventoryScreen(MinecraftClient.getInstance().player));
+					ctx.waitTicks(4);
+					ctx.takeScreenshot("gui_inventory_" + themeNames[theme]);
+				}
+			}
+			ctx.runOnClient(mc -> VantageConfig.get().guiTheme = 0);
+			ctx.setScreen(() -> new GenericContainerScreen(GenericContainerScreenHandler.createGeneric9x3(1, inv()), inv(), Text.literal("Kiste")));
+			ctx.waitTicks(4);
+			ctx.takeScreenshot("gui_chest_zurueck_normal");
+			ctx.setScreen(() -> null);
+
+			// Hotbar-Stile im Spiel
+			for (int style = 1; style < 5; style++) {
+				int st = style;
+				ctx.runOnClient(mc -> {
+					VantageConfig.get().hotbarStyle = st;
+					VantageConfig.get().hotbarNumbers = st == 3;
+					mc.player.getInventory().setSelectedSlot(st);
+				});
+				ctx.waitTicks(8);
+				ctx.takeScreenshot("hotbar_" + st);
+			}
+			ctx.runOnClient(mc -> {
+				VantageConfig.get().hotbarStyle = 0;
+				VantageConfig.get().hotbarNumbers = false;
+				mc.player.getInventory().setSelectedSlot(0);
+			});
 
 			for (String f : new String[]{"clear", "vivid", "cinematic", "golden", "frost", "dream", "hdr", "noir", "comic", "nightvision"}) {
 				ctx.runOnClient(mc -> VantageConfig.get().filter = f);
@@ -387,7 +449,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			waitLoot(ctx);
 			logLoot(ctx, "fern");
 			ctx.takeScreenshot("tracker_end");
-			ctx.runOnClient(mc -> VantageScreen.setTab(5));
+			ctx.runOnClient(mc -> VantageScreen.setPage(VantageScreen.P_TRACKER));
 			ctx.setScreen(VantageScreen::new);
 			ctx.waitTicks(4);
 			ctx.takeScreenshot("menu_tracker_end");
@@ -509,5 +571,9 @@ public class VantageGameTest implements FabricClientGameTest {
 			for (LootStatus.Row r : st.rows) sb.append(r.label()).append('=').append(r.value()).append('[').append(r.state()).append("] ");
 			VantageClient.LOG.info("TEST Beute ({}): {} {} | {}| Hinweis: {} | Entfernung {}", when, s.type(), st.verdict, sb, st.note, StructureTracker.distance(mc, s.pos()));
 		});
+	}
+
+	private static net.minecraft.entity.player.PlayerInventory inv() {
+		return MinecraftClient.getInstance().player.getInventory();
 	}
 }

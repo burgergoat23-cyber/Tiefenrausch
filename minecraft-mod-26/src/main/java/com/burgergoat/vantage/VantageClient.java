@@ -2,6 +2,9 @@ package com.burgergoat.vantage;
 
 import com.burgergoat.vantage.config.VantageConfig;
 import com.burgergoat.vantage.feature.VantageHud;
+import com.burgergoat.vantage.feature.BrewGuide;
+import com.burgergoat.vantage.feature.GuiThemes;
+import com.burgergoat.vantage.feature.Hotbar;
 import com.burgergoat.vantage.feature.CameraControl;
 import com.burgergoat.vantage.feature.ComboCounter;
 import com.burgergoat.vantage.feature.Crosshair;
@@ -25,6 +28,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -34,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Items;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +86,12 @@ public class VantageClient implements ClientModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(ServerLoot::serverTick);
 
 		HudElementRegistry.replaceElement(VanillaHudElements.CROSSHAIR, Crosshair::wrap);
+		HudElementRegistry.replaceElement(VanillaHudElements.HOTBAR, Hotbar::wrap);
+		// GUI-Designs: vor jedem Kisten-/Ofen-/Inventar-Fenster die Bilder im gewaehlten Design bereitlegen
+		ScreenEvents.BEFORE_INIT.register((client, screen, w, h) -> {
+			if (screen instanceof AbstractContainerScreen<?>) GuiThemes.ensure(client);
+		});
+		BrewGuide.register();
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "hud"), VantageHud::render);
 
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> SkinManager.appendTooltip(stack, lines));
@@ -122,7 +133,7 @@ public class VantageClient implements ClientModInitializer {
 
 	private static void tick(Minecraft client) {
 		while (menuKey.consumeClick()) {
-			if (client.gui.screen() == null) client.gui.setScreen(new VantageScreen());
+			if (client.gui.screen() == null) client.gui.setScreen(VantageScreen.home());
 		}
 		while (inspectKey.consumeClick()) Viewmodel.startInspect(client);
 		while (lungeKey.consumeClick()) Macros.lungeSwap(client);

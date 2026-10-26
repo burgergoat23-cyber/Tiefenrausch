@@ -2,7 +2,7 @@
 
 CS-Skins für deine Waffen, PvP-Makros und ein Struktur-Tracker – alles in **einer** Jar-Datei.
 
-Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.4.0+mc1.21.11.jar`).
+Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.5.0+mc1.21.11.jar`).
 
 > Früher hieß die Mod „Arsenal“. Beim Wechsel die alte `arsenal-….jar` aus dem Ordner `mods` löschen. Deine Einstellungen werden automatisch übernommen.
 
@@ -10,8 +10,8 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.4.
 
 | Minecraft-Version | Datei | Ordner |
 |---|---|---|
-| **1.21.11** | `vantage-client-1.4.0+mc1.21.11.jar` | `minecraft-mod/download/` |
-| **26.2** | `vantage-client-1.4.0+mc26.2.jar` | `minecraft-mod-26/download/` |
+| **1.21.11** | `vantage-client-1.5.0+mc1.21.11.jar` | `minecraft-mod/download/` |
+| **26.2** | `vantage-client-1.5.0+mc26.2.jar` | `minecraft-mod-26/download/` |
 
 Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neuer und **Fabric API für 26.2**.
 
@@ -63,7 +63,13 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 
 **Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch). Es ist von Anfang an an; oben im Reiter siehst du, ob es an ist, und kannst es mit einem Klick umschalten. Fertige **Vorlagen** (Standard, Klein, Punkt, Groß, T-Form, Kreis) gehen mit einem Klick. Jede Änderung schaltet es automatisch an. Zu sehen ist es in der Ich-Ansicht (F5 wieder auf die normale Ansicht).
 
-**Menü-Farbe:** unten links im Menü (bunte Punkte) oder im Reiter „Tasten & HUD“ – Orange, Eisblau, Lila, Grün, Rot oder Pink.
+**Das Menü (Taste K):** Auf der Startseite gibt es für jede Funktion eine Kachel. Die Leiste unten auf der Kachel schaltet sie mit einem Klick **an oder aus**, ein Klick auf die Kachel öffnet ihre Einstellungen. Oben kannst du nach Kampf, Optik, Welt oder HUD & Kamera filtern. „‹ Zurück“ oder Esc bringt dich wieder zur Startseite.
+
+**Menü-Farbe:** unten rechts auf der Startseite (bunte Punkte) oder unter „GUI-Design“ – Orange, Eisblau, Lila, Grün, Rot oder Pink.
+
+**GUI-Design:** Kisten, Fässer, Shulker, Öfen, Crafter, Braustand, Trichter, Werkbank, Amboss, Inventar und Kreativ-Inventar bekommen ein anderes Aussehen: Dunkel, Mitternacht, Glas (durchsichtig) oder in deiner Menü-Farbe. Die Schrift wird dabei hell. Funktioniert auch auf Servern. Dazu eine eigene **Hotbar** in 4 Stilen (Dunkel, Glas, Neon, Minimal), auf Wunsch mit Zahlen 1–9 und einer Auswahl, die weich zum neuen Platz gleitet.
+
+**Brau-Helfer:** Öffnest du einen Braustand, steht links daneben eine Liste mit allen Tränken und ihren Zutaten. Mausrad = scrollen, Maus drauf = genaue Infos. Grüner Punkt = diese Zutat hast du dabei, roter Punkt = mit Redstone länger, gelber Punkt = mit Glowstone stärker. Die Rezepte kommen direkt aus dem Spiel.
 
 **Viewmodel:** Hand in alle Richtungen einstellen – links/rechts, oben/unten, nah/fern, kippen, drehen, neigen und Größe; die linke Hand auf Wunsch getrennt. Im Viewmodel-Reiter rückt das Menü zur Seite, damit du die Hand live siehst.
 

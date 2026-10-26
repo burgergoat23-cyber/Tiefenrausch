@@ -1,1 +1,22 @@
 # Klassen aus Minecraft 26.2 zum Nachschlagen beim Bau (Ausgabe nur im Bau-Protokoll, nicht im Repo)
+net.minecraft.client.renderer.texture.TextureManager
+net.minecraft.client.renderer.texture.DynamicTexture
+com.mojang.blaze3d.platform.NativeImage
+net.minecraft.world.item.alchemy.PotionBrewing
+net.minecraft.world.item.alchemy.PotionContents
+net.minecraft.server.packs.resources.ResourceProvider
+net.minecraft.server.packs.resources.Resource
+net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+-c net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+net.minecraft.client.gui.screens.inventory.BrewingStandScreen
+net.minecraft.world.entity.player.Inventory
+net.minecraft.client.AttackIndicatorStatus
+net.minecraft.world.entity.HumanoidArm
+-c net.minecraft.client.gui.Gui
+net.minecraft.world.inventory.ChestMenu
+net.minecraft.world.inventory.FurnaceMenu
+net.minecraft.world.inventory.BrewingStandMenu
+net.minecraft.world.inventory.CrafterMenu
+net.minecraft.client.gui.screens.inventory.ContainerScreen
+net.minecraft.client.gui.screens.inventory.FurnaceScreen
+net.minecraft.client.gui.screens.inventory.CrafterScreen

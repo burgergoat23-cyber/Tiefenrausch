@@ -2,41 +2,34 @@
 # Aufruf: python3 minecraft-mod-26/dev/port26.py minecraft-mod/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java > minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java
 import re, sys
 src = open(sys.argv[1], encoding='utf-8').read()
-IMPORTS_OLD = """import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-"""
-assert IMPORTS_OLD in src
-src = src.replace(IMPORTS_OLD, "import com.mojang.blaze3d.platform.InputConstants;\n")
-NEW_MC = """import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-"""
+# Yarn-Importe -> Mojang-Importe (jede Zeile einzeln; unbekannte Minecraft-Importe = Fehler)
+IMPORT_MAP = {
+ 'net.minecraft.client.gui.Click': 'net.minecraft.client.input.MouseButtonEvent',
+ 'net.minecraft.client.gui.DrawContext': 'net.minecraft.client.gui.GuiGraphicsExtractor',
+ 'net.minecraft.client.gui.screen.Screen': 'net.minecraft.client.gui.screens.Screen',
+ 'net.minecraft.client.gui.screen.ingame.InventoryScreen': 'net.minecraft.client.gui.screens.inventory.InventoryScreen',
+ 'net.minecraft.client.input.KeyInput': 'net.minecraft.client.input.KeyEvent',
+ 'net.minecraft.client.option.KeyBinding': 'net.minecraft.client.KeyMapping',
+ 'net.minecraft.client.util.InputUtil': 'com.mojang.blaze3d.platform.InputConstants',
+ 'net.minecraft.client.sound.PositionedSoundInstance': 'net.minecraft.client.resources.sounds.SimpleSoundInstance',
+ 'net.minecraft.item.Item': 'net.minecraft.world.item.Item',
+ 'net.minecraft.item.ItemStack': 'net.minecraft.world.item.ItemStack',
+ 'net.minecraft.item.Items': 'net.minecraft.world.item.Items',
+ 'net.minecraft.registry.RegistryKey': 'net.minecraft.resources.ResourceKey',
+ 'net.minecraft.sound.SoundEvents': 'net.minecraft.sounds.SoundEvents',
+ 'net.minecraft.text.OrderedText': 'net.minecraft.util.FormattedCharSequence',
+ 'net.minecraft.text.Text': 'net.minecraft.network.chat.Component',
+ 'net.minecraft.util.math.MathHelper': 'net.minecraft.util.Mth',
+ 'net.minecraft.world.World': 'net.minecraft.world.level.Level',
+}
+out_lines = []
+for line in src.split('\n'):
+    if line.startswith('import net.minecraft.'):
+        name = line[len('import '):-1]
+        assert name in IMPORT_MAP, 'Unbekannter Import: ' + name
+        line = 'import ' + IMPORT_MAP[name] + ';'
+    out_lines.append(line)
+src = '\n'.join(out_lines)
 R = [
  (r'\bpublic boolean shouldPause\(\)', 'public boolean isPauseScreen()'),
  (r'public void renderBackground\(DrawContext', 'public void extractBackground(GuiGraphicsExtractor'),
@@ -92,9 +85,4 @@ head, sep, body = src.partition('\n/**')
 for a, b in R:
     body = re.sub(a, b, body)
 src = head + sep + body
-# Mojang-Importe nach dem letzten Import einfuegen
-lines = src.split('\n')
-last = max(i for i, l in enumerate(lines) if l.startswith('import '))
-lines.insert(last + 1, NEW_MC.rstrip('\n'))
-src = '\n'.join(lines)
 sys.stdout.write(src)
