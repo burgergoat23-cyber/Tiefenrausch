@@ -3,6 +3,8 @@ package com.burgergoat.vantage.test;
 import com.burgergoat.vantage.VantageClient;
 import com.burgergoat.vantage.anim.KnifeAnimations;
 import com.burgergoat.vantage.config.VantageConfig;
+import com.burgergoat.vantage.feature.CameraControl;
+import com.burgergoat.vantage.feature.ComboCounter;
 import com.burgergoat.vantage.feature.Macros;
 import com.burgergoat.vantage.feature.Viewmodel;
 import com.burgergoat.vantage.gui.VantageScreen;
@@ -227,6 +229,56 @@ public class VantageGameTest implements FabricClientGameTest {
 			}
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(25);
+
+			// Combo-Zaehler: dreimal mit der Faust auf einen Husk (Pause > Unverwundbarkeit)
+			sp.getServer().runCommand(tpCenter.replace(" 180 0", " 0 0"));
+			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(8));
+			ctx.waitTicks(5);
+			sp.getServer().runCommand("execute at @p run summon minecraft:husk ~ ~ ~2.5 {NoAI:1b,PersistenceRequired:1b}");
+			ctx.waitTicks(20);
+			StringBuilder combos = new StringBuilder();
+			for (int hit = 0; hit < 3; hit++) {
+				ctx.getInput().pressMouse(0);
+				ctx.waitTicks(14);
+				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+			}
+			VantageClient.LOG.info("TEST Combo: {}(erwartet 1 2 3)", combos);
+			ctx.takeScreenshot("combo");
+			sp.getServer().runCommand("kill @e[type=minecraft:husk]");
+
+			// Freelook: Taste halten und Maus bewegen -> Kamera dreht sich, der Spieler nicht
+			float yawBefore = ctx.computeOnClient(mc -> mc.player.getYRot());
+			ctx.getInput().holdKey(VantageClient.freelookKey);
+			ctx.waitTicks(3);
+			ctx.getInput().moveCursor(600, 0);
+			ctx.waitTicks(5);
+			float yawDuring = ctx.computeOnClient(mc -> mc.player.getYRot());
+			float camYaw = ctx.computeOnClient(mc -> CameraControl.yaw());
+			boolean lookOn = ctx.computeOnClient(mc -> CameraControl.freeLook());
+			ctx.takeScreenshot("freelook");
+			ctx.getInput().releaseKey(VantageClient.freelookKey);
+			ctx.waitTicks(3);
+			String persp = ctx.computeOnClient(mc -> mc.options.getCameraType().name());
+			VantageClient.LOG.info("TEST Freelook: aktiv={} Spieler-Blick vorher={} waehrend={} Kamera={} Perspektive danach={}",
+					lookOn, yawBefore, yawDuring, camYaw, persp);
+
+			// Freecam: einschalten, 20 Ticks vorwaerts fliegen -> Kamera bewegt sich, Spieler bleibt
+			double[] start = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
+			ctx.getInput().pressKey(VantageClient.freecamKey);
+			ctx.waitTicks(3);
+			ctx.getInput().holdKeyFor(o -> o.keyUp, 20);
+			ctx.getInput().holdKeyFor(o -> o.keyJump, 8);
+			ctx.waitTicks(3);
+			double[] end = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
+			double camDist = ctx.computeOnClient(mc -> CameraControl.position(1f).distanceTo(mc.player.getEyePosition()));
+			boolean camOn = ctx.computeOnClient(mc -> CameraControl.freeCam());
+			ctx.takeScreenshot("freecam");
+			ctx.getInput().pressKey(VantageClient.freecamKey);
+			ctx.waitTicks(3);
+			boolean camOff = !ctx.computeOnClient(mc -> CameraControl.freeCam());
+			VantageClient.LOG.info("TEST Freecam: aktiv={} Kamera-Abstand={} Spieler bewegt={} wieder aus={}", camOn,
+					String.format(java.util.Locale.ROOT, "%.1f", camDist),
+					String.format(java.util.Locale.ROOT, "%.2f", Math.hypot(end[0] - start[0], end[1] - start[1])), camOff);
 
 			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			ctx.waitTicks(10);

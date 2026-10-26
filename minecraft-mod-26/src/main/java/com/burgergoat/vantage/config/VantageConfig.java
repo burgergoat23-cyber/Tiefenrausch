@@ -78,6 +78,17 @@ public class VantageConfig {
 	public boolean hudCoords = true;
 	public boolean hudDirection = true;
 	public boolean hudPing = false;
+	/** Combo-Zaehler und Reichweite unter dem Fadenkreuz */
+	public boolean comboCounter = true;
+	public boolean reachDisplay = true;
+
+	// ---- Kamera
+	/** Freelook umschalten statt halten */
+	public boolean freelookToggle = false;
+	/** Beim Freelook in die dritte Person wechseln */
+	public boolean freelookThirdPerson = true;
+	/** Freecam-Tempo in Bloecken pro Tick */
+	public float freecamSpeed = 0.6f;
 
 	// ---- Tracker
 	/** Dimension ("overworld", "the_nether", "the_end") -> gesuchter Typ (immer nur einer pro Dimension). */

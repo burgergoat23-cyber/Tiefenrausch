@@ -1,5 +1,6 @@
 package com.burgergoat.vantage.feature;
 
+import com.burgergoat.vantage.VantageClient;
 import com.burgergoat.vantage.config.VantageConfig;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -81,5 +82,12 @@ public final class VantageHud {
 			}
 		}
 		if (c.trackerHud) TrackerCard.renderHud(ctx);
+		ComboCounter.render(ctx);
+		if (CameraControl.freeCam()) {
+			String s = "Freecam – " + VantageClient.freecamKey.getTranslatedKeyMessage().getString() + " zum Beenden";
+			int x = (ctx.guiWidth() - tr.width(s)) / 2;
+			ctx.fill(x - 4, 3, x + tr.width(s) + 4, 15, 0x90000000);
+			ctx.text(tr, s, x, 5, 0xFFE8A33D);
+		}
 	}
 }
