@@ -76,6 +76,19 @@ public final class HudModules {
 		ctx.centeredText(tr, label, x + w / 2, y + (h - 8) / 2, Draw.mix(0xFFFFFFFF, 0xFF101010, g * 0.8f));
 	}
 
+	/** Maustaste: oben der Name, darunter klein die Klicks pro Sekunde. */
+	private static void mouseKey(GuiGraphicsExtractor ctx, Font tr, int x, String label, int cps, boolean down, String id) {
+		key(ctx, tr, x, 40, 28, 18, "", down, id);
+		float g = GLOW.getOrDefault(id, 0f);
+		int col = Draw.mix(0xFFFFFFFF, 0xFF101010, g * 0.8f);
+		ctx.pose().pushMatrix();
+		ctx.pose().translate(x + 14, 42);
+		ctx.pose().scale(0.7f, 0.7f);
+		ctx.centeredText(tr, label, 0, 0, col);
+		ctx.centeredText(tr, cps + " CPS", 0, 11, col);
+		ctx.pose().popMatrix();
+	}
+
 	private static String name(KeyMapping k) {
 		String s = k.getTranslatedKeyMessage().getString();
 		return s.length() > 3 ? s.substring(0, 3) : s;
@@ -95,8 +108,8 @@ public final class HudModules {
 		key(ctx, tr, 0, 20, 18, 18, name(o.keyLeft), o.keyLeft.isDown(), "a");
 		key(ctx, tr, 20, 20, 18, 18, name(o.keyDown), o.keyDown.isDown(), "s");
 		key(ctx, tr, 40, 20, 18, 18, name(o.keyRight), o.keyRight.isDown(), "d");
-		key(ctx, tr, 0, 40, 28, 18, VantageHud.leftCps() + " CPS", o.keyAttack.isDown(), "lmb");
-		key(ctx, tr, 30, 40, 28, 18, VantageHud.rightCps() + " CPS", o.keyUse.isDown(), "rmb");
+		mouseKey(ctx, tr, 0, "LMB", VantageHud.leftCps(), o.keyAttack.isDown(), "lmb");
+		mouseKey(ctx, tr, 30, "RMB", VantageHud.rightCps(), o.keyUse.isDown(), "rmb");
 		float g = glow("space", o.keyJump.isDown());
 		int accent = VantageScreen.accent();
 		Draw.roundRect(ctx, 0, 60, 58, 9, Draw.mix(0x90000000, Draw.alpha(accent, 0xD0), g));

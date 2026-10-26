@@ -117,7 +117,7 @@ public class VantageConfig {
 	public int armorPos = 3;
 	public boolean armorCounts = true;
 	public boolean potionHud = false;
-	public int potionPos = 5;
+	public int potionPos = 0;
 	public boolean potionHideVanilla = true;
 
 	// ---- Wegpunkte (Welt/Server -> Liste "Name|x|y|z|Dimension|Farbe")

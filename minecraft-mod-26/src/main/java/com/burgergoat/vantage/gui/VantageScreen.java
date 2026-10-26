@@ -555,8 +555,20 @@ public class VantageScreen extends Screen {
 			else if (k > 0.02f) roundRect(ctx, x + 2, ry, w - 4, 14, alpha(0xFFFFFF, Math.round(0x1C * k)));
 			if (on) roundRect(ctx, x + 3, ry + 2, 2, 10, accent);
 			int off = Math.round(k * 2);
-			ctx.text(font, font.plainSubstrByWidth(PAGES[m.page], w - 24), x + 8 + off, ry + 3,
-					on ? 0xFFFFFFFF : has ? GRAY : TEXT);
+			// Lange Namen etwas kleiner statt abgeschnitten
+			String label = rowName(m.page);
+			int room = w - 24;
+			int col = on ? 0xFFFFFFFF : has ? GRAY : TEXT;
+			if (font.width(label) <= room) {
+				ctx.text(font, label, x + 8 + off, ry + 3, col);
+			} else {
+				float sc = Math.max(0.75f, room / (float) font.width(label));
+				ctx.pose().pushMatrix();
+				ctx.pose().translate(x + 8 + off, ry + 3 + (1f - sc) * 4);
+				ctx.pose().scale(sc, sc);
+				ctx.text(font, font.plainSubstrByWidth(label, Math.round(room / sc)), 0, 0, col);
+				ctx.pose().popMatrix();
+			}
 			if (has) {
 				// kleiner Punkt: gefuellt = an
 				if (on) roundRect(ctx, x + w - 11, ry + 4, 6, 6, accent);
@@ -583,6 +595,15 @@ public class VantageScreen extends Screen {
 			ry += 15;
 		}
 		ctx.disableScissor();
+	}
+
+	/** Kurzer Name fuer die Zeile im Kategorie-Fenster. */
+	private static String rowName(int page) {
+		return switch (page) {
+			case P_CAMERA -> "Freecam";
+			case P_OUTLINE -> "Blockrahmen";
+			default -> PAGES[page];
+		};
 	}
 
 	/** Bunte Punkte zum Wechseln der Menue-Farbe. */
