@@ -60,7 +60,7 @@ public final class TrackerCard {
 		float sc = scale();
 		int x = ctx.guiWidth() - Math.round(w * sc) - 4;
 		// Nicht ueber den Boss-Balken (z. B. Enderdrache) zeichnen: dann darunter
-		int bars = ((BossBarHudAccessor) mc.gui.getBossOverlay()).vantage$getBossBars().size();
+		int bars = ((BossBarHudAccessor) mc.gui.hud.getBossOverlay()).vantage$getBossBars().size();
 		if (bars > 0 && x < ctx.guiWidth() / 2 + 96) {
 			y = Math.max(y, Math.min(12 + bars * 19, ctx.guiHeight() / 3) + 4);
 		}
@@ -96,8 +96,8 @@ public final class TrackerCard {
 		if (site == null) {
 			int h = 34;
 			panel(ctx, x, y, w, h, color);
-			ctx.renderItem(type.icon(), x + 7, y + 9);
-			ctx.drawString(tr, tr.plainSubstrByWidth(type.label, w - 34), x + 28, y + 6, color);
+			ctx.item(type.icon(), x + 7, y + 9);
+			ctx.text(tr, tr.plainSubstrByWidth(type.label, w - 34), x + 28, y + 6, color);
 			if (StructureTracker.searching()) {
 				small(ctx, tr, "Suche läuft …", x + 28, y + 18, GRAY);
 				float p = progress();
@@ -124,8 +124,8 @@ public final class TrackerCard {
 		ctx.fill(x + 2, y + 1, x + w - 1, y + 45, BG_HEAD);
 
 		// Kopf: Symbol, Name, "1 von 4"
-		ctx.renderItem(type.icon(), x + 7, y + 6);
-		ctx.drawString(tr, tr.plainSubstrByWidth(type.label, w - 60), x + 28, y + 5, color);
+		ctx.item(type.icon(), x + 7, y + 6);
+		ctx.text(tr, tr.plainSubstrByWidth(type.label, w - 60), x + 28, y + 5, color);
 		int count = StructureTracker.count(mc);
 		String sub = count > 1 ? "Nächstes Ziel · " + count + " gefunden" : "Nächstes Ziel";
 		if (VantageConfig.get().trackerSkipLooted) sub = count > 1 ? "Nächstes ungeplündertes · " + count : "Nächstes Ziel";
@@ -138,7 +138,7 @@ public final class TrackerCard {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x + 8, y + 26);
 		ctx.pose().scale(1.5f, 1.5f);
-		ctx.drawString(tr, d, 0, 0, 0xFFFFFFFF);
+		ctx.text(tr, d, 0, 0, 0xFFFFFFFF);
 		ctx.pose().popMatrix();
 		int dx = x + 8 + Math.round(tr.width(d) * 1.5f) + 5;
 		int dy = p.getY() - mc.player.getBlockY();
@@ -161,9 +161,9 @@ public final class TrackerCard {
 		if (rowsH > 0) {
 			for (LootStatus.Row r : st.rows) {
 				icon(ctx, r.icon(), x + 7, ry - 1);
-				ctx.drawString(tr, r.label(), x + 21, ry + 1, TEXT);
+				ctx.text(tr, r.label(), x + 21, ry + 1, TEXT);
 				String v = r.state().symbol + " " + r.value();
-				ctx.drawString(tr, v, x + w - 7 - tr.width(v), ry + 1, r.state().color);
+				ctx.text(tr, v, x + w - 7 - tr.width(v), ry + 1, r.state().color);
 				ry += 13;
 			}
 			ry += 3;
@@ -181,7 +181,7 @@ public final class TrackerCard {
 			int dots = (int) (System.currentTimeMillis() / 300 % 4);
 			label = "WIRD GEPRÜFT" + ".".repeat(dots);
 		}
-		ctx.drawString(tr, label, x + (w - tr.width(label)) / 2, ry + 3, vc);
+		ctx.text(tr, label, x + (w - tr.width(label)) / 2, ry + 3, vc);
 		ry += 16;
 		if (note) small(ctx, tr, st.note, x + 7, ry, DIM);
 		return h;
@@ -212,7 +212,7 @@ public final class TrackerCard {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x, y);
 		ctx.pose().scale(0.75f, 0.75f);
-		ctx.drawString(tr, s, 0, 0, color);
+		ctx.text(tr, s, 0, 0, color);
 		ctx.pose().popMatrix();
 	}
 
@@ -220,7 +220,7 @@ public final class TrackerCard {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x, y);
 		ctx.pose().scale(0.65f, 0.65f);
-		ctx.renderItem(stack, 0, 0);
+		ctx.item(stack, 0, 0);
 		ctx.pose().popMatrix();
 	}
 

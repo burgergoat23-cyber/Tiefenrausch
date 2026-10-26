@@ -30,27 +30,28 @@ public final class VantageHud {
 		long now = System.currentTimeMillis();
 		boolean l = mc.options.keyAttack.isDown();
 		boolean r = mc.options.keyUse.isDown();
-		if (l && !leftWas && mc.screen == null) LEFT.addLast(now);
-		if (r && !rightWas && mc.screen == null) RIGHT.addLast(now);
+		if (l && !leftWas && mc.gui.screen() == null) LEFT.addLast(now);
+		if (r && !rightWas && mc.gui.screen() == null) RIGHT.addLast(now);
 		leftWas = l;
 		rightWas = r;
 	}
 
 	public static void render(GuiGraphicsExtractor ctx, DeltaTracker tickCounter) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null || mc.options.hideGui) return;
+		if (mc.player == null || mc.gui.hud.isHidden()) return;
 		countClicks(mc);
 		VantageConfig c = VantageConfig.get();
 		Font tr = mc.font;
 		if (c.hudInfo) {
-			List<String> lines = new ArrayList<>();
-			if (c.hudFps) lines.add("§6FPS §f" + mc.getFps());
+			// Bezeichnung (orange) und Wert (weiss) getrennt – Farbcodes mit § gibt es in 26.2 nicht mehr
+			List<String[]> lines = new ArrayList<>();
+			if (c.hudFps) lines.add(new String[]{"FPS", String.valueOf(mc.getFps())});
 			if (c.hudCps) {
 				long now = System.currentTimeMillis();
-				lines.add("§6CPS §f" + cps(LEFT, now) + " §7| §f" + cps(RIGHT, now));
+				lines.add(new String[]{"CPS", cps(LEFT, now) + " | " + cps(RIGHT, now)});
 			}
 			if (c.hudCoords) {
-				lines.add(String.format("§6XYZ §f%d %d %d", mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()));
+				lines.add(new String[]{"XYZ", mc.player.getBlockX() + " " + mc.player.getBlockY() + " " + mc.player.getBlockZ()});
 			}
 			if (c.hudDirection) {
 				Direction d = mc.player.getDirection();
@@ -61,19 +62,20 @@ public final class VantageHud {
 					case WEST -> "Westen (-X)";
 					default -> d.getSerializedName();
 				};
-				lines.add("§6Richtung §f" + name);
+				lines.add(new String[]{"Richtung", name});
 			}
 			if (c.hudPing && mc.getConnection() != null) {
 				PlayerInfo e = mc.getConnection().getPlayerInfo(mc.player.getUUID());
-				if (e != null) lines.add("§6Ping §f" + e.getLatency() + " ms");
+				if (e != null) lines.add(new String[]{"Ping", e.getLatency() + " ms"});
 			}
 			if (!lines.isEmpty()) {
 				int w = 0;
-				for (String s : lines) w = Math.max(w, tr.width(s));
+				for (String[] s : lines) w = Math.max(w, tr.width(s[0] + " " + s[1]));
 				int y = 4;
 				ctx.fill(2, 2, 8 + w, 4 + lines.size() * 10, 0x70000000);
-				for (String s : lines) {
-					ctx.drawString(tr, s, 5, y, 0xFFFFFFFF);
+				for (String[] s : lines) {
+					ctx.text(tr, s[0], 5, y, 0xFFFFAA00);
+					ctx.text(tr, s[1], 5 + tr.width(s[0] + " "), y, 0xFFFFFFFF);
 					y += 10;
 				}
 			}

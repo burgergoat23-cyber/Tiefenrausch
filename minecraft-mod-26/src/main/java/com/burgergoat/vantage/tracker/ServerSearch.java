@@ -280,8 +280,8 @@ public final class ServerSearch {
 				int[] c = cells.get(index++);
 				// getStartChunk erwartet Chunk-Koordinaten (nicht Regionen)
 				ChunkPos start = placement.getPotentialStructureChunk(calculator.getLevelSeed(), c[0] * spacing, c[1] * spacing);
-				if (!placement.isStructureChunk(calculator, start.x, start.z)) return false;
-				ChunkAccess chunk = world.getChunk(start.x, start.z, ChunkStatus.STRUCTURE_STARTS, true);
+				if (!placement.isStructureChunk(calculator, start.x(), start.z())) return false;
+				ChunkAccess chunk = world.getChunk(start.x(), start.z(), ChunkStatus.STRUCTURE_STARTS, true);
 				if (chunk == null) return false;
 				StructureStart s = chunk.getStartForStructure(entry.value());
 				if (s == null || !s.isValid()) return false;

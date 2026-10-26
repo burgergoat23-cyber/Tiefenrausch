@@ -93,7 +93,7 @@ public final class LootScanner {
 			for (int cz = box.minZ() >> 4; cz <= box.maxZ() >> 4; cz++) {
 				LevelChunk chunk = world.getChunkSource().getChunkNow(cx, cz);
 				if (chunk == null) {
-					if (pristine.test(net.minecraft.world.level.ChunkPos.asLong(cx, cz))) c.pristine++;
+					if (pristine.test(net.minecraft.world.level.ChunkPos.pack(cx, cz))) c.pristine++;
 					else c.unloaded++;
 					continue;
 				}

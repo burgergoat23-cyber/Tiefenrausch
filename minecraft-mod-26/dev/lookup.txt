@@ -34,3 +34,6 @@ net.minecraft.world.item.ItemStack
 net.minecraft.world.item.ItemStackTemplate
 net.minecraft.network.chat.Style
 net.minecraft.client.gui.components.toasts.ToastManager
+net.minecraft.client.Camera
+-c net.minecraft.client.Camera
+net.minecraft.client.renderer.state.CameraRenderState

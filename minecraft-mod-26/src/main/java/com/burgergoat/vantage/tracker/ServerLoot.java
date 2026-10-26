@@ -89,7 +89,7 @@ public final class ServerLoot {
 				for (int cz = area.minZ() >> 4; cz <= area.maxZ() >> 4; cz++) chunks.add(new ChunkPos(cx, cz));
 			}
 			// Naheliegende Chunks zuerst (wichtig, falls nicht alle geladen werden)
-			ChunkPos c = new ChunkPos(site.pos());
+			ChunkPos c = ChunkPos.containing(site.pos());
 			chunks.sort(Comparator.comparingInt(p -> p.getChessboardDistance(c)));
 		}
 
@@ -101,7 +101,7 @@ public final class ServerLoot {
 		LootScanner.Census fix(LootScanner.Census c, BoundingBox box) {
 			for (int cx = box.minX() >> 4; cx <= box.maxX() >> 4; cx++) {
 				for (int cz = box.minZ() >> 4; cz <= box.maxZ() >> 4; cz++) {
-					if (cm().getChunkNow(cx, cz) != null && !world.areEntitiesLoaded(ChunkPos.asLong(cx, cz))) c.unloaded++;
+					if (cm().getChunkNow(cx, cz) != null && !world.areEntitiesLoaded(ChunkPos.pack(cx, cz))) c.unloaded++;
 				}
 			}
 			return c;
@@ -115,12 +115,12 @@ public final class ServerLoot {
 					int budget = 24;
 					while (budget-- > 0 && classified < chunks.size()) {
 						ChunkPos p = chunks.get(classified++);
-						if (cm().getChunkNow(p.x, p.z) != null) {
-							if (!world.areEntitiesLoaded(p.toLong())) toLoad.add(p); // Bloecke da, Entities fehlen noch
+						if (cm().getChunkNow(p.x(), p.z()) != null) {
+							if (!world.areEntitiesLoaded(p.pack())) toLoad.add(p); // Bloecke da, Entities fehlen noch
 						} else if (mgr.vantage$isLevelChunk(p)) {
 							toLoad.add(p);
 						} else {
-							pristine.add(p.toLong());
+							pristine.add(p.pack());
 						}
 					}
 					if (classified >= chunks.size()) phase = 1;
@@ -136,7 +136,7 @@ public final class ServerLoot {
 				case 2 -> {
 					boolean ready = true;
 					for (ChunkPos p : ticketed) {
-						if (cm().getChunkNow(p.x, p.z) == null || !world.areEntitiesLoaded(p.toLong())) {
+						if (cm().getChunkNow(p.x(), p.z()) == null || !world.areEntitiesLoaded(p.pack())) {
 							ready = false;
 							break;
 						}

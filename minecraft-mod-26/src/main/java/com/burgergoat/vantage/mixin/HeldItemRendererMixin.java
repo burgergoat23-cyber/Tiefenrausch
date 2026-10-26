@@ -18,24 +18,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemInHandRenderer.class)
 public abstract class HeldItemRendererMixin {
 	/** Waehrend der Zieh-Animation (Messer) kein zusaetzliches Hochfahren von unten. */
-	@ModifyVariable(method = "renderArmWithItem", at = @At("HEAD"), argsOnly = true, ordinal = 3)
+	@ModifyVariable(method = "submitArmWithItem", at = @At("HEAD"), argsOnly = true, ordinal = 3)
 	private float vantage$equipProgress(float equipProgress, @Local(argsOnly = true) InteractionHand hand) {
 		return Viewmodel.equipProgress(hand, equipProgress);
 	}
 
 	/** Eigene Schlaganimation (CS) statt des normalen Schwungs. */
-	@ModifyVariable(method = "renderArmWithItem", at = @At("HEAD"), argsOnly = true, ordinal = 2)
+	@ModifyVariable(method = "submitArmWithItem", at = @At("HEAD"), argsOnly = true, ordinal = 2)
 	private float vantage$swingProgress(float swingProgress, @Local(argsOnly = true) InteractionHand hand) {
 		return Viewmodel.swingProgress(hand, swingProgress);
 	}
 
-	@Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = At.Shift.AFTER, ordinal = 0))
+	@Inject(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = At.Shift.AFTER, ordinal = 0))
 	private void vantage$viewmodelOffset(AbstractClientPlayer player, float tickProgress, float pitch, InteractionHand hand, float swingProgress,
 			ItemStack item, float equipProgress, PoseStack matrices, SubmitNodeCollector queue, int light, CallbackInfo ci) {
 		Viewmodel.applyOffset(matrices, hand);
 	}
 
-	@Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
+	@Inject(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
 	private void vantage$inspect(AbstractClientPlayer player, float tickProgress, float pitch, InteractionHand hand, float swingProgress,
 			ItemStack item, float equipProgress, PoseStack matrices, SubmitNodeCollector queue, int light, CallbackInfo ci) {
 		Viewmodel.applyItem(matrices, hand, item, tickProgress);

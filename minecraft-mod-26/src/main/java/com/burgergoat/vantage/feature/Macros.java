@@ -94,7 +94,7 @@ public final class Macros {
 	}
 
 	private static void msg(Minecraft client, String text) {
-		if (client.player != null) client.player.displayClientMessage(Component.literal(text).withColor(0xFFFFB347), true);
+		if (client.player != null) client.player.sendOverlayMessage(Component.literal(text).withColor(0xFFFFB347));
 	}
 
 	public static boolean isSpear(ItemStack s) {
@@ -147,7 +147,7 @@ public final class Macros {
 	public static void lungeSwap(Minecraft client) {
 		VantageConfig c = VantageConfig.get();
 		LocalPlayer p = client.player;
-		if (!c.lungeEnabled || busy || p == null || client.screen != null) return;
+		if (!c.lungeEnabled || busy || p == null || client.gui.screen() != null) return;
 		int slot = find(p, s -> isSpear(s) && hasLunge(s));
 		if (slot < 0 && !c.lungeOnlyEnchanted) slot = find(p, Macros::isSpear);
 		if (slot < 0) {
@@ -214,7 +214,7 @@ public final class Macros {
 
 	public static void quickUse(Minecraft client, Item item, String name) {
 		LocalPlayer p = client.player;
-		if (busy || p == null || client.gameMode == null || client.screen != null) return;
+		if (busy || p == null || client.gameMode == null || client.gui.screen() != null) return;
 		int slot = find(p, s -> s.is(item));
 		if (slot < 0) {
 			msg(client, "Keine " + name + " in der Hotbar");

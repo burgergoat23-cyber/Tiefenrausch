@@ -304,9 +304,9 @@ public final class StructureTracker {
 		if (s == null) return;
 		double dist = Math.sqrt(d2(s.pos(), client.player.getX(), client.player.getZ()));
 		if (dist > 220) return;
-		double x = s.pos().getX() + 0.5 + (world.random.nextDouble() - 0.5) * 0.6;
-		double z = s.pos().getZ() + 0.5 + (world.random.nextDouble() - 0.5) * 0.6;
-		double y = client.player.getY() - 8 + world.random.nextDouble() * 50;
+		double x = s.pos().getX() + 0.5 + (world.getRandom().nextDouble() - 0.5) * 0.6;
+		double z = s.pos().getZ() + 0.5 + (world.getRandom().nextDouble() - 0.5) * 0.6;
+		double y = client.player.getY() - 8 + world.getRandom().nextDouble() * 50;
 		world.addParticle(ParticleTypes.END_ROD, true, true, x, y, z, 0, 0.08, 0);
 	}
 
@@ -318,13 +318,13 @@ public final class StructureTracker {
 		Set<TrackType> wanted = Set.of(types);
 		ChunkPos here = client.player.chunkPosition();
 		int r = Math.max(2, client.options.getEffectiveRenderDistance());
-		if (scanCenter == null || Math.abs(scanCenter.x - here.x) > 2 || Math.abs(scanCenter.z - here.z) > 2 || ORDER.isEmpty()) {
+		if (scanCenter == null || Math.abs(scanCenter.x() - here.x()) > 2 || Math.abs(scanCenter.z() - here.z()) > 2 || ORDER.isEmpty()) {
 			scanCenter = here;
 			ORDER.clear();
 			for (int ring = 0; ring <= r; ring++) {
 				for (int dx = -ring; dx <= ring; dx++) {
 					for (int dz = -ring; dz <= ring; dz++) {
-						if (Math.max(Math.abs(dx), Math.abs(dz)) == ring) ORDER.add(new ChunkPos(here.x + dx, here.z + dz));
+						if (Math.max(Math.abs(dx), Math.abs(dz)) == ring) ORDER.add(new ChunkPos(here.x() + dx, here.z() + dz));
 					}
 				}
 			}
@@ -340,10 +340,10 @@ public final class StructureTracker {
 				status = "Geladene Chunks: " + n + " Fundorte";
 			}
 			ChunkPos cp = ORDER.get(scanIndex++);
-			if (SCANNED.contains(cp.toLong())) continue;
-			ChunkAccess chunk = world.getChunk(cp.x, cp.z, ChunkStatus.FULL, false);
+			if (SCANNED.contains(cp.pack())) continue;
+			ChunkAccess chunk = world.getChunk(cp.x(), cp.z(), ChunkStatus.FULL, false);
 			if (chunk == null) continue;
-			SCANNED.add(cp.toLong());
+			SCANNED.add(cp.pack());
 			budget--;
 			scanChunk(chunk, cp, wanted);
 		}

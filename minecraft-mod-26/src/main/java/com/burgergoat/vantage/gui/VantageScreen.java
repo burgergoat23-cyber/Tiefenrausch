@@ -85,7 +85,7 @@ public class VantageScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
+	public void extractBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
 		// Im Viewmodel-Reiter frei lassen, damit man die Hand live sieht
 		if (tab != 3) ctx.fill(0, 0, width, height, 0x60000000);
 	}
@@ -199,8 +199,8 @@ public class VantageScreen extends Screen {
 	// ------------------------------------------------------------------ Zeichnen
 
 	@Override
-	public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
-		super.render(ctx, mouseX, mouseY, deltaTicks);
+	public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
+		super.extractRenderState(ctx, mouseX, mouseY, deltaTicks);
 		mx = mouseX;
 		my = mouseY;
 		hits.clear();
@@ -227,15 +227,15 @@ public class VantageScreen extends Screen {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(px + 8, py + 6);
 		ctx.pose().scale(1.5f, 1.5f);
-		ctx.drawString(font, "VANTAGE", 0, 0, ACCENT);
+		ctx.text(font, "VANTAGE", 0, 0, ACCENT);
 		ctx.pose().popMatrix();
-		ctx.drawString(font, "CLIENT  •  Skins • Makros • Tracker", px + 76, py + 9, GRAY);
+		ctx.text(font, "CLIENT  •  Skins • Makros • Tracker", px + 76, py + 9, GRAY);
 
 		// Schliessen
 		int bx = px + pw - 20;
 		boolean hovClose = hovered(bx, py + 4, 16, 16, false);
 		ctx.fill(bx, py + 4, bx + 16, py + 20, hovClose ? 0xFFB03030 : 0xFF2A333E);
-		ctx.drawCenteredString(font, "✕", bx + 8, py + 8, 0xFFFFFFFF);
+		ctx.centeredText(font, "✕", bx + 8, py + 8, 0xFFFFFFFF);
 		hit(bx, py + 4, 16, 16, false, this::onClose);
 
 		// Reiter
@@ -246,8 +246,8 @@ public class VantageScreen extends Screen {
 			boolean hov = hovered(tx, ty, 92, 21, false);
 			ctx.fill(tx, ty, tx + 92, ty + 21, sel ? 0xFF2E3A48 : hov ? 0xFF222B36 : 0xFF181F27);
 			if (sel) ctx.fill(tx, ty, tx + 2, ty + 21, ACCENT);
-			ctx.renderItem(new ItemStack(TAB_ICONS[i]), tx + 4, ty + 2);
-			ctx.drawString(font, TABS[i], tx + 23, ty + 7, sel ? 0xFFFFFFFF : TEXT);
+			ctx.item(new ItemStack(TAB_ICONS[i]), tx + 4, ty + 2);
+			ctx.text(font, TABS[i], tx + 23, ty + 7, sel ? 0xFFFFFFFF : TEXT);
 			int idx = i;
 			hit(tx, ty, 92, 21, false, () -> {
 				tab = idx;
@@ -305,19 +305,19 @@ public class VantageScreen extends Screen {
 		ctx.fill(x, y, x + w, y + h, active ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
 		border(ctx, x, y, w, h, active ? ACCENT : hov ? 0xFF56677A : LINE);
 		String s = font.plainSubstrByWidth(label, w - 6);
-		ctx.drawCenteredString(font, s, x + w / 2, y + (h - 8) / 2, active ? 0xFFFFFFFF : TEXT);
+		ctx.centeredText(font, s, x + w / 2, y + (h - 8) / 2, active ? 0xFFFFFFFF : TEXT);
 		hit(x, y, w, h, true, click);
 	}
 
 	private int header(GuiGraphicsExtractor ctx, int x, int y, int w, String text) {
-		ctx.drawString(font, text, x, y + 3, ACCENT);
+		ctx.text(font, text, x, y + 3, ACCENT);
 		ctx.fill(x, y + 13, x + w, y + 14, LINE);
 		return y + 18;
 	}
 
 	private int paragraph(GuiGraphicsExtractor ctx, int x, int y, int w, String text, int color) {
 		for (FormattedCharSequence line : font.split(Component.literal(text), w)) {
-			ctx.drawString(font, line, x, y, color);
+			ctx.text(font, line, x, y, color);
 			y += 10;
 		}
 		return y + 3;
@@ -326,7 +326,7 @@ public class VantageScreen extends Screen {
 	private int toggle(GuiGraphicsExtractor ctx, int x, int y, int w, String label, boolean value, Consumer<Boolean> set) {
 		boolean hov = hovered(x, y, w, 15, true);
 		if (hov) ctx.fill(x, y, x + w, y + 15, 0x18FFFFFF);
-		ctx.drawString(font, font.plainSubstrByWidth(label, w - 32), x + 3, y + 4, TEXT);
+		ctx.text(font, font.plainSubstrByWidth(label, w - 32), x + 3, y + 4, TEXT);
 		int sx = x + w - 26;
 		ctx.fill(sx, y + 4, sx + 22, y + 11, value ? 0xFF3FAF5A : 0xFF4A525C);
 		int kx = value ? sx + 13 : sx + 1;
@@ -340,8 +340,8 @@ public class VantageScreen extends Screen {
 
 	private int slider(GuiGraphicsExtractor ctx, int x, int y, int w, String label, double min, double max, double value, double step,
 			String text, DoubleConsumer set) {
-		ctx.drawString(font, label, x + 3, y + 1, TEXT);
-		ctx.drawString(font, text, x + w - font.width(text) - 3, y + 1, ACCENT);
+		ctx.text(font, label, x + 3, y + 1, TEXT);
+		ctx.text(font, text, x + w - font.width(text) - 3, y + 1, ACCENT);
 		int bx = x + 4;
 		int bw = w - 8;
 		int by = y + 13;
@@ -371,7 +371,7 @@ public class VantageScreen extends Screen {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x + 3, y + 2);
 		ctx.pose().scale(s, s);
-		ctx.renderItem(stack, 0, 0);
+		ctx.item(stack, 0, 0);
 		ctx.pose().popMatrix();
 		if (hov && tip != null) tooltip = tip;
 		hit(x, y, size, size, true, click);
@@ -403,8 +403,8 @@ public class VantageScreen extends Screen {
 			ctx.fill(bx, by, bx + chipW, by + 19, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
 			border(ctx, bx, by, chipW, 19, sel ? ACCENT : LINE);
 			ItemStack icon = SkinManager.preview(null, baseItem(cat, "*"));
-			ctx.renderItem(icon, bx + 2, by + 1);
-			ctx.drawString(font, font.plainSubstrByWidth(cat.name, chipW - 22), bx + 20, by + 6, sel ? 0xFFFFFFFF : TEXT);
+			ctx.item(icon, bx + 2, by + 1);
+			ctx.text(font, font.plainSubstrByWidth(cat.name, chipW - 22), bx + 20, by + 6, sel ? 0xFFFFFFFF : TEXT);
 			String id = cat.id;
 			hit(bx, by, chipW, 19, true, () -> select.accept(id));
 			i++;
@@ -430,7 +430,7 @@ public class VantageScreen extends Screen {
 
 		SkinCatalog.Category k = cat;
 		if (cat.items.size() > 1) {
-			ctx.drawString(font, "Für:", x + 1, y + 6, GRAY);
+			ctx.text(font, "Für:", x + 1, y + 6, GRAY);
 			int bx = x + 26;
 			button(ctx, bx, y, 34, 19, "Alle", "*".equals(skinTarget), () -> skinTarget = "*");
 			bx += 37;
@@ -441,7 +441,7 @@ public class VantageScreen extends Screen {
 				boolean hov = hovered(bx, y, 19, 19, true);
 				ctx.fill(bx, y, bx + 19, y + 19, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
 				border(ctx, bx, y, 19, 19, sel ? ACCENT : LINE);
-				ctx.renderItem(SkinManager.preview(null, path), bx + 2, y + 2);
+				ctx.item(SkinManager.preview(null, path), bx + 2, y + 2);
 				if (hov) tooltip = List.of(item.getName());
 				hit(bx, y, 19, 19, true, () -> skinTarget = path);
 				bx += 21;
@@ -505,17 +505,17 @@ public class VantageScreen extends Screen {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x + 5, y + 3);
 		ctx.pose().scale(4f, 4f);
-		ctx.renderItem(SkinManager.preview(current, base), 0, 0);
+		ctx.item(SkinManager.preview(current, base), 0, 0);
 		ctx.pose().popMatrix();
 		int tx = x + 82;
-		ctx.drawString(font, "Ausgerüstet:", tx, y + 2, GRAY);
+		ctx.text(font, "Ausgerüstet:", tx, y + 2, GRAY);
 		String name = current == null ? "Kein Skin" : current.displayName();
-		ctx.drawString(font, font.plainSubstrByWidth(name, w - 84), tx, y + 13,
+		ctx.text(font, font.plainSubstrByWidth(name, w - 84), tx, y + 13,
 				current == null ? TEXT : SkinCatalog.rarityColor(current.rarity()));
 		if (current != null) {
-			ctx.drawString(font, SkinCatalog.RARITY_NAMES[Math.min(6, current.rarity())], tx, y + 24, GRAY);
+			ctx.text(font, SkinCatalog.RARITY_NAMES[Math.min(6, current.rarity())], tx, y + 24, GRAY);
 			if (cat.hasShapes() && c.statTrak) {
-				ctx.drawString(font, "StatTrak™ Kills: " + c.statTrakKills.getOrDefault(current.id(), 0), tx, y + 35, 0xFFCF6A32);
+				ctx.text(font, "StatTrak™ Kills: " + c.statTrakKills.getOrDefault(current.id(), 0), tx, y + 35, 0xFFCF6A32);
 			}
 		}
 		button(ctx, tx, y + 50, 90, 18, "🎲 Zufällig", false, () -> {
@@ -574,13 +574,13 @@ public class VantageScreen extends Screen {
 			boolean hov = hovered(bx, by, colW, cardH, true);
 			ctx.fillGradient(bx, by, bx + colW, by + cardH, active ? 0xFF4A3A1C : hov ? 0xFF2C3744 : 0xFF222B35, 0xFF161C23);
 			border(ctx, bx, by, colW, cardH, active ? ACCENT : hov ? 0xFF56677A : LINE);
-			ctx.drawString(font, pack.name() + (active ? "  ✔" : ""), bx + 5, by + 4, active ? ACCENT : 0xFFFFFFFF);
-			ctx.drawString(font, font.plainSubstrByWidth(pack.desc(), colW - 10), bx + 5, by + 15, GRAY);
+			ctx.text(font, pack.name() + (active ? "  ✔" : ""), bx + 5, by + 4, active ? ACCENT : 0xFFFFFFFF);
+			ctx.text(font, font.plainSubstrByWidth(pack.desc(), colW - 10), bx + 5, by + 15, GRAY);
 			int ix = bx + 4;
 			for (String it : showItems) {
 				SkinCatalog.Skin sk = SkinCatalog.skin(pack.skins().get(it));
 				if (ix + 16 > bx + colW - 2) break;
-				ctx.renderItem(SkinManager.preview(sk, it), ix, by + 27);
+				ctx.item(SkinManager.preview(sk, it), ix, by + 27);
 				ix += 18;
 			}
 			hit(bx, by, colW, cardH, true, () -> SkinPacks.apply(pack));
@@ -602,7 +602,7 @@ public class VantageScreen extends Screen {
 		ctx.fill(bx, y + boxW * 2 / 3, bx + boxW, y + boxW, 0xFF5A7F3A);
 		border(ctx, bx, y, boxW, boxW, LINE);
 		Crosshair.draw(ctx, bx + boxW / 2, y + boxW / 2, 0);
-		ctx.drawCenteredString(font, "Vorschau", bx + boxW / 2, y + boxW + 3, GRAY);
+		ctx.centeredText(font, "Vorschau", bx + boxW / 2, y + boxW + 3, GRAY);
 
 		int yy = y;
 		yy = toggle(ctx, x, yy, lw, "Eigenes Fadenkreuz benutzen", c.chEnabled, v -> c.chEnabled = v);
@@ -615,7 +615,7 @@ public class VantageScreen extends Screen {
 			});
 		}
 		yy += 38;
-		ctx.drawString(font, "Farbe", x + 3, yy + 4, GRAY);
+		ctx.text(font, "Farbe", x + 3, yy + 4, GRAY);
 		int swatch = Math.max(10, Math.min(15, (lw - 40) / Crosshair.COLORS.length - 2));
 		for (int i = 0; i < Crosshair.COLORS.length; i++) {
 			int col = Crosshair.COLORS[i];
@@ -743,8 +743,8 @@ public class VantageScreen extends Screen {
 			boolean hov = hovered(bx, by, colW, 29, true);
 			ctx.fill(bx, by, bx + colW, by + 29, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
 			border(ctx, bx, by, colW, 29, sel ? ACCENT : LINE);
-			ctx.drawString(font, f[1], bx + 5, by + 5, sel ? 0xFFFFFFFF : TEXT);
-			ctx.drawString(font, font.plainSubstrByWidth(f[2], colW - 10), bx + 5, by + 17, GRAY);
+			ctx.text(font, f[1], bx + 5, by + 5, sel ? 0xFFFFFFFF : TEXT);
+			ctx.text(font, font.plainSubstrByWidth(f[2], colW - 10), bx + 5, by + 17, GRAY);
 			if (hov) tooltip = List.of(Component.literal(f[1]).withColor(ACCENT), Component.literal(f[2]));
 			hit(bx, by, colW, 29, true, () -> {
 				c.filter = f[0];
@@ -784,7 +784,7 @@ public class VantageScreen extends Screen {
 				y += Math.max(h, 92) + 6;
 			}
 		}
-		ctx.drawString(font, font.plainSubstrByWidth("Status: " + StructureTracker.status(), w - 4), x + 2, y, GRAY);
+		ctx.text(font, font.plainSubstrByWidth("Status: " + StructureTracker.status(), w - 4), x + 2, y, GRAY);
 		y += 13;
 		y = paragraph(ctx, x, y, w, single
 				? "Einzelspieler: Die Suche kennt die ganze Welt – auch weit außerhalb der Sichtweite. Die Beute wird echt geprüft: Elytra im Rahmen, Drachenkopf, ob Kisten noch nie geöffnet, offen, leer oder abgebaut sind."
@@ -797,11 +797,11 @@ public class VantageScreen extends Screen {
 			y = paragraph(ctx, x, y, w, "Mit dem Seed findet der Tracker Endsiedlungen und Endschiffe auch weit außerhalb der Sichtweite – "
 					+ "wie Chunkbase. Nur für Server, deren Seed ihr kennt (z. B. euer eigener). Den Seed zeigt das Aternos-Panel, "
 					+ "oder hol ihn mit /seed (braucht Op).", GRAY);
-			ctx.drawString(font, seed == null ? "Kein Seed gespeichert" : "Seed: " + seed, x + 2, y + 2,
+			ctx.text(font, seed == null ? "Kein Seed gespeichert" : "Seed: " + seed, x + 2, y + 2,
 					seed == null ? 0xFFE0C070 : 0xFF8FD18F);
 			y += 14;
 			int bw = (w - 8) / 3;
-			button(ctx, x, y, bw, 20, "Seed eingeben …", false, () -> minecraft.setScreen(new SeedScreen(this)));
+			button(ctx, x, y, bw, 20, "Seed eingeben …", false, () -> minecraft.gui.setScreen(new SeedScreen(this)));
 			button(ctx, x + bw + 4, y, bw, 20, "Seed holen (/seed)", false, () -> SeedStore.request(minecraft));
 			button(ctx, x + 2 * (bw + 4), y, bw, 20, "Seed löschen", false, () -> SeedStore.set(minecraft, null));
 			y += 24;
@@ -832,7 +832,7 @@ public class VantageScreen extends Screen {
 	private int targetGroup(GuiGraphicsExtractor ctx, int x, int y, int w, String title, ResourceKey<Level> dim) {
 		TrackType[] types = TrackType.forDimension(dim);
 		TrackType current = StructureTracker.targetType(dim);
-		ctx.drawString(font, title, x + 2, y + 2, TEXT);
+		ctx.text(font, title, x + 2, y + 2, TEXT);
 		y += 13;
 		int cols = w >= 360 ? 3 : 2;
 		int colW = (w - (cols - 1) * 4) / cols;
@@ -848,10 +848,10 @@ public class VantageScreen extends Screen {
 			ctx.pose().pushMatrix();
 			ctx.pose().translate(bx + 5, by + 3);
 			ctx.pose().scale(0.85f, 0.85f);
-			ctx.renderItem(t.icon(), 0, 0);
+			ctx.item(t.icon(), 0, 0);
 			ctx.pose().popMatrix();
-			ctx.drawString(font, font.plainSubstrByWidth(t.label, colW - 32), bx + 22, by + 6, sel ? 0xFFFFFFFF : TEXT);
-			if (sel) ctx.drawString(font, "●", bx + colW - 10, by + 6, t.color | 0xFF000000);
+			ctx.text(font, font.plainSubstrByWidth(t.label, colW - 32), bx + 22, by + 6, sel ? 0xFFFFFFFF : TEXT);
+			if (sel) ctx.text(font, "●", bx + colW - 10, by + 6, t.color | 0xFF000000);
 			hit(bx, by, colW, 20, true, () -> {
 				StructureTracker.setTarget(dim, t);
 				changed();
@@ -918,14 +918,14 @@ public class VantageScreen extends Screen {
 	private int keyRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, KeyMapping key) {
 		boolean wait = listening == key;
 		int bw = Math.min(110, w / 2);
-		ctx.drawString(font, font.plainSubstrByWidth(label, w - bw - 8), x + 3, y + 5, TEXT);
+		ctx.text(font, font.plainSubstrByWidth(label, w - bw - 8), x + 3, y + 5, TEXT);
 		button(ctx, x + w - bw, y, bw, 17, wait ? "> Taste drücken <" : keyName(key), wait, () -> listening = wait ? null : key);
 		y += 19;
 		if (!key.isUnbound() && minecraft != null) {
 			for (KeyMapping other : minecraft.options.keyMappings) {
 				// F3-Debug-Kombinationen (F3+B usw.) sind keine echten Konflikte
 				if (other != key && other.same(key) && !other.getName().contains("debug")) {
-					ctx.drawString(font, font.plainSubstrByWidth("⚠ Auch belegt: " + Component.translatable(other.getName()).getString(), w - 6),
+					ctx.text(font, font.plainSubstrByWidth("⚠ Auch belegt: " + Component.translatable(other.getName()).getString(), w - 6),
 							x + 3, y, 0xFFFF7060);
 					y += 11;
 					break;

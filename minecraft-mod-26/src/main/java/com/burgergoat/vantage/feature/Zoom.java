@@ -14,7 +14,7 @@ public final class Zoom {
 
 	public static void tick(Minecraft client) {
 		last = current;
-		float target = VantageClient.zoomKey.isDown() && client.screen == null ? Math.max(1.1f, VantageConfig.get().zoom) : 1f;
+		float target = VantageClient.zoomKey.isDown() && client.gui.screen() == null ? Math.max(1.1f, VantageConfig.get().zoom) : 1f;
 		current += (target - current) * 0.5f;
 		if (Math.abs(current - target) < 0.01f) current = target;
 	}

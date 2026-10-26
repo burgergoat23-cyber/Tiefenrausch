@@ -44,26 +44,26 @@ public class SeedScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		if (minecraft != null) minecraft.setScreen(parent);
+		if (minecraft != null) minecraft.gui.setScreen(parent);
 	}
 
 	@Override
-	public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-		super.render(ctx, mouseX, mouseY, delta);
+	public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+		super.extractRenderState(ctx, mouseX, mouseY, delta);
 		int cx = width / 2;
 		int y = height / 2 - 20;
-		ctx.drawCenteredString(font, title, cx, y - 46, 0xFFE8A33D);
+		ctx.centeredText(font, title, cx, y - 46, 0xFFE8A33D);
 		int ty = y - 32;
 		for (FormattedCharSequence line : font.split(Component.literal(
 				"Den Seed findest du im Aternos-Panel (Welten / Optionen) oder im Spiel mit /seed (braucht Op)."), 300)) {
-			ctx.drawCenteredString(font, line, cx, ty, 0xFFB8C4D6);
+			ctx.centeredText(font, line, cx, ty, 0xFFB8C4D6);
 			ty += 10;
 		}
 		String msg = SeedStore.message();
 		if (!msg.isEmpty()) {
 			int my = y + 80;
 			for (FormattedCharSequence line : font.split(Component.literal(msg), 300)) {
-				ctx.drawCenteredString(font, line, cx, my, 0xFF8FD18F);
+				ctx.centeredText(font, line, cx, my, 0xFF8FD18F);
 				my += 10;
 			}
 			// Seed kam per /seed an -> Feld fuellen

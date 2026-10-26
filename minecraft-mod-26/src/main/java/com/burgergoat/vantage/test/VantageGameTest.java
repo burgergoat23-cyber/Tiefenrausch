@@ -54,7 +54,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			w.setGenerateStructures(true);
 			w.setAllowCommands(true);
 		}).create()) {
-			sp.getClientWorld().waitForChunksRender();
+			sp.getConnection().waitForChunksRender();
 			sp.getServer().runCommand("gamemode creative @a");
 			sp.getServer().runCommand("time set noon");
 			sp.getServer().runCommand("weather clear");
@@ -71,7 +71,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			sp.getServer().runCommand("item replace entity @p inventory.2 with wooden_sword");
 			sp.getServer().runCommand("item replace entity @p weapon.offhand with shield");
 			ctx.waitTicks(20);
-			ctx.runOnClient(mc -> mc.gui.getChat().clearMessages(false));
+			ctx.runOnClient(mc -> mc.gui.hud.getChat().clearMessages(false));
 			for (int slot : new int[]{0, 1, 2, 3, 4, 5}) {
 				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(slot));
 				ctx.waitTicks(12);
@@ -144,7 +144,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			ctx.waitTicks(20);
 			sp.getServer().runCommand("execute at @p run summon minecraft:husk ~ ~ ~2.5 {NoAI:1b,PersistenceRequired:1b}");
 			ctx.waitTicks(30);
-			ctx.runOnClient(mc -> mc.gui.getChat().clearMessages(false));
+			ctx.runOnClient(mc -> mc.gui.hud.getChat().clearMessages(false));
 			ctx.waitTicks(2);
 			String target = ctx.computeOnClient(mc -> String.valueOf(mc.hitResult == null ? null : mc.hitResult.getType()));
 			ctx.getInput().pressMouse(0);
@@ -257,7 +257,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			// Tracker im Nether
 			sp.getServer().runCommand("execute in minecraft:the_nether run tp @p 0 100 0");
 			ctx.waitFor(mc -> mc.level != null && mc.level.dimension() == Level.NETHER, 2400);
-			sp.getClientWorld().waitForChunksRender();
+			sp.getConnection().waitForChunksRender();
 			ctx.runOnClient(StructureTracker::search);
 			ctx.waitTicks(5);
 			ctx.waitFor(mc -> !StructureTracker.searching(), 3000);
@@ -267,7 +267,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			// Tracker im End
 			sp.getServer().runCommand("execute in minecraft:the_end run tp @p 0 80 0");
 			ctx.waitFor(mc -> mc.level != null && mc.level.dimension() == Level.END, 2400);
-			sp.getClientWorld().waitForChunksRender();
+			sp.getConnection().waitForChunksRender();
 			ctx.runOnClient(StructureTracker::search);
 			ctx.waitTicks(5);
 			ctx.waitFor(mc -> !StructureTracker.searching(), 6000);
@@ -315,7 +315,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			sp.getServer().runCommand(String.format(java.util.Locale.ROOT, "execute in minecraft:the_end run fill %d %d %d %d %d %d minecraft:glass", sx - 1, sy - 1, sz - 1, sx + 1, sy - 1, sz + 1));
 			sp.getServer().runCommand(String.format(java.util.Locale.ROOT, "execute in minecraft:the_end run tp @p %d %d %d 0 35", sx, sy, sz));
 			ctx.waitTicks(40);
-			sp.getClientWorld().waitForChunksRender();
+			sp.getConnection().waitForChunksRender();
 			ctx.waitTicks(60);
 			waitLoot(ctx);
 			logLoot(ctx, "angekommen");

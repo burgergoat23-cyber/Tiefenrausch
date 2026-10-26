@@ -126,7 +126,7 @@ public final class SkinManager {
 				int n = c.statTrakKills.merge(lastSkin, 1, Integer::sum);
 				VantageConfig.save();
 				if (client.player != null) {
-					client.player.displayClientMessage(Component.literal("StatTrak™ " + n).withColor(0xFFCF6A32), true);
+					client.player.sendOverlayMessage(Component.literal("StatTrak™ " + n).withColor(0xFFCF6A32));
 				}
 			}
 			lastTarget = null;

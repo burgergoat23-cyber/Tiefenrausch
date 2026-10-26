@@ -17,7 +17,7 @@ public final class Crosshair {
 	public static HudElement wrap(HudElement vanilla) {
 		return (ctx, tickCounter) -> {
 			if (!VantageConfig.get().chEnabled) {
-				vanilla.render(ctx, tickCounter);
+				vanilla.extractRenderState(ctx, tickCounter);
 				return;
 			}
 			render(ctx, tickCounter);

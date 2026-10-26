@@ -96,8 +96,8 @@ public class VantageClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> client.execute(() -> {
 			if (!greeted && client.player != null) {
 				greeted = true;
-				client.player.displayClientMessage(Component.literal("[Vantage] ").withColor(0xFFE8A33D)
-						.append(Component.literal("Drücke " + menuKey.getTranslatedKeyMessage().getString() + " für das Menü.").withColor(0xFFFFFFFF)), false);
+				client.player.sendSystemMessage(Component.literal("[Vantage] ").withColor(0xFFE8A33D)
+						.append(Component.literal("Drücke " + menuKey.getTranslatedKeyMessage().getString() + " für das Menü.").withColor(0xFFFFFFFF)));
 			}
 		}));
 
@@ -106,14 +106,14 @@ public class VantageClient implements ClientModInitializer {
 
 	private static void status(Minecraft client, String name, boolean on) {
 		if (client.player != null) {
-			client.player.displayClientMessage(Component.literal(name + ": ").withColor(0xFFE8A33D)
-					.append(Component.literal(on ? "AN" : "AUS").withColor(on ? 0xFF55FF55 : 0xFFFF5555)), true);
+			client.player.sendOverlayMessage(Component.literal(name + ": ").withColor(0xFFE8A33D)
+					.append(Component.literal(on ? "AN" : "AUS").withColor(on ? 0xFF55FF55 : 0xFFFF5555)));
 		}
 	}
 
 	private static void tick(Minecraft client) {
 		while (menuKey.consumeClick()) {
-			if (client.screen == null) client.setScreen(new VantageScreen());
+			if (client.gui.screen() == null) client.gui.setScreen(new VantageScreen());
 		}
 		while (inspectKey.consumeClick()) Viewmodel.startInspect(client);
 		while (lungeKey.consumeClick()) Macros.lungeSwap(client);
@@ -123,7 +123,7 @@ public class VantageClient implements ClientModInitializer {
 		while (trackerCycleKey.consumeClick()) {
 			TrackType t = StructureTracker.cycleTarget(client);
 			if (t != null && client.player != null) {
-				client.player.displayClientMessage(Component.literal("Tracker-Ziel: ").withColor(0xFFE8A33D).append(Component.literal(t.label).withColor(t.color)), true);
+				client.player.sendOverlayMessage(Component.literal("Tracker-Ziel: ").withColor(0xFFE8A33D).append(Component.literal(t.label).withColor(t.color)));
 			}
 		}
 		while (maceToggleKey.consumeClick()) {
