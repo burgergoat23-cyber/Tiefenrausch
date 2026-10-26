@@ -59,6 +59,12 @@ jobs:
       - name: Screenshots und Log einsammeln
         if: always()
         run: |
+          if [ "${{ steps.gametest.outcome }}" = "skipped" ]; then
+            # Bau fehlgeschlagen: alte Testbilder behalten, nur den Status setzen
+            mkdir -p test-screenshots
+            echo "Bau fehlgeschlagen (Spieltest nicht gelaufen)" > test-screenshots/status.txt
+            exit 0
+          fi
           rm -rf test-screenshots
           mkdir -p test-screenshots
           find run -path '*screenshots*' -name '*.png' | while read -r f; do

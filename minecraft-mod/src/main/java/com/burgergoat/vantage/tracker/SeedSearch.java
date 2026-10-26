@@ -178,13 +178,13 @@ public final class SeedSearch {
 		if (g != null && g.seed == seed) return g;
 		// Alle Weltgenerierungs-Daten so, wie sie im Spiel eingebaut sind (gleich wie auf jedem Server mit 1.21.11)
 		RegistryWrapper.WrapperLookup lookup = BuiltinRegistries.createWrapperLookup();
-		RegistryEntry<ChunkGeneratorSettings> settings = lookup.getWrapperOrThrow(RegistryKeys.CHUNK_GENERATOR_SETTINGS).getOrThrow(ChunkGeneratorSettings.END);
-		TheEndBiomeSource biomes = TheEndBiomeSource.createVanilla(lookup.getWrapperOrThrow(RegistryKeys.BIOME));
+		RegistryEntry<ChunkGeneratorSettings> settings = lookup.getOrThrow(RegistryKeys.CHUNK_GENERATOR_SETTINGS).getOrThrow(ChunkGeneratorSettings.END);
+		TheEndBiomeSource biomes = TheEndBiomeSource.createVanilla(lookup.getOrThrow(RegistryKeys.BIOME));
 		NoiseChunkGenerator generator = new NoiseChunkGenerator(biomes, settings);
-		NoiseConfig noise = NoiseConfig.create(settings.value(), lookup.getWrapperOrThrow(RegistryKeys.NOISE_PARAMETERS), seed);
-		RegistryEntry<Structure> city = lookup.getWrapperOrThrow(RegistryKeys.STRUCTURE)
+		NoiseConfig noise = NoiseConfig.create(settings.value(), lookup.getOrThrow(RegistryKeys.NOISE_PARAMETERS), seed);
+		RegistryEntry<Structure> city = lookup.getOrThrow(RegistryKeys.STRUCTURE)
 				.getOrThrow(RegistryKey.of(RegistryKeys.STRUCTURE, Identifier.ofVanilla("end_city")));
-		RandomSpreadStructurePlacement placement = (RandomSpreadStructurePlacement) lookup.getWrapperOrThrow(RegistryKeys.STRUCTURE_SET)
+		RandomSpreadStructurePlacement placement = (RandomSpreadStructurePlacement) lookup.getOrThrow(RegistryKeys.STRUCTURE_SET)
 				.getOrThrow(RegistryKey.of(RegistryKeys.STRUCTURE_SET, Identifier.ofVanilla("end_cities"))).value().placement();
 		Predicate<RegistryEntry<Biome>> biomeOk = b -> b.matchesKey(BiomeKeys.END_HIGHLANDS) || b.matchesKey(BiomeKeys.END_MIDLANDS);
 		g = new Gen(seed, generator, biomes, noise, city, placement, templates(), HeightLimitView.create(0, 256), biomeOk);
