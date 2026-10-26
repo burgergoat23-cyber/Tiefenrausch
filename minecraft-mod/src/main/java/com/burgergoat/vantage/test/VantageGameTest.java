@@ -1,6 +1,7 @@
 package com.burgergoat.vantage.test;
 
 import com.burgergoat.vantage.VantageClient;
+import com.burgergoat.vantage.anim.KnifeAnimations;
 import com.burgergoat.vantage.config.VantageConfig;
 import com.burgergoat.vantage.feature.Macros;
 import com.burgergoat.vantage.feature.Viewmodel;
@@ -91,23 +92,6 @@ public class VantageGameTest implements FabricClientGameTest {
 				ctx.takeScreenshot("inspect_" + slot + "_c");
 				ctx.waitTicks(50);
 			}
-			// Schlaganimationen (CS): Karambit, Butterfly (zweimal: Vorhand + Rueckhand), Schattendolche, Axt, Streitkolben
-			for (int slot : new int[]{0, 1, 1, 7, 2, 3}) {
-				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(slot));
-				ctx.waitTicks(40);
-				ctx.runOnClient(mc -> mc.player.setPitch(-30f));
-				ctx.waitTicks(2);
-				ctx.getInput().pressMouse(0);
-				ctx.waitTicks(1);
-				boolean sw = ctx.computeOnClient(mc -> Viewmodel.swinging());
-				VantageClient.LOG.info("TEST Schlag Slot {}: Animation={}", slot, sw);
-				ctx.waitTicks(2);
-				ctx.takeScreenshot("swing_" + slot + "_a");
-				ctx.waitTicks(2);
-				ctx.takeScreenshot("swing_" + slot + "_b");
-				ctx.waitTicks(10);
-			}
-			ctx.runOnClient(mc -> mc.player.setPitch(0f));
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(30);
 			// Viewmodel verstellt
@@ -143,7 +127,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			ctx.takeScreenshot("quick_pearl");
 			ctx.waitTicks(10);
 			int pearlAfter = ctx.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
-			VantageClient.LOG.info("TEST Schnell-Perle: danach={} (erwartet 0)", pearlAfter);
+			VantageClient.LOG.info("TEST Schnell-Perle: danach={} (erwartet 8 = vorheriger Platz)", pearlAfter);
 
 			// Attribut-Swap: mit der Axt (Slot 2) auf ein Ziel schlagen -> Streitkolben (Slot 3)
 			ctx.runOnClient(mc -> {
@@ -210,6 +194,33 @@ public class VantageGameTest implements FabricClientGameTest {
 				VantageConfig.get().lungeReturnDelay = 0;
 				VantageConfig.get().lungeAfterWind = false;
 			});
+			// Schlaganimationen (CS) mit echtem Linksklick: Karambit, Butterfly (Vorhand + Rueckhand), Schattendolche, Axt, Streitkolben
+			for (int slot : new int[]{0, 1, 1, 7, 2, 3}) {
+				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(slot));
+				ctx.waitTicks(30);
+				ctx.getInput().pressMouse(0);
+				ctx.waitTicks(1);
+				boolean sw = ctx.computeOnClient(mc -> Viewmodel.swinging());
+				VantageClient.LOG.info("TEST Schlag Slot {}: Animation={}", slot, sw);
+				ctx.waitTicks(15);
+			}
+			// Standbilder der Schlag-Posen (zum Pruefen der Bewegung)
+			Object[][] poses = {
+					{1, KnifeAnimations.SLASH_RIGHT}, {1, KnifeAnimations.SLASH_LEFT}, {1, KnifeAnimations.STAB},
+					{0, KnifeAnimations.HOOK_RIGHT}, {0, KnifeAnimations.HOOK_LEFT}, {7, KnifeAnimations.PUNCH_A},
+					{2, KnifeAnimations.CHOP}, {2, KnifeAnimations.CHOP_DIAGONAL}, {3, KnifeAnimations.SMASH}};
+			for (Object[] pose : poses) {
+				int slot = (Integer) pose[0];
+				KnifeAnimations.Anim anim = (KnifeAnimations.Anim) pose[1];
+				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(slot));
+				ctx.waitTicks(25);
+				for (float t : new float[]{0.15f, 0.3f, 0.4f, 0.58f, 0.8f}) {
+					ctx.runOnClient(mc -> Viewmodel.freeze(mc, anim, t));
+					ctx.waitTicks(2);
+					ctx.takeScreenshot("pose_" + anim.name() + "_" + Math.round(t * 100));
+				}
+				ctx.runOnClient(mc -> Viewmodel.stop());
+			}
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(25);
 
@@ -273,7 +284,12 @@ public class VantageGameTest implements FabricClientGameTest {
 				return;
 			}
 			BlockBox box = ship.box();
-			sp.getServer().runCommand(String.format(java.util.Locale.ROOT, "tp @p %d %d %d 0 60", box.getCenter().getX(), box.getMaxY() + 4, box.getMinZ() - 6));
+			int sx = box.getCenter().getX();
+			int sy = box.getMaxY() + 6;
+			int sz = box.getMinZ() - 10;
+			// Kleine Glasplatte, damit man nicht ins Leere faellt
+			sp.getServer().runCommand(String.format(java.util.Locale.ROOT, "execute in minecraft:the_end run fill %d %d %d %d %d %d minecraft:glass", sx - 1, sy - 1, sz - 1, sx + 1, sy - 1, sz + 1));
+			sp.getServer().runCommand(String.format(java.util.Locale.ROOT, "execute in minecraft:the_end run tp @p %d %d %d 0 35", sx, sy, sz));
 			ctx.waitTicks(40);
 			sp.getClientWorld().waitForChunksRender();
 			ctx.waitTicks(60);

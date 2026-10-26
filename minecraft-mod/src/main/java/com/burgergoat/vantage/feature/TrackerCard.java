@@ -1,6 +1,7 @@
 package com.burgergoat.vantage.feature;
 
 import com.burgergoat.vantage.config.VantageConfig;
+import com.burgergoat.vantage.mixin.BossBarHudAccessor;
 import com.burgergoat.vantage.tracker.LootStatus;
 import com.burgergoat.vantage.tracker.Site;
 import com.burgergoat.vantage.tracker.StructureTracker;
@@ -55,7 +56,13 @@ public final class TrackerCard {
 		if (bad) y = 53;
 		else if (good) y = 28;
 		int w = width(mc, type, site);
-		render(ctx, mc, ctx.getScaledWindowWidth() - w - 4, y, w, type, site);
+		int x = ctx.getScaledWindowWidth() - w - 4;
+		// Nicht ueber den Boss-Balken (z. B. Enderdrache) zeichnen: dann darunter
+		int bars = ((BossBarHudAccessor) mc.inGameHud.getBossBarHud()).vantage$getBossBars().size();
+		if (bars > 0 && x < ctx.getScaledWindowWidth() / 2 + 96) {
+			y = Math.max(y, Math.min(12 + bars * 19, ctx.getScaledWindowHeight() / 3) + 4);
+		}
+		render(ctx, mc, x, y, w, type, site);
 	}
 
 	/** Breite passend zum Inhalt. */

@@ -38,6 +38,8 @@ public final class Viewmodel {
 	private static int lastSlot = -1;
 	private static Item lastItem;
 	private static int cueIndex;
+	/** Nur fuer den automatischen Test: Animation an einer festen Stelle (0..1) anhalten. */
+	private static float frozen = -1f;
 
 	private Viewmodel() {
 	}
@@ -93,7 +95,14 @@ public final class Viewmodel {
 		animSlot = client.player.getInventory().getSelectedSlot();
 	}
 
+	/** Nur fuer den automatischen Test: zeigt eine Animation an der Stelle t (0..1) als Standbild. */
+	public static void freeze(MinecraftClient client, KnifeAnimations.Anim a, float t) {
+		start(client, a, Kind.SWING);
+		frozen = t;
+	}
+
 	public static void stop() {
+		frozen = -1f;
 		anim = null;
 		animTime = -1f;
 		lastAnimTime = -1f;
@@ -112,6 +121,7 @@ public final class Viewmodel {
 	}
 
 	public static void tick(MinecraftClient client) {
+		if (frozen >= 0) return;
 		if (client.player == null) {
 			stop();
 			lastSlot = -1;
@@ -198,7 +208,7 @@ public final class Viewmodel {
 			matrices.scale(s, s, s);
 		}
 		if (anim == null || hand != Hand.MAIN_HAND) return;
-		float time = MathHelper.lerp(tickProgress, lastAnimTime, animTime);
+		float time = frozen >= 0 ? frozen * anim.ticks() : MathHelper.lerp(tickProgress, lastAnimTime, animTime);
 		float[] v = anim.sample(MathHelper.clamp(time / anim.ticks(), 0f, 1f));
 		matrices.translate(sd * v[0], v[1], v[2]);
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(sd * v[4]));

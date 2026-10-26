@@ -4,6 +4,7 @@
 	"package": "com.burgergoat.vantage.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"BossBarHudAccessor",
 		"ClientPlayerInteractionManagerAccessor",
 		"GameRendererAccessor",
 		"GameRendererMixin",
