@@ -1,17 +1,1 @@
-20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:445: error: method getName in class Item cannot be applied to given types;
-21-				if (hov) tooltip = List.of(item.getName());
-22-				                               ^
-23-  required: ItemStack
---
-38:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:445: error: method getName in class Item cannot be applied to given types;
-39-  				if (hov) tooltip = List.of(item.getName());
-40-  				                               ^
-41-    required: ItemStack
---
-81:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:445: error: method getName in class Item cannot be applied to given types;
-82-				if (hov) tooltip = List.of(item.getName());
-83-				                               ^
-84-  required: ItemStack
-1 error
-1 error
-Bau: failure
+Bau: success
