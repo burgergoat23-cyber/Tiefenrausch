@@ -1,1 +1,1 @@
-Spieltest: skipped
+Bau fehlgeschlagen (Spieltest nicht gelaufen)
