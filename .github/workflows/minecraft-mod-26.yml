@@ -49,7 +49,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add minecraft-mod-26/src/main/java
           git commit -m "26.2: Code automatisch auf Mojang-Namen umgestellt [skip ci]"
-          for i in 1 2 3; do git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; sleep 5; done
+          for i in 1 2 3 4; do git pull --rebase -X theirs origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; git rebase --abort 2>/dev/null || true; sleep 5; done
 
       - name: Bauen
         id: build
@@ -129,7 +129,7 @@ jobs:
           [ -d test-screenshots ] && git add test-screenshots
           if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
           git commit -m "26.2: Bau-Ergebnisse automatisch [skip ci]"
-          for i in 1 2 3; do git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; sleep 5; done
+          for i in 1 2 3 4; do git pull --rebase -X theirs origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; git rebase --abort 2>/dev/null || true; sleep 5; done
 
       - name: Ergebnis
         if: steps.build.outcome == 'failure' || steps.gametest.outcome == 'failure'
