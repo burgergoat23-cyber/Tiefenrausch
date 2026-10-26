@@ -1,0 +1,22 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.burgergoat.vantage.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"BossBarHudAccessor",
+		"ClientPlayerInteractionManagerAccessor",
+		"GameRendererAccessor",
+		"GameRendererMixin",
+		"HeldItemRendererMixin",
+		"ItemModelManagerMixin",
+		"MinecraftClientAccessor",
+		"MinecraftClientMixin",
+		"ServerChunkLoadingManagerInvoker",
+		"ServerChunkManagerAccessor",
+		"SimpleStructurePieceAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

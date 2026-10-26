@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "vantage",
+	"version": "${version}",
+	"name": "Vantage Client",
+	"description": "Vantage Client: CS-Messer und Skins mit Animationen, Viewmodel, CS-Fadenkreuz, Shader, Struktur-Tracker mit Plünder-Status (Elytra, Drachenkopf, Kisten) und PvP-Makros (Lunge-Swap, Attribut-Swap).",
+	"authors": [
+		"BurgerGoat"
+	],
+	"license": "MIT",
+	"icon": "assets/vantage/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.burgergoat.vantage.VantageClient"
+		],
+		"fabric-client-gametest": [
+			"com.burgergoat.vantage.test.VantageGameTest"
+		]
+	},
+	"mixins": [
+		"vantage.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.0",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

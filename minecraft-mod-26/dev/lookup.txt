@@ -1,0 +1,22 @@
+# Klassen aus Minecraft 26.2, deren Namen/Signaturen gebraucht werden (wird beim Bau mit javap ausgegeben)
+net.minecraft.client.renderer.ItemInHandRenderer
+-c net.minecraft.client.renderer.ItemInHandRenderer
+net.minecraft.client.renderer.item.ItemModelResolver
+-c net.minecraft.client.renderer.item.ItemModelResolver
+net.minecraft.client.Minecraft
+net.minecraft.client.multiplayer.MultiPlayerGameMode
+net.minecraft.client.renderer.GameRenderer
+net.minecraft.client.gui.GuiGraphics
+net.minecraft.client.gui.Gui
+net.minecraft.client.gui.components.BossHealthOverlay
+net.minecraft.client.KeyMapping
+net.minecraft.world.item.ItemStack
+net.minecraft.world.level.levelgen.structure.TemplateStructurePiece
+net.minecraft.server.level.ChunkMap
+net.minecraft.server.level.ServerChunkCache
+net.minecraft.server.level.TicketType
+net.minecraft.data.registries.VanillaRegistries
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
+net.fabricmc.fabric.api.client.keybinding.v1.KeyMappingHelper
+net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
