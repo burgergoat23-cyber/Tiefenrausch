@@ -126,13 +126,13 @@ public final class Viewmodel {
 		lastSlot = slot;
 		lastItem = item;
 		if (changed) {
-			if (swinging() && Macros.isBusy()) {
+			if (swinging() && Macros.isBusyOrJustDone()) {
 				// Attribut-Swap: Schlag laeuft mit der Waffe weiter, die gerade getauscht wurde
 				animSlot = slot;
 			} else {
 				stop();
 				String shape = knifeShape(held);
-				if (shape != null && c.drawAnim && !Macros.isBusy()) start(client, KnifeAnimations.draw(shape), Kind.DRAW);
+				if (shape != null && c.drawAnim && !Macros.isBusyOrJustDone()) start(client, KnifeAnimations.draw(shape), Kind.DRAW);
 			}
 		}
 		if (anim == null) return;

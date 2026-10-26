@@ -43,9 +43,17 @@ public final class Macros {
 	private Macros() {
 	}
 
+	/** Tick, in dem zuletzt ein Makro zurueckgewechselt hat. */
+	private static int swappedBackAt = -100;
+
 	/** Laeuft gerade ein Makro (dann keine Zieh-Animation beim schnellen Wechseln). */
 	public static boolean isBusy() {
 		return busy;
+	}
+
+	/** Makro laeuft oder hat in diesem Tick gerade zurueckgewechselt. */
+	public static boolean isBusyOrJustDone() {
+		return busy || tick - swappedBackAt <= 0;
 	}
 
 	public static void tick(MinecraftClient client) {
@@ -123,6 +131,7 @@ public final class Macros {
 		later(Math.max(0, delay), () -> {
 			if (client.player != null && client.player.getInventory().getSelectedSlot() == usedSlot) {
 				select(client, back);
+				swappedBackAt = tick;
 			}
 			busy = false;
 		});
