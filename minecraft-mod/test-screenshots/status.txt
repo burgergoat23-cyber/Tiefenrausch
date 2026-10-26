@@ -1,15 +1,1 @@
-Bau fehlgeschlagen (Spieltest nicht gelaufen)
-22:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/VantageClient.java:96: error: cannot find symbol
-23-		HudElementRegistry.replaceElement(VanillaHudElements.MOB_EFFECTS, vanilla -> (ctx, tickCounter) -> {
-24-		                                                    ^
-25-  symbol:   variable MOB_EFFECTS
---
-39:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/VantageClient.java:96: error: cannot find symbol
-40-  		HudElementRegistry.replaceElement(VanillaHudElements.MOB_EFFECTS, vanilla -> (ctx, tickCounter) -> {
-41-  		                                                    ^
-42-    symbol:   variable MOB_EFFECTS
---
-81:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/VantageClient.java:96: error: cannot find symbol
-82-		HudElementRegistry.replaceElement(VanillaHudElements.MOB_EFFECTS, vanilla -> (ctx, tickCounter) -> {
-83-		                                                    ^
-84-  symbol:   variable MOB_EFFECTS
+Spieltest: success
