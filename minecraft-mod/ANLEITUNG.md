@@ -35,6 +35,8 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 | **V** | Schnell-Enderperle (wechseln, werfen, zurück) |
 | **B** | Schnell-Windladung |
 | **C** (halten) | Zoom |
+| **Linke Alt-Taste** (halten) | Freelook – frei umschauen, du läufst weiter geradeaus |
+| **F4** | Freecam an/aus – Kamera fliegt frei (W/A/S/D, Leertaste hoch, Schleichen runter) |
 | – | Attribut-Swap an/aus, Schild-Brecher an/aus, Tracker: jetzt suchen, Tracker: Ziel wechseln (frei belegbar) |
 
 **Tasten ändern direkt im Menü:** Reiter „Tasten & HUD“ (oder „Makros“) → auf den Knopf neben der Aktion klicken → gewünschte Taste drücken (auch Maus-Seitentasten). Esc = Taste entfernen. Ist eine Taste doppelt belegt, steht eine rote Warnung darunter.
@@ -54,6 +56,10 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 **Messer-Animationen:** beim Wechseln aufs Messer kommt eine Zieh-Animation, mit G die Inspect-Animation – je Messer anders (Karambit/Talon wirbeln um den Finger, Butterfly klappt auf und wird hochgeworfen, Schattendolche drehen sich, M9/Bajonett werden geworfen und gefangen, Flip/Falchion/Navaja/Stiletto klappen auf). Mit Klick- und Schwung-Geräuschen, Tempo einstellbar.
 
 **Schlag-Animationen wie in CS:** Schwerter/Messer schlagen abwechselnd Vorhand (von rechts) und Rückhand (von links). Im Fallen (kritischer Treffer) kommt ein schwerer Stich. Karambit und Talon haken, Schattendolche stoßen nach vorne. Axt und Streitkolben hauen von oben wie Axt und Hammer aus CS. An/aus im Reiter „Viewmodel“.
+
+**Combo-Zähler:** unter dem Fadenkreuz steht, wie viele Treffer du am Stück gelandet hast (z. B. „5 Combo“, ab 3 gelb, ab 5 orange, ab 10 rot). Wirst du selbst getroffen oder triffst 3 Sekunden nichts, geht er auf 0. Darunter steht, aus wie vielen Blöcken der letzte Treffer kam. An/aus im Reiter „Tasten & HUD“.
+
+**Freelook und Freecam:** Freelook (Alt halten) dreht nur die Kamera um dich herum – praktisch, um beim Laufen hinter dich zu schauen. Freecam (F4) lässt die Kamera frei fliegen, dein Spieler bleibt stehen; die Kamera fliegt **nicht durch Blöcke**. Tempo und „umschalten statt halten“ im Reiter „Tasten & HUD“. Manche Server verbieten Freelook/Freecam.
 
 **Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch).
 
@@ -82,7 +88,7 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 - **Schild-Brecher:** blockt der Gegner mit Schild, wird für den Schlag auf die Axt gewechselt.
 - **Schnell-Perle / Schnell-Windladung.**
 
-> ⚠️ Makros sind auf vielen Servern verboten. Nur dort benutzen, wo es erlaubt ist – im Einzelspieler immer ok. Es gibt **keine** Cheats wie Killaura, Reach oder X-Ray.
+> ⚠️ Makros sind auf vielen Servern verboten. Nur dort benutzen, wo es erlaubt ist – im Einzelspieler immer ok. Es gibt **keine** Cheats wie Killaura, Aimbot/Auto-Zielen, Reach oder X-Ray.
 
 ## Für Entwickler
 
