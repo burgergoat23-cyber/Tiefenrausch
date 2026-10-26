@@ -5866,3 +5866,652 @@ public class net.minecraft.client.gui.components.toasts.ToastManager {
   private boolean lambda$update$1(net.minecraft.client.gui.components.toasts.Toast);
   private boolean lambda$update$0(org.apache.commons.lang3.mutable.MutableBoolean, net.minecraft.client.gui.components.toasts.ToastManager$ToastInstance);
 }
+=== net.minecraft.client.Camera
+Compiled from "Camera.java"
+public class net.minecraft.client.Camera implements net.minecraft.world.waypoints.TrackedWaypoint$Camera {
+  public static final float PROJECTION_Z_NEAR;
+  private static final float DEFAULT_CAMERA_DISTANCE;
+  private static final org.joml.Vector3fc FORWARDS;
+  private static final org.joml.Vector3fc UP;
+  private static final org.joml.Vector3fc LEFT;
+  public static final float BASE_HUD_FOV;
+  private boolean initialized;
+  private net.minecraft.world.level.Level level;
+  private net.minecraft.world.entity.Entity entity;
+  private net.minecraft.world.phys.Vec3 position;
+  private final net.minecraft.core.BlockPos$MutableBlockPos blockPosition;
+  private final org.joml.Vector3f forwards;
+  private final org.joml.Vector3f panoramicForwards;
+  private final org.joml.Vector3f up;
+  private final org.joml.Vector3f left;
+  private float xRot;
+  private float yRot;
+  private final org.joml.Quaternionf rotation;
+  private boolean detached;
+  private float eyeHeight;
+  private float eyeHeightOld;
+  private final net.minecraft.client.renderer.Projection projection;
+  private net.minecraft.client.renderer.culling.Frustum cullFrustum;
+  private net.minecraft.client.renderer.culling.Frustum capturedFrustum;
+  private boolean captureFrustum;
+  private final org.joml.Matrix4f cachedViewRotMatrix;
+  private final org.joml.Matrix4f cachedViewRotProjMatrix;
+  private long lastProjectionVersion;
+  private int matrixPropertiesDirty;
+  private static final int DIRTY_VIEW_ROT;
+  private static final int DIRTY_VIEW_ROT_PROJ;
+  private float fovModifier;
+  private float oldFovModifier;
+  private float fov;
+  private float hudFov;
+  private float depthFar;
+  private boolean isPanoramicMode;
+  private final net.minecraft.world.attribute.EnvironmentAttributeProbe attributeProbe;
+  private final net.minecraft.client.Minecraft minecraft;
+  public net.minecraft.client.Camera();
+  public void tick();
+  public void update(net.minecraft.client.DeltaTracker);
+  public float getCameraEntityPartialTicks(net.minecraft.client.DeltaTracker);
+  public void extractRenderState(net.minecraft.client.renderer.state.level.CameraRenderState, float);
+  private void tickFov();
+  private org.joml.Matrix4f createProjectionMatrixForCulling();
+  public net.minecraft.client.renderer.culling.Frustum getCullFrustum();
+  private void prepareCullFrustum(org.joml.Matrix4fc, org.joml.Matrix4f, net.minecraft.world.phys.Vec3);
+  public net.minecraft.client.renderer.culling.Frustum getCapturedFrustum();
+  public void captureFrustum();
+  public void killFrustum();
+  private float calculateFov(float);
+  private float calculateHudFov(float);
+  private float modifyFovBasedOnDeathOrFluid(float, float);
+  private void alignWithEntity(float);
+  private float getMaxZoom(float);
+  public boolean isPanoramicMode();
+  public float getFov();
+  private void setupPerspective(float, float, float, float, float);
+  private void setupOrtho(float, float, float, float, boolean);
+  protected void move(float, float, float);
+  protected void setRotation(float, float);
+  protected void setPosition(double, double, double);
+  protected void setPosition(net.minecraft.world.phys.Vec3);
+  public net.minecraft.world.phys.Vec3 position();
+  public net.minecraft.core.BlockPos blockPosition();
+  public float xRot();
+  public float yRot();
+  public float yaw();
+  public org.joml.Quaternionf rotation();
+  public org.joml.Matrix4f getViewRotationMatrix(org.joml.Matrix4f);
+  public org.joml.Matrix4f getViewRotationProjectionMatrix(org.joml.Matrix4f);
+  public net.minecraft.world.entity.Entity entity();
+  public void setEntity(net.minecraft.world.entity.Entity);
+  public boolean isInitialized();
+  public boolean isDetached();
+  public net.minecraft.world.attribute.EnvironmentAttributeProbe attributeProbe();
+  public net.minecraft.client.Camera$NearPlane getNearPlane(float);
+  public net.minecraft.world.level.material.FogType getFluidInCamera();
+  public org.joml.Vector3fc forwardVector();
+  public org.joml.Vector3fc panoramicForwards();
+  public org.joml.Vector3fc upVector();
+  public org.joml.Vector3fc leftVector();
+  public void reset();
+  public void setLevel(net.minecraft.client.multiplayer.ClientLevel);
+  public void enablePanoramicMode();
+  public void disablePanoramicMode();
+  static {};
+}
+=== net.minecraft.client.Camera (Code)
+  public net.minecraft.client.Camera();
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         8: putfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        16: invokespecial #20                 // Method net/minecraft/core/BlockPos$MutableBlockPos."<init>":()V
+        19: putfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        30: invokespecial #31                 // Method org/joml/Vector3f."<init>":(Lorg/joml/Vector3fc;)V
+        33: putfield      #34                 // Field forwards:Lorg/joml/Vector3f;
+        44: invokespecial #31                 // Method org/joml/Vector3f."<init>":(Lorg/joml/Vector3fc;)V
+        47: putfield      #38                 // Field panoramicForwards:Lorg/joml/Vector3f;
+        58: invokespecial #31                 // Method org/joml/Vector3f."<init>":(Lorg/joml/Vector3fc;)V
+        61: putfield      #44                 // Field up:Lorg/joml/Vector3f;
+        72: invokespecial #31                 // Method org/joml/Vector3f."<init>":(Lorg/joml/Vector3fc;)V
+        75: putfield      #50                 // Field left:Lorg/joml/Vector3f;
+        83: invokespecial #55                 // Method org/joml/Quaternionf."<init>":()V
+        86: putfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+        94: invokespecial #62                 // Method net/minecraft/client/renderer/Projection."<init>":()V
+        97: putfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+       109: invokespecial #71                 // Method org/joml/Matrix4f."<init>":()V
+       116: invokespecial #71                 // Method org/joml/Matrix4f."<init>":()V
+       119: invokespecial #72                 // Method net/minecraft/client/renderer/culling/Frustum."<init>":(Lorg/joml/Matrix4fc;Lorg/joml/Matrix4f;)V
+       122: putfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+       130: invokespecial #71                 // Method org/joml/Matrix4f."<init>":()V
+       133: putfield      #79                 // Field cachedViewRotMatrix:Lorg/joml/Matrix4f;
+       141: invokespecial #71                 // Method org/joml/Matrix4f."<init>":()V
+       144: putfield      #83                 // Field cachedViewRotProjMatrix:Lorg/joml/Matrix4f;
+       151: putfield      #88                 // Field lastProjectionVersion:J
+       156: putfield      #92                 // Field matrixPropertiesDirty:I
+       164: invokespecial #98                 // Method net/minecraft/world/attribute/EnvironmentAttributeProbe."<init>":()V
+       167: putfield      #99                 // Field attributeProbe:Lnet/minecraft/world/attribute/EnvironmentAttributeProbe;
+       171: invokestatic  #103                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+       174: putfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+  public void tick();
+         1: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+         8: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        16: getfield      #121                // Field eyeHeight:F
+        19: putfield      #125                // Field eyeHeightOld:F
+        24: getfield      #121                // Field eyeHeight:F
+        28: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        31: invokevirtual #128                // Method net/minecraft/world/entity/Entity.getEyeHeight:()F
+        35: getfield      #121                // Field eyeHeight:F
+        43: putfield      #121                // Field eyeHeight:F
+        47: getfield      #99                 // Field attributeProbe:Lnet/minecraft/world/attribute/EnvironmentAttributeProbe;
+        51: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+        55: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        58: invokevirtual #135                // Method net/minecraft/world/attribute/EnvironmentAttributeProbe.tick:(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/phys/Vec3;)V
+        62: invokevirtual #139                // Method tickFov:()V
+  public void update(net.minecraft.client.DeltaTracker);
+         1: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+         4: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+         7: invokevirtual #146                // Method net/minecraft/client/Options.getEffectiveRenderDistance:()I
+        21: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        24: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+        27: invokevirtual #155                // Method net/minecraft/client/Options.cloudRange:()Lnet/minecraft/client/OptionInstance;
+        30: invokevirtual #159                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
+        36: invokevirtual #167                // Method java/lang/Integer.intValue:()I
+        43: invokestatic  #170                // Method java/lang/Math.max:(FF)F
+        46: putfield      #176                // Field depthFar:F
+        50: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        53: getfield      #179                // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+        62: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+        70: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        78: invokevirtual #183                // Method setEntity:(Lnet/minecraft/world/entity/Entity;)V
+        83: invokevirtual #187                // Method getCameraEntityPartialTicks:(Lnet/minecraft/client/DeltaTracker;)F
+        91: invokevirtual #191                // Method alignWithEntity:(F)V
+        98: invokevirtual #195                // Method calculateFov:(F)F
+       101: putfield      #199                // Field fov:F
+       108: invokevirtual #202                // Method calculateHudFov:(F)F
+       111: putfield      #205                // Field hudFov:F
+       117: getfield      #79                 // Field cachedViewRotMatrix:Lorg/joml/Matrix4f;
+       120: invokevirtual #208                // Method getViewRotationMatrix:(Lorg/joml/Matrix4f;)Lorg/joml/Matrix4f;
+       124: invokevirtual #212                // Method createProjectionMatrixForCulling:()Lorg/joml/Matrix4f;
+       128: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+       131: invokevirtual #216                // Method prepareCullFrustum:(Lorg/joml/Matrix4fc;Lorg/joml/Matrix4f;Lnet/minecraft/world/phys/Vec3;)V
+       135: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+       138: invokevirtual #220                // Method net/minecraft/client/Minecraft.getWindow:()Lcom/mojang/blaze3d/platform/Window;
+       141: invokevirtual #224                // Method com/mojang/blaze3d/platform/Window.getWidth:()I
+       148: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+       151: invokevirtual #220                // Method net/minecraft/client/Minecraft.getWindow:()Lcom/mojang/blaze3d/platform/Window;
+       154: invokevirtual #229                // Method com/mojang/blaze3d/platform/Window.getHeight:()I
+       164: getfield      #176                // Field depthFar:F
+       168: getfield      #199                // Field fov:F
+       175: invokevirtual #233                // Method setupPerspective:(FFFFF)V
+       180: putfield      #237                // Field initialized:Z
+  public float getCameraEntityPartialTicks(net.minecraft.client.DeltaTracker);
+         1: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+         4: invokevirtual #241                // Method net/minecraft/world/level/Level.tickRateManager:()Lnet/minecraft/world/TickRateManager;
+         8: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        11: invokevirtual #247                // Method net/minecraft/world/TickRateManager.isEntityFrozen:(Lnet/minecraft/world/entity/Entity;)Z
+        23: invokeinterface #253,  2          // InterfaceMethod net/minecraft/client/DeltaTracker.getGameTimeDeltaPartialTick:(Z)F
+  public void extractRenderState(net.minecraft.client.renderer.state.level.CameraRenderState, float);
+         2: invokevirtual #259                // Method isInitialized:()Z
+         5: putfield      #263                // Field net/minecraft/client/renderer/state/level/CameraRenderState.initialized:Z
+        10: getfield      #266                // Field isPanoramicMode:Z
+        13: putfield      #269                // Field net/minecraft/client/renderer/state/level/CameraRenderState.isPanoramicMode:Z
+        18: getfield      #270                // Field capturedFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        29: putfield      #273                // Field net/minecraft/client/renderer/state/level/CameraRenderState.isFrustumCaptured:Z
+        34: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        37: getfield      #276                // Field net/minecraft/client/Minecraft.smartCull:Z
+        40: putfield      #279                // Field net/minecraft/client/renderer/state/level/CameraRenderState.smartCull:Z
+        44: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        47: getfield      #179                // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+        50: invokevirtual #280                // Method net/minecraft/client/player/LocalPlayer.isSpectator:()Z
+        57: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+        61: getfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        64: invokevirtual #285                // Method net/minecraft/world/level/Level.getBlockState:(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;
+        67: invokevirtual #289                // Method net/minecraft/world/level/block/state/BlockState.isSolidRender:()Z
+        75: putfield      #279                // Field net/minecraft/client/renderer/state/level/CameraRenderState.smartCull:Z
+        80: invokevirtual #294                // Method position:()Lnet/minecraft/world/phys/Vec3;
+        83: putfield      #297                // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+        88: getfield      #300                // Field xRot:F
+        91: putfield      #303                // Field net/minecraft/client/renderer/state/level/CameraRenderState.xRot:F
+        96: getfield      #304                // Field yRot:F
+        99: putfield      #307                // Field net/minecraft/client/renderer/state/level/CameraRenderState.yRot:F
+       104: invokevirtual #308                // Method blockPosition:()Lnet/minecraft/core/BlockPos;
+       107: putfield      #311                // Field net/minecraft/client/renderer/state/level/CameraRenderState.blockPos:Lnet/minecraft/core/BlockPos;
+       111: getfield      #315                // Field net/minecraft/client/renderer/state/level/CameraRenderState.orientation:Lorg/joml/Quaternionf;
+       115: invokevirtual #318                // Method rotation:()Lorg/joml/Quaternionf;
+       118: invokevirtual #321                // Method org/joml/Quaternionf.set:(Lorg/joml/Quaternionfc;)Lorg/joml/Quaternionf;
+       123: getfield      #325                // Field net/minecraft/client/renderer/state/level/CameraRenderState.cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+       127: getfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+       130: invokevirtual #326                // Method net/minecraft/client/renderer/culling/Frustum.set:(Lnet/minecraft/client/renderer/culling/Frustum;)V
+       135: getfield      #176                // Field depthFar:F
+       138: putfield      #329                // Field net/minecraft/client/renderer/state/level/CameraRenderState.depthFar:F
+       142: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+       146: getfield      #330                // Field net/minecraft/client/renderer/state/level/CameraRenderState.projectionMatrix:Lorg/joml/Matrix4f;
+       149: invokevirtual #333                // Method net/minecraft/client/renderer/Projection.getMatrix:(Lorg/joml/Matrix4f;)Lorg/joml/Matrix4f;
+       155: getfield      #336                // Field net/minecraft/client/renderer/state/level/CameraRenderState.viewRotationMatrix:Lorg/joml/Matrix4f;
+       158: invokevirtual #208                // Method getViewRotationMatrix:(Lorg/joml/Matrix4f;)Lorg/joml/Matrix4f;
+       163: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       183: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       187: putfield      #345                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isLiving:Z
+       191: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       195: invokevirtual #350                // Method net/minecraft/world/entity/LivingEntity.isSleeping:()Z
+       198: putfield      #353                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isSleeping:Z
+       202: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       209: invokevirtual #361                // Method net/minecraft/world/entity/LivingEntity.hasEffect:(Lnet/minecraft/core/Holder;)Z
+       219: invokevirtual #361                // Method net/minecraft/world/entity/LivingEntity.hasEffect:(Lnet/minecraft/core/Holder;)Z
+       230: putfield      #368                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.doesMobEffectBlockSky:Z
+       234: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       238: invokevirtual #371                // Method net/minecraft/world/entity/LivingEntity.isDeadOrDying:()Z
+       241: putfield      #374                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isDeadOrDying:Z
+       245: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       249: invokevirtual #376                // Method net/minecraft/world/entity/LivingEntity.getHurtDir:()F
+       252: putfield      #379                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.hurtDir:F
+       256: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       260: getfield      #382                // Field net/minecraft/world/entity/LivingEntity.hurtTime:I
+       266: putfield      #385                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.hurtTime:F
+       270: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       274: getfield      #387                // Field net/minecraft/world/entity/LivingEntity.deathTime:I
+       280: putfield      #390                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.deathTime:F
+       284: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       288: getfield      #392                // Field net/minecraft/world/entity/LivingEntity.hurtDuration:I
+       291: putfield      #395                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.hurtDuration:I
+       298: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       302: putfield      #345                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isLiving:Z
+       306: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       310: putfield      #353                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isSleeping:Z
+       314: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       318: putfield      #368                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.doesMobEffectBlockSky:Z
+       322: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       342: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       346: putfield      #398                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isPlayer:Z
+       350: invokevirtual #401                // Method net/minecraft/client/player/AbstractClientPlayer.avatarState:()Lnet/minecraft/client/entity/ClientAvatarState;
+       356: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       362: invokevirtual #405                // Method net/minecraft/client/entity/ClientAvatarState.getBackwardsInterpolatedWalkDistance:(F)F
+       365: putfield      #410                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.backwardsInterpolatedWalkDistance:F
+       369: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       375: invokevirtual #413                // Method net/minecraft/client/entity/ClientAvatarState.getInterpolatedBob:(F)F
+       378: putfield      #416                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.bob:F
+       385: getfield      #341                // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+       389: putfield      #398                // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.isPlayer:Z
+       394: getfield      #205                // Field hudFov:F
+       397: putfield      #419                // Field net/minecraft/client/renderer/state/level/CameraRenderState.hudFov:F
+  private void tickFov();
+         1: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+         4: invokevirtual #420                // Method net/minecraft/client/Minecraft.getCameraEntity:()Lnet/minecraft/world/entity/Entity;
+        21: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        24: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+        29: invokevirtual #424                // Method net/minecraft/client/Options.getCameraType:()Lnet/minecraft/client/CameraType;
+        32: invokevirtual #428                // Method net/minecraft/client/CameraType.isFirstPerson:()Z
+        38: invokevirtual #433                // Method net/minecraft/client/Options.fovEffectScale:()Lnet/minecraft/client/OptionInstance;
+        41: invokevirtual #159                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
+        47: invokevirtual #438                // Method java/lang/Double.floatValue:()F
+        57: invokevirtual #441                // Method net/minecraft/client/player/AbstractClientPlayer.getFieldOfViewModifier:(ZF)F
+        68: getfield      #445                // Field fovModifier:F
+        71: putfield      #448                // Field oldFovModifier:F
+        76: getfield      #445                // Field fovModifier:F
+        81: getfield      #445                // Field fovModifier:F
+        89: putfield      #445                // Field fovModifier:F
+        94: getfield      #445                // Field fovModifier:F
+       103: invokestatic  #453                // Method net/minecraft/util/Mth.clamp:(FFF)F
+       106: putfield      #445                // Field fovModifier:F
+  private org.joml.Matrix4f createProjectionMatrixForCulling();
+         1: getfield      #199                // Field fov:F
+         5: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+         8: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+        11: invokevirtual #459                // Method net/minecraft/client/Options.fov:()Lnet/minecraft/client/OptionInstance;
+        14: invokevirtual #159                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
+        20: invokevirtual #167                // Method java/lang/Integer.intValue:()I
+        24: invokestatic  #170                // Method java/lang/Math.max:(FF)F
+        32: invokespecial #71                 // Method org/joml/Matrix4f."<init>":()V
+        43: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        46: invokevirtual #220                // Method net/minecraft/client/Minecraft.getWindow:()Lcom/mojang/blaze3d/platform/Window;
+        49: invokevirtual #224                // Method com/mojang/blaze3d/platform/Window.getWidth:()I
+        54: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        57: invokevirtual #220                // Method net/minecraft/client/Minecraft.getWindow:()Lcom/mojang/blaze3d/platform/Window;
+        60: invokevirtual #229                // Method com/mojang/blaze3d/platform/Window.getHeight:()I
+        68: getfield      #176                // Field depthFar:F
+        71: invokestatic  #462                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/blaze3d/systems/GpuDevice;
+        74: invokevirtual #468                // Method com/mojang/blaze3d/systems/GpuDevice.getDeviceInfo:()Lcom/mojang/blaze3d/systems/DeviceInfo;
+        77: invokevirtual #474                // Method com/mojang/blaze3d/systems/DeviceInfo.isZZeroToOne:()Z
+        80: invokevirtual #479                // Method org/joml/Matrix4f.perspective:(FFFFZ)Lorg/joml/Matrix4f;
+  public net.minecraft.client.renderer.culling.Frustum getCullFrustum();
+         1: getfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+  private void prepareCullFrustum(org.joml.Matrix4fc, org.joml.Matrix4f, net.minecraft.world.phys.Vec3);
+         1: getfield      #270                // Field capturedFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+         8: getfield      #483                // Field captureFrustum:Z
+        16: getfield      #270                // Field capturedFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        19: putfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        32: invokespecial #72                 // Method net/minecraft/client/renderer/culling/Frustum."<init>":(Lorg/joml/Matrix4fc;Lorg/joml/Matrix4f;)V
+        35: putfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        39: getfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        43: invokevirtual #486                // Method net/minecraft/world/phys/Vec3.x:()D
+        47: invokevirtual #490                // Method net/minecraft/world/phys/Vec3.y:()D
+        51: invokevirtual #493                // Method net/minecraft/world/phys/Vec3.z:()D
+        54: invokevirtual #496                // Method net/minecraft/client/renderer/culling/Frustum.prepare:(DDD)V
+        58: getfield      #483                // Field captureFrustum:Z
+        66: getfield      #75                 // Field cullFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        69: putfield      #270                // Field capturedFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+        74: putfield      #483                // Field captureFrustum:Z
+  public net.minecraft.client.renderer.culling.Frustum getCapturedFrustum();
+         1: getfield      #270                // Field capturedFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+  public void captureFrustum();
+         2: putfield      #483                // Field captureFrustum:Z
+  public void killFrustum();
+         2: putfield      #270                // Field capturedFrustum:Lnet/minecraft/client/renderer/culling/Frustum;
+  private float calculateFov(float);
+         1: getfield      #266                // Field isPanoramicMode:Z
+        12: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        15: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+        18: invokevirtual #459                // Method net/minecraft/client/Options.fov:()Lnet/minecraft/client/OptionInstance;
+        21: invokevirtual #159                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
+        27: invokevirtual #167                // Method java/lang/Integer.intValue:()I
+        33: getfield      #448                // Field oldFovModifier:F
+        37: getfield      #445                // Field fovModifier:F
+        40: invokestatic  #501                // Method net/minecraft/util/Mth.lerp:(FFF)F
+        48: invokevirtual #504                // Method modifyFovBasedOnDeathOrFluid:(FF)F
+  private float calculateHudFov(float);
+         5: invokevirtual #504                // Method modifyFovBasedOnDeathOrFluid:(FF)F
+  private float modifyFovBasedOnDeathOrFluid(float, float);
+         1: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        21: invokevirtual #371                // Method net/minecraft/world/entity/LivingEntity.isDeadOrDying:()Z
+        28: getfield      #387                // Field net/minecraft/world/entity/LivingEntity.deathTime:I
+        37: invokestatic  #509                // Method java/lang/Math.min:(FF)F
+        62: invokevirtual #513                // Method getFluidInCamera:()Lnet/minecraft/world/level/material/FogType;
+        81: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        84: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+        87: invokevirtual #433                // Method net/minecraft/client/Options.fovEffectScale:()Lnet/minecraft/client/OptionInstance;
+        90: invokevirtual #159                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
+        96: invokevirtual #438                // Method java/lang/Double.floatValue:()F
+       108: invokestatic  #501                // Method net/minecraft/util/Mth.lerp:(FFF)F
+  private void alignWithEntity(float);
+         1: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+         4: invokevirtual #527                // Method net/minecraft/world/entity/Entity.isPassenger:()Z
+        11: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        14: invokevirtual #530                // Method net/minecraft/world/entity/Entity.getVehicle:()Lnet/minecraft/world/entity/Entity;
+        34: invokevirtual #535                // Method net/minecraft/world/entity/vehicle/minecart/Minecart.getBehavior:()Lnet/minecraft/world/entity/vehicle/minecart/MinecartBehavior;
+        54: invokevirtual #541                // Method net/minecraft/world/entity/vehicle/minecart/NewMinecartBehavior.cartHasPosRotLerp:()Z
+        62: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        65: invokevirtual #544                // Method net/minecraft/world/entity/vehicle/minecart/Minecart.getPassengerRidingPosition:(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/phys/Vec3;
+        69: invokevirtual #548                // Method net/minecraft/world/entity/vehicle/minecart/Minecart.position:()Lnet/minecraft/world/phys/Vec3;
+        72: invokevirtual #549                // Method net/minecraft/world/phys/Vec3.subtract:(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
+        76: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        80: invokevirtual #553                // Method net/minecraft/world/entity/Entity.getVehicleAttachmentPoint:(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/phys/Vec3;
+        83: invokevirtual #549                // Method net/minecraft/world/phys/Vec3.subtract:(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
+        93: getfield      #125                // Field eyeHeightOld:F
+        97: getfield      #121                // Field eyeHeight:F
+       100: invokestatic  #501                // Method net/minecraft/util/Mth.lerp:(FFF)F
+       105: invokespecial #556                // Method net/minecraft/world/phys/Vec3."<init>":(DDD)V
+       108: invokevirtual #558                // Method net/minecraft/world/phys/Vec3.add:(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
+       115: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       119: invokevirtual #561                // Method net/minecraft/world/entity/Entity.getViewYRot:(F)F
+       123: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       127: invokevirtual #564                // Method net/minecraft/world/entity/Entity.getViewXRot:(F)F
+       130: invokevirtual #567                // Method setRotation:(FF)V
+       136: invokevirtual #571                // Method net/minecraft/world/entity/vehicle/minecart/NewMinecartBehavior.getCartLerpPosition:(F)Lnet/minecraft/world/phys/Vec3;
+       141: invokevirtual #558                // Method net/minecraft/world/phys/Vec3.add:(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
+       144: invokevirtual #575                // Method setPosition:(Lnet/minecraft/world/phys/Vec3;)V
+       152: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       156: invokevirtual #561                // Method net/minecraft/world/entity/Entity.getViewYRot:(F)F
+       160: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       164: invokevirtual #564                // Method net/minecraft/world/entity/Entity.getViewXRot:(F)F
+       167: invokevirtual #567                // Method setRotation:(FF)V
+       174: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       177: getfield      #579                // Field net/minecraft/world/entity/Entity.xo:D
+       181: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       184: invokevirtual #583                // Method net/minecraft/world/entity/Entity.getX:()D
+       187: invokestatic  #586                // Method net/minecraft/util/Mth.lerp:(DDD)D
+       193: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       196: getfield      #589                // Field net/minecraft/world/entity/Entity.yo:D
+       200: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       203: invokevirtual #592                // Method net/minecraft/world/entity/Entity.getY:()D
+       206: invokestatic  #586                // Method net/minecraft/util/Mth.lerp:(DDD)D
+       211: getfield      #125                // Field eyeHeightOld:F
+       215: getfield      #121                // Field eyeHeight:F
+       218: invokestatic  #501                // Method net/minecraft/util/Mth.lerp:(FFF)F
+       226: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       229: getfield      #595                // Field net/minecraft/world/entity/Entity.zo:D
+       233: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       236: invokevirtual #598                // Method net/minecraft/world/entity/Entity.getZ:()D
+       239: invokestatic  #586                // Method net/minecraft/util/Mth.lerp:(DDD)D
+       242: invokevirtual #601                // Method setPosition:(DDD)V
+       247: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+       250: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+       253: invokevirtual #424                // Method net/minecraft/client/Options.getCameraType:()Lnet/minecraft/client/CameraType;
+       256: invokevirtual #428                // Method net/minecraft/client/CameraType.isFirstPerson:()Z
+       267: putfield      #603                // Field detached:Z
+       271: getfield      #603                // Field detached:Z
+       278: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+       281: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+       284: invokevirtual #424                // Method net/minecraft/client/Options.getCameraType:()Lnet/minecraft/client/CameraType;
+       287: invokevirtual #606                // Method net/minecraft/client/CameraType.isMirrored:()Z
+       295: getfield      #304                // Field yRot:F
+       303: getfield      #300                // Field xRot:F
+       307: invokevirtual #567                // Method setRotation:(FF)V
+       316: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       338: invokevirtual #610                // Method net/minecraft/world/entity/LivingEntity.getScale:()F
+       347: invokevirtual #618                // Method net/minecraft/world/entity/LivingEntity.getAttributeValue:(Lnet/minecraft/core/Holder;)D
+       359: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       362: invokevirtual #527                // Method net/minecraft/world/entity/Entity.isPassenger:()Z
+       369: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       372: invokevirtual #530                // Method net/minecraft/world/entity/Entity.getVehicle:()Lnet/minecraft/world/entity/Entity;
+       394: invokevirtual #610                // Method net/minecraft/world/entity/LivingEntity.getScale:()F
+       404: invokevirtual #618                // Method net/minecraft/world/entity/LivingEntity.getAttributeValue:(Lnet/minecraft/core/Holder;)D
+       420: invokestatic  #170                // Method java/lang/Math.max:(FF)F
+       423: invokevirtual #622                // Method getMaxZoom:(F)F
+       429: invokevirtual #625                // Method move:(FFF)V
+       436: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       446: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       452: invokevirtual #350                // Method net/minecraft/world/entity/LivingEntity.isSleeping:()Z
+       459: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       465: invokevirtual #629                // Method net/minecraft/world/entity/LivingEntity.getBedOrientation:()Lnet/minecraft/core/Direction;
+       475: invokevirtual #633                // Method net/minecraft/core/Direction.toYRot:()F
+       487: invokevirtual #567                // Method setRotation:(FF)V
+       496: invokevirtual #625                // Method move:(FFF)V
+  private float getMaxZoom(float);
+        47: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        71: invokevirtual #639                // Method net/minecraft/world/phys/Vec3.add:(DDD)Lnet/minecraft/world/phys/Vec3;
+        83: getfield      #34                 // Field forwards:Lorg/joml/Vector3f;
+        86: invokespecial #642                // Method net/minecraft/world/phys/Vec3."<init>":(Lorg/joml/Vector3fc;)V
+        92: invokevirtual #643                // Method net/minecraft/world/phys/Vec3.scale:(D)Lnet/minecraft/world/phys/Vec3;
+        95: invokevirtual #558                // Method net/minecraft/world/phys/Vec3.add:(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
+       101: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+       119: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+       122: invokespecial #661                // Method net/minecraft/world/level/ClipContext."<init>":(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/level/ClipContext$Block;Lnet/minecraft/world/level/ClipContext$Fluid;Lnet/minecraft/world/entity/Entity;)V
+       125: invokevirtual #664                // Method net/minecraft/world/level/Level.clip:(Lnet/minecraft/world/level/ClipContext;)Lnet/minecraft/world/phys/BlockHitResult;
+       132: invokevirtual #668                // Method net/minecraft/world/phys/HitResult.getType:()Lnet/minecraft/world/phys/HitResult$Type;
+       143: invokevirtual #680                // Method net/minecraft/world/phys/HitResult.getLocation:()Lnet/minecraft/world/phys/Vec3;
+       147: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+       150: invokevirtual #683                // Method net/minecraft/world/phys/Vec3.distanceToSqr:(Lnet/minecraft/world/phys/Vec3;)D
+       159: invokestatic  #687                // Method net/minecraft/util/Mth.square:(F)F
+       168: invokestatic  #690                // Method net/minecraft/util/Mth.sqrt:(F)F
+  public boolean isPanoramicMode();
+         1: getfield      #266                // Field isPanoramicMode:Z
+  public float getFov();
+         1: getfield      #199                // Field fov:F
+  private void setupPerspective(float, float, float, float, float);
+         1: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        11: invokevirtual #693                // Method net/minecraft/client/renderer/Projection.setupPerspective:(FFFFF)V
+  private void setupOrtho(float, float, float, float, boolean);
+         1: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        11: invokevirtual #694                // Method net/minecraft/client/renderer/Projection.setupOrtho:(FFFFZ)V
+  protected void move(float, float, float);
+         8: invokespecial #698                // Method org/joml/Vector3f."<init>":(FFF)V
+        12: getfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+        15: invokevirtual #700                // Method org/joml/Vector3f.rotate:(Lorg/joml/Quaternionfc;)Lorg/joml/Vector3f;
+        26: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        29: getfield      #704                // Field net/minecraft/world/phys/Vec3.x:D
+        34: getfield      #706                // Field org/joml/Vector3f.x:F
+        40: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        43: getfield      #708                // Field net/minecraft/world/phys/Vec3.y:D
+        48: getfield      #710                // Field org/joml/Vector3f.y:F
+        54: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        57: getfield      #712                // Field net/minecraft/world/phys/Vec3.z:D
+        62: getfield      #714                // Field org/joml/Vector3f.z:F
+        67: invokespecial #556                // Method net/minecraft/world/phys/Vec3."<init>":(DDD)V
+        70: invokevirtual #575                // Method setPosition:(Lnet/minecraft/world/phys/Vec3;)V
+  protected void setRotation(float, float);
+         2: putfield      #300                // Field xRot:F
+         7: putfield      #304                // Field yRot:F
+        11: getfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+        30: invokevirtual #717                // Method org/joml/Quaternionf.rotationYXZ:(FFF)Lorg/joml/Quaternionf;
+        38: getfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+        42: getfield      #34                 // Field forwards:Lorg/joml/Vector3f;
+        45: invokeinterface #721,  3          // InterfaceMethod org/joml/Vector3fc.rotate:(Lorg/joml/Quaternionfc;Lorg/joml/Vector3f;)Lorg/joml/Vector3f;
+        55: getfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+        59: getfield      #44                 // Field up:Lorg/joml/Vector3f;
+        62: invokeinterface #721,  3          // InterfaceMethod org/joml/Vector3fc.rotate:(Lorg/joml/Quaternionfc;Lorg/joml/Vector3f;)Lorg/joml/Vector3f;
+        72: getfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+        76: getfield      #50                 // Field left:Lorg/joml/Vector3f;
+        79: invokeinterface #721,  3          // InterfaceMethod org/joml/Vector3fc.rotate:(Lorg/joml/Quaternionfc;Lorg/joml/Vector3f;)Lorg/joml/Vector3f;
+        87: getfield      #92                 // Field matrixPropertiesDirty:I
+        92: putfield      #92                 // Field matrixPropertiesDirty:I
+  protected void setPosition(double, double, double);
+         9: invokespecial #556                // Method net/minecraft/world/phys/Vec3."<init>":(DDD)V
+        12: invokevirtual #575                // Method setPosition:(Lnet/minecraft/world/phys/Vec3;)V
+  protected void setPosition(net.minecraft.world.phys.Vec3);
+         2: putfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+         6: getfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        10: getfield      #704                // Field net/minecraft/world/phys/Vec3.x:D
+        14: getfield      #708                // Field net/minecraft/world/phys/Vec3.y:D
+        18: getfield      #712                // Field net/minecraft/world/phys/Vec3.z:D
+        21: invokevirtual #726                // Method net/minecraft/core/BlockPos$MutableBlockPos.set:(DDD)Lnet/minecraft/core/BlockPos$MutableBlockPos;
+  public net.minecraft.world.phys.Vec3 position();
+         1: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+  public net.minecraft.core.BlockPos blockPosition();
+         1: getfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+  public float xRot();
+         1: getfield      #300                // Field xRot:F
+  public float yRot();
+         1: getfield      #304                // Field yRot:F
+  public float yaw();
+         1: invokevirtual #729                // Method yRot:()F
+         4: invokestatic  #731                // Method net/minecraft/util/Mth.wrapDegrees:(F)F
+  public org.joml.Quaternionf rotation();
+         1: getfield      #56                 // Field rotation:Lorg/joml/Quaternionf;
+  public org.joml.Matrix4f getViewRotationMatrix(org.joml.Matrix4f);
+         1: getfield      #92                 // Field matrixPropertiesDirty:I
+        10: invokevirtual #318                // Method rotation:()Lorg/joml/Quaternionf;
+        17: invokespecial #55                 // Method org/joml/Quaternionf."<init>":()V
+        20: invokevirtual #734                // Method org/joml/Quaternionf.conjugate:(Lorg/joml/Quaternionf;)Lorg/joml/Quaternionf;
+        25: getfield      #79                 // Field cachedViewRotMatrix:Lorg/joml/Matrix4f;
+        29: invokevirtual #738                // Method org/joml/Matrix4f.rotation:(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;
+        35: getfield      #92                 // Field matrixPropertiesDirty:I
+        41: putfield      #92                 // Field matrixPropertiesDirty:I
+        46: getfield      #79                 // Field cachedViewRotMatrix:Lorg/joml/Matrix4f;
+        49: invokevirtual #741                // Method org/joml/Matrix4f.set:(Lorg/joml/Matrix4fc;)Lorg/joml/Matrix4f;
+  public org.joml.Matrix4f getViewRotationProjectionMatrix(org.joml.Matrix4f);
+         1: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+         4: invokevirtual #744                // Method net/minecraft/client/renderer/Projection.getMatrixVersion:()J
+         9: getfield      #92                 // Field matrixPropertiesDirty:I
+        18: getfield      #88                 // Field lastProjectionVersion:J
+        22: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        25: invokevirtual #744                // Method net/minecraft/client/renderer/Projection.getMatrixVersion:()J
+        34: getfield      #79                 // Field cachedViewRotMatrix:Lorg/joml/Matrix4f;
+        37: invokevirtual #208                // Method getViewRotationMatrix:(Lorg/joml/Matrix4f;)Lorg/joml/Matrix4f;
+        42: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        46: getfield      #83                 // Field cachedViewRotProjMatrix:Lorg/joml/Matrix4f;
+        49: invokevirtual #333                // Method net/minecraft/client/renderer/Projection.getMatrix:(Lorg/joml/Matrix4f;)Lorg/joml/Matrix4f;
+        54: getfield      #83                 // Field cachedViewRotProjMatrix:Lorg/joml/Matrix4f;
+        58: getfield      #79                 // Field cachedViewRotMatrix:Lorg/joml/Matrix4f;
+        61: invokevirtual #748                // Method org/joml/Matrix4f.mul:(Lorg/joml/Matrix4fc;)Lorg/joml/Matrix4f;
+        67: getfield      #92                 // Field matrixPropertiesDirty:I
+        73: putfield      #92                 // Field matrixPropertiesDirty:I
+        78: putfield      #88                 // Field lastProjectionVersion:J
+        83: getfield      #83                 // Field cachedViewRotProjMatrix:Lorg/joml/Matrix4f;
+        86: invokevirtual #741                // Method org/joml/Matrix4f.set:(Lorg/joml/Matrix4fc;)Lorg/joml/Matrix4f;
+  public net.minecraft.world.entity.Entity entity();
+         1: getfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+  public void setEntity(net.minecraft.world.entity.Entity);
+         2: putfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+  public boolean isInitialized();
+         1: getfield      #237                // Field initialized:Z
+  public boolean isDetached();
+         1: getfield      #603                // Field detached:Z
+  public net.minecraft.world.attribute.EnvironmentAttributeProbe attributeProbe();
+         1: getfield      #99                 // Field attributeProbe:Lnet/minecraft/world/attribute/EnvironmentAttributeProbe;
+  public net.minecraft.client.Camera$NearPlane getNearPlane(float);
+         1: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+         4: invokevirtual #751                // Method net/minecraft/client/renderer/Projection.width:()F
+         9: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        12: invokevirtual #754                // Method net/minecraft/client/renderer/Projection.height:()F
+        28: invokestatic  #759                // Method java/lang/Math.tan:(D)D
+        32: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        35: invokevirtual #763                // Method net/minecraft/client/renderer/Projection.zNear:()F
+        53: getfield      #34                 // Field forwards:Lorg/joml/Vector3f;
+        56: invokespecial #642                // Method net/minecraft/world/phys/Vec3."<init>":(Lorg/joml/Vector3fc;)V
+        60: getfield      #63                 // Field projection:Lnet/minecraft/client/renderer/Projection;
+        63: invokevirtual #763                // Method net/minecraft/client/renderer/Projection.zNear:()F
+        67: invokevirtual #643                // Method net/minecraft/world/phys/Vec3.scale:(D)Lnet/minecraft/world/phys/Vec3;
+        77: getfield      #50                 // Field left:Lorg/joml/Vector3f;
+        80: invokespecial #642                // Method net/minecraft/world/phys/Vec3."<init>":(Lorg/joml/Vector3fc;)V
+        85: invokevirtual #643                // Method net/minecraft/world/phys/Vec3.scale:(D)Lnet/minecraft/world/phys/Vec3;
+        95: getfield      #44                 // Field up:Lorg/joml/Vector3f;
+        98: invokespecial #642                // Method net/minecraft/world/phys/Vec3."<init>":(Lorg/joml/Vector3fc;)V
+       103: invokevirtual #643                // Method net/minecraft/world/phys/Vec3.scale:(D)Lnet/minecraft/world/phys/Vec3;
+       118: invokespecial #768                // Method net/minecraft/client/Camera$NearPlane."<init>":(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V
+  public net.minecraft.world.level.material.FogType getFluidInCamera();
+         1: getfield      #237                // Field initialized:Z
+        12: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+        16: getfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        19: invokevirtual #773                // Method net/minecraft/world/level/Level.getFluidState:(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;
+        27: invokevirtual #782                // Method net/minecraft/world/level/material/FluidState.is:(Lnet/minecraft/tags/TagKey;)Z
+        34: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+        37: getfield      #708                // Field net/minecraft/world/phys/Vec3.y:D
+        41: getfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        44: invokevirtual #788                // Method net/minecraft/core/BlockPos$MutableBlockPos.getY:()I
+        50: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+        54: getfield      #21                 // Field blockPosition:Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        57: invokevirtual #790                // Method net/minecraft/world/level/material/FluidState.getHeight:(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F
+        72: getfield      #109                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        75: getfield      #142                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+        78: invokevirtual #459                // Method net/minecraft/client/Options.fov:()Lnet/minecraft/client/OptionInstance;
+        81: invokevirtual #159                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
+        87: invokevirtual #167                // Method java/lang/Integer.intValue:()I
+        91: invokevirtual #793                // Method getNearPlane:(F)Lnet/minecraft/client/Camera$NearPlane;
+       102: getfield      #797                // Field net/minecraft/client/Camera$NearPlane.forward:Lnet/minecraft/world/phys/Vec3;
+       109: invokevirtual #800                // Method net/minecraft/client/Camera$NearPlane.getTopLeft:()Lnet/minecraft/world/phys/Vec3;
+       116: invokevirtual #803                // Method net/minecraft/client/Camera$NearPlane.getTopRight:()Lnet/minecraft/world/phys/Vec3;
+       123: invokevirtual #806                // Method net/minecraft/client/Camera$NearPlane.getBottomLeft:()Lnet/minecraft/world/phys/Vec3;
+       130: invokevirtual #809                // Method net/minecraft/client/Camera$NearPlane.getBottomRight:()Lnet/minecraft/world/phys/Vec3;
+       134: invokestatic  #812                // Method java/util/Arrays.asList:([Ljava/lang/Object;)Ljava/util/List;
+       139: invokeinterface #818,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+       148: invokeinterface #824,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+       158: invokeinterface #829,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+       169: getfield      #13                 // Field position:Lnet/minecraft/world/phys/Vec3;
+       174: invokevirtual #558                // Method net/minecraft/world/phys/Vec3.add:(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
+       181: invokestatic  #832                // Method net/minecraft/core/BlockPos.containing:(Lnet/minecraft/core/Position;)Lnet/minecraft/core/BlockPos;
+       187: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+       192: invokevirtual #773                // Method net/minecraft/world/level/Level.getFluidState:(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;
+       202: invokevirtual #782                // Method net/minecraft/world/level/material/FluidState.is:(Lnet/minecraft/tags/TagKey;)Z
+       210: getfield      #708                // Field net/minecraft/world/phys/Vec3.y:D
+       216: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+       221: invokevirtual #790                // Method net/minecraft/world/level/material/FluidState.getHeight:(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F
+       226: invokevirtual #840                // Method net/minecraft/core/BlockPos.getY:()I
+       241: getfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+       246: invokevirtual #285                // Method net/minecraft/world/level/Level.getBlockState:(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;
+       256: invokevirtual #847                // Method net/minecraft/world/level/block/state/BlockState.is:(Ljava/lang/Object;)Z
+  public org.joml.Vector3fc forwardVector();
+         1: getfield      #34                 // Field forwards:Lorg/joml/Vector3f;
+  public org.joml.Vector3fc panoramicForwards();
+         1: getfield      #38                 // Field panoramicForwards:Lorg/joml/Vector3f;
+  public org.joml.Vector3fc upVector();
+         1: getfield      #44                 // Field up:Lorg/joml/Vector3f;
+  public org.joml.Vector3fc leftVector();
+         1: getfield      #50                 // Field left:Lorg/joml/Vector3f;
+  public void reset();
+         2: putfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+         7: putfield      #117                // Field entity:Lnet/minecraft/world/entity/Entity;
+        11: getfield      #99                 // Field attributeProbe:Lnet/minecraft/world/attribute/EnvironmentAttributeProbe;
+        14: invokevirtual #852                // Method net/minecraft/world/attribute/EnvironmentAttributeProbe.reset:()V
+        19: putfield      #237                // Field initialized:Z
+  public void setLevel(net.minecraft.client.multiplayer.ClientLevel);
+         2: putfield      #113                // Field level:Lnet/minecraft/world/level/Level;
+  public void enablePanoramicMode();
+         2: putfield      #266                // Field isPanoramicMode:Z
+         6: getfield      #38                 // Field panoramicForwards:Lorg/joml/Vector3f;
+        10: getfield      #34                 // Field forwards:Lorg/joml/Vector3f;
+        13: invokevirtual #855                // Method org/joml/Vector3f.set:(Lorg/joml/Vector3fc;)Lorg/joml/Vector3f;
+  public void disablePanoramicMode();
+         2: putfield      #266                // Field isPanoramicMode:Z
+         9: invokespecial #698                // Method org/joml/Vector3f."<init>":(FFF)V
+        22: invokespecial #698                // Method org/joml/Vector3f."<init>":(FFF)V
+        37: invokespecial #698                // Method org/joml/Vector3f."<init>":(FFF)V
+=== net.minecraft.client.renderer.state.CameraRenderState
+Error: class not found: net.minecraft.client.renderer.state.CameraRenderState
