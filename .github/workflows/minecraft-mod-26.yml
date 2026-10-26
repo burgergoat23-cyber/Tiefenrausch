@@ -70,6 +70,7 @@ jobs:
             grep -E "^[0-9]+ errors?$" build.log >> dev/build-errors.txt || true
           fi
           echo "Bau: ${{ steps.build.outcome }}" >> dev/build-errors.txt
+          echo "Fertiges Jar: minecraft-mod-26/download/" >> dev/build-errors.txt
           # Klassen nachschlagen (Namen und Signaturen aus dem Spiel 26.2), Liste in dev/lookup.txt
           if [ -f dev/lookup.txt ]; then
             JARS=$( (find ~/.gradle/caches/fabric-loom .gradle -name '*.jar' 2>/dev/null | grep -E 'minecraft|26\.2' ; find ~/.gradle/caches/modules-2 -name 'fabric-*.jar' 2>/dev/null) | grep -v sources | tr '\n' ':')
@@ -83,6 +84,8 @@ jobs:
               esac
             done < dev/lookup.txt
           fi
+          # Nachschlage-Ergebnis nur ins Bau-Protokoll (nicht ins Repo)
+          [ -f dev/lookup-out.txt ] && head -n 4000 dev/lookup-out.txt || true
 
       - name: Spieltest (Minecraft startet ohne Bildschirm)
         id: gametest
@@ -122,7 +125,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add download dev
+          git add download dev/build-errors.txt
           [ -d test-screenshots ] && git add test-screenshots
           if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
           git commit -m "26.2: Bau-Ergebnisse automatisch [skip ci]"

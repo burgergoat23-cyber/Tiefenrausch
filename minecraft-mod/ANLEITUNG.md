@@ -6,15 +6,24 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.3.
 
 > Früher hieß die Mod „Arsenal“. Beim Wechsel die alte `arsenal-….jar` aus dem Ordner `mods` löschen. Deine Einstellungen werden automatisch übernommen.
 
+## Welche Datei?
+
+| Minecraft-Version | Datei | Ordner |
+|---|---|---|
+| **1.21.11** | `vantage-client-1.3.0+mc1.21.11.jar` | `minecraft-mod/download/` |
+| **26.2** | `vantage-client-1.3.0+mc26.2.jar` | `minecraft-mod-26/download/` |
+
+Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neuer und **Fabric API für 26.2**.
+
 ## Installieren (einmalig)
 
-1. **Fabric installieren:** <https://fabricmc.net/use/installer/> → Installer starten → Version **1.21.11** wählen → „Installieren“.
-2. **Fabric API herunterladen** (Version für 1.21.11): <https://modrinth.com/mod/fabric-api>
+1. **Fabric installieren:** <https://fabricmc.net/use/installer/> → Installer starten → Version **1.21.11** (bzw. **26.2**) wählen → „Installieren“.
+2. **Fabric API herunterladen** (passend zur Minecraft-Version): <https://modrinth.com/mod/fabric-api>
 3. Den Ordner `mods` öffnen:
    - Windows: `Windows-Taste + R` → `%appdata%\.minecraft\mods` eintippen → Enter.
    - Gibt es den Ordner nicht, einfach anlegen.
 4. **Beide Dateien** (Fabric API und `vantage-client-….jar`) in den Ordner `mods` ziehen.
-5. Minecraft-Launcher öffnen → Profil **„fabric-loader-1.21.11“** wählen → Spielen.
+5. Minecraft-Launcher öffnen → Profil **„fabric-loader-1.21.11“** (bzw. „fabric-loader-26.2“) wählen → Spielen.
 
 ## Tasten
 
