@@ -91,7 +91,7 @@ public class VantageScreen extends Screen {
 				new Module(P_SHIELD, "Axt gegen Schilde", Items.NETHERITE_AXE, 0, () -> c.shieldBreaker, v -> c.shieldBreaker = v),
 				new Module(P_QUICK, "Perle und Windladung", Items.ENDER_PEARL, 0, null, null),
 				new Module(P_COMBO, "Treffer am Stück", Items.BLAZE_POWDER, 0, () -> c.comboCounter, v -> c.comboCounter = v),
-				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
+				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.FIRE_CHARGE, 0, () -> c.killEffects, v -> c.killEffects = v),
 				new Module(P_SKINS, "CS-Messer, Äxte, Schilde", Items.NETHERITE_SWORD, 1, () -> c.skinsEnabled, v -> c.skinsEnabled = v),
 				new Module(P_PACKS, "Alles mit einem Klick", Items.BUNDLE, 1, null, null),
 				new Module(P_VIEWMODEL, "Hand & Schlag-Animationen", Items.ARMOR_STAND, 1, () -> c.swingAnim, v -> c.swingAnim = v),

@@ -48,7 +48,7 @@ public final class KillEffects {
 			Entity ent = mc.level.getEntity(e.getKey());
 			if (ent instanceof LivingEntity le && le.isDeadOrDying()) {
 				it.remove();
-				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
+				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getBbHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
 			}
 		}
 	}
@@ -86,7 +86,10 @@ public final class KillEffects {
 			}
 			default -> {
 				// Blitz nur zum Anschauen: kein Feuer, kein Schaden (nur auf deinem Bildschirm)
-				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
+				@SuppressWarnings("unchecked")
+				EntityType<LightningBolt> type = (EntityType<LightningBolt>) EntityType.byString("lightning_bolt").orElse(null);
+				if (type == null) return;
+				LightningBolt bolt = new LightningBolt(type, w);
 				bolt.setPos(pos.x, pos.y - 1, pos.z);
 				bolt.setVisualOnly(true);
 				if (!sound) bolt.setSilent(true);
