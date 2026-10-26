@@ -5,9 +5,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"BossBarHudAccessor",
+		"CameraMixin",
 		"ClientPlayerInteractionManagerAccessor",
 		"GameRendererAccessor",
-		"GameRendererMixin",
 		"HeldItemRendererMixin",
 		"ItemModelManagerMixin",
 		"MinecraftClientAccessor",

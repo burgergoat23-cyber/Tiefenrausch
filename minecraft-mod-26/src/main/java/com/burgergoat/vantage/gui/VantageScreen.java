@@ -442,7 +442,7 @@ public class VantageScreen extends Screen {
 				ctx.fill(bx, y, bx + 19, y + 19, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
 				border(ctx, bx, y, 19, 19, sel ? ACCENT : LINE);
 				ctx.item(SkinManager.preview(null, path), bx + 2, y + 2);
-				if (hov) tooltip = List.of(item.getName());
+				if (hov) tooltip = List.of(new ItemStack(item).getHoverName());
 				hit(bx, y, 19, 19, true, () -> skinTarget = path);
 				bx += 21;
 			}
