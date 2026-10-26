@@ -1,228 +1,48 @@
-20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:8: error: cannot find symbol
-21-import com.burgergoat.vantage.feature.Extras;
-22-                                     ^
-23-  symbol:   class Extras
+20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:51: error: cannot find symbol
+21-				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
+22-				                                                                                ^
+23-  symbol:   method getHeight()
 --
-25:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:9: error: cannot find symbol
-26-import com.burgergoat.vantage.feature.KillEffects;
-27-                                     ^
-28-  symbol:   class KillEffects
+25:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:89: error: cannot find symbol
+26-				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
+27-				                                                 ^
+28-  symbol:   variable LIGHTNING_BOLT
 --
-30:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:10: error: cannot find symbol
-31-import com.burgergoat.vantage.feature.Waypoints;
-32-                                     ^
-33-  symbol:   class Waypoints
+30:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:94: error: incompatible types: WeatheringCopperCollection<Item> cannot be converted to Item
+31-				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
+32-				                                                  ^
+33-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
 --
-35:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:9: error: cannot find symbol
-36-import com.burgergoat.vantage.feature.KillEffects;
-37-                                     ^
-38-  symbol:   class KillEffects
+46:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:51: error: cannot find symbol
+47-  				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
+48-  				                                                                                ^
+49-    symbol:   method getHeight()
 --
-40:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:10: error: cannot find symbol
-41-import com.burgergoat.vantage.feature.Waypoints;
-42-                                     ^
-43-  symbol:   class Waypoints
+51:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:89: error: cannot find symbol
+52-  				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
+53-  				                                                 ^
+54-    symbol:   variable LIGHTNING_BOLT
 --
-45:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:95: error: cannot find symbol
-46-		HudModules.render(ctx);
-47-		^
-48-  symbol:   variable HudModules
+56:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:94: error: incompatible types: WeatheringCopperCollection<Item> cannot be converted to Item
+57-  				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
+58-  				                                                  ^
+59-  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
 --
-50:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:96: error: cannot find symbol
-51-		Waypoints.render(ctx);
-52-		^
-53-  symbol:   variable Waypoints
+127:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:51: error: cannot find symbol
+128-				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
+129-				                                                                                ^
+130-  symbol:   method getHeight()
 --
-55:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:113: error: cannot find symbol
-56-				KillEffects.onAttack(entity);
-57-				^
-58-  symbol:   variable KillEffects
+132:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:89: error: cannot find symbol
+133-				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
+134-				                                                 ^
+135-  symbol:   variable LIGHTNING_BOLT
 --
-60:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:174: error: cannot find symbol
-61-		Waypoints.tick(client);
-62-		^
-63-  symbol:   variable Waypoints
---
-65:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:175: error: cannot find symbol
-66-		KillEffects.tick(client);
-67-		^
-68-  symbol:   variable KillEffects
---
-70:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:176: error: cannot find symbol
-71-		Extras.tick(client);
-72-		^
-73-  symbol:   variable Extras
---
-75:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:177: error: cannot find symbol
-76-		while (waypointKey.consumeClick()) Waypoints.addHere(client);
-77-		                                   ^
-78-  symbol:   variable Waypoints
---
-80:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:424: error: cannot find symbol
-81-				Waypoints.addHere(mc);
-82-				^
-83-  symbol:   variable Waypoints
---
-85:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:453: error: cannot find symbol
-86-			ctx.runOnClient(mc -> KillEffects.play(mc, mc.player.getEyePosition().add(0, 0, 4), 2));
-87-			                      ^
-88-  symbol:   variable KillEffects
---
-90:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:464: error: cannot find symbol
-91-				Waypoints.setActive(mc, null);
-92-				^
-93-  symbol:   variable Waypoints
---
-107:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:8: error: cannot find symbol
-108-  import com.burgergoat.vantage.feature.Extras;
-109-                                       ^
-110-    symbol:   class Extras
---
-112:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:9: error: cannot find symbol
-113-  import com.burgergoat.vantage.feature.KillEffects;
-114-                                       ^
-115-    symbol:   class KillEffects
---
-117:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:10: error: cannot find symbol
-118-  import com.burgergoat.vantage.feature.Waypoints;
-119-                                       ^
-120-    symbol:   class Waypoints
---
-122:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:9: error: cannot find symbol
-123-  import com.burgergoat.vantage.feature.KillEffects;
-124-                                       ^
-125-    symbol:   class KillEffects
---
-127:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:10: error: cannot find symbol
-128-  import com.burgergoat.vantage.feature.Waypoints;
-129-                                       ^
-130-    symbol:   class Waypoints
---
-132:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:95: error: cannot find symbol
-133-  		HudModules.render(ctx);
-134-  		^
-135-    symbol:   variable HudModules
---
-137:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:96: error: cannot find symbol
-138-  		Waypoints.render(ctx);
-139-  		^
-140-    symbol:   variable Waypoints
---
-142:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:113: error: cannot find symbol
-143-  				KillEffects.onAttack(entity);
-144-  				^
-145-    symbol:   variable KillEffects
---
-147:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:174: error: cannot find symbol
-148-  		Waypoints.tick(client);
-149-  		^
-150-    symbol:   variable Waypoints
---
-152:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:175: error: cannot find symbol
-153-  		KillEffects.tick(client);
-154-  		^
-155-    symbol:   variable KillEffects
---
-157:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:176: error: cannot find symbol
-158-  		Extras.tick(client);
-159-  		^
-160-    symbol:   variable Extras
---
-162:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:177: error: cannot find symbol
-163-  		while (waypointKey.consumeClick()) Waypoints.addHere(client);
-164-  		                                   ^
-165-    symbol:   variable Waypoints
---
-167:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:424: error: cannot find symbol
-168-  				Waypoints.addHere(mc);
-169-  				^
-170-    symbol:   variable Waypoints
---
-172:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:453: error: cannot find symbol
-173-  			ctx.runOnClient(mc -> KillEffects.play(mc, mc.player.getEyePosition().add(0, 0, 4), 2));
-174-  			                      ^
-175-    symbol:   variable KillEffects
---
-177:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:464: error: cannot find symbol
-178-  				Waypoints.setActive(mc, null);
-179-  				^
-180-    symbol:   variable Waypoints
---
-219:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:8: error: cannot find symbol
-220-import com.burgergoat.vantage.feature.Extras;
-221-                                     ^
-222-  symbol:   class Extras
---
-224:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:9: error: cannot find symbol
-225-import com.burgergoat.vantage.feature.KillEffects;
-226-                                     ^
-227-  symbol:   class KillEffects
---
-229:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:10: error: cannot find symbol
-230-import com.burgergoat.vantage.feature.Waypoints;
-231-                                     ^
-232-  symbol:   class Waypoints
---
-234:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:9: error: cannot find symbol
-235-import com.burgergoat.vantage.feature.KillEffects;
-236-                                     ^
-237-  symbol:   class KillEffects
---
-239:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:10: error: cannot find symbol
-240-import com.burgergoat.vantage.feature.Waypoints;
-241-                                     ^
-242-  symbol:   class Waypoints
---
-244:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:95: error: cannot find symbol
-245-		HudModules.render(ctx);
-246-		^
-247-  symbol:   variable HudModules
---
-249:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:96: error: cannot find symbol
-250-		Waypoints.render(ctx);
-251-		^
-252-  symbol:   variable Waypoints
---
-254:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:113: error: cannot find symbol
-255-				KillEffects.onAttack(entity);
-256-				^
-257-  symbol:   variable KillEffects
---
-259:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:174: error: cannot find symbol
-260-		Waypoints.tick(client);
-261-		^
-262-  symbol:   variable Waypoints
---
-264:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:175: error: cannot find symbol
-265-		KillEffects.tick(client);
-266-		^
-267-  symbol:   variable KillEffects
---
-269:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:176: error: cannot find symbol
-270-		Extras.tick(client);
-271-		^
-272-  symbol:   variable Extras
---
-274:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:177: error: cannot find symbol
-275-		while (waypointKey.consumeClick()) Waypoints.addHere(client);
-276-		                                   ^
-277-  symbol:   variable Waypoints
---
-279:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:424: error: cannot find symbol
-280-				Waypoints.addHere(mc);
-281-				^
-282-  symbol:   variable Waypoints
---
-284:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:453: error: cannot find symbol
-285-			ctx.runOnClient(mc -> KillEffects.play(mc, mc.player.getEyePosition().add(0, 0, 4), 2));
-286-			                      ^
-287-  symbol:   variable KillEffects
---
-289:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:464: error: cannot find symbol
-290-				Waypoints.setActive(mc, null);
-291-				^
-292-  symbol:   variable Waypoints
-15 errors
-15 errors
+137:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:94: error: incompatible types: WeatheringCopperCollection<Item> cannot be converted to Item
+138-				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
+139-				                                                  ^
+140-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+3 errors
+3 errors
 Bau: failure
 Fertiges Jar: minecraft-mod-26/download/
