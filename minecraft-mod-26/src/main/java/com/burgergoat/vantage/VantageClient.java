@@ -18,7 +18,7 @@ import com.burgergoat.vantage.tracker.TrackType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -59,16 +59,16 @@ public class VantageClient implements ClientModInitializer {
 		SkinCatalog.load();
 
 		KeyMapping.Category cat = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
-		menuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.menu", GLFW.GLFW_KEY_K, cat));
-		inspectKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.inspect", GLFW.GLFW_KEY_G, cat));
-		lungeKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.lunge", GLFW.GLFW_KEY_R, cat));
-		pearlKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.pearl", GLFW.GLFW_KEY_V, cat));
-		windKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.wind", GLFW.GLFW_KEY_B, cat));
-		zoomKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.zoom", GLFW.GLFW_KEY_C, cat));
-		trackerKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.tracker", GLFW.GLFW_KEY_UNKNOWN, cat));
-		trackerCycleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.vantage.tracker_cycle", GLFW.GLFW_KEY_UNKNOWN, cat));
-		maceToggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.mace_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
-		shieldToggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.shield_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
+		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.menu", GLFW.GLFW_KEY_K, cat));
+		inspectKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.inspect", GLFW.GLFW_KEY_G, cat));
+		lungeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.lunge", GLFW.GLFW_KEY_R, cat));
+		pearlKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.pearl", GLFW.GLFW_KEY_V, cat));
+		windKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.wind", GLFW.GLFW_KEY_B, cat));
+		zoomKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.zoom", GLFW.GLFW_KEY_C, cat));
+		trackerKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.tracker", GLFW.GLFW_KEY_UNKNOWN, cat));
+		trackerCycleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vantage.tracker_cycle", GLFW.GLFW_KEY_UNKNOWN, cat));
+		maceToggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.mace_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
+		shieldToggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.shield_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
 
 		ClientTickEvents.END_CLIENT_TICK.register(VantageClient::tick);
 		ServerTickEvents.END_SERVER_TICK.register(ServerSearch::serverTick);

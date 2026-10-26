@@ -78,8 +78,8 @@ jobs:
               [ -z "$line" ] && continue
               case "$line" in
                 \#*) continue ;;
-                -c\ *) cls=${line#-c }; echo "=== $cls (Code)" >> dev/lookup-out.txt; javap -c -p -cp "$JARS" "$cls" 2>&1 | grep -E "^  [a-zA-Z].*\(|invoke|getfield|putfield" | head -n 1500 >> dev/lookup-out.txt ;;
-                *) echo "=== $line" >> dev/lookup-out.txt; javap -p -cp "$JARS" "$line" >> dev/lookup-out.txt 2>&1 ;;
+                -c\ *) cls=${line#-c }; echo "=== $cls (Code)" >> dev/lookup-out.txt; (javap -c -p -cp "$JARS" "$cls" 2>&1 | grep -E "^  [a-zA-Z].*\(|invoke|getfield|putfield" | head -n 1500 >> dev/lookup-out.txt) || true ;;
+                *) echo "=== $line" >> dev/lookup-out.txt; javap -p -cp "$JARS" "$line" >> dev/lookup-out.txt 2>&1 || true ;;
               esac
             done < dev/lookup.txt
           fi

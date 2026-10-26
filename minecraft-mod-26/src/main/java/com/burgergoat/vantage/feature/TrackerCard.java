@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -35,7 +35,7 @@ public final class TrackerCard {
 	}
 
 	/** Im HUD rechts oben (unter den Effekt-Symbolen). */
-	public static void renderHud(GuiGraphics ctx) {
+	public static void renderHud(GuiGraphicsExtractor ctx) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null || mc.level == null) return;
 		TrackType type = StructureTracker.targetType(mc.level.dimension());
@@ -89,7 +89,7 @@ public final class TrackerCard {
 	}
 
 	/** @return Hoehe der Karte */
-	public static int render(GuiGraphics ctx, Minecraft mc, int x, int y, int w, TrackType type, @Nullable Site site) {
+	public static int render(GuiGraphicsExtractor ctx, Minecraft mc, int x, int y, int w, TrackType type, @Nullable Site site) {
 		Font tr = mc.font;
 		int color = type.color | 0xFF000000;
 
@@ -195,20 +195,20 @@ public final class TrackerCard {
 		return -1f;
 	}
 
-	private static void panel(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+	private static void panel(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
 		ctx.fill(x, y, x + w, y + h, BG);
 		outline(ctx, x, y, w, h, EDGE);
 		ctx.fill(x, y, x + 2, y + h, color);
 	}
 
-	private static void outline(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+	private static void outline(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
 		ctx.fill(x, y, x + w, y + 1, color);
 		ctx.fill(x, y + h - 1, x + w, y + h, color);
 		ctx.fill(x, y + 1, x + 1, y + h - 1, color);
 		ctx.fill(x + w - 1, y + 1, x + w, y + h - 1, color);
 	}
 
-	private static void small(GuiGraphics ctx, Font tr, String s, int x, int y, int color) {
+	private static void small(GuiGraphicsExtractor ctx, Font tr, String s, int x, int y, int color) {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x, y);
 		ctx.pose().scale(0.75f, 0.75f);
@@ -216,7 +216,7 @@ public final class TrackerCard {
 		ctx.pose().popMatrix();
 	}
 
-	private static void icon(GuiGraphics ctx, ItemStack stack, int x, int y) {
+	private static void icon(GuiGraphicsExtractor ctx, ItemStack stack, int x, int y) {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x, y);
 		ctx.pose().scale(0.65f, 0.65f);
@@ -224,14 +224,14 @@ public final class TrackerCard {
 		ctx.pose().popMatrix();
 	}
 
-	private static void disc(GuiGraphics ctx, int cx, int cy, int r, int color) {
+	private static void disc(GuiGraphicsExtractor ctx, int cx, int cy, int r, int color) {
 		for (int dy = -r; dy <= r; dy++) {
 			int half = (int) Math.round(Math.sqrt(r * r - dy * dy));
 			ctx.fill(cx - half, cy + dy, cx + half + 1, cy + dy + 1, color);
 		}
 	}
 
-	private static void ring(GuiGraphics ctx, int cx, int cy, int r, int color) {
+	private static void ring(GuiGraphicsExtractor ctx, int cx, int cy, int r, int color) {
 		int steps = r * 8;
 		for (int i = 0; i < steps; i++) {
 			double a = i * Math.PI * 2 / steps;
@@ -242,7 +242,7 @@ public final class TrackerCard {
 	}
 
 	/** Pfeil, der zum Ziel zeigt (0 Grad = geradeaus = nach oben). */
-	private static void arrow(GuiGraphics ctx, int cx, int cy, float yaw, int color) {
+	private static void arrow(GuiGraphicsExtractor ctx, int cx, int cy, float yaw, int color) {
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(cx + 0.5f, cy + 0.5f);
 		ctx.pose().rotate((float) Math.toRadians(yaw));
@@ -252,7 +252,7 @@ public final class TrackerCard {
 		ctx.pose().popMatrix();
 	}
 
-	private static void drawArrowShape(GuiGraphics ctx, int ox, int oy, int color) {
+	private static void drawArrowShape(GuiGraphicsExtractor ctx, int ox, int oy, int color) {
 		// Spitze (Dreieck)
 		for (int r = 0; r < 6; r++) {
 			ctx.fill(ox - r - 1, oy - 9 + r, ox + r + 1, oy - 8 + r, color);

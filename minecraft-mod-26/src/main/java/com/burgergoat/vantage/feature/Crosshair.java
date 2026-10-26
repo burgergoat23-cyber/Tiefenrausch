@@ -4,7 +4,7 @@ import com.burgergoat.vantage.config.VantageConfig;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** CS-Fadenkreuz (Laenge, Dicke, Luecke, Farbe, Punkt, Umrandung, T-Form, Kreis). */
 public final class Crosshair {
@@ -24,7 +24,7 @@ public final class Crosshair {
 		};
 	}
 
-	private static void render(GuiGraphics ctx, DeltaTracker tickCounter) {
+	private static void render(GuiGraphicsExtractor ctx, DeltaTracker tickCounter) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null || !mc.options.getCameraType().isFirstPerson() || mc.player.isSpectator()) return;
 		VantageConfig c = VantageConfig.get();
@@ -47,7 +47,7 @@ public final class Crosshair {
 	}
 
 	/** Zeichnet das Fadenkreuz mit Mittelpunkt (cx, cy) in echten Bildschirm-Pixeln. */
-	public static void draw(GuiGraphics ctx, int cx, int cy, float extraGap) {
+	public static void draw(GuiGraphicsExtractor ctx, int cx, int cy, float extraGap) {
 		VantageConfig c = VantageConfig.get();
 		Minecraft mc = Minecraft.getInstance();
 		int scale = Math.max(1, mc.getWindow().getGuiScale());
@@ -104,7 +104,7 @@ public final class Crosshair {
 		ctx.pose().popMatrix();
 	}
 
-	private static void rect(GuiGraphics ctx, int x0, int y0, int x1, int y1, int color) {
+	private static void rect(GuiGraphicsExtractor ctx, int x0, int y0, int x1, int y1, int color) {
 		if (x1 > x0 && y1 > y0) ctx.fill(x0, y0, x1, y1, color);
 	}
 }

@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -85,7 +85,7 @@ public class VantageScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics ctx, int mouseX, int mouseY, float deltaTicks) {
+	public void renderBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
 		// Im Viewmodel-Reiter frei lassen, damit man die Hand live sieht
 		if (tab != 3) ctx.fill(0, 0, width, height, 0x60000000);
 	}
@@ -199,7 +199,7 @@ public class VantageScreen extends Screen {
 	// ------------------------------------------------------------------ Zeichnen
 
 	@Override
-	public void render(GuiGraphics ctx, int mouseX, int mouseY, float deltaTicks) {
+	public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
 		super.render(ctx, mouseX, mouseY, deltaTicks);
 		mx = mouseX;
 		my = mouseY;
@@ -293,14 +293,14 @@ public class VantageScreen extends Screen {
 		hits.add(new Hit(x, y, w, h, content, click, null));
 	}
 
-	private void border(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+	private void border(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
 		ctx.fill(x, y, x + w, y + 1, color);
 		ctx.fill(x, y + h - 1, x + w, y + h, color);
 		ctx.fill(x, y, x + 1, y + h, color);
 		ctx.fill(x + w - 1, y, x + w, y + h, color);
 	}
 
-	private void button(GuiGraphics ctx, int x, int y, int w, int h, String label, boolean active, Runnable click) {
+	private void button(GuiGraphicsExtractor ctx, int x, int y, int w, int h, String label, boolean active, Runnable click) {
 		boolean hov = hovered(x, y, w, h, true);
 		ctx.fill(x, y, x + w, y + h, active ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
 		border(ctx, x, y, w, h, active ? ACCENT : hov ? 0xFF56677A : LINE);
@@ -309,13 +309,13 @@ public class VantageScreen extends Screen {
 		hit(x, y, w, h, true, click);
 	}
 
-	private int header(GuiGraphics ctx, int x, int y, int w, String text) {
+	private int header(GuiGraphicsExtractor ctx, int x, int y, int w, String text) {
 		ctx.drawString(font, text, x, y + 3, ACCENT);
 		ctx.fill(x, y + 13, x + w, y + 14, LINE);
 		return y + 18;
 	}
 
-	private int paragraph(GuiGraphics ctx, int x, int y, int w, String text, int color) {
+	private int paragraph(GuiGraphicsExtractor ctx, int x, int y, int w, String text, int color) {
 		for (FormattedCharSequence line : font.split(Component.literal(text), w)) {
 			ctx.drawString(font, line, x, y, color);
 			y += 10;
@@ -323,7 +323,7 @@ public class VantageScreen extends Screen {
 		return y + 3;
 	}
 
-	private int toggle(GuiGraphics ctx, int x, int y, int w, String label, boolean value, Consumer<Boolean> set) {
+	private int toggle(GuiGraphicsExtractor ctx, int x, int y, int w, String label, boolean value, Consumer<Boolean> set) {
 		boolean hov = hovered(x, y, w, 15, true);
 		if (hov) ctx.fill(x, y, x + w, y + 15, 0x18FFFFFF);
 		ctx.drawString(font, font.plainSubstrByWidth(label, w - 32), x + 3, y + 4, TEXT);
@@ -338,7 +338,7 @@ public class VantageScreen extends Screen {
 		return y + 17;
 	}
 
-	private int slider(GuiGraphics ctx, int x, int y, int w, String label, double min, double max, double value, double step,
+	private int slider(GuiGraphicsExtractor ctx, int x, int y, int w, String label, double min, double max, double value, double step,
 			String text, DoubleConsumer set) {
 		ctx.drawString(font, label, x + 3, y + 1, TEXT);
 		ctx.drawString(font, text, x + w - font.width(text) - 3, y + 1, ACCENT);
@@ -361,7 +361,7 @@ public class VantageScreen extends Screen {
 		return y + 25;
 	}
 
-	private void itemCell(GuiGraphics ctx, int x, int y, int size, ItemStack stack, int rarityColor, boolean selected, @Nullable List<Component> tip, Runnable click) {
+	private void itemCell(GuiGraphicsExtractor ctx, int x, int y, int size, ItemStack stack, int rarityColor, boolean selected, @Nullable List<Component> tip, Runnable click) {
 		boolean hov = hovered(x, y, size, size, true);
 		ctx.fill(x, y, x + size, y + size, hov ? 0xFF2D3846 : 0xFF1E262F);
 		ctx.fill(x, y + size - 2, x + size, y + size, rarityColor);
@@ -391,7 +391,7 @@ public class VantageScreen extends Screen {
 		return cat.items.get(0);
 	}
 
-	private int categoryChips(GuiGraphics ctx, int x, int y, int w, String selected, Consumer<String> select) {
+	private int categoryChips(GuiGraphicsExtractor ctx, int x, int y, int w, String selected, Consumer<String> select) {
 		int perRow = 4;
 		int chipW = (w - (perRow - 1) * 3) / perRow;
 		int i = 0;
@@ -414,7 +414,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Skins
 
-	private int drawSkins(GuiGraphics ctx, int x, int y, int w) {
+	private int drawSkins(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		SkinCatalog.Category cat = SkinCatalog.category(skinCat);
 		if (cat == null) {
@@ -558,7 +558,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Pakete
 
-	private int drawPacks(GuiGraphics ctx, int x, int y, int w) {
+	private int drawPacks(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		y = paragraph(ctx, x, y, w, "Wie ein Resourcepack: Ein Klick, und jede Schwert-Stufe bekommt ein anderes CS-Messer "
 				+ "(Netherite = Karambit, Diamant = Butterfly, Eisen = M9, Gold = Talon, Kupfer = Flip, Stein = Gut, Holz = Bajonett) "
 				+ "im selben Muster – dazu passende Axt, Kolben, Speer, Schild, Granaten und Totem.", GRAY);
@@ -593,7 +593,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Fadenkreuz
 
-	private int drawCrosshair(GuiGraphics ctx, int x, int y, int w) {
+	private int drawCrosshair(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		int boxW = 96;
 		int lw = w - boxW - 8;
@@ -665,7 +665,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Viewmodel
 
-	private int drawViewmodel(GuiGraphics ctx, int x, int y, int w) {
+	private int drawViewmodel(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		y = paragraph(ctx, x, y, w, "Live-Vorschau: rechts siehst du deine Hand. Halte dein Messer in der Hand und stell alles ein.", 0xFF8FD18F);
 		int half = (w - 2) / 2;
@@ -731,7 +731,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Shader
 
-	private int drawFilters(GuiGraphics ctx, int x, int y, int w) {
+	private int drawFilters(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		y = paragraph(ctx, x, y, w, "Eingebaute Shader mit Leuchten (Bloom), Kino-Farben und Filmkorn. Wählen und das Menü schließen, um sie zu sehen.", GRAY);
 		int colW = (w - 4) / 2;
@@ -758,7 +758,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Tracker
 
-	private int drawTracker(GuiGraphics ctx, int x, int y, int w) {
+	private int drawTracker(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		boolean single = minecraft != null && minecraft.getSingleplayerServer() != null;
 		if (minecraft != null && minecraft.level != null && minecraft.player != null) {
@@ -829,7 +829,7 @@ public class VantageScreen extends Screen {
 	}
 
 	/** Auswahl wie Radio-Knoepfe: genau ein Typ pro Dimension. */
-	private int targetGroup(GuiGraphics ctx, int x, int y, int w, String title, ResourceKey<Level> dim) {
+	private int targetGroup(GuiGraphicsExtractor ctx, int x, int y, int w, String title, ResourceKey<Level> dim) {
 		TrackType[] types = TrackType.forDimension(dim);
 		TrackType current = StructureTracker.targetType(dim);
 		ctx.drawString(font, title, x + 2, y + 2, TEXT);
@@ -862,7 +862,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Makros
 
-	private int drawMacros(GuiGraphics ctx, int x, int y, int w) {
+	private int drawMacros(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		ctx.fill(x, y, x + w, y + 34, 0x40E0A030);
 		border(ctx, x, y, w, 34, 0xFFE0A030);
@@ -915,7 +915,7 @@ public class VantageScreen extends Screen {
 
 	// ------------------------------------------------------------------ Reiter: Tasten & HUD
 
-	private int keyRow(GuiGraphics ctx, int x, int y, int w, String label, KeyMapping key) {
+	private int keyRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, KeyMapping key) {
 		boolean wait = listening == key;
 		int bw = Math.min(110, w / 2);
 		ctx.drawString(font, font.plainSubstrByWidth(label, w - bw - 8), x + 3, y + 5, TEXT);
@@ -935,7 +935,7 @@ public class VantageScreen extends Screen {
 		return y + 1;
 	}
 
-	private int drawHud(GuiGraphics ctx, int x, int y, int w) {
+	private int drawHud(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
 		y = header(ctx, x, y, w, "Tasten (anklicken, dann Taste drücken)");
 		y = keyRow(ctx, x, y, w, "Menü öffnen", VantageClient.menuKey);

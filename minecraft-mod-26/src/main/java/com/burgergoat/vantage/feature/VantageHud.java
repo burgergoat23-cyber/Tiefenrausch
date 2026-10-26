@@ -7,7 +7,7 @@ import java.util.List;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.Direction;
 
@@ -36,7 +36,7 @@ public final class VantageHud {
 		rightWas = r;
 	}
 
-	public static void render(GuiGraphics ctx, DeltaTracker tickCounter) {
+	public static void render(GuiGraphicsExtractor ctx, DeltaTracker tickCounter) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null || mc.options.hideGui) return;
 		countClicks(mc);

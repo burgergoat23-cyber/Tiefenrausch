@@ -1,7 +1,7 @@
 package com.burgergoat.vantage.gui;
 
 import com.burgergoat.vantage.tracker.SeedStore;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,7 +48,7 @@ public class SeedScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
 		super.render(ctx, mouseX, mouseY, delta);
 		int cx = width / 2;
 		int y = height / 2 - 20;
