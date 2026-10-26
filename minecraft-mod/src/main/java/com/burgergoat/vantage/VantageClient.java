@@ -93,7 +93,7 @@ public class VantageClient implements ClientModInitializer {
 		HudElementRegistry.replaceElement(VanillaHudElements.CROSSHAIR, Crosshair::wrap);
 		HudElementRegistry.replaceElement(VanillaHudElements.HOTBAR, Hotbar::wrap);
 		// Trank-Timer an: die Symbole oben rechts vom Spiel auf Wunsch ausblenden
-		HudElementRegistry.replaceElement(VanillaHudElements.MOB_EFFECTS, vanilla -> (ctx, tickCounter) -> {
+		HudElementRegistry.replaceElement(VanillaHudElements.STATUS_EFFECTS, vanilla -> (ctx, tickCounter) -> {
 			VantageConfig c = VantageConfig.get();
 			if (!(c.potionHud && c.potionHideVanilla)) vanilla.render(ctx, tickCounter);
 		});

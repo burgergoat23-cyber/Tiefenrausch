@@ -75,6 +75,8 @@ R = [
  (r'client\.getServer\(\)', 'minecraft.getSingleplayerServer()'),
  (r'client\.world\.getRegistryKey\(\)', 'minecraft.level.dimension()'),
  (r'client\.world\b', 'minecraft.level'),
+ (r'\.player\.getRotationVector\(\)', '.player.getLookAngle()'),
+ (r'\.player\.getEyePos\(\)', '.player.getEyePosition()'),
  (r'client\.setScreen\(', 'minecraft.gui.setScreen('),
  (r'client\.getSoundManager\(\)', 'minecraft.getSoundManager()'),
  (r'\bRegistryKey<World>', 'ResourceKey<Level>'),
