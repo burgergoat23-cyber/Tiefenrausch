@@ -10,8 +10,73 @@ import net.minecraft.client.render.RenderTickCounter;
 public final class Crosshair {
 	public static final String[] STYLES = {"Klassisch", "Nur Punkt", "T-Form", "Kreis"};
 	public static final int[] COLORS = {0x00FF40, 0xFFFF00, 0x00FFFF, 0xFFFFFF, 0xFF2020, 0xFF40FF, 0xFF9900, 0x4080FF};
+	public static final String[] PRESETS = {"CS Standard", "Klein", "Punkt", "Groß", "T-Form", "Kreis"};
 
 	private Crosshair() {
+	}
+
+	/** Fertige Vorlage Nummer i (nur die Fadenkreuz-Werte sind gesetzt). */
+	public static VantageConfig preset(int i) {
+		VantageConfig p = new VantageConfig();
+		switch (i) {
+			case 1 -> {
+				p.chColor = 0x00FFFF;
+				p.chLength = 2.5f;
+				p.chThickness = 0.5f;
+				p.chGap = 0.5f;
+				p.chDynamic = false;
+			}
+			case 2 -> {
+				p.chStyle = 1;
+				p.chColor = 0xFF2020;
+				p.chThickness = 1.5f;
+				p.chDynamic = false;
+			}
+			case 3 -> {
+				p.chColor = 0xFFFF00;
+				p.chLength = 7f;
+				p.chThickness = 1.5f;
+				p.chGap = 3f;
+			}
+			case 4 -> {
+				p.chStyle = 2;
+				p.chColor = 0xFFFFFF;
+				p.chLength = 4.5f;
+				p.chGap = 1.5f;
+				p.chDot = true;
+			}
+			case 5 -> {
+				p.chStyle = 3;
+				p.chColor = 0xFF40FF;
+				p.chLength = 2f;
+				p.chGap = 3f;
+				p.chDot = true;
+			}
+			default -> {
+			}
+		}
+		return p;
+	}
+
+	/** Uebernimmt alle Fadenkreuz-Werte von {@code from} und schaltet das eigene Fadenkreuz ein. */
+	public static void apply(VantageConfig from, VantageConfig to) {
+		to.chEnabled = true;
+		to.chStyle = from.chStyle;
+		to.chColor = from.chColor;
+		to.chAlpha = from.chAlpha;
+		to.chLength = from.chLength;
+		to.chThickness = from.chThickness;
+		to.chGap = from.chGap;
+		to.chDot = from.chDot;
+		to.chOutline = from.chOutline;
+		to.chDynamic = from.chDynamic;
+	}
+
+	/** Gleiche Werte wie die Vorlage? (zum Hervorheben im Menue) */
+	public static boolean matches(VantageConfig a, VantageConfig b) {
+		return a.chStyle == b.chStyle && (a.chColor & 0xFFFFFF) == (b.chColor & 0xFFFFFF) && a.chLength == b.chLength
+				&& a.chThickness == b.chThickness && a.chGap == b.chGap && a.chDot == b.chDot && a.chOutline == b.chOutline
+				&& a.chDynamic == b.chDynamic && a.chAlpha == b.chAlpha;
 	}
 
 	public static HudElement wrap(HudElement vanilla) {
@@ -48,7 +113,11 @@ public final class Crosshair {
 
 	/** Zeichnet das Fadenkreuz mit Mittelpunkt (cx, cy) in echten Bildschirm-Pixeln. */
 	public static void draw(DrawContext ctx, int cx, int cy, float extraGap) {
-		VantageConfig c = VantageConfig.get();
+		draw(ctx, VantageConfig.get(), cx, cy, extraGap);
+	}
+
+	/** Wie oben, aber mit beliebigen Einstellungen (fuer die Vorschau der Vorlagen im Menue). */
+	public static void draw(DrawContext ctx, VantageConfig c, int cx, int cy, float extraGap) {
 		MinecraftClient mc = MinecraftClient.getInstance();
 		int scale = Math.max(1, mc.getWindow().getScaleFactor());
 		int color = (Math.max(20, Math.min(255, c.chAlpha)) << 24) | (c.chColor & 0xFFFFFF);

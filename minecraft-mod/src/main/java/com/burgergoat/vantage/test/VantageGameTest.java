@@ -5,6 +5,7 @@ import com.burgergoat.vantage.anim.KnifeAnimations;
 import com.burgergoat.vantage.config.VantageConfig;
 import com.burgergoat.vantage.feature.CameraControl;
 import com.burgergoat.vantage.feature.ComboCounter;
+import com.burgergoat.vantage.feature.Crosshair;
 import com.burgergoat.vantage.feature.Macros;
 import com.burgergoat.vantage.feature.Viewmodel;
 import com.burgergoat.vantage.gui.VantageScreen;
@@ -286,6 +287,28 @@ public class VantageGameTest implements FabricClientGameTest {
 					String.format(java.util.Locale.ROOT, "%.1f", camDist),
 					String.format(java.util.Locale.ROOT, "%.2f", Math.hypot(end[0] - start[0], end[1] - start[1])), camOff);
 
+			// Freecam im Einzelspieler durch den Boden: 25 Ticks nach unten -> Kamera unter der Erde, die Welt bleibt sichtbar
+			ctx.getInput().pressKey(VantageClient.freecamKey);
+			ctx.waitTicks(3);
+			ctx.getInput().holdKeyFor(o -> o.sneakKey, 25);
+			ctx.waitTicks(2);
+			double camBelow = ctx.computeOnClient(mc -> mc.player.getEyePos().y - CameraControl.position(1f).y);
+			boolean cullOff = ctx.computeOnClient(mc -> !mc.chunkCullingEnabled);
+			ctx.takeScreenshot("freecam_underground");
+			ctx.getInput().pressKey(VantageClient.freecamKey);
+			ctx.waitTicks(3);
+			boolean cullBack = ctx.computeOnClient(mc -> mc.chunkCullingEnabled);
+			VantageClient.LOG.info("TEST Freecam Boden: Kamera {} Bloecke unter den Augen, Verdeckung aus={} danach wieder an={}",
+					String.format(java.util.Locale.ROOT, "%.1f", camBelow), cullOff, cullBack);
+
+			// Fadenkreuz: ist von Anfang an an, Vorlage "Groß" im Spiel
+			boolean chDefault = new VantageConfig().chEnabled;
+			ctx.runOnClient(mc -> Crosshair.apply(Crosshair.preset(3), VantageConfig.get()));
+			ctx.waitTicks(3);
+			ctx.takeScreenshot("crosshair_preset");
+			ctx.runOnClient(mc -> Crosshair.apply(Crosshair.preset(0), VantageConfig.get()));
+			VantageClient.LOG.info("TEST Fadenkreuz: von Anfang an an={}", chDefault);
+
 			ctx.runOnClient(mc -> mc.options.setPerspective(Perspective.THIRD_PERSON_FRONT));
 			ctx.waitTicks(10);
 			ctx.takeScreenshot("third_person");
@@ -303,6 +326,15 @@ public class VantageGameTest implements FabricClientGameTest {
 				ctx.waitTicks(4);
 				ctx.takeScreenshot("menu_" + t);
 			}
+			// Andere Menue-Farbe (Lila) im Reiter Fadenkreuz
+			ctx.runOnClient(mc -> {
+				VantageConfig.get().menuTheme = 2;
+				VantageScreen.setTab(2);
+			});
+			ctx.setScreen(VantageScreen::new);
+			ctx.waitTicks(4);
+			ctx.takeScreenshot("menu_theme");
+			ctx.runOnClient(mc -> VantageConfig.get().menuTheme = 0);
 			ctx.setScreen(() -> null);
 
 			for (String f : new String[]{"clear", "vivid", "cinematic", "golden", "frost", "dream", "hdr", "noir", "comic", "nightvision"}) {

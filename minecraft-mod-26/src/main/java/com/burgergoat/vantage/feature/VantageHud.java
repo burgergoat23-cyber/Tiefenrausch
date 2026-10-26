@@ -2,6 +2,7 @@ package com.burgergoat.vantage.feature;
 
 import com.burgergoat.vantage.VantageClient;
 import com.burgergoat.vantage.config.VantageConfig;
+import com.burgergoat.vantage.gui.VantageScreen;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,7 @@ public final class VantageHud {
 				for (String[] s : lines) w = Math.max(w, tr.width(s[0] + " " + s[1]));
 				int y = 4;
 				ctx.fill(2, 2, 8 + w, 4 + lines.size() * 10, 0x70000000);
+				ctx.fill(2, 2, 3, 4 + lines.size() * 10, VantageScreen.accent());
 				for (String[] s : lines) {
 					ctx.text(tr, s[0], 5, y, 0xFFFFAA00);
 					ctx.text(tr, s[1], 5 + tr.width(s[0] + " "), y, 0xFFFFFFFF);
@@ -87,7 +89,7 @@ public final class VantageHud {
 			String s = "Freecam – " + VantageClient.freecamKey.getTranslatedKeyMessage().getString() + " zum Beenden";
 			int x = (ctx.guiWidth() - tr.width(s)) / 2;
 			ctx.fill(x - 4, 3, x + tr.width(s) + 4, 15, 0x90000000);
-			ctx.text(tr, s, x, 5, 0xFFE8A33D);
+			ctx.text(tr, s, x, 5, VantageScreen.accent());
 		}
 	}
 }

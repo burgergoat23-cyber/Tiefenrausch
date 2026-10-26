@@ -13,11 +13,14 @@ import com.burgergoat.vantage.tracker.SeedStore;
 import com.burgergoat.vantage.tracker.Site;
 import com.burgergoat.vantage.tracker.StructureTracker;
 import com.burgergoat.vantage.tracker.TrackType;
+import net.fabricmc.loader.api.FabricLoader;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -39,12 +42,19 @@ import net.minecraft.world.level.Level;
 
 /** Das Vantage-Client-Menue (Taste K). */
 public class VantageScreen extends Screen {
-	private static final int BG = 0xF0121820;
-	private static final int PANEL = 0xFF19212B;
+	private static final int BG_TOP = 0xF4161E28;
+	private static final int BG_BOTTOM = 0xF40B1016;
+	private static final int PANEL = 0xFF18202A;
 	private static final int LINE = 0xFF34404E;
-	private static final int ACCENT = 0xFFE8A33D;
 	private static final int TEXT = 0xFFE3E7EC;
 	private static final int GRAY = 0xFF98A2AE;
+	/** Menue-Farben zum Aussuchen (Einstellung menuTheme). */
+	public static final int[] THEMES = {0xFFE8A33D, 0xFF3FC3E8, 0xFFA97CFF, 0xFF4CD07D, 0xFFFF5D5D, 0xFFFF74B8};
+	public static final String[] THEME_NAMES = {"Orange", "Eisblau", "Lila", "Grün", "Rot", "Pink"};
+	private static final String VERSION = FabricLoader.getInstance().getModContainer(VantageClient.MOD_ID)
+			.map(m -> m.getMetadata().getVersion().getFriendlyString().split("\\+")[0]).orElse("");
+	private static int accent = THEMES[0];
+	private static int accentDim = 0xFF5A4220;
 
 	public static final String[] TABS = {"Skins", "Pakete", "Fadenkreuz", "Viewmodel", "Shader", "Tracker", "Makros", "Tasten & HUD"};
 	private static final Item[] TAB_ICONS = {Items.NETHERITE_SWORD, Items.BUNDLE, Items.TARGET, Items.ARMOR_STAND, Items.ENDER_EYE, Items.COMPASS, Items.REDSTONE, Items.CLOCK};
@@ -66,6 +76,16 @@ public class VantageScreen extends Screen {
 	private int px, py, pw, ph;
 	private int cx, cy, cw, ch;
 	private boolean dirty;
+	/** Der Schalter "Eigenes Fadenkreuz" selbst wurde gerade umgelegt (dann nicht automatisch einschalten). */
+	private boolean skipAutoEnable;
+	// Animationen
+	private final long openedAt = System.nanoTime();
+	private long lastFrame;
+	private float frameDt;
+	private float time;
+	private float tabAnim = -1;
+	private float scrollAnim;
+	private final Map<String, Float> anims = new HashMap<>();
 	private List<Component> tooltip;
 	private final Random random = new Random();
 	/** Tastenbelegung, die gerade auf einen Tastendruck wartet. */
@@ -87,7 +107,9 @@ public class VantageScreen extends Screen {
 	@Override
 	public void extractBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float deltaTicks) {
 		// Im Viewmodel-Reiter frei lassen, damit man die Hand live sieht
-		if (tab != 3) ctx.fill(0, 0, width, height, 0x60000000);
+		if (tab == 3) return;
+		float o = openProgress();
+		ctx.fillGradient(0, 0, width, height, alpha(0, Math.round(0x40 * o)), alpha(0, Math.round(0xA0 * o)));
 	}
 
 	@Override
@@ -194,6 +216,53 @@ public class VantageScreen extends Screen {
 
 	private void changed() {
 		dirty = true;
+		// Im Reiter Fadenkreuz schaltet jede Aenderung das eigene Fadenkreuz ein - sonst sieht man im Spiel nichts davon
+		if (tab == 2 && !skipAutoEnable) VantageConfig.get().chEnabled = true;
+		skipAutoEnable = false;
+	}
+
+	/** Aktuelle Menue-Farbe (auch fuer das HUD). */
+	public static int accent() {
+		int i = Math.floorMod(VantageConfig.get().menuTheme, THEMES.length);
+		return THEMES[i];
+	}
+
+	private static void applyTheme() {
+		accent = accent();
+		accentDim = mix(0xFF1E262F, accent, 0.33f);
+	}
+
+	// ------------------------------------------------------------------ Animation
+
+	/** 0 -> 1 in den ersten Sekundenbruchteilen nach dem Oeffnen (schnell, dann sanft auslaufend). */
+	private float openProgress() {
+		float t = Math.min(1f, (System.nanoTime() - openedAt) / 1.8e8f);
+		float u = 1f - t;
+		return 1f - u * u * u;
+	}
+
+	private float approach(float v, float target, float speed) {
+		return v + (target - v) * (1f - (float) Math.exp(-frameDt * speed));
+	}
+
+	/** Weicher Uebergang fuer Schalter, Reiter usw. (pro Name gemerkt). */
+	private float anim(String key, float target, float speed) {
+		Float v = anims.get(key);
+		float r = v == null ? target : approach(v, target, speed);
+		anims.put(key, r);
+		return r;
+	}
+
+	private static int mix(int a, int b, float t) {
+		t = Math.max(0f, Math.min(1f, t));
+		int aa = a >>> 24, ar = (a >> 16) & 255, ag = (a >> 8) & 255, ab = a & 255;
+		int ba = b >>> 24, br = (b >> 16) & 255, bg = (b >> 8) & 255, bb = b & 255;
+		return (Math.round(aa + (ba - aa) * t) << 24) | (Math.round(ar + (br - ar) * t) << 16)
+				| (Math.round(ag + (bg - ag) * t) << 8) | Math.round(ab + (bb - ab) * t);
+	}
+
+	private static int alpha(int color, int a) {
+		return (Math.max(0, Math.min(255, a)) << 24) | (color & 0xFFFFFF);
 	}
 
 	// ------------------------------------------------------------------ Zeichnen
@@ -206,6 +275,12 @@ public class VantageScreen extends Screen {
 		hits.clear();
 		tooltip = null;
 
+		long now = System.nanoTime();
+		frameDt = lastFrame == 0 ? 0f : Math.min(0.1f, (now - lastFrame) / 1e9f);
+		lastFrame = now;
+		time = (now - openedAt) / 1e9f;
+		applyTheme();
+
 		pw = Math.min(width - 12, 480);
 		ph = Math.min(height - 12, 330);
 		px = (width - pw) / 2;
@@ -215,50 +290,109 @@ public class VantageScreen extends Screen {
 			pw = Math.min(pw, Math.max(280, width * 11 / 20));
 			px = 6;
 		}
-		cx = px + 102;
-		cy = py + 30;
-		cw = pw - 110;
-		ch = ph - 36;
+		// Beim Oeffnen gleitet das Fenster kurz von unten herein
+		py += Math.round((1f - openProgress()) * 14);
+		cx = px + 104;
+		cy = py + 32;
+		cw = pw - 112;
+		ch = ph - 38;
 
-		ctx.fill(px - 1, py - 1, px + pw + 1, py + ph + 1, 0xFF0A0D11);
-		ctx.fill(px, py, px + pw, py + ph, BG);
-		ctx.fillGradient(px, py, px + pw, py + 24, 0xFF26303C, 0xFF1A222C);
-		ctx.fill(px, py + 24, px + pw, py + 25, ACCENT);
+		// Leuchtender Rand in der Menue-Farbe
+		for (int i = 4; i >= 1; i--) border(ctx, px - i, py - i, pw + 2 * i, ph + 2 * i, alpha(accent, 0x60 >> (i - 1)));
+		ctx.fillGradient(px, py, px + pw, py + ph, BG_TOP, BG_BOTTOM);
+
+		// Kopfzeile mit Lichtstreifen, der ueber die Linie wandert
+		ctx.fillGradient(px, py, px + pw, py + 26, mix(0xFF202A36, accent, 0.18f), 0xFF141B23);
+		ctx.fill(px, py + 26, px + pw, py + 27, mix(LINE, accent, 0.7f));
+		int sweep = Math.round((time * 150f) % (pw + 200)) - 100;
+		for (int k = -5; k < 5; k++) {
+			int sx0 = Math.max(px, px + sweep + k * 10);
+			int sx1 = Math.min(px + pw, px + sweep + k * 10 + 10);
+			if (sx1 <= sx0) continue;
+			float f = 1f - Math.abs(k + 0.5f) / 5f;
+			ctx.fill(sx0, py + 26, sx1, py + 27, alpha(0xFFFFFF, Math.round(f * f * 0xD0)));
+		}
+		// Schriftzug: jeder Buchstabe schimmert nacheinander auf
+		String logo = "VANTAGE";
 		ctx.pose().pushMatrix();
-		ctx.pose().translate(px + 8, py + 6);
-		ctx.pose().scale(1.5f, 1.5f);
-		ctx.text(font, "VANTAGE", 0, 0, ACCENT);
+		ctx.pose().translate(px + 9, py + 7);
+		ctx.pose().scale(1.6f, 1.6f);
+		int lx = 0;
+		for (int i = 0; i < logo.length(); i++) {
+			String letter = String.valueOf(logo.charAt(i));
+			float wave = 0.5f + 0.5f * (float) Math.sin(time * 2.6f - i * 0.55f);
+			ctx.text(font, letter, lx, 0, mix(accent, 0xFFFFFFFF, 0.08f + 0.55f * wave * wave * wave));
+			lx += font.width(letter);
+		}
 		ctx.pose().popMatrix();
-		ctx.text(font, "CLIENT  •  Skins • Makros • Tracker", px + 76, py + 9, GRAY);
+		int sub = px + 14 + Math.round(font.width(logo) * 1.6f);
+		ctx.text(font, "CLIENT", sub, py + 10, GRAY);
+		sub += font.width("CLIENT") + 6;
+		ctx.text(font, "›", sub, py + 10, accent);
+		ctx.text(font, TABS[tab], sub + 9, py + 10, 0xFFFFFFFF);
 
-		// Schliessen
-		int bx = px + pw - 20;
-		boolean hovClose = hovered(bx, py + 4, 16, 16, false);
-		ctx.fill(bx, py + 4, bx + 16, py + 20, hovClose ? 0xFFB03030 : 0xFF2A333E);
-		ctx.centeredText(font, "✕", bx + 8, py + 8, 0xFFFFFFFF);
-		hit(bx, py + 4, 16, 16, false, this::onClose);
+		// Schliessen + Versions-Plakette
+		int bx = px + pw - 22;
+		boolean hovClose = hovered(bx, py + 5, 16, 16, false);
+		roundRect(ctx, bx, py + 5, 16, 16, hovClose ? 0xFFC0392B : 0xFF27313C);
+		ctx.centeredText(font, "✕", bx + 8, py + 9, 0xFFFFFFFF);
+		hit(bx, py + 5, 16, 16, false, this::onClose);
+		if (!VERSION.isEmpty()) {
+			String ver = "v" + VERSION;
+			int vw = font.width(ver) + 8;
+			if (sub + 9 + font.width(TABS[tab]) + 8 < bx - vw - 4) {
+				roundRect(ctx, bx - vw - 5, py + 7, vw, 12, alpha(accent, 0x40));
+				ctx.text(font, ver, bx - vw - 1, py + 9, mix(accent, 0xFFFFFFFF, 0.45f));
+			}
+		}
 
-		// Reiter
+		// Seitenleiste: die Markierung gleitet zum gewaehlten Reiter
+		ctx.fill(px, py + 27, px + 100, py + ph, 0x28000000);
+		if (tabAnim < 0) tabAnim = tab;
+		tabAnim = approach(tabAnim, tab, 16f);
+		int selY = Math.round(py + 32 + tabAnim * 22);
+		roundRect(ctx, px + 5, selY, 92, 20, mix(0xFF1C2530, accent, 0.24f));
+		roundRect(ctx, px + 5, selY + 4, 2, 12, accent);
 		for (int i = 0; i < TABS.length; i++) {
-			int ty = py + 30 + i * 23;
+			int ty = py + 32 + i * 22;
 			int tx = px + 5;
 			boolean sel = i == tab;
-			boolean hov = hovered(tx, ty, 92, 21, false);
-			ctx.fill(tx, ty, tx + 92, ty + 21, sel ? 0xFF2E3A48 : hov ? 0xFF222B36 : 0xFF181F27);
-			if (sel) ctx.fill(tx, ty, tx + 2, ty + 21, ACCENT);
-			ctx.item(new ItemStack(TAB_ICONS[i]), tx + 4, ty + 2);
-			ctx.text(font, TABS[i], tx + 23, ty + 7, sel ? 0xFFFFFFFF : TEXT);
+			boolean hov = hovered(tx, ty, 92, 20, false);
+			float h = anim("tab" + i, sel || hov ? 1f : 0f, 14f);
+			if (hov && !sel) roundRect(ctx, tx, ty, 92, 20, 0x14FFFFFF);
+			int off = Math.round(h * 2);
+			ctx.item(new ItemStack(TAB_ICONS[i]), tx + 5 + off, ty + 2);
+			ctx.text(font, TABS[i], tx + 24 + off, ty + 6, mix(0xFFAEB7C2, 0xFFFFFFFF, h));
 			int idx = i;
-			hit(tx, ty, 92, 21, false, () -> {
+			hit(tx, ty, 92, 20, false, () -> {
 				tab = idx;
 				scroll = 0;
+				scrollAnim = 0;
 			});
+		}
+		// Menue-Farbe unten in der Seitenleiste (wenn Platz ist)
+		int dotY = py + ph - 15;
+		if (dotY >= py + 34 + TABS.length * 22) {
+			for (int i = 0; i < THEMES.length; i++) {
+				int dx = px + 10 + i * 14;
+				boolean sel = Math.floorMod(VantageConfig.get().menuTheme, THEMES.length) == i;
+				boolean hov = hovered(dx - 1, dotY - 1, 12, 12, false);
+				roundRect(ctx, dx, dotY, 10, 10, hov || sel ? THEMES[i] : mix(THEMES[i], 0xFF000000, 0.3f));
+				if (sel) border(ctx, dx - 2, dotY - 2, 14, 14, 0xFFFFFFFF);
+				if (hov) tooltip = List.of(Component.literal("Menü-Farbe: " + THEME_NAMES[i]));
+				int ti = i;
+				hit(dx - 1, dotY - 1, 12, 12, false, () -> {
+					VantageConfig.get().menuTheme = ti;
+					VantageConfig.save();
+				});
+			}
 		}
 
 		// Inhalt
-		ctx.fill(cx - 4, cy - 2, cx + cw + 2, cy + ch, PANEL);
+		roundRect(ctx, cx - 4, cy - 2, cw + 6, ch + 2, PANEL);
 		ctx.enableScissor(cx - 4, cy - 2, cx + cw + 2, cy + ch);
-		int top = cy + 2 - scroll;
+		scrollAnim = approach(scrollAnim, scroll, 22f);
+		int top = cy + 2 - Math.round(scrollAnim);
 		int end = switch (tab) {
 			case 0 -> drawSkins(ctx, cx, top, cw - 6);
 			case 1 -> drawPacks(ctx, cx, top, cw - 6);
@@ -274,10 +408,13 @@ public class VantageScreen extends Screen {
 		int max = Math.max(0, contentHeight - ch);
 		if (scroll > max) scroll = max;
 		if (max > 0) {
+			// Sanfte Kanten: zeigen, dass es oben/unten weitergeht
+			if (scroll < max) ctx.fillGradient(cx - 3, cy + ch - 12, cx + cw + 1, cy + ch - 1, alpha(PANEL, 0), PANEL);
+			if (scroll > 0) ctx.fillGradient(cx - 3, cy - 1, cx + cw + 1, cy + 9, PANEL, alpha(PANEL, 0));
 			int barH = Math.max(16, ch * ch / contentHeight);
-			int barY = cy + (int) ((ch - barH) * (scroll / (double) max));
-			ctx.fill(cx + cw - 2, cy, cx + cw, cy + ch, 0x40FFFFFF);
-			ctx.fill(cx + cw - 2, barY, cx + cw, barY + barH, ACCENT);
+			int barY = cy + (int) ((ch - barH) * Math.min(1.0, scrollAnim / (double) max));
+			roundRect(ctx, cx + cw - 2, cy, 3, ch, 0x26FFFFFF);
+			roundRect(ctx, cx + cw - 2, barY, 3, barH, accent);
 		}
 		if (tooltip != null) ctx.setComponentTooltipForNextFrame(font, tooltip, mouseX, mouseY);
 	}
@@ -293,25 +430,69 @@ public class VantageScreen extends Screen {
 		hits.add(new Hit(x, y, w, h, content, click, null));
 	}
 
-	private void border(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
-		ctx.fill(x, y, x + w, y + 1, color);
-		ctx.fill(x, y + h - 1, x + w, y + h, color);
-		ctx.fill(x, y, x + 1, y + h, color);
-		ctx.fill(x + w - 1, y, x + w, y + h, color);
+	/** Abgerundeter Rahmen (passend zu roundRect). */
+	private static void border(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
+		if (w < 6 || h < 6) {
+			ctx.fill(x + 1, y, x + w - 1, y + 1, color);
+			ctx.fill(x + 1, y + h - 1, x + w - 1, y + h, color);
+			ctx.fill(x, y + 1, x + 1, y + h - 1, color);
+			ctx.fill(x + w - 1, y + 1, x + w, y + h - 1, color);
+			return;
+		}
+		ctx.fill(x + 2, y, x + w - 2, y + 1, color);
+		ctx.fill(x + 2, y + h - 1, x + w - 2, y + h, color);
+		ctx.fill(x, y + 2, x + 1, y + h - 2, color);
+		ctx.fill(x + w - 1, y + 2, x + w, y + h - 2, color);
+		ctx.fill(x + 1, y + 1, x + 2, y + 2, color);
+		ctx.fill(x + w - 2, y + 1, x + w - 1, y + 2, color);
+		ctx.fill(x + 1, y + h - 2, x + 2, y + h - 1, color);
+		ctx.fill(x + w - 2, y + h - 2, x + w - 1, y + h - 1, color);
+	}
+
+	/** Flaeche mit abgerundeten Ecken. */
+	private static void roundRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
+		roundGradient(ctx, x, y, w, h, color, color);
+	}
+
+	private static void roundGradient(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int top, int bottom) {
+		if (w < 3 || h < 3) {
+			ctx.fill(x, y, x + w, y + h, top);
+			return;
+		}
+		if (w < 6 || h < 6) {
+			ctx.fill(x + 1, y, x + w - 1, y + 1, top);
+			ctx.fillGradient(x, y + 1, x + w, y + h - 1, top, bottom);
+			ctx.fill(x + 1, y + h - 1, x + w - 1, y + h, bottom);
+			return;
+		}
+		ctx.fill(x + 2, y, x + w - 2, y + 1, top);
+		ctx.fill(x + 1, y + 1, x + w - 1, y + 2, top);
+		ctx.fillGradient(x, y + 2, x + w, y + h - 2, top, bottom);
+		ctx.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, bottom);
+		ctx.fill(x + 2, y + h - 1, x + w - 2, y + h, bottom);
 	}
 
 	private void button(GuiGraphicsExtractor ctx, int x, int y, int w, int h, String label, boolean active, Runnable click) {
 		boolean hov = hovered(x, y, w, h, true);
-		ctx.fill(x, y, x + w, y + h, active ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
-		border(ctx, x, y, w, h, active ? ACCENT : hov ? 0xFF56677A : LINE);
+		int top = active ? mix(accentDim, accent, 0.3f) : hov ? 0xFF33404E : 0xFF27313C;
+		int bottom = active ? accentDim : hov ? 0xFF253039 : 0xFF1C242D;
+		roundGradient(ctx, x, y, w, h, top, bottom);
+		border(ctx, x, y, w, h, active ? accent : hov ? mix(LINE, accent, 0.6f) : LINE);
 		String s = font.plainSubstrByWidth(label, w - 6);
-		ctx.centeredText(font, s, x + w / 2, y + (h - 8) / 2, active ? 0xFFFFFFFF : TEXT);
+		ctx.centeredText(font, s, x + w / 2, y + (h - 8) / 2, active || hov ? 0xFFFFFFFF : TEXT);
 		hit(x, y, w, h, true, click);
 	}
 
 	private int header(GuiGraphicsExtractor ctx, int x, int y, int w, String text) {
-		ctx.text(font, text, x, y + 3, ACCENT);
-		ctx.fill(x, y + 13, x + w, y + 14, LINE);
+		roundRect(ctx, x, y + 2, 3, 10, accent);
+		ctx.text(font, text, x + 7, y + 3, mix(accent, 0xFFFFFFFF, 0.3f));
+		// Linie, die nach rechts ausblendet
+		int lx = x + 7 + font.width(text) + 6;
+		int lw = x + w - lx;
+		for (int i = 0; i < lw; i += 6) {
+			int a = Math.round(0x80 * (1f - i / (float) lw));
+			ctx.fill(lx + i, y + 7, Math.min(lx + i + 6, x + w), y + 8, alpha(accent, a));
+		}
 		return y + 18;
 	}
 
@@ -325,12 +506,9 @@ public class VantageScreen extends Screen {
 
 	private int toggle(GuiGraphicsExtractor ctx, int x, int y, int w, String label, boolean value, Consumer<Boolean> set) {
 		boolean hov = hovered(x, y, w, 15, true);
-		if (hov) ctx.fill(x, y, x + w, y + 15, 0x18FFFFFF);
-		ctx.text(font, font.plainSubstrByWidth(label, w - 32), x + 3, y + 4, TEXT);
-		int sx = x + w - 26;
-		ctx.fill(sx, y + 4, sx + 22, y + 11, value ? 0xFF3FAF5A : 0xFF4A525C);
-		int kx = value ? sx + 13 : sx + 1;
-		ctx.fill(kx, y + 2, kx + 8, y + 13, 0xFFF2F2F2);
+		if (hov) roundRect(ctx, x, y, w, 15, 0x14FFFFFF);
+		ctx.text(font, font.plainSubstrByWidth(label, w - 34), x + 4, y + 4, hov ? 0xFFFFFFFF : TEXT);
+		switchKnob(ctx, x + w - 27, y + 3, anim("t:" + label, value ? 1f : 0f, 18f));
 		hit(x, y, w, 15, true, () -> {
 			set.accept(!value);
 			changed();
@@ -338,19 +516,30 @@ public class VantageScreen extends Screen {
 		return y + 17;
 	}
 
+	/** Schiebeschalter (k = 0 aus ... 1 an, weich animiert). */
+	private void switchKnob(GuiGraphicsExtractor ctx, int sx, int sy, float k) {
+		roundRect(ctx, sx, sy, 22, 10, mix(0xFF3A434F, accent, k));
+		roundRect(ctx, sx + 1 + Math.round(k * 12), sy + 1, 8, 8, 0xFFF4F6F8);
+	}
+
 	private int slider(GuiGraphicsExtractor ctx, int x, int y, int w, String label, double min, double max, double value, double step,
 			String text, DoubleConsumer set) {
-		ctx.text(font, label, x + 3, y + 1, TEXT);
-		ctx.text(font, text, x + w - font.width(text) - 3, y + 1, ACCENT);
+		ctx.text(font, label, x + 4, y + 1, TEXT);
+		int tw = font.width(text);
+		roundRect(ctx, x + w - tw - 9, y - 1, tw + 7, 11, alpha(accent, 0x30));
+		ctx.text(font, text, x + w - tw - 5, y + 1, mix(accent, 0xFFFFFFFF, 0.35f));
 		int bx = x + 4;
 		int bw = w - 8;
 		int by = y + 13;
 		double f = Mth.clamp((value - min) / (max - min), 0, 1);
-		ctx.fill(bx, by + 2, bx + bw, by + 5, LINE);
-		ctx.fill(bx, by + 2, bx + (int) (bw * f), by + 5, ACCENT);
-		int kx = bx + (int) (bw * f);
+		int fw = (int) (bw * f);
+		roundRect(ctx, bx, by + 2, bw, 4, 0xFF2B3440);
+		if (fw > 0) roundRect(ctx, bx, by + 2, fw, 4, accent);
+		int kx = bx + fw;
 		boolean hov = hovered(bx - 3, by - 2, bw + 6, 11, true);
-		ctx.fill(kx - 2, by, kx + 3, by + 7, hov ? 0xFFFFFFFF : 0xFFDADADA);
+		boolean held = dragging != null && dragging.x == bx - 3 && dragging.y == by - 2;
+		if (hov || held) roundRect(ctx, kx - 5, by - 2, 11, 11, alpha(accent, 0x60));
+		roundRect(ctx, kx - 3, by, 7, 7, held ? 0xFFFFFFFF : hov ? 0xFFF4F6F8 : 0xFFDADFE5);
 		hits.add(new Hit(bx - 3, by - 2, bw + 6, 11, true, null, mouse -> {
 			double ff = Mth.clamp((mouse - bx) / bw, 0, 1);
 			double v = min + ff * (max - min);
@@ -363,9 +552,9 @@ public class VantageScreen extends Screen {
 
 	private void itemCell(GuiGraphicsExtractor ctx, int x, int y, int size, ItemStack stack, int rarityColor, boolean selected, @Nullable List<Component> tip, Runnable click) {
 		boolean hov = hovered(x, y, size, size, true);
-		ctx.fill(x, y, x + size, y + size, hov ? 0xFF2D3846 : 0xFF1E262F);
-		ctx.fill(x, y + size - 2, x + size, y + size, rarityColor);
-		if (selected) border(ctx, x, y, size, size, ACCENT);
+		roundRect(ctx, x, y, size, size, hov ? 0xFF2D3846 : 0xFF1E262F);
+		ctx.fill(x + 2, y + size - 3, x + size - 2, y + size - 1, rarityColor);
+		if (selected) border(ctx, x, y, size, size, accent);
 		else if (hov) border(ctx, x, y, size, size, 0xFF6A7A8C);
 		float s = (size - 6) / 16f;
 		ctx.pose().pushMatrix();
@@ -400,8 +589,8 @@ public class VantageScreen extends Screen {
 			int by = y + (i / perRow) * 21;
 			boolean sel = cat.id.equals(selected);
 			boolean hov = hovered(bx, by, chipW, 19, true);
-			ctx.fill(bx, by, bx + chipW, by + 19, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
-			border(ctx, bx, by, chipW, 19, sel ? ACCENT : LINE);
+			roundRect(ctx, bx, by, chipW, 19, sel ? accentDim : hov ? 0xFF2C3744 : 0xFF222B35);
+			border(ctx, bx, by, chipW, 19, sel ? accent : LINE);
 			ItemStack icon = SkinManager.preview(null, baseItem(cat, "*"));
 			ctx.item(icon, bx + 2, by + 1);
 			ctx.text(font, font.plainSubstrByWidth(cat.name, chipW - 22), bx + 20, by + 6, sel ? 0xFFFFFFFF : TEXT);
@@ -439,8 +628,8 @@ public class VantageScreen extends Screen {
 				if (item == null) continue;
 				boolean sel = path.equals(skinTarget);
 				boolean hov = hovered(bx, y, 19, 19, true);
-				ctx.fill(bx, y, bx + 19, y + 19, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
-				border(ctx, bx, y, 19, 19, sel ? ACCENT : LINE);
+				roundRect(ctx, bx, y, 19, 19, sel ? accentDim : hov ? 0xFF2C3744 : 0xFF222B35);
+				border(ctx, bx, y, 19, 19, sel ? accent : LINE);
 				ctx.item(SkinManager.preview(null, path), bx + 2, y + 2);
 				if (hov) tooltip = List.of(new ItemStack(item).getHoverName());
 				hit(bx, y, 19, 19, true, () -> skinTarget = path);
@@ -468,7 +657,7 @@ public class VantageScreen extends Screen {
 				int by = y + (i / perRow) * (size + 2);
 				SkinCatalog.Skin finalCur = current;
 				itemCell(ctx, bx, by, size, SkinManager.preview(sk, base), 0xFF3A4654, s == shape,
-						List.of(Component.literal(s.name()).withColor(ACCENT)), () -> {
+						List.of(Component.literal(s.name()).withColor(accent)), () -> {
 							skinShape = s.id();
 							if (finalCur != null) equip(k, SkinCatalog.skin(k.skinId(s, finalCur.finish())));
 						});
@@ -500,7 +689,7 @@ public class VantageScreen extends Screen {
 
 		// Grosse Vorschau + Infos
 		int boxH = 70;
-		ctx.fillGradient(x, y, x + 74, y + boxH, 0xFF2A3442, 0xFF141A21);
+		roundGradient(ctx, x, y, 74, boxH, 0xFF2A3442, 0xFF141A21);
 		border(ctx, x, y, 74, boxH, current == null ? LINE : SkinCatalog.rarityColor(current.rarity()));
 		ctx.pose().pushMatrix();
 		ctx.pose().translate(x + 5, y + 3);
@@ -572,9 +761,9 @@ public class VantageScreen extends Screen {
 			int by = y + (i / 2) * (cardH + 4);
 			boolean active = pack.active();
 			boolean hov = hovered(bx, by, colW, cardH, true);
-			ctx.fillGradient(bx, by, bx + colW, by + cardH, active ? 0xFF4A3A1C : hov ? 0xFF2C3744 : 0xFF222B35, 0xFF161C23);
-			border(ctx, bx, by, colW, cardH, active ? ACCENT : hov ? 0xFF56677A : LINE);
-			ctx.text(font, pack.name() + (active ? "  ✔" : ""), bx + 5, by + 4, active ? ACCENT : 0xFFFFFFFF);
+			roundGradient(ctx, bx, by, colW, cardH, active ? accentDim : hov ? 0xFF2C3744 : 0xFF222B35, 0xFF161C23);
+			border(ctx, bx, by, colW, cardH, active ? accent : hov ? 0xFF56677A : LINE);
+			ctx.text(font, pack.name() + (active ? "  ✔" : ""), bx + 5, by + 4, active ? accent : 0xFFFFFFFF);
 			ctx.text(font, font.plainSubstrByWidth(pack.desc(), colW - 10), bx + 5, by + 15, GRAY);
 			int ix = bx + 4;
 			for (String it : showItems) {
@@ -595,65 +784,113 @@ public class VantageScreen extends Screen {
 
 	private int drawCrosshair(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
+		// Ganz oben: ist das eigene Fadenkreuz im Spiel an? (ein Klick schaltet um)
+		boolean on = c.chEnabled;
+		int sc = on ? 0xFF3FAF5A : 0xFFE0A030;
+		boolean hovBanner = hovered(x, y, w, 22, true);
+		roundRect(ctx, x, y, w, 22, alpha(sc, hovBanner ? 0x48 : 0x30));
+		border(ctx, x, y, w, 22, alpha(sc, 0xC0));
+		ctx.text(font, font.plainSubstrByWidth(on ? "✔ Dein Fadenkreuz ist im Spiel an"
+				: "Aus: im Spiel ist das normale Minecraft-Fadenkreuz", w - 40), x + 6, y + 7, on ? 0xFFB8F0C4 : 0xFFFFD98A);
+		switchKnob(ctx, x + w - 28, y + 6, anim("t:chEnabled", on ? 1f : 0f, 18f));
+		hit(x, y, w, 22, true, () -> {
+			c.chEnabled = !c.chEnabled;
+			skipAutoEnable = true;
+			changed();
+		});
+		y += 28;
+
+		// Rechts: Vorschau in echter Groesse vor einem kleinen Block
 		int boxW = 96;
 		int lw = w - boxW - 8;
 		int bx = x + w - boxW;
-		ctx.fillGradient(bx, y, bx + boxW, y + boxW, 0xFF7DB3E6, 0xFF4E7A3C);
-		ctx.fill(bx, y + boxW * 2 / 3, bx + boxW, y + boxW, 0xFF5A7F3A);
+		int mid = bx + boxW / 2;
+		int horizon = y + boxW * 2 / 3;
+		roundGradient(ctx, bx, y, boxW, boxW, 0xFF6FA8DC, 0xFFBFDDF2);
+		roundRect(ctx, bx, horizon, boxW, boxW - boxW * 2 / 3, 0xFF5E8A3C);
+		ctx.fill(bx, horizon, bx + boxW, horizon + 2, 0xFF7DB04B);
+		ctx.fill(mid - 12, y + 34, mid + 12, horizon, 0xFF8C9198);
+		ctx.fill(mid - 12, y + 34, mid + 12, y + 37, 0xFFA9AEB5);
+		ctx.fill(mid + 9, y + 37, mid + 12, horizon, 0xFF6E737A);
 		border(ctx, bx, y, boxW, boxW, LINE);
-		Crosshair.draw(ctx, bx + boxW / 2, y + boxW / 2, 0);
-		ctx.centeredText(font, "Vorschau", bx + boxW / 2, y + boxW + 3, GRAY);
+		float dyn = c.chDynamic ? (0.5f + 0.5f * (float) Math.sin(time * 2.4f)) * 3f : 0f;
+		Crosshair.draw(ctx, mid, y + boxW / 2, dyn);
+		ctx.centeredText(font, "Vorschau", mid, y + boxW + 3, GRAY);
 
-		int yy = y;
-		yy = toggle(ctx, x, yy, lw, "Eigenes Fadenkreuz benutzen", c.chEnabled, v -> c.chEnabled = v);
-		int sw = (lw - 2) / 2;
+		// Links: fertige Vorlagen zum Anklicken
+		int yy = header(ctx, x, y, lw, "Vorlagen");
+		int cols = 3;
+		int cellW = (lw - (cols - 1) * 4) / cols;
+		int cellH = 34;
+		for (int i = 0; i < Crosshair.PRESETS.length; i++) {
+			VantageConfig p = Crosshair.preset(i);
+			int px0 = x + (i % cols) * (cellW + 4);
+			int py0 = yy + (i / cols) * (cellH + 4);
+			boolean sel = on && Crosshair.matches(c, p);
+			boolean hov = hovered(px0, py0, cellW, cellH, true);
+			roundGradient(ctx, px0, py0, cellW, cellH, sel ? mix(accentDim, accent, 0.2f) : hov ? 0xFF2E3A48 : 0xFF222B35, sel ? accentDim : 0xFF1A2129);
+			border(ctx, px0, py0, cellW, cellH, sel ? accent : hov ? mix(LINE, accent, 0.6f) : LINE);
+			ctx.enableScissor(px0 + 1, py0 + 1, px0 + cellW - 1, py0 + cellH - 11);
+			Crosshair.draw(ctx, p, px0 + cellW / 2, py0 + 12, 0);
+			ctx.disableScissor();
+			ctx.centeredText(font, font.plainSubstrByWidth(Crosshair.PRESETS[i], cellW - 4), px0 + cellW / 2,
+					py0 + cellH - 10, sel || hov ? 0xFFFFFFFF : TEXT);
+			hit(px0, py0, cellW, cellH, true, () -> {
+				Crosshair.apply(p, c);
+				changed();
+			});
+		}
+		yy += 2 * (cellH + 4);
+		y = Math.max(yy, y + boxW + 14);
+
+		y = header(ctx, x, y, w, "Form");
+		int sw = (w - 6) / 4;
 		for (int i = 0; i < Crosshair.STYLES.length; i++) {
 			int idx = i;
-			button(ctx, x + (i % 2) * (sw + 2), yy + (i / 2) * 18, sw, 16, Crosshair.STYLES[i], c.chStyle == i, () -> {
+			button(ctx, x + i * (sw + 2), y, sw, 18, Crosshair.STYLES[i], c.chStyle == i, () -> {
 				c.chStyle = idx;
 				changed();
 			});
 		}
-		yy += 38;
-		ctx.text(font, "Farbe", x + 3, yy + 4, GRAY);
-		int swatch = Math.max(10, Math.min(15, (lw - 40) / Crosshair.COLORS.length - 2));
+		y += 24;
+
+		y = header(ctx, x, y, w, "Farbe");
 		for (int i = 0; i < Crosshair.COLORS.length; i++) {
 			int col = Crosshair.COLORS[i];
-			int sx = x + 38 + i * (swatch + 2);
-			ctx.fill(sx, yy, sx + swatch, yy + swatch, 0xFF000000 | col);
-			if ((c.chColor & 0xFFFFFF) == col) border(ctx, sx - 1, yy - 1, swatch + 2, swatch + 2, 0xFFFFFFFF);
-			hit(sx, yy, swatch, swatch, true, () -> {
+			int sx = x + 2 + i * 21;
+			boolean sel = (c.chColor & 0xFFFFFF) == col;
+			boolean hov = hovered(sx, y, 16, 16, true);
+			roundRect(ctx, sx, y, 16, 16, 0xFF000000 | col);
+			if (sel) border(ctx, sx - 2, y - 2, 20, 20, 0xFFFFFFFF);
+			else if (hov) border(ctx, sx - 1, y - 1, 18, 18, 0xA0FFFFFF);
+			hit(sx, y, 16, 16, true, () -> {
 				c.chColor = col;
 				changed();
 			});
 		}
-		yy += 20;
-		y = Math.max(yy, y + boxW + 14);
+		y += 22;
 		y = slider(ctx, x, y, w, "Rot", 0, 255, (c.chColor >> 16) & 255, 1, String.valueOf((c.chColor >> 16) & 255),
 				v -> c.chColor = (c.chColor & 0x00FFFF) | ((int) v << 16));
 		y = slider(ctx, x, y, w, "Grün", 0, 255, (c.chColor >> 8) & 255, 1, String.valueOf((c.chColor >> 8) & 255),
 				v -> c.chColor = (c.chColor & 0xFF00FF) | ((int) v << 8));
 		y = slider(ctx, x, y, w, "Blau", 0, 255, c.chColor & 255, 1, String.valueOf(c.chColor & 255),
 				v -> c.chColor = (c.chColor & 0xFFFF00) | (int) v);
+
+		y = header(ctx, x, y + 2, w, "Größe");
 		y = slider(ctx, x, y, w, "Länge", 0, 15, c.chLength, 0.5, fmt(c.chLength), v -> c.chLength = (float) v);
 		y = slider(ctx, x, y, w, "Dicke", 0.5, 5, c.chThickness, 0.5, fmt(c.chThickness), v -> c.chThickness = (float) v);
 		y = slider(ctx, x, y, w, "Lücke", -3, 10, c.chGap, 0.5, fmt(c.chGap), v -> c.chGap = (float) v);
 		y = slider(ctx, x, y, w, "Deckkraft", 30, 255, c.chAlpha, 5, Math.round(c.chAlpha / 2.55) + " %", v -> c.chAlpha = (int) v);
+
+		y = header(ctx, x, y + 2, w, "Extras");
 		y = toggle(ctx, x, y, w, "Punkt in der Mitte", c.chDot, v -> c.chDot = v);
 		y = toggle(ctx, x, y, w, "Schwarze Umrandung", c.chOutline, v -> c.chOutline = v);
 		y = toggle(ctx, x, y, w, "Dynamisch (geht beim Laufen/Angreifen auf)", c.chDynamic, v -> c.chDynamic = v);
 		y = toggle(ctx, x, y, w, "Angriffs-Abklingzeit unter dem Fadenkreuz", c.chCooldown, v -> c.chCooldown = v);
+		y = paragraph(ctx, x, y + 2, w, "Jede Änderung hier schaltet dein Fadenkreuz automatisch an. Menü schließen, dann siehst du es im Spiel. "
+				+ "(Nur in der Ich-Ansicht, wie in Minecraft.)", GRAY);
 		button(ctx, x, y + 2, 110, 18, "Zurücksetzen", false, () -> {
-			VantageConfig d = new VantageConfig();
-			c.chStyle = d.chStyle;
-			c.chColor = d.chColor;
-			c.chAlpha = d.chAlpha;
-			c.chLength = d.chLength;
-			c.chThickness = d.chThickness;
-			c.chGap = d.chGap;
-			c.chDot = d.chDot;
-			c.chOutline = d.chOutline;
-			c.chDynamic = d.chDynamic;
+			Crosshair.apply(new VantageConfig(), c);
 			changed();
 		});
 		return y + 24;
@@ -741,11 +978,11 @@ public class VantageScreen extends Screen {
 			int by = y + (i / 2) * 32;
 			boolean sel = f[0].equals(c.filter);
 			boolean hov = hovered(bx, by, colW, 29, true);
-			ctx.fill(bx, by, bx + colW, by + 29, sel ? 0xFF5A4220 : hov ? 0xFF2C3744 : 0xFF222B35);
-			border(ctx, bx, by, colW, 29, sel ? ACCENT : LINE);
+			roundGradient(ctx, bx, by, colW, 29, sel ? accentDim : hov ? 0xFF2C3744 : 0xFF222B35, sel ? mix(accentDim, 0xFF161C23, 0.5f) : 0xFF1A2129);
+			border(ctx, bx, by, colW, 29, sel ? accent : LINE);
 			ctx.text(font, f[1], bx + 5, by + 5, sel ? 0xFFFFFFFF : TEXT);
 			ctx.text(font, font.plainSubstrByWidth(f[2], colW - 10), bx + 5, by + 17, GRAY);
-			if (hov) tooltip = List.of(Component.literal(f[1]).withColor(ACCENT), Component.literal(f[2]));
+			if (hov) tooltip = List.of(Component.literal(f[1]).withColor(accent), Component.literal(f[2]));
 			hit(bx, by, colW, 29, true, () -> {
 				c.filter = f[0];
 				VantageConfig.save();
@@ -842,9 +1079,9 @@ public class VantageScreen extends Screen {
 			int by = y + (i / cols) * 22;
 			boolean sel = t == current;
 			boolean hov = hovered(bx, by, colW, 20, true);
-			ctx.fill(bx, by, bx + colW, by + 20, sel ? 0xFF2E2A22 : hov ? 0xFF2C3744 : 0xFF1E262F);
+			roundRect(ctx, bx, by, colW, 20, sel ? 0xFF2E2A22 : hov ? 0xFF2C3744 : 0xFF1E262F);
 			border(ctx, bx, by, colW, 20, sel ? (t.color | 0xFF000000) : hov ? 0xFF56677A : LINE);
-			ctx.fill(bx, by, bx + 2, by + 20, t.color | 0xFF000000);
+			ctx.fill(bx + 1, by + 4, bx + 3, by + 16, t.color | 0xFF000000);
 			ctx.pose().pushMatrix();
 			ctx.pose().translate(bx + 5, by + 3);
 			ctx.pose().scale(0.85f, 0.85f);
@@ -864,7 +1101,7 @@ public class VantageScreen extends Screen {
 
 	private int drawMacros(GuiGraphicsExtractor ctx, int x, int y, int w) {
 		VantageConfig c = VantageConfig.get();
-		ctx.fill(x, y, x + w, y + 34, 0x40E0A030);
+		roundRect(ctx, x, y, w, 34, 0x40E0A030);
 		border(ctx, x, y, w, 34, 0xFFE0A030);
 		paragraph(ctx, x + 5, y + 4, w - 10, "Makros sind auf vielen Servern verboten. Nur dort benutzen, wo es erlaubt ist (Einzelspieler immer ok).", 0xFFFFD27A);
 		y += 40;
@@ -957,7 +1194,8 @@ public class VantageScreen extends Screen {
 		y = toggle(ctx, x, y, w, "Freelook in der dritten Person", c.freelookThirdPerson, v -> c.freelookThirdPerson = v);
 		y = slider(ctx, x, y, w, "Freecam-Tempo", 0.2, 2.0, c.freecamSpeed, 0.1, fmt(c.freecamSpeed), v -> c.freecamSpeed = (float) v);
 		y = paragraph(ctx, x, y, w, "Freecam: fliegen mit W/A/S/D, Leertaste hoch, Schleichen runter, Sprinten schneller. "
-				+ "Die Kamera fliegt nicht durch Blöcke. Manche Server verbieten Freelook/Freecam – vorher die Regeln lesen.", GRAY);
+				+ "Im Einzelspieler fliegt sie durch Blöcke (wie im Zuschauermodus), auf Servern nicht – dort wäre das wie X-Ray. "
+				+ "Manche Server verbieten Freelook/Freecam – vorher die Regeln lesen.", GRAY);
 
 		y = header(ctx, x, y + 2, w, "Combo-Zähler (unter dem Fadenkreuz)");
 		y = toggle(ctx, x, y, w, "Combo-Zähler (Treffer am Stück)", c.comboCounter, v -> c.comboCounter = v);
@@ -965,6 +1203,21 @@ public class VantageScreen extends Screen {
 
 		y = header(ctx, x, y + 2, w, "Zoom");
 		y = slider(ctx, x, y, w, "Zoom-Stärke", 1.5, 10, c.zoom, 0.5, fmt(c.zoom) + "×", v -> c.zoom = (float) v);
+
+		y = header(ctx, x, y + 2, w, "Menü-Farbe");
+		int tw = (w - 10) / 3;
+		for (int i = 0; i < THEMES.length; i++) {
+			int ti = i;
+			int bx = x + (i % 3) * (tw + 5);
+			int by = y + (i / 3) * 22;
+			boolean sel = Math.floorMod(c.menuTheme, THEMES.length) == i;
+			button(ctx, bx, by, tw, 19, "    " + THEME_NAMES[i], sel, () -> {
+				c.menuTheme = ti;
+				changed();
+			});
+			roundRect(ctx, bx + 5, by + 5, 9, 9, THEMES[i]);
+		}
+		y += 46;
 
 		y = header(ctx, x, y + 2, w, "Info-Anzeige (oben links)");
 		y = toggle(ctx, x, y, w, "Info-Anzeige an", c.hudInfo, v -> c.hudInfo = v);

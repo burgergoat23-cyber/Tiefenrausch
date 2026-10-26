@@ -11,7 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Freelook (Taste halten: frei umschauen, der Spieler laeuft weiter geradeaus) und
- * Freecam (Kamera fliegt frei, der Spieler bleibt stehen). Die Freecam fliegt nicht durch Bloecke.
+ * Freecam (Kamera fliegt frei, der Spieler bleibt stehen). Im Einzelspieler fliegt die Freecam durch Bloecke,
+ * auf Servern nicht (dort waere das wie X-Ray).
  */
 public final class CameraControl {
 	private static boolean freeLook;
@@ -23,6 +24,9 @@ public final class CameraControl {
 	@Nullable
 	private static CameraType before;
 	private static boolean lookToggled;
+	/** Gemerkte Einstellung fuer das Ausblenden verdeckter Chunks, solange die Freecam durch Bloecke fliegt. */
+	@Nullable
+	private static Boolean savedCull;
 
 	private CameraControl() {
 	}
@@ -65,6 +69,7 @@ public final class CameraControl {
 			freeLook = false;
 			freeCam = false;
 			before = null;
+			seeThrough(client, false);
 			return;
 		}
 		VantageConfig c = VantageConfig.get();
@@ -103,6 +108,26 @@ public final class CameraControl {
 		}
 
 		if (freeCam) moveFreeCam(client, c);
+		seeThrough(client, freeCam && noClip(client));
+	}
+
+	/** Durch Bloecke fliegen nur im Einzelspieler (eigene Welt). */
+	public static boolean noClip(Minecraft client) {
+		return client.getSingleplayerServer() != null;
+	}
+
+	/**
+	 * In einer Wand wuerde das Spiel alle "verdeckten" Chunks weglassen und man saehe nur Leere.
+	 * Darum das Ausblenden verdeckter Chunks abschalten, solange die Kamera durch Bloecke fliegt (wie im Zuschauermodus).
+	 */
+	private static void seeThrough(Minecraft client, boolean on) {
+		if (on && savedCull == null) {
+			savedCull = client.smartCull;
+			client.smartCull = false;
+		} else if (!on && savedCull != null) {
+			client.smartCull = savedCull;
+			savedCull = null;
+		}
 	}
 
 	private static void startFreeCam(Minecraft client) {
@@ -137,7 +162,7 @@ public final class CameraControl {
 		double dz = (cos * forward + sin * side) * speed;
 		double dy = up * speed;
 		if (dx == 0 && dy == 0 && dz == 0) return;
-		// Nicht durch Bloecke: jede Achse einzeln pruefen (so gleitet man an Waenden entlang)
+		// Auf Servern nicht durch Bloecke: jede Achse einzeln pruefen (so gleitet man an Waenden entlang)
 		Vec3 p = pos;
 		p = tryMove(client, p, dx, 0, 0);
 		p = tryMove(client, p, 0, dy, 0);
@@ -148,6 +173,7 @@ public final class CameraControl {
 	private static Vec3 tryMove(Minecraft client, Vec3 from, double dx, double dy, double dz) {
 		if (dx == 0 && dy == 0 && dz == 0) return from;
 		Vec3 to = from.add(dx, dy, dz);
+		if (noClip(client)) return to;
 		AABB box = new AABB(to.x - 0.15, to.y - 0.15, to.z - 0.15, to.x + 0.15, to.y + 0.15, to.z + 0.15);
 		return client.level.noCollision(box) ? to : from;
 	}

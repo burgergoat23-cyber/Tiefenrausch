@@ -52,7 +52,7 @@ public class VantageConfig {
 	public float animSpeed = 1f;
 
 	// ---- Fadenkreuz
-	public boolean chEnabled = false;
+	public boolean chEnabled = true;
 	/** 0 = Klassisch, 1 = Punkt, 2 = T-Form, 3 = Kreis */
 	public int chStyle = 0;
 	public int chColor = 0x00FF40;
@@ -89,6 +89,10 @@ public class VantageConfig {
 	public boolean freelookThirdPerson = true;
 	/** Freecam-Tempo in Bloecken pro Tick */
 	public float freecamSpeed = 0.6f;
+
+	// ---- Menue
+	/** Akzentfarbe des Menues (Index in VantageScreen.THEMES) */
+	public int menuTheme = 0;
 
 	// ---- Tracker
 	/** Dimension ("overworld", "the_nether", "the_end") -> gesuchter Typ (immer nur einer pro Dimension). */
@@ -180,6 +184,12 @@ public class VantageConfig {
 			instance.trackerAuto = true;
 			instance.trackerServers = true;
 			instance.configVersion = 3;
+			save();
+		}
+		if (instance.configVersion < 4) {
+			// Ab 1.4: Eigenes Fadenkreuz ist von Anfang an an (vorher sah man Aenderungen im Spiel nicht)
+			instance.chEnabled = true;
+			instance.configVersion = 4;
 			save();
 		}
 		version++;

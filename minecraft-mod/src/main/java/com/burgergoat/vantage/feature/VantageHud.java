@@ -2,6 +2,7 @@ package com.burgergoat.vantage.feature;
 
 import com.burgergoat.vantage.VantageClient;
 import com.burgergoat.vantage.config.VantageConfig;
+import com.burgergoat.vantage.gui.VantageScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -74,6 +75,7 @@ public final class VantageHud {
 				for (String s : lines) w = Math.max(w, tr.getWidth(s));
 				int y = 4;
 				ctx.fill(2, 2, 8 + w, 4 + lines.size() * 10, 0x70000000);
+				ctx.fill(2, 2, 3, 4 + lines.size() * 10, VantageScreen.accent());
 				for (String s : lines) {
 					ctx.drawTextWithShadow(tr, s, 5, y, 0xFFFFFFFF);
 					y += 10;
@@ -86,7 +88,7 @@ public final class VantageHud {
 			String s = "Freecam – " + VantageClient.freecamKey.getBoundKeyLocalizedText().getString() + " zum Beenden";
 			int x = (ctx.getScaledWindowWidth() - tr.getWidth(s)) / 2;
 			ctx.fill(x - 4, 3, x + tr.getWidth(s) + 4, 15, 0x90000000);
-			ctx.drawTextWithShadow(tr, s, x, 5, 0xFFE8A33D);
+			ctx.drawTextWithShadow(tr, s, x, 5, VantageScreen.accent());
 		}
 	}
 }

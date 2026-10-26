@@ -2,7 +2,7 @@
 
 CS-Skins für deine Waffen, PvP-Makros und ein Struktur-Tracker – alles in **einer** Jar-Datei.
 
-Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.3.0+mc1.21.11.jar`).
+Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.4.0+mc1.21.11.jar`).
 
 > Früher hieß die Mod „Arsenal“. Beim Wechsel die alte `arsenal-….jar` aus dem Ordner `mods` löschen. Deine Einstellungen werden automatisch übernommen.
 
@@ -10,8 +10,8 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.3.
 
 | Minecraft-Version | Datei | Ordner |
 |---|---|---|
-| **1.21.11** | `vantage-client-1.3.0+mc1.21.11.jar` | `minecraft-mod/download/` |
-| **26.2** | `vantage-client-1.3.0+mc26.2.jar` | `minecraft-mod-26/download/` |
+| **1.21.11** | `vantage-client-1.4.0+mc1.21.11.jar` | `minecraft-mod/download/` |
+| **26.2** | `vantage-client-1.4.0+mc26.2.jar` | `minecraft-mod-26/download/` |
 
 Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neuer und **Fabric API für 26.2**.
 
@@ -59,9 +59,11 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 
 **Combo-Zähler:** unter dem Fadenkreuz steht, wie viele Treffer du am Stück gelandet hast (z. B. „5 Combo“, ab 3 gelb, ab 5 orange, ab 10 rot). Wirst du selbst getroffen oder triffst 3 Sekunden nichts, geht er auf 0. Darunter steht, aus wie vielen Blöcken der letzte Treffer kam. An/aus im Reiter „Tasten & HUD“.
 
-**Freelook und Freecam:** Freelook (Alt halten) dreht nur die Kamera um dich herum – praktisch, um beim Laufen hinter dich zu schauen. Freecam (F4) lässt die Kamera frei fliegen, dein Spieler bleibt stehen; die Kamera fliegt **nicht durch Blöcke**. Tempo und „umschalten statt halten“ im Reiter „Tasten & HUD“. Manche Server verbieten Freelook/Freecam.
+**Freelook und Freecam:** Freelook (Alt halten) dreht nur die Kamera um dich herum – praktisch, um beim Laufen hinter dich zu schauen. Freecam (F4) lässt die Kamera frei fliegen, dein Spieler bleibt stehen; im **Einzelspieler fliegt sie durch Blöcke** (wie im Zuschauermodus), auf Servern nicht – dort wäre das wie X-Ray. Tempo und „umschalten statt halten“ im Reiter „Tasten & HUD“. Manche Server verbieten Freelook/Freecam.
 
-**Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch).
+**Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch). Es ist von Anfang an an; oben im Reiter siehst du, ob es an ist, und kannst es mit einem Klick umschalten. Fertige **Vorlagen** (CS Standard, Klein, Punkt, Groß, T-Form, Kreis) gehen mit einem Klick. Jede Änderung schaltet es automatisch an. Zu sehen ist es in der Ich-Ansicht (F5 wieder auf die normale Ansicht).
+
+**Menü-Farbe:** unten links im Menü (bunte Punkte) oder im Reiter „Tasten & HUD“ – Orange, Eisblau, Lila, Grün, Rot oder Pink.
 
 **Viewmodel:** Hand in alle Richtungen einstellen – links/rechts, oben/unten, nah/fern, kippen, drehen, neigen und Größe; die linke Hand auf Wunsch getrennt. Im Viewmodel-Reiter rückt das Menü zur Seite, damit du die Hand live siehst.
 
