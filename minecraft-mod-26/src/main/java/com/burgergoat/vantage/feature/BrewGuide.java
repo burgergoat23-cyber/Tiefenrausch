@@ -213,7 +213,17 @@ public final class BrewGuide {
 				ctx.item(r.to, x, y + 1);
 				x += 18;
 				int right = panelX + panelW - 6 - (r.longer ? 5 : 0) - (r.stronger ? 5 : 0);
-				ctx.text(tr, tr.plainSubstrByWidth(shortName(r.to), right - x), x, y + 5, 0xFFE3E7EC);
+				// Lange Namen etwas kleiner, damit sie in die Liste passen
+				String name = shortName(r.to);
+				if (tr.width((name) <= right - x) {
+					ctx.text(tr, name, x, y + 5, 0xFFE3E7EC);
+				} else {
+					ctx.pose().pushMatrix();
+					ctx.pose().translate(x, y + 6);
+					ctx.pose().scale(0.75f, 0.75f);
+					ctx.text(tr, tr.plainSubstrByWidth(name, Math.round((right - x) / 0.75f)), 0, 0, 0xFFE3E7EC);
+					ctx.pose().popMatrix();
+				}
 				// Kleine Punkte: rot = mit Redstone laenger, gelb = mit Glowstone staerker
 				int dx = panelX + panelW - 8;
 				if (r.stronger) {

@@ -171,7 +171,7 @@ public class VantageScreen extends Screen {
 		// Im Viewmodel frei lassen, damit man die Hand live sieht
 		if (page == P_VIEWMODEL) return;
 		float o = openProgress();
-		ctx.fillGradient(0, 0, width, height, alpha(0x05070A, Math.round(0x90 * o)), alpha(0x05070A, Math.round(0xE0 * o)));
+		ctx.fillGradient(0, 0, width, height, alpha(0x05070A, Math.round(0xD0 * o)), alpha(0x05070A, Math.round(0xF0 * o)));
 		ctx.fillGradient(0, 0, width, 70, alpha(accent, Math.round(0x2C * o)), alpha(accent, 0));
 	}
 
