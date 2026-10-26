@@ -1,1 +1,1 @@
-Spieltest: success
+Spieltest: skipped
