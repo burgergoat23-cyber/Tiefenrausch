@@ -41,8 +41,9 @@ jobs:
 
       - name: Bauen
         run: |
+          set -o pipefail
           chmod +x gradlew
-          ./gradlew build -Pyarn_mappings="$YARN" --no-daemon --stacktrace
+          ./gradlew build -Pyarn_mappings="$YARN" --no-daemon --stacktrace 2>&1 | tee build.log
 
       - name: Jar hochladen
         uses: actions/upload-artifact@v4
@@ -63,6 +64,7 @@ jobs:
             # Bau fehlgeschlagen: alte Testbilder behalten, nur den Status setzen
             mkdir -p test-screenshots
             echo "Bau fehlgeschlagen (Spieltest nicht gelaufen)" > test-screenshots/status.txt
+            [ -f build.log ] && grep -n -E "error:" -A 3 build.log | head -n 300 >> test-screenshots/status.txt || true
             exit 0
           fi
           rm -rf test-screenshots
