@@ -3,6 +3,7 @@ package com.burgergoat.vantage.feature;
 import com.burgergoat.vantage.config.VantageConfig;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -86,8 +87,7 @@ public final class KillEffects {
 			}
 			default -> {
 				// Blitz nur zum Anschauen: kein Feuer, kein Schaden (nur auf deinem Bildschirm)
-				@SuppressWarnings("unchecked")
-				EntityType<LightningBolt> type = (EntityType<LightningBolt>) EntityType.byString("lightning_bolt").orElse(null);
+				EntityType<LightningBolt> type = lightningType();
 				if (type == null) return;
 				LightningBolt bolt = new LightningBolt(type, w);
 				bolt.setPos(pos.x, pos.y - 1, pos.z);
@@ -96,6 +96,15 @@ public final class KillEffects {
 				w.addEntity(bolt);
 			}
 		}
+	}
+
+	/** Der Blitz-Typ, ueber seine Kennung gesucht (der Name im Code hat sich zwischen Versionen geaendert). */
+	@SuppressWarnings("unchecked")
+	private static EntityType<LightningBolt> lightningType() {
+		for (EntityType<?> t : BuiltInRegistries.ENTITY_TYPE) {
+			if (BuiltInRegistries.ENTITY_TYPE.getKey(t).getPath().equals("lightning_bolt")) return (EntityType<LightningBolt>) t;
+		}
+		return null;
 	}
 
 	private static double gauss(double s) {
