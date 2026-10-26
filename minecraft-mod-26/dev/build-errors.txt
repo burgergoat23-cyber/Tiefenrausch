@@ -1,168 +1,30 @@
-20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:73: error: cannot find symbol
-21-		while (VantageClient.freecamKey.consumeClick()) {
-22-		                    ^
-23-  symbol:   variable freecamKey
+20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:243: error: reference to append is ambiguous
+21-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+22-				      ^
+23-  both method append(char[]) in StringBuilder and method append(String) in StringBuilder match
+24:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:243: error: incompatible types: inference variable T has incompatible bounds
+25-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+26-				                                 ^
+27-    upper bounds: char[],Object
 --
-25:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:81: error: cannot find symbol
-26-		if (c.freelookToggle) {
-27-		     ^
-28-  symbol:   variable freelookToggle
+45:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:243: error: reference to append is ambiguous
+46-  				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+47-  				      ^
+48-    both method append(char[]) in StringBuilder and method append(String) in StringBuilder match
+49:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:243: error: incompatible types: inference variable T has incompatible bounds
+50-  				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+51-  				                                 ^
+52-      upper bounds: char[],Object
 --
-30:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:82: error: cannot find symbol
-31-			while (VantageClient.freelookKey.consumeClick()) lookToggled = !lookToggled;
-32-			                    ^
-33-  symbol:   variable freelookKey
---
-35:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:85: error: cannot find symbol
-36-			while (VantageClient.freelookKey.consumeClick()) {
-37-			                    ^
-38-  symbol:   variable freelookKey
---
-40:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:88: error: cannot find symbol
-41-			want = VantageClient.freelookKey.isDown() && client.gui.screen() == null;
-42-			                    ^
-43-  symbol:   variable freelookKey
---
-45:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:95: error: cannot find symbol
-46-			if (c.freelookThirdPerson) {
-47-			     ^
-48-  symbol:   variable freelookThirdPerson
---
-50:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:132: error: cannot find symbol
-51-		double speed = Mth.clamp(c.freecamSpeed, 0.1f, 3f) * (o.keySprint.isDown() ? 2.5 : 1.0);
-52-		                          ^
-53-  symbol:   variable freecamSpeed
---
-55:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:82: error: cannot find symbol
-56-		if (mc.player == null || (!c.comboCounter && !c.reachDisplay)) return;
-57-		                            ^
-58-  symbol:   variable comboCounter
---
-60:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:82: error: cannot find symbol
-61-		if (mc.player == null || (!c.comboCounter && !c.reachDisplay)) return;
-62-		                                               ^
-63-  symbol:   variable reachDisplay
---
-65:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:90: error: cannot find symbol
-66-		if (c.comboCounter && combo > 0) {
-67-		     ^
-68-  symbol:   variable comboCounter
---
-70:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:102: error: cannot find symbol
-71-		if (c.reachDisplay && reach > 0) {
-72-		     ^
-73-  symbol:   variable reachDisplay
---
-87:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:73: error: cannot find symbol
-88-  		while (VantageClient.freecamKey.consumeClick()) {
-89-  		                    ^
-90-    symbol:   variable freecamKey
---
-92:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:81: error: cannot find symbol
-93-  		if (c.freelookToggle) {
-94-  		     ^
-95-    symbol:   variable freelookToggle
---
-97:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:82: error: cannot find symbol
-98-  			while (VantageClient.freelookKey.consumeClick()) lookToggled = !lookToggled;
-99-  			                    ^
-100-    symbol:   variable freelookKey
---
-102:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:85: error: cannot find symbol
-103-  			while (VantageClient.freelookKey.consumeClick()) {
-104-  			                    ^
-105-    symbol:   variable freelookKey
---
-107:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:88: error: cannot find symbol
-108-  			want = VantageClient.freelookKey.isDown() && client.gui.screen() == null;
-109-  			                    ^
-110-    symbol:   variable freelookKey
---
-112:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:95: error: cannot find symbol
-113-  			if (c.freelookThirdPerson) {
-114-  			     ^
-115-    symbol:   variable freelookThirdPerson
---
-117:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:132: error: cannot find symbol
-118-  		double speed = Mth.clamp(c.freecamSpeed, 0.1f, 3f) * (o.keySprint.isDown() ? 2.5 : 1.0);
-119-  		                          ^
-120-    symbol:   variable freecamSpeed
---
-122:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:82: error: cannot find symbol
-123-  		if (mc.player == null || (!c.comboCounter && !c.reachDisplay)) return;
-124-  		                            ^
-125-    symbol:   variable comboCounter
---
-127:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:82: error: cannot find symbol
-128-  		if (mc.player == null || (!c.comboCounter && !c.reachDisplay)) return;
-129-  		                                               ^
-130-    symbol:   variable reachDisplay
---
-132:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:90: error: cannot find symbol
-133-  		if (c.comboCounter && combo > 0) {
-134-  		     ^
-135-    symbol:   variable comboCounter
---
-137:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:102: error: cannot find symbol
-138-  		if (c.reachDisplay && reach > 0) {
-139-  		     ^
-140-    symbol:   variable reachDisplay
---
-209:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:73: error: cannot find symbol
-210-		while (VantageClient.freecamKey.consumeClick()) {
-211-		                    ^
-212-  symbol:   variable freecamKey
---
-214:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:81: error: cannot find symbol
-215-		if (c.freelookToggle) {
-216-		     ^
-217-  symbol:   variable freelookToggle
---
-219:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:82: error: cannot find symbol
-220-			while (VantageClient.freelookKey.consumeClick()) lookToggled = !lookToggled;
-221-			                    ^
-222-  symbol:   variable freelookKey
---
-224:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:85: error: cannot find symbol
-225-			while (VantageClient.freelookKey.consumeClick()) {
-226-			                    ^
-227-  symbol:   variable freelookKey
---
-229:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:88: error: cannot find symbol
-230-			want = VantageClient.freelookKey.isDown() && client.gui.screen() == null;
-231-			                    ^
-232-  symbol:   variable freelookKey
---
-234:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:95: error: cannot find symbol
-235-			if (c.freelookThirdPerson) {
-236-			     ^
-237-  symbol:   variable freelookThirdPerson
---
-239:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/CameraControl.java:132: error: cannot find symbol
-240-		double speed = Mth.clamp(c.freecamSpeed, 0.1f, 3f) * (o.keySprint.isDown() ? 2.5 : 1.0);
-241-		                          ^
-242-  symbol:   variable freecamSpeed
---
-244:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:82: error: cannot find symbol
-245-		if (mc.player == null || (!c.comboCounter && !c.reachDisplay)) return;
-246-		                            ^
-247-  symbol:   variable comboCounter
---
-249:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:82: error: cannot find symbol
-250-		if (mc.player == null || (!c.comboCounter && !c.reachDisplay)) return;
-251-		                                               ^
-252-  symbol:   variable reachDisplay
---
-254:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:90: error: cannot find symbol
-255-		if (c.comboCounter && combo > 0) {
-256-		     ^
-257-  symbol:   variable comboCounter
---
-259:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/ComboCounter.java:102: error: cannot find symbol
-260-		if (c.reachDisplay && reach > 0) {
-261-		     ^
-262-  symbol:   variable reachDisplay
-11 errors
-11 errors
+125:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:243: error: reference to append is ambiguous
+126-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+127-				      ^
+128-  both method append(char[]) in StringBuilder and method append(String) in StringBuilder match
+129:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:243: error: incompatible types: inference variable T has incompatible bounds
+130-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+131-				                                 ^
+132-    upper bounds: char[],Object
+2 errors
+2 errors
 Bau: failure
 Fertiges Jar: minecraft-mod-26/download/
