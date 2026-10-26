@@ -2,7 +2,7 @@
 
 CS-Skins für deine Waffen, PvP-Makros und ein Struktur-Tracker – alles in **einer** Jar-Datei.
 
-Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.5.0+mc1.21.11.jar`).
+Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.6.0+mc1.21.11.jar`).
 
 > Früher hieß die Mod „Arsenal“. Beim Wechsel die alte `arsenal-….jar` aus dem Ordner `mods` löschen. Deine Einstellungen werden automatisch übernommen.
 
@@ -10,8 +10,8 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.5.
 
 | Minecraft-Version | Datei | Ordner |
 |---|---|---|
-| **1.21.11** | `vantage-client-1.5.0+mc1.21.11.jar` | `minecraft-mod/download/` |
-| **26.2** | `vantage-client-1.5.0+mc26.2.jar` | `minecraft-mod-26/download/` |
+| **1.21.11** | `vantage-client-1.6.0+mc1.21.11.jar` | `minecraft-mod/download/` |
+| **26.2** | `vantage-client-1.6.0+mc26.2.jar` | `minecraft-mod-26/download/` |
 
 Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neuer und **Fabric API für 26.2**.
 
@@ -37,6 +37,7 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 | **C** (halten) | Zoom |
 | **Linke Alt-Taste** (halten) | Freelook – frei umschauen, du läufst weiter geradeaus |
 | **F4** | Freecam an/aus – Kamera fliegt frei (W/A/S/D, Leertaste hoch, Schleichen runter) |
+| **J** | Wegpunkt an deiner Position setzen |
 | – | Attribut-Swap an/aus, Schild-Brecher an/aus, Tracker: jetzt suchen, Tracker: Ziel wechseln (frei belegbar) |
 
 **Tasten ändern direkt im Menü:** Reiter „Tasten & HUD“ (oder „Makros“) → auf den Knopf neben der Aktion klicken → gewünschte Taste drücken (auch Maus-Seitentasten). Esc = Taste entfernen. Ist eine Taste doppelt belegt, steht eine rote Warnung darunter.
@@ -63,13 +64,27 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 
 **Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch). Es ist von Anfang an an; oben im Reiter siehst du, ob es an ist, und kannst es mit einem Klick umschalten. Fertige **Vorlagen** (Standard, Klein, Punkt, Groß, T-Form, Kreis) gehen mit einem Klick. Jede Änderung schaltet es automatisch an. Zu sehen ist es in der Ich-Ansicht (F5 wieder auf die normale Ansicht).
 
-**Das Menü (Taste K):** Auf der Startseite gibt es für jede Funktion eine Kachel. Die Leiste unten auf der Kachel schaltet sie mit einem Klick **an oder aus**, ein Klick auf die Kachel öffnet ihre Einstellungen. Oben kannst du nach Kampf, Optik, Welt oder HUD & Kamera filtern. „‹ Zurück“ oder Esc bringt dich wieder zur Startseite.
+**Das Menü (Taste K):** Für jede Kategorie gibt es ein eigenes Fenster: **Kampf, Optik, Welt und HUD**. Fenster oben an der Kopfzeile anfassen = verschieben (die Mod merkt sich die Lage), Pfeil rechts oben = auf- und zuklappen. In den Fenstern: **Linksklick** auf ein Modul = an/aus, **Rechtsklick** = Einstellungen öffnen (sie erscheinen in einem eigenen Fenster daneben). Esc oder ✕ schließt die Einstellungen. Der Knopf ↺ unten rechts stellt alle Fenster zurück an ihren Platz.
 
-**Menü-Farbe:** unten rechts auf der Startseite (bunte Punkte) oder unter „GUI-Design“ – Orange, Eisblau, Lila, Grün, Rot oder Pink.
+**Menü-Farbe:** unten rechts im Menü (bunte Punkte) oder unter „GUI-Design“ – Orange, Eisblau, Lila, Grün, Rot oder Pink.
 
 **GUI-Design:** Kisten, Fässer, Shulker, Öfen, Crafter, Braustand, Trichter, Werkbank, Amboss, Inventar und Kreativ-Inventar bekommen ein anderes Aussehen: Dunkel, Mitternacht, Glas (durchsichtig) oder in deiner Menü-Farbe. Die Schrift wird dabei hell. Funktioniert auch auf Servern. Dazu eine eigene **Hotbar** in 4 Stilen (Dunkel, Glas, Neon, Minimal), auf Wunsch mit Zahlen 1–9 und einer Auswahl, die weich zum neuen Platz gleitet.
 
 **Brau-Helfer:** Öffnest du einen Braustand, steht links daneben eine Liste mit allen Tränken und ihren Zutaten. Mausrad = scrollen, Maus drauf = genaue Infos. Grüner Punkt = diese Zutat hast du dabei, roter Punkt = mit Redstone länger, gelber Punkt = mit Glowstone stärker. Die Rezepte kommen direkt aus dem Spiel.
+
+**Tasten-Anzeige:** W, A, S, D, Leertaste und Maustasten mit Klicks pro Sekunde; gedrückte Tasten leuchten. Platz und Größe einstellbar.
+
+**Rüstung & Haltbarkeit:** Rüstung und Items in den Händen mit Haltbarkeit (grün/gelb/rot, unter 10 % blinkt es), dazu Anzahl von Pfeilen, Perlen, Totems und goldenen Äpfeln.
+
+**Trank-Timer:** alle aktiven Effekte mit Stufe und Restzeit; in den letzten 10 Sekunden blinkt die Zeit. Die Symbole oben rechts vom Spiel können ausgeblendet werden.
+
+**Wegpunkte:** Mit **J** (oder im Menü) merkst du dir Orte. Oben in der Mitte zeigen ein Pfeil und die Entfernung den Weg, auf Wunsch mit Lichtsäule. Stirbst du, wird der **Todespunkt** automatisch gespeichert und angezeigt. Wegpunkte gelten pro Welt bzw. Server.
+
+**Blockrahmen & Treffer-Farbe:** eigene Farbe und Dicke für den Rahmen um den angeschauten Block und eine eigene Farbe statt Rot, wenn Gegner getroffen werden.
+
+**Kill-Effekte:** Besiegst du einen Gegner, den du kurz vorher getroffen hast: Blitz, Blut, Feuerwerk oder Seelen (mit Sound). Nur auf deinem Bildschirm.
+
+**Chat:** Uhrzeit vor jeder Nachricht, gleiche Nachrichten werden zusammengefasst („(x3)“), Verlauf mit 1000 statt 100 Nachrichten.
 
 **Viewmodel:** Hand in alle Richtungen einstellen – links/rechts, oben/unten, nah/fern, kippen, drehen, neigen und Größe; die linke Hand auf Wunsch getrennt. Im Viewmodel-Reiter rückt das Menü zur Seite, damit du die Hand live siehst.
 
