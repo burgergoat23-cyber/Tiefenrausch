@@ -1,1 +1,1 @@
-Bau fehlgeschlagen (Spieltest nicht gelaufen)
+Spieltest: success
