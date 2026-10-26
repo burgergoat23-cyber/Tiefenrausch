@@ -20,3 +20,22 @@ net.minecraft.world.inventory.CrafterMenu
 net.minecraft.client.gui.screens.inventory.ContainerScreen
 net.minecraft.client.gui.screens.inventory.FurnaceScreen
 net.minecraft.client.gui.screens.inventory.CrafterScreen
+net.minecraft.client.gui.components.ChatComponent
+-c net.minecraft.client.gui.components.ChatComponent
+net.minecraft.client.GuiMessage
+net.minecraft.client.renderer.texture.OverlayTexture
+net.minecraft.client.renderer.LevelRenderer
+-c net.minecraft.client.renderer.LevelRenderer
+net.minecraft.client.renderer.ShapeRenderer
+net.minecraft.client.renderer.state.level.BlockOutlineRenderState
+net.minecraft.world.effect.MobEffectInstance
+net.minecraft.world.effect.MobEffect
+net.minecraft.world.entity.LightningBolt
+net.minecraft.core.particles.ParticleTypes
+net.minecraft.core.particles.BlockParticleOption
+net.minecraft.world.entity.EquipmentSlot
+net.minecraft.client.gui.screens.DeathScreen
+net.minecraft.client.gui.Gui
+net.minecraft.world.level.storage.WorldData
+net.minecraft.server.MinecraftServer
+net.minecraft.world.entity.Entity
