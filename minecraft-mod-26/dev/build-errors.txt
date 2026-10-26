@@ -1,0 +1,603 @@
+8:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:10: error: cannot find symbol
+9-import net.minecraft.client.gui.GuiGraphics;
+10-                               ^
+11-  symbol:   class GuiGraphics
+--
+13:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:39: error: cannot find symbol
+14-	public static void render(GuiGraphics ctx, DeltaTracker tickCounter) {
+15-	                          ^
+16-  symbol:   class GuiGraphics
+--
+18:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:7: error: cannot find symbol
+19-import net.minecraft.client.gui.GuiGraphics;
+20-                               ^
+21-  symbol:   class GuiGraphics
+--
+23:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:27: error: cannot find symbol
+24-	private static void render(GuiGraphics ctx, DeltaTracker tickCounter) {
+25-	                           ^
+26-  symbol:   class GuiGraphics
+--
+28:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:50: error: cannot find symbol
+29-	public static void draw(GuiGraphics ctx, int cx, int cy, float extraGap) {
+30-	                        ^
+31-  symbol:   class GuiGraphics
+--
+33:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:107: error: cannot find symbol
+34-	private static void rect(GuiGraphics ctx, int x0, int y0, int x1, int y1, int color) {
+35-	                         ^
+36-  symbol:   class GuiGraphics
+--
+38:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:15: error: cannot find symbol
+39-import net.minecraft.client.gui.GuiGraphics;
+40-                               ^
+41-  symbol:   class GuiGraphics
+--
+43:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:38: error: cannot find symbol
+44-	public static void renderHud(GuiGraphics ctx) {
+45-	                             ^
+46-  symbol:   class GuiGraphics
+--
+48:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:92: error: cannot find symbol
+49-	public static int render(GuiGraphics ctx, Minecraft mc, int x, int y, int w, TrackType type, @Nullable Site site) {
+50-	                         ^
+51-  symbol:   class GuiGraphics
+--
+53:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:198: error: cannot find symbol
+54-	private static void panel(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+55-	                          ^
+56-  symbol:   class GuiGraphics
+--
+58:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:204: error: cannot find symbol
+59-	private static void outline(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+60-	                            ^
+61-  symbol:   class GuiGraphics
+--
+63:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:211: error: cannot find symbol
+64-	private static void small(GuiGraphics ctx, Font tr, String s, int x, int y, int color) {
+65-	                          ^
+66-  symbol:   class GuiGraphics
+--
+68:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:219: error: cannot find symbol
+69-	private static void icon(GuiGraphics ctx, ItemStack stack, int x, int y) {
+70-	                         ^
+71-  symbol:   class GuiGraphics
+--
+73:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:227: error: cannot find symbol
+74-	private static void disc(GuiGraphics ctx, int cx, int cy, int r, int color) {
+75-	                         ^
+76-  symbol:   class GuiGraphics
+--
+78:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:234: error: cannot find symbol
+79-	private static void ring(GuiGraphics ctx, int cx, int cy, int r, int color) {
+80-	                         ^
+81-  symbol:   class GuiGraphics
+--
+83:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:245: error: cannot find symbol
+84-	private static void arrow(GuiGraphics ctx, int cx, int cy, float yaw, int color) {
+85-	                          ^
+86-  symbol:   class GuiGraphics
+--
+88:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:255: error: cannot find symbol
+89-	private static void drawArrowShape(GuiGraphics ctx, int ox, int oy, int color) {
+90-	                                   ^
+91-  symbol:   class GuiGraphics
+--
+93:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:21: error: package net.fabricmc.fabric.api.client.keybinding.v1 does not exist
+94-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+95-                                                   ^
+96:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/SeedScreen.java:4: error: cannot find symbol
+97-import net.minecraft.client.gui.GuiGraphics;
+98-                               ^
+99-  symbol:   class GuiGraphics
+--
+101:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/SeedScreen.java:51: error: cannot find symbol
+102-	public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+103-	                   ^
+104-  symbol:   class GuiGraphics
+--
+106:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:25: error: cannot find symbol
+107-import net.minecraft.client.gui.GuiGraphics;
+108-                               ^
+109-  symbol:   class GuiGraphics
+--
+111:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:88: error: cannot find symbol
+112-	public void renderBackground(GuiGraphics ctx, int mouseX, int mouseY, float deltaTicks) {
+113-	                             ^
+114-  symbol:   class GuiGraphics
+--
+116:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:202: error: cannot find symbol
+117-	public void render(GuiGraphics ctx, int mouseX, int mouseY, float deltaTicks) {
+118-	                   ^
+119-  symbol:   class GuiGraphics
+--
+121:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:296: error: cannot find symbol
+122-	private void border(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+123-	                    ^
+124-  symbol:   class GuiGraphics
+--
+126:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:303: error: cannot find symbol
+127-	private void button(GuiGraphics ctx, int x, int y, int w, int h, String label, boolean active, Runnable click) {
+128-	                    ^
+129-  symbol:   class GuiGraphics
+--
+131:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:312: error: cannot find symbol
+132-	private int header(GuiGraphics ctx, int x, int y, int w, String text) {
+133-	                   ^
+134-  symbol:   class GuiGraphics
+--
+136:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:318: error: cannot find symbol
+137-	private int paragraph(GuiGraphics ctx, int x, int y, int w, String text, int color) {
+138-	                      ^
+139-  symbol:   class GuiGraphics
+--
+141:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:326: error: cannot find symbol
+142-	private int toggle(GuiGraphics ctx, int x, int y, int w, String label, boolean value, Consumer<Boolean> set) {
+143-	                   ^
+144-  symbol:   class GuiGraphics
+--
+146:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:341: error: cannot find symbol
+147-	private int slider(GuiGraphics ctx, int x, int y, int w, String label, double min, double max, double value, double step,
+148-	                   ^
+149-  symbol:   class GuiGraphics
+--
+151:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:364: error: cannot find symbol
+152-	private void itemCell(GuiGraphics ctx, int x, int y, int size, ItemStack stack, int rarityColor, boolean selected, @Nullable List<Component> tip, Runnable click) {
+153-	                      ^
+154-  symbol:   class GuiGraphics
+--
+156:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:394: error: cannot find symbol
+157-	private int categoryChips(GuiGraphics ctx, int x, int y, int w, String selected, Consumer<String> select) {
+158-	                          ^
+159-  symbol:   class GuiGraphics
+--
+161:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:417: error: cannot find symbol
+162-	private int drawSkins(GuiGraphics ctx, int x, int y, int w) {
+163-	                      ^
+164-  symbol:   class GuiGraphics
+--
+166:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:561: error: cannot find symbol
+167-	private int drawPacks(GuiGraphics ctx, int x, int y, int w) {
+168-	                      ^
+169-  symbol:   class GuiGraphics
+--
+171:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:596: error: cannot find symbol
+172-	private int drawCrosshair(GuiGraphics ctx, int x, int y, int w) {
+173-	                          ^
+174-  symbol:   class GuiGraphics
+--
+176:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:668: error: cannot find symbol
+177-	private int drawViewmodel(GuiGraphics ctx, int x, int y, int w) {
+178-	                          ^
+179-  symbol:   class GuiGraphics
+--
+181:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:734: error: cannot find symbol
+182-	private int drawFilters(GuiGraphics ctx, int x, int y, int w) {
+183-	                        ^
+184-  symbol:   class GuiGraphics
+--
+186:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:761: error: cannot find symbol
+187-	private int drawTracker(GuiGraphics ctx, int x, int y, int w) {
+188-	                        ^
+189-  symbol:   class GuiGraphics
+--
+191:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:832: error: cannot find symbol
+192-	private int targetGroup(GuiGraphics ctx, int x, int y, int w, String title, ResourceKey<Level> dim) {
+193-	                        ^
+194-  symbol:   class GuiGraphics
+--
+196:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:865: error: cannot find symbol
+197-	private int drawMacros(GuiGraphics ctx, int x, int y, int w) {
+198-	                       ^
+199-  symbol:   class GuiGraphics
+--
+201:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:918: error: cannot find symbol
+202-	private int keyRow(GuiGraphics ctx, int x, int y, int w, String label, KeyMapping key) {
+203-	                   ^
+204-  symbol:   class GuiGraphics
+--
+206:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:938: error: cannot find symbol
+207-	private int drawHud(GuiGraphics ctx, int x, int y, int w) {
+208-	                    ^
+209-  symbol:   class GuiGraphics
+--
+211:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:33: error: cannot find symbol
+212-		if (l && !leftWas && mc.screen == null) LEFT.addLast(now);
+213-		                       ^
+214-  symbol:   variable screen
+--
+216:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:34: error: cannot find symbol
+217-		if (r && !rightWas && mc.screen == null) RIGHT.addLast(now);
+218-		                        ^
+219-  symbol:   variable screen
+--
+221:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:41: error: cannot find symbol
+222-		if (mc.player == null || mc.options.hideGui) return;
+223-		                                   ^
+224-  symbol:   variable hideGui
+--
+226:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Zoom.java:17: error: cannot find symbol
+227-		float target = VantageClient.zoomKey.isDown() && client.screen == null ? Math.max(1.1f, VantageConfig.get().zoom) : 1f;
+228-		                                                       ^
+229-  symbol:   variable screen
+--
+231:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:20: error: cannot find symbol
+232-				vanilla.render(ctx, tickCounter);
+233-				       ^
+234-  symbol:   method render(GuiGraphicsExtractor,DeltaTracker)
+--
+236:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Macros.java:97: error: cannot find symbol
+237-		if (client.player != null) client.player.displayClientMessage(Component.literal(text).withColor(0xFFFFB347), true);
+238-		                                        ^
+239-  symbol:   method displayClientMessage(MutableComponent,boolean)
+--
+241:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Macros.java:150: error: cannot find symbol
+242-		if (!c.lungeEnabled || busy || p == null || client.screen != null) return;
+243-		                                                  ^
+244-  symbol:   variable screen
+--
+246:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Macros.java:217: error: cannot find symbol
+247-		if (busy || p == null || client.gameMode == null || client.screen != null) return;
+248-		                                                          ^
+249-  symbol:   variable screen
+--
+251:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:63: error: cannot find symbol
+252-		int bars = ((BossBarHudAccessor) mc.gui.getBossOverlay()).vantage$getBossBars().size();
+253-		                                       ^
+254-  symbol:   method getBossOverlay()
+--
+256:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerSearch.java:283: error: x has private access in ChunkPos
+257-				if (!placement.isStructureChunk(calculator, start.x, start.z)) return false;
+258-				                                                 ^
+259:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerSearch.java:283: error: z has private access in ChunkPos
+260-				if (!placement.isStructureChunk(calculator, start.x, start.z)) return false;
+261-				                                                          ^
+262:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerSearch.java:284: error: x has private access in ChunkPos
+263-				ChunkAccess chunk = world.getChunk(start.x, start.z, ChunkStatus.STRUCTURE_STARTS, true);
+264-				                                        ^
+265:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerSearch.java:284: error: z has private access in ChunkPos
+266-				ChunkAccess chunk = world.getChunk(start.x, start.z, ChunkStatus.STRUCTURE_STARTS, true);
+267-				                                                 ^
+268:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/LootScanner.java:96: error: cannot find symbol
+269-					if (pristine.test(net.minecraft.world.level.ChunkPos.asLong(cx, cz))) c.pristine++;
+270-					                                                    ^
+271-  symbol:   method asLong(int,int)
+--
+273:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:307: error: random has protected access in Level
+274-		double x = s.pos().getX() + 0.5 + (world.random.nextDouble() - 0.5) * 0.6;
+275-		                                        ^
+276:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:308: error: random has protected access in Level
+277-		double z = s.pos().getZ() + 0.5 + (world.random.nextDouble() - 0.5) * 0.6;
+278-		                                        ^
+279:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:309: error: random has protected access in Level
+280-		double y = client.player.getY() - 8 + world.random.nextDouble() * 50;
+281-		                                           ^
+282:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:321: error: x has private access in ChunkPos
+283-		if (scanCenter == null || Math.abs(scanCenter.x - here.x) > 2 || Math.abs(scanCenter.z - here.z) > 2 || ORDER.isEmpty()) {
+284-		                                             ^
+285:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:321: error: x has private access in ChunkPos
+286-		if (scanCenter == null || Math.abs(scanCenter.x - here.x) > 2 || Math.abs(scanCenter.z - here.z) > 2 || ORDER.isEmpty()) {
+287-		                                                      ^
+288:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:321: error: z has private access in ChunkPos
+289-		if (scanCenter == null || Math.abs(scanCenter.x - here.x) > 2 || Math.abs(scanCenter.z - here.z) > 2 || ORDER.isEmpty()) {
+290-		                                                                                    ^
+291:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:321: error: z has private access in ChunkPos
+292-		if (scanCenter == null || Math.abs(scanCenter.x - here.x) > 2 || Math.abs(scanCenter.z - here.z) > 2 || ORDER.isEmpty()) {
+293-		                                                                                             ^
+294:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:327: error: x has private access in ChunkPos
+295-						if (Math.max(Math.abs(dx), Math.abs(dz)) == ring) ORDER.add(new ChunkPos(here.x + dx, here.z + dz));
+296-						                                                                             ^
+297:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:327: error: z has private access in ChunkPos
+298-						if (Math.max(Math.abs(dx), Math.abs(dz)) == ring) ORDER.add(new ChunkPos(here.x + dx, here.z + dz));
+299-						                                                                                          ^
+300:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:343: error: cannot find symbol
+301-			if (SCANNED.contains(cp.toLong())) continue;
+302-			                       ^
+303-  symbol:   method toLong()
+--
+305:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:344: error: x has private access in ChunkPos
+306-			ChunkAccess chunk = world.getChunk(cp.x, cp.z, ChunkStatus.FULL, false);
+307-			                                     ^
+308:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:344: error: z has private access in ChunkPos
+309-			ChunkAccess chunk = world.getChunk(cp.x, cp.z, ChunkStatus.FULL, false);
+310-			                                           ^
+311:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/StructureTracker.java:346: error: cannot find symbol
+312-			SCANNED.add(cp.toLong());
+313-			              ^
+314-  symbol:   method toLong()
+--
+316:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:92: error: constructor ChunkPos in record ChunkPos cannot be applied to given types;
+317-			ChunkPos c = new ChunkPos(site.pos());
+318-			             ^
+319-  required: int,int
+--
+322:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:104: error: cannot find symbol
+323-					if (cm().getChunkNow(cx, cz) != null && !world.areEntitiesLoaded(ChunkPos.asLong(cx, cz))) c.unloaded++;
+324-					                                                                         ^
+325-  symbol:   method asLong(int,int)
+--
+327:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:118: error: x has private access in ChunkPos
+328-						if (cm().getChunkNow(p.x, p.z) != null) {
+329-						                      ^
+330:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:118: error: z has private access in ChunkPos
+331-						if (cm().getChunkNow(p.x, p.z) != null) {
+332-						                           ^
+333:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:119: error: cannot find symbol
+334-							if (!world.areEntitiesLoaded(p.toLong())) toLoad.add(p); // Bloecke da, Entities fehlen noch
+335-							                              ^
+336-  symbol:   method toLong()
+--
+338:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:123: error: cannot find symbol
+339-							pristine.add(p.toLong());
+340-							              ^
+341-  symbol:   method toLong()
+--
+343:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:139: error: x has private access in ChunkPos
+344-						if (cm().getChunkNow(p.x, p.z) == null || !world.areEntitiesLoaded(p.toLong())) {
+345-						                      ^
+346:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:139: error: z has private access in ChunkPos
+347-						if (cm().getChunkNow(p.x, p.z) == null || !world.areEntitiesLoaded(p.toLong())) {
+348-						                           ^
+349:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/tracker/ServerLoot.java:139: error: cannot find symbol
+350-						if (cm().getChunkNow(p.x, p.z) == null || !world.areEntitiesLoaded(p.toLong())) {
+351-						                                                                    ^
+352-  symbol:   method toLong()
+--
+354:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:62: error: cannot find symbol
+355-		menuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.menu", GLFW.GLFW_KEY_K, cat));
+356-		          ^
+357-  symbol:   variable KeyBindingHelper
+--
+359:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:63: error: cannot find symbol
+360-		inspectKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.inspect", GLFW.GLFW_KEY_G, cat));
+361-		             ^
+362-  symbol:   variable KeyBindingHelper
+--
+364:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:64: error: cannot find symbol
+365-		lungeKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.lunge", GLFW.GLFW_KEY_R, cat));
+366-		           ^
+367-  symbol:   variable KeyBindingHelper
+--
+369:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:65: error: cannot find symbol
+370-		pearlKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.pearl", GLFW.GLFW_KEY_V, cat));
+371-		           ^
+372-  symbol:   variable KeyBindingHelper
+--
+374:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:66: error: cannot find symbol
+375-		windKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.wind", GLFW.GLFW_KEY_B, cat));
+376-		          ^
+377-  symbol:   variable KeyBindingHelper
+--
+379:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:67: error: cannot find symbol
+380-		zoomKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.zoom", GLFW.GLFW_KEY_C, cat));
+381-		          ^
+382-  symbol:   variable KeyBindingHelper
+--
+384:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:68: error: cannot find symbol
+385-		trackerKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.tracker", GLFW.GLFW_KEY_UNKNOWN, cat));
+386-		             ^
+387-  symbol:   variable KeyBindingHelper
+--
+389:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:69: error: cannot find symbol
+390-		trackerCycleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.vantage.tracker_cycle", GLFW.GLFW_KEY_UNKNOWN, cat));
+391-		                  ^
+392-  symbol:   variable KeyBindingHelper
+--
+394:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:70: error: cannot find symbol
+395-		maceToggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.mace_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
+396-		                ^
+397-  symbol:   variable KeyBindingHelper
+--
+399:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:71: error: cannot find symbol
+400-		shieldToggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.arsenal.shield_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
+401-		                  ^
+402-  symbol:   variable KeyBindingHelper
+--
+404:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:99: error: cannot find symbol
+405-				client.player.displayClientMessage(Component.literal("[Vantage] ").withColor(0xFFE8A33D)
+406-				             ^
+407-  symbol:   method displayClientMessage(MutableComponent,boolean)
+--
+409:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:109: error: cannot find symbol
+410-			client.player.displayClientMessage(Component.literal(name + ": ").withColor(0xFFE8A33D)
+411-			             ^
+412-  symbol:   method displayClientMessage(MutableComponent,boolean)
+--
+414:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:116: error: cannot find symbol
+415-			if (client.screen == null) client.setScreen(new VantageScreen());
+416-			          ^
+417-  symbol:   variable screen
+--
+419:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:116: error: cannot find symbol
+420-			if (client.screen == null) client.setScreen(new VantageScreen());
+421-			                                 ^
+422-  symbol:   method setScreen(VantageScreen)
+--
+424:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/VantageClient.java:126: error: cannot find symbol
+425-				client.player.displayClientMessage(Component.literal("Tracker-Ziel: ").withColor(0xFFE8A33D).append(Component.literal(t.label).withColor(t.color)), true);
+426-				             ^
+427-  symbol:   method displayClientMessage(MutableComponent,boolean)
+--
+429:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:57: error: cannot find symbol
+430-			sp.getClientWorld().waitForChunksRender();
+431-			  ^
+432-  symbol:   method getClientWorld()
+--
+434:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:74: error: cannot find symbol
+435-			ctx.runOnClient(mc -> mc.gui.getChat().clearMessages(false));
+436-			                            ^
+437-  symbol:   method getChat()
+--
+439:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:147: error: cannot find symbol
+440-			ctx.runOnClient(mc -> mc.gui.getChat().clearMessages(false));
+441-			                            ^
+442-  symbol:   method getChat()
+--
+444:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:260: error: cannot find symbol
+445-			sp.getClientWorld().waitForChunksRender();
+446-			  ^
+447-  symbol:   method getClientWorld()
+--
+449:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:270: error: cannot find symbol
+450-			sp.getClientWorld().waitForChunksRender();
+451-			  ^
+452-  symbol:   method getClientWorld()
+--
+454:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:318: error: cannot find symbol
+455-			sp.getClientWorld().waitForChunksRender();
+456-			  ^
+457-  symbol:   method getClientWorld()
+--
+459:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/skin/SkinManager.java:129: error: cannot find symbol
+460-					client.player.displayClientMessage(Component.literal("StatTrak™ " + n).withColor(0xFFCF6A32), true);
+461-					             ^
+462-  symbol:   method displayClientMessage(MutableComponent,boolean)
+--
+464:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/SeedScreen.java:47: error: cannot find symbol
+465-		if (minecraft != null) minecraft.setScreen(parent);
+466-		                                ^
+467-  symbol:   method setScreen(Screen)
+--
+483:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:10: error: cannot find symbol
+484-  import net.minecraft.client.gui.GuiGraphics;
+485-                                 ^
+486-    symbol:   class GuiGraphics
+--
+488:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/VantageHud.java:39: error: cannot find symbol
+489-  	public static void render(GuiGraphics ctx, DeltaTracker tickCounter) {
+490-  	                          ^
+491-    symbol:   class GuiGraphics
+--
+493:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:7: error: cannot find symbol
+494-  import net.minecraft.client.gui.GuiGraphics;
+495-                                 ^
+496-    symbol:   class GuiGraphics
+--
+498:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:27: error: cannot find symbol
+499-  	private static void render(GuiGraphics ctx, DeltaTracker tickCounter) {
+500-  	                           ^
+501-    symbol:   class GuiGraphics
+--
+503:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:50: error: cannot find symbol
+504-  	public static void draw(GuiGraphics ctx, int cx, int cy, float extraGap) {
+505-  	                        ^
+506-    symbol:   class GuiGraphics
+--
+508:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/Crosshair.java:107: error: cannot find symbol
+509-  	private static void rect(GuiGraphics ctx, int x0, int y0, int x1, int y1, int color) {
+510-  	                         ^
+511-    symbol:   class GuiGraphics
+--
+513:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:15: error: cannot find symbol
+514-  import net.minecraft.client.gui.GuiGraphics;
+515-                                 ^
+516-    symbol:   class GuiGraphics
+--
+518:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:38: error: cannot find symbol
+519-  	public static void renderHud(GuiGraphics ctx) {
+520-  	                             ^
+521-    symbol:   class GuiGraphics
+--
+523:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:92: error: cannot find symbol
+524-  	public static int render(GuiGraphics ctx, Minecraft mc, int x, int y, int w, TrackType type, @Nullable Site site) {
+525-  	                         ^
+526-    symbol:   class GuiGraphics
+--
+528:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:198: error: cannot find symbol
+529-  	private static void panel(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+530-  	                          ^
+531-    symbol:   class GuiGraphics
+--
+533:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:204: error: cannot find symbol
+534-  	private static void outline(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+535-  	                            ^
+536-    symbol:   class GuiGraphics
+--
+538:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:211: error: cannot find symbol
+539-  	private static void small(GuiGraphics ctx, Font tr, String s, int x, int y, int color) {
+540-  	                          ^
+541-    symbol:   class GuiGraphics
+--
+543:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:219: error: cannot find symbol
+544-  	private static void icon(GuiGraphics ctx, ItemStack stack, int x, int y) {
+545-  	                         ^
+546-    symbol:   class GuiGraphics
+--
+548:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:227: error: cannot find symbol
+549-  	private static void disc(GuiGraphics ctx, int cx, int cy, int r, int color) {
+550-  	                         ^
+551-    symbol:   class GuiGraphics
+--
+553:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:234: error: cannot find symbol
+554-  	private static void ring(GuiGraphics ctx, int cx, int cy, int r, int color) {
+555-  	                         ^
+556-    symbol:   class GuiGraphics
+--
+558:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:245: error: cannot find symbol
+559-  	private static void arrow(GuiGraphics ctx, int cx, int cy, float yaw, int color) {
+560-  	                          ^
+561-    symbol:   class GuiGraphics
+--
+563:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/TrackerCard.java:255: error: cannot find symbol
+564-  	private static void drawArrowShape(GuiGraphics ctx, int ox, int oy, int color) {
+565-  	                                   ^
+566-    symbol:   class GuiGraphics
+--
+568:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/SeedScreen.java:4: error: cannot find symbol
+569-  import net.minecraft.client.gui.GuiGraphics;
+570-                                 ^
+571-    symbol:   class GuiGraphics
+--
+573:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/SeedScreen.java:51: error: cannot find symbol
+574-  	public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+575-  	                   ^
+576-    symbol:   class GuiGraphics
+--
+578:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:25: error: cannot find symbol
+579-  import net.minecraft.client.gui.GuiGraphics;
+580-                                 ^
+581-    symbol:   class GuiGraphics
+--
+583:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:88: error: cannot find symbol
+584-  	public void renderBackground(GuiGraphics ctx, int mouseX, int mouseY, float deltaTicks) {
+585-  	                             ^
+586-    symbol:   class GuiGraphics
+--
+588:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:202: error: cannot find symbol
+589-  	public void render(GuiGraphics ctx, int mouseX, int mouseY, float deltaTicks) {
+590-  	                   ^
+591-    symbol:   class GuiGraphics
+--
+593:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:296: error: cannot find symbol
+594-  	private void border(GuiGraphics ctx, int x, int y, int w, int h, int color) {
+595-  	                    ^
+596-    symbol:   class GuiGraphics
+--
+598:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:303: error: cannot find symbol
+599-  	private void button(GuiGraphics ctx, int x, int y, int w, int h, String label, boolean active, Runnable click) {
+600-  	                    ^
+601-    symbol:   class GuiGraphics
+--
+603:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:312: error: cannot find symbol
+604-  	private int header(GuiGraphics ctx, int x, int y, int w, String text) {
+605-  	                   ^
+606-    symbol:   class GuiGraphics
+--
+608:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:318: error: cannot find symbol
+609-  	private int paragraph(GuiGraphics ctx, int x, int y, int w, String text, int color) {
+610-  	                      ^
+611-    symbol:   class GuiGraphics
+--
+613:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:326: error: cannot find symbol
+614-  	private int toggle(GuiGraphics ctx, int x, int y, int w, String label, boolean value, Consumer<Boolean> set) {
+615-  	                   ^
+616-    symbol:   class GuiGraphics
+--
+618:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:341: error: cannot find symbol
+619-  	private int slider(GuiGraphics ctx, int x, int y, int w, String label, double min, double max, double value, double step,
+620-  	                   ^
+621-    symbol:   class GuiGraphics
+--
+100 errors
+100 errors
+Bau: failure

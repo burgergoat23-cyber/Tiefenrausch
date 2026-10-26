@@ -1,0 +1,1113 @@
+=== net.minecraft.client.renderer.ItemInHandRenderer
+Compiled from "ItemInHandRenderer.java"
+public class net.minecraft.client.renderer.ItemInHandRenderer {
+  private static final net.minecraft.client.renderer.rendertype.RenderType MAP_BACKGROUND;
+  private static final net.minecraft.client.renderer.rendertype.RenderType MAP_BACKGROUND_CHECKERBOARD;
+  private static final float ITEM_SWING_X_POS_SCALE;
+  private static final float ITEM_SWING_Y_POS_SCALE;
+  private static final float ITEM_SWING_Z_POS_SCALE;
+  private static final float ITEM_HEIGHT_SCALE;
+  private static final float ITEM_POS_X;
+  private static final float ITEM_POS_Y;
+  private static final float ITEM_POS_Z;
+  private static final float ITEM_PRESWING_ROT_Y;
+  private static final float ITEM_SWING_X_ROT_AMOUNT;
+  private static final float ITEM_SWING_Y_ROT_AMOUNT;
+  private static final float ITEM_SWING_Z_ROT_AMOUNT;
+  private static final float EAT_JIGGLE_X_ROT_AMOUNT;
+  private static final float EAT_JIGGLE_Y_ROT_AMOUNT;
+  private static final float EAT_JIGGLE_Z_ROT_AMOUNT;
+  private static final float EAT_JIGGLE_X_POS_SCALE;
+  private static final float EAT_JIGGLE_Y_POS_SCALE;
+  private static final float EAT_JIGGLE_Z_POS_SCALE;
+  private static final double EAT_JIGGLE_EXPONENT;
+  private static final float EAT_EXTRA_JIGGLE_CUTOFF;
+  private static final float EAT_EXTRA_JIGGLE_SCALE;
+  private static final float ARM_SWING_X_POS_SCALE;
+  private static final float ARM_SWING_Y_POS_SCALE;
+  private static final float ARM_SWING_Z_POS_SCALE;
+  private static final float ARM_SWING_Y_ROT_AMOUNT;
+  private static final float ARM_SWING_Z_ROT_AMOUNT;
+  private static final float ARM_HEIGHT_SCALE;
+  private static final float ARM_POS_SCALE;
+  private static final float ARM_POS_X;
+  private static final float ARM_POS_Y;
+  private static final float ARM_POS_Z;
+  private static final float ARM_PRESWING_ROT_Y;
+  private static final float ARM_PREROTATION_X_OFFSET;
+  private static final float ARM_PREROTATION_Y_OFFSET;
+  private static final float ARM_PREROTATION_Z_OFFSET;
+  private static final float ARM_POSTROTATION_X_OFFSET;
+  private static final int ARM_ROT_X;
+  private static final int ARM_ROT_Y;
+  private static final int ARM_ROT_Z;
+  private static final float MAP_SWING_X_POS_SCALE;
+  private static final float MAP_SWING_Z_POS_SCALE;
+  private static final float MAP_HANDS_POS_X;
+  private static final float MAP_HANDS_POS_Y;
+  private static final float MAP_HANDS_POS_Z;
+  private static final float MAP_HANDS_HEIGHT_SCALE;
+  private static final float MAP_HANDS_TILT_SCALE;
+  private static final float MAP_PLAYER_PITCH_SCALE;
+  private static final float MAP_HANDS_Z_ROT_AMOUNT;
+  private static final float MAPHAND_X_ROT_AMOUNT;
+  private static final float MAPHAND_Y_ROT_AMOUNT;
+  private static final float MAPHAND_Z_ROT_AMOUNT;
+  private static final float MAP_HAND_X_POS;
+  private static final float MAP_HAND_Y_POS;
+  private static final float MAP_HAND_Z_POS;
+  private static final float MAP_SWING_X_ROT_AMOUNT;
+  private static final float MAP_PRE_ROT_SCALE;
+  private static final float MAP_GLOBAL_X_POS;
+  private static final float MAP_GLOBAL_Y_POS;
+  private static final float MAP_GLOBAL_Z_POS;
+  private static final float MAP_FINAL_SCALE;
+  private static final int MAP_BORDER;
+  private static final int MAP_HEIGHT;
+  private static final int MAP_WIDTH;
+  private static final float BOW_CHARGE_X_POS_SCALE;
+  private static final float BOW_CHARGE_Y_POS_SCALE;
+  private static final float BOW_CHARGE_Z_POS_SCALE;
+  private static final float BOW_CHARGE_SHAKE_X_SCALE;
+  private static final float BOW_CHARGE_SHAKE_Y_SCALE;
+  private static final float BOW_CHARGE_SHAKE_Z_SCALE;
+  private static final float BOW_CHARGE_Z_SCALE;
+  private static final float BOW_MIN_SHAKE_CHARGE;
+  private final net.minecraft.client.Minecraft minecraft;
+  private final net.minecraft.client.renderer.state.MapRenderState mapRenderState;
+  private net.minecraft.world.item.ItemStack mainHandItem;
+  private net.minecraft.world.item.ItemStack offHandItem;
+  private float mainHandHeight;
+  private float oMainHandHeight;
+  private float offHandHeight;
+  private float oOffHandHeight;
+  private final net.minecraft.client.renderer.entity.EntityRenderDispatcher entityRenderDispatcher;
+  private final net.minecraft.client.renderer.item.ItemModelResolver itemModelResolver;
+  public net.minecraft.client.renderer.ItemInHandRenderer(net.minecraft.client.Minecraft, net.minecraft.client.renderer.entity.EntityRenderDispatcher, net.minecraft.client.renderer.item.ItemModelResolver);
+  public void renderItem(net.minecraft.world.entity.LivingEntity, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int);
+  private float calculateMapTilt(float);
+  private void renderMapHand(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, net.minecraft.world.entity.HumanoidArm);
+  private void renderOneHandedMap(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, float, net.minecraft.world.entity.HumanoidArm, float, net.minecraft.world.item.ItemStack);
+  private void renderTwoHandedMap(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, float, float, float);
+  private void renderMap(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, net.minecraft.world.item.ItemStack);
+  private void renderPlayerArm(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, float, float, net.minecraft.world.entity.HumanoidArm);
+  private void applyEatTransform(com.mojang.blaze3d.vertex.PoseStack, float, net.minecraft.world.entity.HumanoidArm, net.minecraft.world.item.ItemStack, net.minecraft.world.entity.player.Player);
+  private void applyBrushTransform(com.mojang.blaze3d.vertex.PoseStack, float, net.minecraft.world.entity.HumanoidArm, net.minecraft.world.entity.player.Player);
+  private void applyItemArmAttackTransform(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.world.entity.HumanoidArm, float);
+  private void applyItemArmTransform(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.world.entity.HumanoidArm, float);
+  public void submitHandsWithItems(float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, net.minecraft.client.player.LocalPlayer, int);
+  static net.minecraft.client.renderer.ItemInHandRenderer$HandRenderSelection evaluateWhichHandsToRender(net.minecraft.client.player.LocalPlayer);
+  private static net.minecraft.client.renderer.ItemInHandRenderer$HandRenderSelection selectionUsingItemWhileHoldingBowLike(net.minecraft.client.player.LocalPlayer);
+  private static boolean isChargedCrossbow(net.minecraft.world.item.ItemStack);
+  private void submitArmWithItem(net.minecraft.client.player.AbstractClientPlayer, float, float, net.minecraft.world.InteractionHand, float, net.minecraft.world.item.ItemStack, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int);
+  private void swingArm(float, com.mojang.blaze3d.vertex.PoseStack, int, net.minecraft.world.entity.HumanoidArm);
+  private boolean shouldInstantlyReplaceVisibleItem(net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);
+  public void tick();
+  public void itemUsed(net.minecraft.world.InteractionHand);
+  private static void lambda$renderMap$0(int, com.mojang.blaze3d.vertex.PoseStack$Pose, com.mojang.blaze3d.vertex.VertexConsumer);
+  static {};
+}
+=== net.minecraft.client.renderer.ItemInHandRenderer (Code)
+  public net.minecraft.client.renderer.ItemInHandRenderer(net.minecraft.client.Minecraft, net.minecraft.client.renderer.entity.EntityRenderDispatcher, net.minecraft.client.renderer.item.ItemModelResolver);
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         9: invokespecial #9                  // Method net/minecraft/client/renderer/state/MapRenderState."<init>":()V
+        12: putfield      #10                 // Field mapRenderState:Lnet/minecraft/client/renderer/state/MapRenderState;
+        19: putfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+        26: putfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+        31: putfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        36: putfield      #32                 // Field entityRenderDispatcher:Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;
+        41: putfield      #36                 // Field itemModelResolver:Lnet/minecraft/client/renderer/item/ItemModelResolver;
+  public void renderItem(net.minecraft.world.entity.LivingEntity, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int);
+         1: invokevirtual #40                 // Method net/minecraft/world/item/ItemStack.isEmpty:()Z
+        12: invokespecial #46                 // Method net/minecraft/client/renderer/item/ItemStackRenderState."<init>":()V
+        18: getfield      #36                 // Field itemModelResolver:Lnet/minecraft/client/renderer/item/ItemModelResolver;
+        26: invokevirtual #47                 // Method net/minecraft/world/entity/LivingEntity.level:()Lnet/minecraft/world/level/Level;
+        31: invokevirtual #53                 // Method net/minecraft/world/entity/LivingEntity.getId:()I
+        35: invokevirtual #57                 // Method net/minecraft/world/item/ItemDisplayContext.ordinal:()I
+        39: invokevirtual #62                 // Method net/minecraft/client/renderer/item/ItemModelResolver.updateForTopItem:(Lnet/minecraft/client/renderer/item/ItemStackRenderState;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/ItemOwner;I)V
+        54: invokevirtual #76                 // Method net/minecraft/client/renderer/item/ItemStackRenderState.submit:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;III)V
+  private float calculateMapTilt(float);
+        13: invokestatic  #82                 // Method net/minecraft/util/Mth.clamp:(FFF)F
+        22: invokestatic  #89                 // Method net/minecraft/util/Mth.cos:(D)F
+  private void renderMapHand(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, net.minecraft.world.entity.HumanoidArm);
+         1: getfield      #32                 // Field entityRenderDispatcher:Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;
+         5: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+         8: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+        11: invokevirtual #100                // Method net/minecraft/client/renderer/entity/EntityRenderDispatcher.getPlayerRenderer:(Lnet/minecraft/client/player/AbstractClientPlayer;)Lnet/minecraft/client/renderer/entity/player/AvatarRenderer;
+        17: invokevirtual #106                // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+        42: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        47: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        56: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        61: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        73: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        78: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        91: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        95: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        98: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+       101: invokevirtual #147                // Method net/minecraft/client/player/LocalPlayer.getSkin:()Lnet/minecraft/world/entity/player/PlayerSkin;
+       104: invokevirtual #153                // Method net/minecraft/world/entity/player/PlayerSkin.body:()Lnet/minecraft/core/ClientAsset$Texture;
+       107: invokeinterface #159,  1          // InterfaceMethod net/minecraft/core/ClientAsset$Texture.texturePath:()Lnet/minecraft/resources/Identifier;
+       130: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       133: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+       139: invokevirtual #171                // Method net/minecraft/client/player/LocalPlayer.isModelPartShown:(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z
+       142: invokevirtual #175                // Method net/minecraft/client/renderer/entity/player/AvatarRenderer.renderRightHand:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;Z)V
+       156: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       159: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+       165: invokevirtual #171                // Method net/minecraft/client/player/LocalPlayer.isModelPartShown:(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z
+       168: invokevirtual #184                // Method net/minecraft/client/renderer/entity/player/AvatarRenderer.renderLeftHand:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;Z)V
+       172: invokevirtual #187                // Method com/mojang/blaze3d/vertex/PoseStack.popPose:()V
+  private void renderOneHandedMap(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, float, net.minecraft.world.entity.HumanoidArm, float, net.minecraft.world.item.ItemStack);
+        25: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        29: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        32: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+        35: invokevirtual #192                // Method net/minecraft/client/player/LocalPlayer.isInvisible:()Z
+        42: invokevirtual #106                // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+        54: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        59: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        72: invokevirtual #196                // Method renderPlayerArm:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFFLnet/minecraft/world/entity/HumanoidArm;)V
+        76: invokevirtual #187                // Method com/mojang/blaze3d/vertex/PoseStack.popPose:()V
+        80: invokevirtual #106                // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+        99: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       104: invokestatic  #204                // Method net/minecraft/util/Mth.sqrt:(F)F
+       115: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       135: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       149: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       171: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       183: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       188: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       203: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       208: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       217: invokevirtual #217                // Method renderMap:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/item/ItemStack;)V
+       221: invokevirtual #187                // Method com/mojang/blaze3d/vertex/PoseStack.popPose:()V
+  private void renderTwoHandedMap(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, float, float, float);
+         2: invokestatic  #204                // Method net/minecraft/util/Mth.sqrt:(F)F
+        15: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        29: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        44: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        50: invokevirtual #223                // Method calculateMapTilt:(F)F
+        73: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        85: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        90: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        94: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        97: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+       100: invokevirtual #192                // Method net/minecraft/client/player/LocalPlayer.isInvisible:()Z
+       107: invokevirtual #106                // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+       116: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       121: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       131: invokevirtual #230                // Method renderMapHand:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/entity/HumanoidArm;)V
+       141: invokevirtual #230                // Method renderMapHand:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/entity/HumanoidArm;)V
+       145: invokevirtual #187                // Method com/mojang/blaze3d/vertex/PoseStack.popPose:()V
+       154: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       168: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       173: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       180: invokevirtual #238                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
+       188: getfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+       191: invokevirtual #217                // Method renderMap:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/item/ItemStack;)V
+  private void renderMap(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, net.minecraft.world.item.ItemStack);
+         6: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        11: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        20: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        25: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        35: invokevirtual #238                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
+        44: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        54: invokevirtual #238                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
+        62: invokevirtual #250                // Method net/minecraft/world/item/ItemStack.get:(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;
+        73: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        76: getfield      #256                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        79: invokestatic  #259                // Method net/minecraft/world/item/MapItem.getSavedData:(Lnet/minecraft/world/level/saveddata/maps/MapId;Lnet/minecraft/world/level/Level;)Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;
+       105: invokedynamic #272,  0            // InvokeDynamic #0:render:(I)Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;
+       110: invokeinterface #276,  4          // InterfaceMethod net/minecraft/client/renderer/SubmitNodeCollector.submitCustomGeometry:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V
+       121: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       124: invokevirtual #282                // Method net/minecraft/client/Minecraft.getMapRenderer:()Lnet/minecraft/client/renderer/MapRenderer;
+       136: getfield      #10                 // Field mapRenderState:Lnet/minecraft/client/renderer/state/MapRenderState;
+       139: invokevirtual #286                // Method net/minecraft/client/renderer/MapRenderer.extractRenderState:(Lnet/minecraft/world/level/saveddata/maps/MapId;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;Lnet/minecraft/client/renderer/state/MapRenderState;)V
+       145: getfield      #10                 // Field mapRenderState:Lnet/minecraft/client/renderer/state/MapRenderState;
+       152: invokevirtual #292                // Method net/minecraft/client/renderer/MapRenderer.render:(Lnet/minecraft/client/renderer/state/MapRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ZI)V
+  private void renderPlayerArm(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int, float, float, net.minecraft.world.entity.HumanoidArm);
+        30: invokestatic  #204                // Method net/minecraft/util/Mth.sqrt:(F)F
+        43: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        57: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        71: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       106: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       118: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       123: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       135: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       146: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       164: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       169: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       185: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       190: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       194: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       197: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+       214: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       227: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       232: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       242: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       247: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       260: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       265: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       277: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       281: getfield      #32                 // Field entityRenderDispatcher:Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;
+       286: invokevirtual #100                // Method net/minecraft/client/renderer/entity/EntityRenderDispatcher.getPlayerRenderer:(Lnet/minecraft/client/player/AbstractClientPlayer;)Lnet/minecraft/client/renderer/entity/player/AvatarRenderer;
+       293: invokevirtual #306                // Method net/minecraft/client/player/AbstractClientPlayer.getSkin:()Lnet/minecraft/world/entity/player/PlayerSkin;
+       296: invokevirtual #153                // Method net/minecraft/world/entity/player/PlayerSkin.body:()Lnet/minecraft/core/ClientAsset$Texture;
+       299: invokeinterface #159,  1          // InterfaceMethod net/minecraft/core/ClientAsset$Texture.texturePath:()Lnet/minecraft/resources/Identifier;
+       323: invokevirtual #309                // Method net/minecraft/client/player/AbstractClientPlayer.isModelPartShown:(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z
+       326: invokevirtual #175                // Method net/minecraft/client/renderer/entity/player/AvatarRenderer.renderRightHand:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;Z)V
+       344: invokevirtual #309                // Method net/minecraft/client/player/AbstractClientPlayer.isModelPartShown:(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z
+       347: invokevirtual #184                // Method net/minecraft/client/renderer/entity/player/AvatarRenderer.renderLeftHand:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;Z)V
+  private void applyEatTransform(com.mojang.blaze3d.vertex.PoseStack, float, net.minecraft.world.entity.HumanoidArm, net.minecraft.world.item.ItemStack, net.minecraft.world.entity.player.Player);
+         2: invokevirtual #310                // Method net/minecraft/world/entity/player/Player.getUseItemRemainingTicks:()I
+        18: invokevirtual #315                // Method net/minecraft/world/item/ItemStack.getUseDuration:(Lnet/minecraft/world/entity/LivingEntity;)I
+        44: invokestatic  #89                 // Method net/minecraft/util/Mth.cos:(D)F
+        50: invokestatic  #321                // Method net/minecraft/util/Mth.abs:(F)F
+        60: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        70: invokestatic  #326                // Method java/lang/Math.pow:(DD)D
+       111: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       127: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       132: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       144: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       149: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       166: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       171: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+  private void applyBrushTransform(com.mojang.blaze3d.vertex.PoseStack, float, net.minecraft.world.entity.HumanoidArm, net.minecraft.world.entity.player.Player);
+         2: invokevirtual #310                // Method net/minecraft/world/entity/player/Player.getUseItemRemainingTicks:()I
+        65: invokestatic  #89                 // Method net/minecraft/util/Mth.cos:(D)F
+        89: invokevirtual #347                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(DDD)V
+        99: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       104: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       114: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       119: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       128: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       133: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       146: invokevirtual #347                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(DDD)V
+       162: invokevirtual #347                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(DDD)V
+       172: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       177: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       186: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       191: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       199: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       204: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       213: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       218: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+  private void applyItemArmAttackTransform(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.world.entity.HumanoidArm, float);
+        21: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        43: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        48: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        52: invokestatic  #204                // Method net/minecraft/util/Mth.sqrt:(F)F
+        59: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        78: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        83: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+        96: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       101: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       114: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       119: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+  private void applyItemArmTransform(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.world.entity.HumanoidArm, float);
+        33: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+  public void submitHandsWithItems(float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, net.minecraft.client.player.LocalPlayer, int);
+         3: invokevirtual #359                // Method net/minecraft/client/player/LocalPlayer.getAttackAnim:(F)F
+        10: getfield      #362                // Field net/minecraft/client/player/LocalPlayer.swingingArm:Lnet/minecraft/world/InteractionHand;
+        16: invokestatic  #371                // Method com/google/common/base/MoreObjects.firstNonNull:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+        27: invokevirtual #377                // Method net/minecraft/client/player/LocalPlayer.getXRot:(F)F
+        34: invokestatic  #380                // Method evaluateWhichHandsToRender:(Lnet/minecraft/client/player/LocalPlayer;)Lnet/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection;
+        42: getfield      #384                // Field net/minecraft/client/player/LocalPlayer.xBobO:F
+        47: getfield      #388                // Field net/minecraft/client/player/LocalPlayer.xBob:F
+        50: invokestatic  #391                // Method net/minecraft/util/Mth.lerp:(FFF)F
+        58: getfield      #394                // Field net/minecraft/client/player/LocalPlayer.yBobO:F
+        63: getfield      #397                // Field net/minecraft/client/player/LocalPlayer.yBob:F
+        66: invokestatic  #391                // Method net/minecraft/util/Mth.lerp:(FFF)F
+        78: invokevirtual #400                // Method net/minecraft/client/player/LocalPlayer.getViewXRot:(F)F
+        87: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+        92: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       102: invokevirtual #403                // Method net/minecraft/client/player/LocalPlayer.getViewYRot:(F)F
+       111: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       116: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       121: getfield      #406                // Field net/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection.renderMainHand:Z
+       144: getfield      #36                 // Field itemModelResolver:Lnet/minecraft/client/renderer/item/ItemModelResolver;
+       148: getfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+       151: invokevirtual #412                // Method net/minecraft/client/renderer/item/ItemModelResolver.swapAnimationScale:(Lnet/minecraft/world/item/ItemStack;)F
+       157: getfield      #416                // Field oMainHandHeight:F
+       161: getfield      #419                // Field mainHandHeight:F
+       164: invokestatic  #391                // Method net/minecraft/util/Mth.lerp:(FFF)F
+       183: getfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+       192: invokevirtual #422                // Method submitArmWithItem:(Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
+       197: getfield      #426                // Field net/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection.renderOffHand:Z
+       220: getfield      #36                 // Field itemModelResolver:Lnet/minecraft/client/renderer/item/ItemModelResolver;
+       224: getfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+       227: invokevirtual #412                // Method net/minecraft/client/renderer/item/ItemModelResolver.swapAnimationScale:(Lnet/minecraft/world/item/ItemStack;)F
+       233: getfield      #432                // Field oOffHandHeight:F
+       237: getfield      #435                // Field offHandHeight:F
+       240: invokestatic  #391                // Method net/minecraft/util/Mth.lerp:(FFF)F
+       259: getfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+       268: invokevirtual #422                // Method submitArmWithItem:(Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
+  static net.minecraft.client.renderer.ItemInHandRenderer$HandRenderSelection evaluateWhichHandsToRender(net.minecraft.client.player.LocalPlayer);
+         1: invokevirtual #438                // Method net/minecraft/client/player/LocalPlayer.getMainHandItem:()Lnet/minecraft/world/item/ItemStack;
+         6: invokevirtual #442                // Method net/minecraft/client/player/LocalPlayer.getOffhandItem:()Lnet/minecraft/world/item/ItemStack;
+        14: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        24: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        40: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        50: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        77: invokevirtual #462                // Method net/minecraft/client/player/LocalPlayer.isUsingItem:()Z
+        84: invokestatic  #465                // Method selectionUsingItemWhileHoldingBowLike:(Lnet/minecraft/client/player/LocalPlayer;)Lnet/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection;
+        89: invokestatic  #468                // Method isChargedCrossbow:(Lnet/minecraft/world/item/ItemStack;)Z
+  private static net.minecraft.client.renderer.ItemInHandRenderer$HandRenderSelection selectionUsingItemWhileHoldingBowLike(net.minecraft.client.player.LocalPlayer);
+         1: invokevirtual #475                // Method net/minecraft/client/player/LocalPlayer.getUseItem:()Lnet/minecraft/world/item/ItemStack;
+         6: invokevirtual #478                // Method net/minecraft/client/player/LocalPlayer.getUsedItemHand:()Lnet/minecraft/world/InteractionHand;
+        14: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        24: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        31: invokestatic  #482                // Method net/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection.onlyForHand:(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection;
+        43: invokevirtual #442                // Method net/minecraft/client/player/LocalPlayer.getOffhandItem:()Lnet/minecraft/world/item/ItemStack;
+        46: invokestatic  #468                // Method isChargedCrossbow:(Lnet/minecraft/world/item/ItemStack;)Z
+  private static boolean isChargedCrossbow(net.minecraft.world.item.ItemStack);
+         4: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+        11: invokestatic  #486                // Method net/minecraft/world/item/CrossbowItem.isCharged:(Lnet/minecraft/world/item/ItemStack;)Z
+  private void submitArmWithItem(net.minecraft.client.player.AbstractClientPlayer, float, float, net.minecraft.world.InteractionHand, float, net.minecraft.world.item.ItemStack, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.SubmitNodeCollector, int);
+         1: invokevirtual #491                // Method net/minecraft/client/player/AbstractClientPlayer.isScoping:()Z
+        29: invokevirtual #494                // Method net/minecraft/client/player/AbstractClientPlayer.getMainArm:()Lnet/minecraft/world/entity/HumanoidArm;
+        36: invokevirtual #494                // Method net/minecraft/client/player/AbstractClientPlayer.getMainArm:()Lnet/minecraft/world/entity/HumanoidArm;
+        39: invokevirtual #498                // Method net/minecraft/world/entity/HumanoidArm.getOpposite:()Lnet/minecraft/world/entity/HumanoidArm;
+        46: invokevirtual #106                // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+        51: invokevirtual #40                 // Method net/minecraft/world/item/ItemStack.isEmpty:()Z
+        63: invokevirtual #501                // Method net/minecraft/client/player/AbstractClientPlayer.isInvisible:()Z
+        82: invokevirtual #196                // Method renderPlayerArm:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFFLnet/minecraft/world/entity/HumanoidArm;)V
+        93: invokevirtual #502                // Method net/minecraft/world/item/ItemStack.has:(Lnet/minecraft/core/component/DataComponentType;)Z
+       105: getfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+       108: invokevirtual #40                 // Method net/minecraft/world/item/ItemStack.isEmpty:()Z
+       126: invokevirtual #506                // Method renderTwoHandedMap:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFFF)V
+       147: invokevirtual #510                // Method renderOneHandedMap:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFLnet/minecraft/world/entity/HumanoidArm;FLnet/minecraft/world/item/ItemStack;)V
+       158: invokevirtual #451                // Method net/minecraft/world/item/ItemStack.is:(Ljava/lang/Object;)Z
+       171: invokevirtual #514                // Method applyItemArmTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
+       176: invokestatic  #486                // Method net/minecraft/world/item/CrossbowItem.isCharged:(Lnet/minecraft/world/item/ItemStack;)Z
+       209: invokevirtual #518                // Method net/minecraft/client/player/AbstractClientPlayer.isUsingItem:()Z
+       216: invokevirtual #519                // Method net/minecraft/client/player/AbstractClientPlayer.getUseItemRemainingTicks:()I
+       223: invokevirtual #520                // Method net/minecraft/client/player/AbstractClientPlayer.getUsedItemHand:()Lnet/minecraft/world/InteractionHand;
+       251: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       262: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       267: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       282: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       287: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       302: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       307: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       313: invokevirtual #315                // Method net/minecraft/world/item/ItemStack.getUseDuration:(Lnet/minecraft/world/entity/LivingEntity;)I
+       318: invokevirtual #519                // Method net/minecraft/client/player/AbstractClientPlayer.getUseItemRemainingTicks:()I
+       334: invokestatic  #527                // Method net/minecraft/world/item/CrossbowItem.getChargeDuration:(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)I
+       369: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       404: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       422: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       437: invokevirtual #238                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
+       451: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       456: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       471: invokevirtual #537                // Method swingArm:(FLcom/mojang/blaze3d/vertex/PoseStack;ILnet/minecraft/world/entity/HumanoidArm;)V
+       504: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       518: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       523: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       550: invokevirtual #550                // Method renderItem:(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
+       584: invokevirtual #518                // Method net/minecraft/client/player/AbstractClientPlayer.isUsingItem:()Z
+       591: invokevirtual #519                // Method net/minecraft/client/player/AbstractClientPlayer.getUseItemRemainingTicks:()I
+       598: invokevirtual #520                // Method net/minecraft/client/player/AbstractClientPlayer.getUsedItemHand:()Lnet/minecraft/world/InteractionHand;
+       608: invokevirtual #554                // Method net/minecraft/world/item/ItemStack.getUseAnimation:()Lnet/minecraft/world/item/ItemUseAnimation;
+       615: invokevirtual #558                // Method net/minecraft/world/item/ItemUseAnimation.hasCustomArmTransform:()Z
+       628: invokevirtual #514                // Method applyItemArmTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
+       636: invokevirtual #569                // Method net/minecraft/world/item/ItemUseAnimation.ordinal:()I
+       704: invokevirtual #570                // Method applyEatTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/world/entity/HumanoidArm;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/player/Player;)V
+       714: invokevirtual #514                // Method applyItemArmTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
+       722: invokevirtual #574                // Method net/minecraft/world/item/ItemStack.getItem:()Lnet/minecraft/world/item/Item;
+       746: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       757: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       762: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       777: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       782: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       797: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       802: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       823: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+       834: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       839: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       854: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       859: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       874: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       879: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+       885: invokevirtual #315                // Method net/minecraft/world/item/ItemStack.getUseDuration:(Lnet/minecraft/world/entity/LivingEntity;)I
+       890: invokevirtual #519                // Method net/minecraft/client/player/AbstractClientPlayer.getUseItemRemainingTicks:()I
+       952: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+       987: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1005: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1020: invokevirtual #238                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
+      1034: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1039: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1058: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1069: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1074: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1089: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1094: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1109: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1114: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1120: invokevirtual #315                // Method net/minecraft/world/item/ItemStack.getUseDuration:(Lnet/minecraft/world/entity/LivingEntity;)I
+      1125: invokevirtual #519                // Method net/minecraft/client/player/AbstractClientPlayer.getUseItemRemainingTicks:()I
+      1171: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+      1206: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1219: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1234: invokevirtual #238                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
+      1248: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1253: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1266: invokevirtual #598                // Method applyBrushTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/world/entity/HumanoidArm;Lnet/minecraft/world/entity/player/Player;)V
+      1281: invokevirtual #537                // Method swingArm:(FLcom/mojang/blaze3d/vertex/PoseStack;ILnet/minecraft/world/entity/HumanoidArm;)V
+      1301: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1307: invokevirtual #315                // Method net/minecraft/world/item/ItemStack.getUseDuration:(Lnet/minecraft/world/entity/LivingEntity;)I
+      1312: invokevirtual #519                // Method net/minecraft/client/player/AbstractClientPlayer.getUseItemRemainingTicks:()I
+      1325: invokevirtual #602                // Method net/minecraft/client/player/AbstractClientPlayer.getTicksSinceLastKineticHitFeedback:(F)F
+      1336: invokestatic  #605                // Method net/minecraft/client/model/effects/SpearAnimations.firstPersonUse:(FLcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/world/entity/HumanoidArm;Lnet/minecraft/world/item/ItemStack;)V
+      1343: invokevirtual #611                // Method net/minecraft/client/player/AbstractClientPlayer.isAutoSpinAttack:()Z
+      1356: invokevirtual #514                // Method applyItemArmTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
+      1372: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+      1387: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1392: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1406: invokeinterface #125,  2          // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+      1411: invokevirtual #129                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
+      1424: invokevirtual #514                // Method applyItemArmTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
+      1432: invokevirtual #618                // Method net/minecraft/world/item/ItemStack.getSwingAnimation:()Lnet/minecraft/world/item/component/SwingAnimation;
+      1435: invokevirtual #622                // Method net/minecraft/world/item/component/SwingAnimation.type:()Lnet/minecraft/world/item/SwingAnimationType;
+      1438: invokevirtual #628                // Method net/minecraft/world/item/SwingAnimationType.ordinal:()I
+      1480: invokevirtual #537                // Method swingArm:(FLcom/mojang/blaze3d/vertex/PoseStack;ILnet/minecraft/world/entity/HumanoidArm;)V
+      1494: invokestatic  #631                // Method net/minecraft/client/model/effects/SpearAnimations.firstPersonAttack:(FLcom/mojang/blaze3d/vertex/PoseStack;ILnet/minecraft/world/entity/HumanoidArm;)V
+      1521: invokevirtual #550                // Method renderItem:(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
+      1526: invokevirtual #187                // Method com/mojang/blaze3d/vertex/PoseStack.popPose:()V
+  private void swingArm(float, com.mojang.blaze3d.vertex.PoseStack, int, net.minecraft.world.entity.HumanoidArm);
+         3: invokestatic  #204                // Method net/minecraft/util/Mth.sqrt:(F)F
+        10: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        20: invokestatic  #204                // Method net/minecraft/util/Mth.sqrt:(F)F
+        27: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        40: invokestatic  #208                // Method net/minecraft/util/Mth.sin:(D)F
+        56: invokevirtual #143                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
+        64: invokevirtual #634                // Method applyItemArmAttackTransform:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
+  private boolean shouldInstantlyReplaceVisibleItem(net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);
+         2: invokedynamic #637,  0            // InvokeDynamic #1:test:()Ljava/util/function/Predicate;
+         7: invokestatic  #641                // Method net/minecraft/world/item/ItemStack.matchesIgnoringComponents:(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;Ljava/util/function/Predicate;)Z
+        16: getfield      #36                 // Field itemModelResolver:Lnet/minecraft/client/renderer/item/ItemModelResolver;
+        20: invokevirtual #645                // Method net/minecraft/client/renderer/item/ItemModelResolver.shouldPlaySwapAnimation:(Lnet/minecraft/world/item/ItemStack;)Z
+  public void tick();
+         2: getfield      #419                // Field mainHandHeight:F
+         5: putfield      #416                // Field oMainHandHeight:F
+        10: getfield      #435                // Field offHandHeight:F
+        13: putfield      #432                // Field oOffHandHeight:F
+        17: getfield      #28                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        20: getfield      #94                 // Field net/minecraft/client/Minecraft.player:Lnet/minecraft/client/player/LocalPlayer;
+        25: invokevirtual #438                // Method net/minecraft/client/player/LocalPlayer.getMainHandItem:()Lnet/minecraft/world/item/ItemStack;
+        30: invokevirtual #442                // Method net/minecraft/client/player/LocalPlayer.getOffhandItem:()Lnet/minecraft/world/item/ItemStack;
+        36: getfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+        40: invokevirtual #648                // Method shouldInstantlyReplaceVisibleItem:(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
+        48: putfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+        53: getfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+        57: invokevirtual #648                // Method shouldInstantlyReplaceVisibleItem:(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
+        65: putfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+        69: invokevirtual #652                // Method net/minecraft/client/player/LocalPlayer.isHandsBusy:()Z
+        77: getfield      #419                // Field mainHandHeight:F
+        85: invokestatic  #82                 // Method net/minecraft/util/Mth.clamp:(FFF)F
+        88: putfield      #419                // Field mainHandHeight:F
+        93: getfield      #435                // Field offHandHeight:F
+       101: invokestatic  #82                 // Method net/minecraft/util/Mth.clamp:(FFF)F
+       104: putfield      #435                // Field offHandHeight:F
+       112: invokevirtual #655                // Method net/minecraft/client/player/LocalPlayer.getItemSwapScale:(F)F
+       118: getfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+       140: getfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+       156: getfield      #419                // Field mainHandHeight:F
+       162: getfield      #419                // Field mainHandHeight:F
+       170: invokestatic  #82                 // Method net/minecraft/util/Mth.clamp:(FFF)F
+       174: putfield      #419                // Field mainHandHeight:F
+       179: getfield      #435                // Field offHandHeight:F
+       185: getfield      #435                // Field offHandHeight:F
+       193: invokestatic  #82                 // Method net/minecraft/util/Mth.clamp:(FFF)F
+       197: putfield      #435                // Field offHandHeight:F
+       201: getfield      #419                // Field mainHandHeight:F
+       212: putfield      #22                 // Field mainHandItem:Lnet/minecraft/world/item/ItemStack;
+       216: getfield      #435                // Field offHandHeight:F
+       227: putfield      #25                 // Field offHandItem:Lnet/minecraft/world/item/ItemStack;
+  public void itemUsed(net.minecraft.world.InteractionHand);
+         9: putfield      #419                // Field mainHandHeight:F
+        17: putfield      #435                // Field offHandHeight:F
+  private static void lambda$renderMap$0(int, com.mojang.blaze3d.vertex.PoseStack$Pose, com.mojang.blaze3d.vertex.VertexConsumer);
+         9: invokeinterface #660,  5          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.addVertex:(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        15: invokeinterface #668,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setColor:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        22: invokeinterface #672,  3          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setUv:(FF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        28: invokeinterface #676,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setLight:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        43: invokeinterface #660,  5          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.addVertex:(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        49: invokeinterface #668,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setColor:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        56: invokeinterface #672,  3          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setUv:(FF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        62: invokeinterface #676,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setLight:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        77: invokeinterface #660,  5          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.addVertex:(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        83: invokeinterface #668,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setColor:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        90: invokeinterface #672,  3          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setUv:(FF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+        96: invokeinterface #676,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setLight:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       111: invokeinterface #660,  5          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.addVertex:(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       117: invokeinterface #668,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setColor:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       124: invokeinterface #672,  3          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setUv:(FF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       130: invokeinterface #676,  2          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setLight:(I)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+         3: invokestatic  #681                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+         6: invokestatic  #687                // Method net/minecraft/client/renderer/rendertype/RenderTypes.text:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;
+        15: invokestatic  #681                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+        18: invokestatic  #687                // Method net/minecraft/client/renderer/rendertype/RenderTypes.text:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;
+=== net.minecraft.client.renderer.item.ItemModelResolver
+Compiled from "ItemModelResolver.java"
+public class net.minecraft.client.renderer.item.ItemModelResolver {
+  private final net.minecraft.client.resources.model.ModelManager modelManager;
+  public net.minecraft.client.renderer.item.ItemModelResolver(net.minecraft.client.resources.model.ModelManager);
+  private net.minecraft.client.renderer.item.ClientItem$Properties getItemProperties(net.minecraft.resources.Identifier);
+  private net.minecraft.client.renderer.item.ItemModel getItemModel(net.minecraft.resources.Identifier);
+  public void updateForLiving(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.entity.LivingEntity);
+  public void updateForNonLiving(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.entity.Entity);
+  public void updateForTopItem(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.level.Level, net.minecraft.world.entity.ItemOwner, int);
+  public void appendItemLayers(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.level.Level, net.minecraft.world.entity.ItemOwner, int);
+  public boolean shouldPlaySwapAnimation(net.minecraft.world.item.ItemStack);
+  public float swapAnimationScale(net.minecraft.world.item.ItemStack);
+}
+=== net.minecraft.client.renderer.item.ItemModelResolver (Code)
+  public net.minecraft.client.renderer.item.ItemModelResolver(net.minecraft.client.resources.model.ModelManager);
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         6: putfield      #7                  // Field modelManager:Lnet/minecraft/client/resources/model/ModelManager;
+  private net.minecraft.client.renderer.item.ClientItem$Properties getItemProperties(net.minecraft.resources.Identifier);
+         1: getfield      #7                  // Field modelManager:Lnet/minecraft/client/resources/model/ModelManager;
+         5: invokevirtual #13                 // Method net/minecraft/client/resources/model/ModelManager.getItemProperties:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/item/ClientItem$Properties;
+  private net.minecraft.client.renderer.item.ItemModel getItemModel(net.minecraft.resources.Identifier);
+         1: getfield      #7                  // Field modelManager:Lnet/minecraft/client/resources/model/ModelManager;
+         5: invokevirtual #19                 // Method net/minecraft/client/resources/model/ModelManager.getItemModel:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/item/ItemModel;
+  public void updateForLiving(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.entity.LivingEntity);
+         6: invokevirtual #23                 // Method net/minecraft/world/entity/LivingEntity.level:()Lnet/minecraft/world/level/Level;
+        13: invokevirtual #29                 // Method net/minecraft/world/entity/LivingEntity.getId:()I
+        17: invokevirtual #33                 // Method net/minecraft/world/item/ItemDisplayContext.ordinal:()I
+        21: invokevirtual #38                 // Method updateForTopItem:(Lnet/minecraft/client/renderer/item/ItemStackRenderState;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/ItemOwner;I)V
+  public void updateForNonLiving(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.entity.Entity);
+         6: invokevirtual #42                 // Method net/minecraft/world/entity/Entity.level:()Lnet/minecraft/world/level/Level;
+        13: invokevirtual #45                 // Method net/minecraft/world/entity/Entity.getId:()I
+        16: invokevirtual #38                 // Method updateForTopItem:(Lnet/minecraft/client/renderer/item/ItemStackRenderState;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/ItemOwner;I)V
+  public void updateForTopItem(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.level.Level, net.minecraft.world.entity.ItemOwner, int);
+         1: invokevirtual #46                 // Method net/minecraft/client/renderer/item/ItemStackRenderState.clear:()V
+         5: invokevirtual #51                 // Method net/minecraft/world/item/ItemStack.isEmpty:()Z
+        13: putfield      #57                 // Field net/minecraft/client/renderer/item/ItemStackRenderState.displayContext:Lnet/minecraft/world/item/ItemDisplayContext;
+        26: invokevirtual #61                 // Method appendItemLayers:(Lnet/minecraft/client/renderer/item/ItemStackRenderState;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/ItemOwner;I)V
+  public void appendItemLayers(net.minecraft.client.renderer.item.ItemStackRenderState, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.level.Level, net.minecraft.world.entity.ItemOwner, int);
+         4: invokevirtual #70                 // Method net/minecraft/world/item/ItemStack.get:(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;
+        22: invokevirtual #76                 // Method getItemProperties:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/item/ClientItem$Properties;
+        25: invokevirtual #77                 // Method net/minecraft/client/renderer/item/ClientItem$Properties.oversizedInGui:()Z
+        28: invokevirtual #82                 // Method net/minecraft/client/renderer/item/ItemStackRenderState.setOversizedInGui:(Z)V
+        34: invokevirtual #86                 // Method getItemModel:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/item/ItemModel;
+        66: invokeinterface #89,  8           // InterfaceMethod net/minecraft/client/renderer/item/ItemModel.update:(Lnet/minecraft/client/renderer/item/ItemStackRenderState;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/renderer/item/ItemModelResolver;Lnet/minecraft/world/item/ItemDisplayContext;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/world/entity/ItemOwner;I)V
+  public boolean shouldPlaySwapAnimation(net.minecraft.world.item.ItemStack);
+         4: invokevirtual #70                 // Method net/minecraft/world/item/ItemStack.get:(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;
+        19: invokevirtual #76                 // Method getItemProperties:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/item/ClientItem$Properties;
+        22: invokevirtual #95                 // Method net/minecraft/client/renderer/item/ClientItem$Properties.handAnimationOnSwap:()Z
+  public float swapAnimationScale(net.minecraft.world.item.ItemStack);
+         4: invokevirtual #70                 // Method net/minecraft/world/item/ItemStack.get:(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;
+        19: invokevirtual #76                 // Method getItemProperties:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/item/ClientItem$Properties;
+        22: invokevirtual #98                 // Method net/minecraft/client/renderer/item/ClientItem$Properties.swapAnimationScale:()F
+=== net.minecraft.client.Minecraft
+Compiled from "Minecraft.java"
+public class net.minecraft.client.Minecraft extends net.minecraft.util.thread.ReentrantBlockableEventLoop<java.lang.Runnable> implements com.mojang.blaze3d.platform.WindowEventHandler {
+  private static net.minecraft.client.Minecraft instance;
+  private static final org.slf4j.Logger LOGGER;
+  private static final int MAX_TICKS_PER_UPDATE;
+  public static final net.minecraft.resources.Identifier DEFAULT_FONT;
+  private static final net.minecraft.resources.Identifier REGIONAL_COMPLIANCIES;
+  private static final java.util.concurrent.CompletableFuture<net.minecraft.util.Unit> RESOURCE_RELOAD_INITIAL_TASK;
+  public static final java.lang.String UPDATE_DRIVERS_ADVICE;
+  private final long canary;
+  private final java.nio.file.Path resourcePackDirectory;
+  private final java.util.concurrent.CompletableFuture<com.mojang.authlib.yggdrasil.ProfileResult> profileFuture;
+  private final net.minecraft.client.renderer.texture.TextureManager textureManager;
+  private final net.minecraft.client.renderer.ShaderManager shaderManager;
+  private final com.mojang.datafixers.DataFixer fixerUpper;
+  private final com.mojang.blaze3d.platform.MonitorManager monitorManager;
+  private final com.mojang.blaze3d.platform.Window window;
+  private final com.mojang.blaze3d.systems.GpuSurface windowSurface;
+  private final com.mojang.blaze3d.platform.TextInputManager textInputManager;
+  private final net.minecraft.client.DeltaTracker$Timer deltaTracker;
+  public final net.minecraft.client.renderer.extract.LevelExtractor levelExtractor;
+  public final net.minecraft.client.renderer.LevelRenderer levelRenderer;
+  private final net.minecraft.client.renderer.entity.EntityRenderDispatcher entityRenderDispatcher;
+  private final net.minecraft.client.renderer.item.ItemModelResolver itemModelResolver;
+  private final net.minecraft.client.renderer.MapRenderer mapRenderer;
+  public final net.minecraft.client.particle.ParticleEngine particleEngine;
+  private final net.minecraft.client.User user;
+  public final net.minecraft.client.gui.Font font;
+  public final net.minecraft.client.gui.Font fontFilterFishy;
+  public final net.minecraft.client.renderer.GameRenderer gameRenderer;
+  public final net.minecraft.client.gui.Gui gui;
+  public final net.minecraft.client.Options options;
+  public final net.minecraft.client.gui.components.debug.DebugScreenEntryList debugEntries;
+  private final net.minecraft.client.HotbarManager hotbarManager;
+  public final net.minecraft.client.MouseHandler mouseHandler;
+  public final net.minecraft.client.KeyboardHandler keyboardHandler;
+  private net.minecraft.client.InputType lastInputType;
+  public final java.io.File gameDirectory;
+  private final java.lang.String launchedVersion;
+  private final java.net.Proxy proxy;
+  private final boolean offlineDeveloperMode;
+  private final net.minecraft.world.level.storage.LevelStorageSource levelSource;
+  private final boolean demo;
+  private final boolean allowsMultiplayer;
+  private final boolean allowsChat;
+  private final net.minecraft.server.packs.resources.ReloadableResourceManager resourceManager;
+  private final net.minecraft.server.packs.VanillaPackResources vanillaPackResources;
+  private final net.minecraft.client.resources.server.DownloadedPackSource downloadedPackSource;
+  private final net.minecraft.server.packs.repository.PackRepository resourcePackRepository;
+  private final net.minecraft.client.resources.language.LanguageManager languageManager;
+  private final net.minecraft.client.color.block.BlockColors blockColors;
+  private final com.mojang.blaze3d.TracyFrameCapture tracyFrameCapture;
+  private final net.minecraft.client.sounds.SoundManager soundManager;
+  private final net.minecraft.client.sounds.MusicManager musicManager;
+  private final net.minecraft.client.gui.font.FontManager fontManager;
+  private final net.minecraft.client.renderer.GpuWarnlistManager gpuWarnlistManager;
+  private final net.minecraft.client.PeriodicNotificationManager regionalCompliancies;
+  private final com.mojang.authlib.minecraft.UserApiService userApiService;
+  private final java.util.concurrent.CompletableFuture<com.mojang.authlib.minecraft.UserApiService$UserProperties> userPropertiesFuture;
+  private final net.minecraft.client.resources.SkinManager skinManager;
+  private final net.minecraft.client.resources.model.sprite.AtlasManager atlasManager;
+  private final net.minecraft.client.resources.model.ModelManager modelManager;
+  private final net.minecraft.client.resources.MapTextureManager mapTextureManager;
+  private final net.minecraft.client.tutorial.Tutorial tutorial;
+  private final net.minecraft.client.gui.screens.social.PlayerSocialManager playerSocialManager;
+  private final net.minecraft.client.gui.screens.social.RemoteFriendListUpdateHandler remoteFriendListUpdateHandler;
+  private final net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+  private final net.minecraft.client.telemetry.ClientTelemetryManager telemetryManager;
+  private final net.minecraft.client.multiplayer.ProfileKeyPairManager profileKeyPairManager;
+  private final com.mojang.realmsclient.gui.RealmsDataFetcher realmsDataFetcher;
+  private final net.minecraft.client.quickplay.QuickPlayLog quickPlayLog;
+  private final net.minecraft.server.Services services;
+  private final net.minecraft.client.renderer.PlayerSkinRenderCache playerSkinRenderCache;
+  private final com.mojang.blaze3d.systems.TimerQuery timerQuery;
+  public net.minecraft.client.multiplayer.MultiPlayerGameMode gameMode;
+  public net.minecraft.client.multiplayer.ClientLevel level;
+  public net.minecraft.client.player.LocalPlayer player;
+  private net.minecraft.client.server.IntegratedServer singleplayerServer;
+  private net.minecraft.network.Connection pendingConnection;
+  private boolean isLocalServer;
+  public net.minecraft.world.entity.Entity crosshairPickEntity;
+  public net.minecraft.world.phys.HitResult hitResult;
+  private int rightClickDelay;
+  protected int missTime;
+  private volatile boolean pause;
+  private long lastNanoTime;
+  private long lastTime;
+  private int frames;
+  private java.lang.Thread gameThread;
+  private volatile boolean running;
+  private static int fps;
+  private long frameTimeNs;
+  private final com.mojang.blaze3d.platform.FramerateLimitTracker framerateLimitTracker;
+  public boolean wireframe;
+  public boolean smartCull;
+  private long lastActiveTime;
+  private java.util.concurrent.CompletableFuture<java.lang.Void> pendingReload;
+  private int fpsPieRenderTicks;
+  private final net.minecraft.util.profiling.ContinuousProfiler fpsPieProfiler;
+  private net.minecraft.util.profiling.metrics.profiling.MetricsRecorder metricsRecorder;
+  private final net.minecraft.client.ResourceLoadStateTracker reloadStateTracker;
+  private long savedCpuDuration;
+  private double gpuUtilization;
+  private final net.minecraft.client.GameNarrator narrator;
+  private net.minecraft.client.multiplayer.chat.report.ReportingContext reportingContext;
+  private final net.minecraft.world.level.validation.DirectoryValidator directoryValidator;
+  private boolean gameLoadFinished;
+  private final long clientStartTimeMs;
+  private long clientTickCount;
+  private final net.minecraft.network.PacketProcessor packetProcessor;
+  private final net.minecraft.gizmos.SimpleGizmoCollector perTickGizmos;
+  private java.util.List<net.minecraft.gizmos.SimpleGizmoCollector$GizmoInstance> drainedLatestTickGizmos;
+  private boolean windowSurfaceNeedsReconfiguring;
+  private boolean surfaceIsInvalid;
+  private com.mojang.blaze3d.systems.BackendCreationException backendCreationException;
+  public net.minecraft.client.Minecraft(net.minecraft.client.main.GameConfig);
+  public boolean hasShiftDown();
+  public boolean hasControlDown();
+  public boolean hasAltDown();
+  private void onResourceLoadFinished(net.minecraft.client.GameLoadCookie);
+  private void onGameLoadFinished(net.minecraft.client.GameLoadCookie);
+  public boolean isGameLoadFinished();
+  private static boolean countryEqualsISO3(java.lang.Object);
+  public void updateTitle();
+  private java.lang.String createTitle();
+  private static com.mojang.authlib.minecraft.UserApiService createUserApiService(com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService, net.minecraft.client.main.GameConfig);
+  public boolean isOfflineDeveloperMode();
+  public static net.minecraft.util.ModCheck checkModStatus();
+  private void loadCriticalShaders();
+  private void rollbackResourcePacks(java.lang.Throwable, net.minecraft.client.GameLoadCookie);
+  public void clearResourcePacksOnError(java.lang.Throwable, net.minecraft.network.chat.Component, net.minecraft.client.GameLoadCookie);
+  private void abortResourcePackRecovery();
+  private void addResourcePackLoadFailToast(net.minecraft.network.chat.Component);
+  public void triggerResourcePackRecovery(java.lang.Exception);
+  public void run();
+  void updateFontOptions();
+  private void onFullscreenError(int, long);
+  public java.lang.String getLaunchedVersion();
+  public void delayCrash(net.minecraft.CrashReport);
+  public void emergencySaveAndCrash(net.minecraft.CrashReport);
+  public static void saveReport(java.io.File, net.minecraft.CrashReport);
+  public static int saveReport(java.io.File, net.minecraft.CrashReport, int);
+  public static void crash(net.minecraft.client.Minecraft, java.io.File, net.minecraft.CrashReport, int);
+  public static int saveReportAndShutdownSoundManager(net.minecraft.client.Minecraft, java.io.File, net.minecraft.CrashReport, int);
+  public boolean isEnforceUnicode();
+  public java.util.concurrent.CompletableFuture<java.lang.Void> reloadResourcePacks();
+  private java.util.concurrent.CompletableFuture<java.lang.Void> reloadResourcePacks(boolean, net.minecraft.client.GameLoadCookie);
+  private void selfTest();
+  public net.minecraft.world.level.storage.LevelStorageSource getLevelSource();
+  public void exitWorldAndClose();
+  public void close();
+  private void runTick(boolean);
+  public void renderFrame(boolean);
+  private void pauseIfInactive();
+  private net.minecraft.util.profiling.ProfilerFiller constructProfiler(boolean, net.minecraft.util.profiling.SingleTickProfiler);
+  private void finishProfilers(boolean, net.minecraft.util.profiling.SingleTickProfiler);
+  public void framebufferSizeChanged();
+  public void resizeGui();
+  public void cursorEntered();
+  public int getFps();
+  public long getFrameTimeNs();
+  public void sendLowDiskSpaceWarning();
+  private void emergencySave();
+  public boolean debugClientMetricsStart(java.util.function.Consumer<net.minecraft.network.chat.Component>);
+  private void debugClientMetricsStop();
+  private void debugClientMetricsCancel();
+  private java.nio.file.Path archiveProfilingReport(net.minecraft.SystemReport, java.util.List<java.nio.file.Path>);
+  public void stop();
+  public boolean isRunning();
+  public void pauseGame(boolean);
+  private void continueAttack(boolean);
+  private boolean startAttack();
+  private void startUseItem();
+  public net.minecraft.client.sounds.MusicManager getMusicManager();
+  public void tick();
+  private boolean isLevelRunningNormally();
+  public boolean isMultiplayerServer();
+  private void handleKeybinds();
+  private java.util.Optional<net.minecraft.core.Holder<net.minecraft.server.dialog.Dialog>> getQuickActionsDialog();
+  public net.minecraft.client.telemetry.ClientTelemetryManager getTelemetryManager();
+  public net.minecraft.util.profiling.metrics.profiling.MetricsRecorder getMetricsRecorder();
+  public double getGpuUtilization();
+  public net.minecraft.client.multiplayer.ProfileKeyPairManager getProfileKeyPairManager();
+  public net.minecraft.client.gui.screens.worldselection.WorldOpenFlows createWorldOpenFlows();
+  public void doWorldLoad(net.minecraft.world.level.storage.LevelStorageSource$LevelStorageAccess, net.minecraft.server.packs.repository.PackRepository, net.minecraft.server.WorldStem, java.util.Optional<net.minecraft.world.level.gamerules.GameRules>, boolean);
+  public void setLevel(net.minecraft.client.multiplayer.ClientLevel);
+  public void disconnectFromWorld(net.minecraft.network.chat.Component);
+  public void disconnectWithSavingScreen();
+  public void disconnectWithProgressScreen();
+  public void disconnectWithProgressScreen(boolean);
+  public void disconnect(net.minecraft.client.gui.screens.Screen, boolean);
+  public void disconnect(net.minecraft.client.gui.screens.Screen, boolean, boolean);
+  public void clearDownloadedResourcePacks();
+  public void clearClientLevel(net.minecraft.client.gui.screens.Screen);
+  public void setScreenAndShow(net.minecraft.client.gui.screens.Screen);
+  private void updateLevelInEngines(net.minecraft.client.multiplayer.ClientLevel);
+  private void updateLevelInEngines(net.minecraft.client.multiplayer.ClientLevel, boolean);
+  private com.mojang.authlib.minecraft.UserApiService$UserProperties userProperties();
+  public boolean telemetryOptInExtra();
+  public boolean extraTelemetryAvailable();
+  public boolean allowsTelemetry();
+  public boolean allowsMultiplayer();
+  public boolean allowsRealms();
+  public boolean friendsEnabled();
+  public boolean handleGlobalKeyPress(com.mojang.blaze3d.platform.InputConstants$Key, boolean);
+  private void toggleFullscreen();
+  private boolean toggleFriendsScreen();
+  public boolean allowFriendRequests();
+  public boolean allowChatOnlyWithFriend();
+  public com.mojang.authlib.minecraft.BanDetails multiplayerBan();
+  public boolean isNameBanned();
+  public boolean isBlocked(java.util.UUID);
+  public boolean isFriendOnlyRestricted(java.util.UUID);
+  private boolean isLocalOrUnknownPlayer(java.util.UUID);
+  public net.minecraft.client.multiplayer.chat.ChatAbilities computeChatAbilities();
+  public final boolean isDemo();
+  public final boolean canSwitchGameMode();
+  public net.minecraft.client.multiplayer.ClientPacketListener getConnection();
+  private void pickBlockOrEntity();
+  public net.minecraft.CrashReport fillReport(net.minecraft.CrashReport);
+  public static void fillReport(net.minecraft.client.Minecraft, net.minecraft.client.resources.language.LanguageManager, java.lang.String, net.minecraft.client.Options, net.minecraft.CrashReport);
+  private static java.lang.String formatSeconds(double);
+  private void fillUptime(net.minecraft.CrashReportCategory);
+  private static net.minecraft.SystemReport fillSystemReport(net.minecraft.SystemReport, net.minecraft.client.Minecraft, net.minecraft.client.resources.language.LanguageManager, java.lang.String, net.minecraft.client.Options);
+  public static net.minecraft.client.Minecraft getInstance();
+  public java.util.concurrent.CompletableFuture<java.lang.Void> delayTextureReload();
+  public void updateReportEnvironment(net.minecraft.client.multiplayer.chat.report.ReportEnvironment);
+  public net.minecraft.client.multiplayer.ServerData getCurrentServer();
+  public boolean isLocalServer();
+  public boolean hasSingleplayerServer();
+  public net.minecraft.client.server.IntegratedServer getSingleplayerServer();
+  public boolean isLocalPlayer(java.util.UUID);
+  public net.minecraft.client.User getUser();
+  public com.mojang.authlib.yggdrasil.ProfileResult getProfileResult();
+  public com.mojang.authlib.GameProfile getGameProfile();
+  public java.net.Proxy getProxy();
+  public net.minecraft.client.renderer.texture.TextureManager getTextureManager();
+  public net.minecraft.client.renderer.ShaderManager getShaderManager();
+  public net.minecraft.server.packs.resources.ResourceManager getResourceManager();
+  public net.minecraft.server.packs.repository.PackRepository getResourcePackRepository();
+  public net.minecraft.server.packs.VanillaPackResources getVanillaPackResources();
+  public net.minecraft.client.resources.server.DownloadedPackSource getDownloadedPackSource();
+  public java.nio.file.Path getResourcePackDirectory();
+  public net.minecraft.client.resources.language.LanguageManager getLanguageManager();
+  public boolean isPaused();
+  public net.minecraft.client.renderer.GpuWarnlistManager getGpuWarnlistManager();
+  public net.minecraft.client.sounds.SoundManager getSoundManager();
+  public net.minecraft.sounds.Music getSituationalMusic();
+  public float getMusicVolume();
+  public net.minecraft.server.Services services();
+  public net.minecraft.client.resources.SkinManager getSkinManager();
+  public net.minecraft.world.entity.Entity getCameraEntity();
+  public void setCameraEntity(net.minecraft.world.entity.Entity);
+  public boolean shouldEntityAppearGlowing(net.minecraft.world.entity.Entity);
+  public java.lang.Thread getRunningThread();
+  public java.lang.Runnable wrapRunnable(java.lang.Runnable);
+  protected boolean shouldRun(java.lang.Runnable);
+  public net.minecraft.client.renderer.entity.EntityRenderDispatcher getEntityRenderDispatcher();
+  public net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher getBlockEntityRenderDispatcher();
+  public net.minecraft.client.renderer.MapRenderer getMapRenderer();
+  public com.mojang.datafixers.DataFixer getFixerUpper();
+  public net.minecraft.client.DeltaTracker getDeltaTracker();
+  public net.minecraft.client.color.block.BlockColors getBlockColors();
+  public boolean showOnlyReducedInfo();
+  public net.minecraft.client.tutorial.Tutorial getTutorial();
+  public boolean isWindowActive();
+  public net.minecraft.client.HotbarManager getHotbarManager();
+  public net.minecraft.client.resources.model.ModelManager getModelManager();
+  public net.minecraft.client.resources.model.sprite.AtlasManager getAtlasManager();
+  public net.minecraft.client.resources.MapTextureManager getMapTextureManager();
+  public net.minecraft.network.chat.Component grabPanoramixScreenshot(java.io.File);
+  public net.minecraft.client.gui.screens.social.PlayerSocialManager getPlayerSocialManager();
+  public com.mojang.blaze3d.platform.Window getWindow();
+  public com.mojang.blaze3d.platform.TextInputManager textInputManager();
+  public void onTextInputFocusChange(net.minecraft.client.gui.components.events.GuiEventListener, boolean);
+  public com.mojang.blaze3d.systems.GpuSurface windowSurface();
+  public com.mojang.blaze3d.platform.FramerateLimitTracker getFramerateLimitTracker();
+  public net.minecraft.client.gui.components.DebugScreenOverlay getDebugOverlay();
+  public void updateMaxMipLevel(int);
+  public net.minecraft.client.model.geom.EntityModelSet getEntityModels();
+  public boolean isTextFilteringEnabled();
+  public void prepareForMultiplayer();
+  public net.minecraft.client.InputType getLastInputType();
+  public void setLastInputType(net.minecraft.client.InputType);
+  public net.minecraft.client.GameNarrator getNarrator();
+  public net.minecraft.client.multiplayer.chat.report.ReportingContext getReportingContext();
+  public com.mojang.realmsclient.gui.RealmsDataFetcher realmsDataFetcher();
+  public net.minecraft.client.quickplay.QuickPlayLog quickPlayLog();
+  public net.minecraft.world.level.validation.DirectoryValidator directoryValidator();
+  public net.minecraft.client.renderer.PlayerSkinRenderCache playerSkinRenderCache();
+  private float getTickTargetMillis(float);
+  public net.minecraft.client.renderer.item.ItemModelResolver getItemModelResolver();
+  public boolean canInterruptScreen();
+  public void invalidateSurfaceConfiguration();
+  public static java.lang.String getLauncherBrand();
+  public net.minecraft.network.PacketProcessor packetProcessor();
+  public net.minecraft.gizmos.Gizmos$TemporaryCollection collectPerTickGizmos();
+  public java.util.Collection<net.minecraft.gizmos.SimpleGizmoCollector$GizmoInstance> getPerTickGizmos();
+  private void pick(float);
+  public void showDebugChat(net.minecraft.network.chat.Component);
+  private static net.minecraft.network.chat.Style lambda$grabPanoramixScreenshot$1(java.io.File, net.minecraft.network.chat.Style);
+  private static void lambda$grabPanoramixScreenshot$0(net.minecraft.network.chat.Component);
+  private static java.util.concurrent.CompletionStage lambda$delayTextureReload$0(java.util.concurrent.CompletableFuture);
+  private static java.lang.Object lambda$fillSystemReport$11() throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$10() throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$9(net.minecraft.client.resources.language.LanguageManager) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$8(net.minecraft.client.Minecraft) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$7(net.minecraft.client.Minecraft) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$6(net.minecraft.client.Minecraft) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$5(net.minecraft.client.Minecraft) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$4() throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$3(com.mojang.blaze3d.systems.GpuDevice) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$2(net.minecraft.client.Minecraft) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$1(net.minecraft.client.Minecraft) throws java.lang.Exception;
+  private static java.lang.Object lambda$fillSystemReport$0(java.lang.String) throws java.lang.Exception;
+  private java.lang.String lambda$fillUptime$3() throws java.lang.Exception;
+  private static java.lang.String lambda$fillUptime$2() throws java.lang.Exception;
+  private java.lang.String lambda$fillUptime$1() throws java.lang.Exception;
+  private static java.lang.String lambda$fillUptime$0() throws java.lang.Exception;
+  private void lambda$toggleFriendsScreen$0(net.minecraft.client.gui.screens.Screen);
+  private static void lambda$doWorldLoad$3(net.minecraft.network.chat.Component);
+  private static boolean lambda$doWorldLoad$2(long);
+  private static java.lang.String lambda$doWorldLoad$1(net.minecraft.server.WorldStem) throws java.lang.Exception;
+  private net.minecraft.client.server.IntegratedServer lambda$doWorldLoad$0(net.minecraft.world.level.storage.LevelStorageSource$LevelStorageAccess, net.minecraft.server.packs.repository.PackRepository, net.minecraft.server.WorldStem, java.util.Optional, net.minecraft.server.level.progress.LevelLoadListener, java.lang.Thread);
+  private static java.util.Optional lambda$getQuickActionsDialog$0(net.minecraft.core.Registry, net.minecraft.core.HolderSet$Named);
+  private void lambda$handleKeybinds$0(net.minecraft.core.Holder);
+  private static boolean lambda$tick$0();
+  private void lambda$debugClientMetricsStart$9(java.util.function.Consumer, net.minecraft.util.profiling.ProfileResults);
+  private static void lambda$debugClientMetricsStart$8(net.minecraft.util.profiling.ProfileResults);
+  private static void lambda$debugClientMetricsStart$7(java.util.function.Consumer, java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture);
+  private static void lambda$debugClientMetricsStart$6(java.util.function.Consumer, java.nio.file.Path);
+  private void lambda$debugClientMetricsStart$5(net.minecraft.SystemReport, java.util.function.Consumer, java.util.List);
+  private void lambda$debugClientMetricsStart$2(java.util.function.Consumer, java.nio.file.Path);
+  private static void lambda$debugClientMetricsStart$4(java.util.function.Consumer, net.minecraft.network.chat.Component);
+  private static net.minecraft.network.chat.Style lambda$debugClientMetricsStart$3(java.nio.file.Path, net.minecraft.network.chat.Style);
+  private void lambda$debugClientMetricsStart$0(java.util.function.Consumer, net.minecraft.util.profiling.ProfileResults);
+  private static void lambda$debugClientMetricsStart$1(java.util.function.Consumer, double, int);
+  private void lambda$sendLowDiskSpaceWarning$0();
+  private static void lambda$runTick$0(java.util.concurrent.CompletableFuture);
+  private void lambda$reloadResourcePacks$0(boolean, net.minecraft.client.GameLoadCookie, java.util.concurrent.CompletableFuture, java.util.Optional);
+  private void lambda$reloadResourcePacks$2(java.util.concurrent.CompletableFuture, net.minecraft.client.GameLoadCookie);
+  private void lambda$reloadResourcePacks$1(boolean, net.minecraft.client.GameLoadCookie, java.lang.Throwable);
+  private void lambda$clearResourcePacksOnError$0(net.minecraft.network.chat.Component);
+  private void lambda$new$8(net.minecraft.client.telemetry.TelemetryPropertyMap$Builder);
+  private int lambda$new$7();
+  private void lambda$new$4(net.minecraft.client.GameLoadCookie, java.util.Optional);
+  private void lambda$new$6(net.minecraft.client.GameLoadCookie);
+  private void lambda$new$5(net.minecraft.client.GameLoadCookie, java.lang.Throwable);
+  private void lambda$new$3(net.minecraft.client.resources.language.ClientLanguage);
+  private java.lang.String lambda$new$2(net.minecraft.resources.Identifier, com.mojang.blaze3d.shaders.ShaderType);
+  private com.mojang.authlib.minecraft.UserApiService$UserProperties lambda$new$1();
+  private com.mojang.authlib.yggdrasil.ProfileResult lambda$new$0();
+  static {};
+}
+=== net.minecraft.client.multiplayer.MultiPlayerGameMode
+Compiled from "MultiPlayerGameMode.java"
+public class net.minecraft.client.multiplayer.MultiPlayerGameMode {
+  private static final org.slf4j.Logger LOGGER;
+  private final net.minecraft.client.Minecraft minecraft;
+  private final net.minecraft.client.multiplayer.ClientPacketListener connection;
+  private net.minecraft.core.BlockPos destroyBlockPos;
+  private net.minecraft.world.item.ItemStack destroyingItem;
+  private float destroyProgress;
+  private float destroyTicks;
+  private int destroyDelay;
+  private boolean isDestroying;
+  private net.minecraft.world.level.GameType localPlayerMode;
+  private net.minecraft.world.level.GameType previousLocalPlayerMode;
+  private int carriedIndex;
+  public net.minecraft.client.multiplayer.MultiPlayerGameMode(net.minecraft.client.Minecraft, net.minecraft.client.multiplayer.ClientPacketListener);
+  public void adjustPlayer(net.minecraft.world.entity.player.Player);
+  public void setLocalMode(net.minecraft.world.level.GameType, net.minecraft.world.level.GameType);
+  public void setLocalMode(net.minecraft.world.level.GameType);
+  public boolean canHurtPlayer();
+  public boolean destroyBlock(net.minecraft.core.BlockPos);
+  public boolean startDestroyBlock(net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  public void stopDestroyBlock();
+  public boolean continueDestroyBlock(net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  private void startPrediction(net.minecraft.client.multiplayer.ClientLevel, net.minecraft.client.multiplayer.prediction.PredictiveAction);
+  public void tick();
+  private boolean sameDestroyTarget(net.minecraft.core.BlockPos);
+  private void ensureHasSentCarriedItem();
+  public net.minecraft.world.InteractionResult useItemOn(net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);
+  private net.minecraft.world.InteractionResult performUseItemOn(net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);
+  public net.minecraft.world.InteractionResult useItem(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);
+  public net.minecraft.client.player.LocalPlayer createPlayer(net.minecraft.client.multiplayer.ClientLevel, net.minecraft.stats.StatsCounter, net.minecraft.client.ClientRecipeBook);
+  public net.minecraft.client.player.LocalPlayer createPlayer(net.minecraft.client.multiplayer.ClientLevel, net.minecraft.stats.StatsCounter, net.minecraft.client.ClientRecipeBook, net.minecraft.world.entity.player.Input, boolean);
+  public void attack(net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity);
+  public void spectate(net.minecraft.world.entity.Entity);
+  public void spectatorNoAction();
+  public net.minecraft.world.InteractionResult interact(net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity, net.minecraft.world.phys.EntityHitResult, net.minecraft.world.InteractionHand);
+  public void handleContainerInput(int, int, int, net.minecraft.world.inventory.ContainerInput, net.minecraft.world.entity.player.Player);
+  public void handlePlaceRecipe(int, net.minecraft.world.item.crafting.display.RecipeDisplayId, boolean);
+  public void handleInventoryButtonClick(int, int);
+  public void handleCreativeModeItemAdd(net.minecraft.world.item.ItemStack, int);
+  public void handleCreativeModeItemDrop(net.minecraft.world.item.ItemStack);
+  public void releaseUsingItem(net.minecraft.world.entity.player.Player);
+  public void piercingAttack(net.minecraft.world.item.component.PiercingWeapon);
+  public boolean hasExperience();
+  public boolean hasMissTime();
+  public boolean isServerControlledInventory();
+  public boolean isSpectator();
+  public net.minecraft.world.level.GameType getPreviousPlayerMode();
+  public net.minecraft.world.level.GameType getPlayerMode();
+  public boolean isDestroying();
+  public int getDestroyStage();
+  public void handlePickItemFromBlock(net.minecraft.core.BlockPos, boolean);
+  public void handlePickItemFromEntity(net.minecraft.world.entity.Entity, boolean);
+  public void handleSlotStateChanged(int, int, boolean);
+  private net.minecraft.network.protocol.Packet lambda$useItem$0(net.minecraft.world.InteractionHand, net.minecraft.world.entity.player.Player, org.apache.commons.lang3.mutable.MutableObject, int);
+  private static net.minecraft.world.item.ItemStack lambda$useItem$1(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);
+  private net.minecraft.network.protocol.Packet lambda$useItemOn$0(org.apache.commons.lang3.mutable.MutableObject, net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult, int);
+  private net.minecraft.network.protocol.Packet lambda$continueDestroyBlock$1(net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  private net.minecraft.network.protocol.Packet lambda$continueDestroyBlock$0(net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  private net.minecraft.network.protocol.Packet lambda$startDestroyBlock$1(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  private net.minecraft.network.protocol.Packet lambda$startDestroyBlock$0(net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  static {};
+}
+=== net.minecraft.client.renderer.GameRenderer
+Compiled from "GameRenderer.java"
+public class net.minecraft.client.renderer.GameRenderer implements java.lang.AutoCloseable,net.minecraft.world.waypoints.TrackedWaypoint$Projector {
+  private static final net.minecraft.resources.Identifier BLUR_POST_CHAIN_ID;
+  public static final int MAX_BLUR_RADIUS;
+  private static final org.slf4j.Logger LOGGER;
+  public static final float PROJECTION_3D_HUD_Z_FAR;
+  private static final float PORTAL_SPINNING_SPEED;
+  private static final float NAUSEA_SPINNING_SPEED;
+  private final net.minecraft.client.Minecraft minecraft;
+  private final net.minecraft.client.renderer.state.GameRenderState gameRenderState;
+  private final net.minecraft.util.RandomSource random;
+  public final net.minecraft.client.renderer.ItemInHandRenderer itemInHandRenderer;
+  private final net.minecraft.client.renderer.ScreenEffectRenderer screenEffectRenderer;
+  private final net.minecraft.client.renderer.DebugCrosshairRenderer debugCrosshairRenderer;
+  private final net.minecraft.client.renderer.RenderBuffers renderBuffers;
+  private final com.mojang.blaze3d.pipeline.RenderTarget mainRenderTarget;
+  private float spinningEffectTime;
+  private float spinningEffectSpeed;
+  private float bossOverlayWorldDarkening;
+  private float bossOverlayWorldDarkeningO;
+  private boolean renderBlockOutline;
+  private long lastScreenshotAttempt;
+  private boolean hasWorldScreenshot;
+  private final net.minecraft.client.renderer.Lightmap lightmap;
+  private final net.minecraft.client.renderer.LightmapRenderStateExtractor lightmapRenderStateExtractor;
+  private final net.minecraft.client.renderer.UiLightmap uiLightmap;
+  private boolean useUiLightmap;
+  private final net.minecraft.client.renderer.texture.OverlayTexture overlayTexture;
+  protected final net.minecraft.client.renderer.Panorama panorama;
+  private final com.mojang.blaze3d.resource.CrossFrameResourcePool resourcePool;
+  private final net.minecraft.client.renderer.fog.FogRenderer fogRenderer;
+  private final net.minecraft.client.gui.render.GuiRenderer guiRenderer;
+  private final net.minecraft.client.renderer.feature.FeatureRenderDispatcher featureRenderDispatcher;
+  private final net.minecraft.client.renderer.SubmitNodeStorage handAndScreenSubmitNodeStorage;
+  private net.minecraft.resources.Identifier postEffectId;
+  private boolean effectActive;
+  private final net.minecraft.client.Camera mainCamera;
+  private final net.minecraft.client.renderer.Projection hudProjection;
+  private final com.mojang.blaze3d.platform.Lighting lighting;
+  private final net.minecraft.client.renderer.GlobalSettingsUniform globalSettingsUniform;
+  private final net.minecraft.client.renderer.ProjectionMatrixBuffer levelProjectionMatrixBuffer;
+  private final net.minecraft.client.renderer.ProjectionMatrixBuffer hud3dProjectionMatrixBuffer;
+  public net.minecraft.client.renderer.GameRenderer(net.minecraft.client.Minecraft, net.minecraft.client.renderer.ItemInHandRenderer, net.minecraft.client.resources.model.ModelManager);
+  public void close();
+  public net.minecraft.client.renderer.RenderBuffers renderBuffers();
+  public net.minecraft.client.renderer.feature.FeatureRenderDispatcher featureRenderDispatcher();
+  public net.minecraft.client.renderer.state.GameRenderState gameRenderState();
+  public void setRenderBlockOutline(boolean);
+  public void clearPostEffect();
+  public void togglePostEffect();
+  public void checkEntityPostEffect(net.minecraft.world.entity.Entity);
+  private void setPostEffect(net.minecraft.resources.Identifier);
+  public void processBlurEffect();
+  public void preloadUiShader(net.minecraft.server.packs.resources.ResourceProvider);
+  public void tick();
+  public net.minecraft.resources.Identifier currentPostEffect();
+  public void resize(int, int);
+  private void bobHurt(net.minecraft.client.renderer.state.level.CameraRenderState, com.mojang.blaze3d.vertex.PoseStack);
+  private void bobView(net.minecraft.client.renderer.state.level.CameraRenderState, com.mojang.blaze3d.vertex.PoseStack);
+  private void renderItemInHand(net.minecraft.client.renderer.state.level.CameraRenderState, float, org.joml.Matrix4fc);
+  public static float nightVisionScale(net.minecraft.world.entity.LivingEntity, float);
+  public void update(net.minecraft.client.DeltaTracker);
+  public void extract(net.minecraft.client.DeltaTracker, boolean);
+  public void render(net.minecraft.client.DeltaTracker, boolean);
+  private void tryTakeScreenshotIfNeeded();
+  private void takeAutoScreenshot(java.nio.file.Path);
+  private boolean shouldRenderBlockOutline();
+  public void renderLevel(net.minecraft.client.DeltaTracker);
+  private void extractWindow();
+  private void extractOptions();
+  private void extractCamera(net.minecraft.client.DeltaTracker, float, float);
+  public void resetData();
+  public void displayItemActivation(net.minecraft.world.item.ItemStack);
+  public float bossOverlayWorldDarkening(float);
+  public net.minecraft.client.Camera mainCamera();
+  public com.mojang.blaze3d.textures.GpuTextureView lightmap();
+  public com.mojang.blaze3d.textures.GpuTextureView levelLightmap();
+  public net.minecraft.client.renderer.texture.OverlayTexture overlayTexture();
+  public com.mojang.blaze3d.pipeline.RenderTarget mainRenderTarget();
+  public net.minecraft.world.phys.Vec3 projectPointToScreen(net.minecraft.world.phys.Vec3);
+  public double projectHorizonToScreen();
+  public com.mojang.blaze3d.platform.Lighting lighting();
+  public void setLevel(net.minecraft.client.multiplayer.ClientLevel);
+  public net.minecraft.client.renderer.Panorama panorama();
+  public void registerPanoramaTextures(net.minecraft.client.renderer.texture.TextureManager);
+  private static void lambda$takeAutoScreenshot$0(java.nio.file.Path, com.mojang.blaze3d.platform.NativeImage);
+  private static void lambda$takeAutoScreenshot$1(com.mojang.blaze3d.platform.NativeImage, java.nio.file.Path);
+  private void lambda$tryTakeScreenshotIfNeeded$0(java.nio.file.Path);
+  private static java.lang.String lambda$preloadUiShader$0(net.minecraft.server.packs.resources.ResourceProvider, net.minecraft.resources.Identifier, com.mojang.blaze3d.shaders.ShaderType);
+  static {};
+}
+=== net.minecraft.client.gui.GuiGraphics
+Error: class not found: net.minecraft.client.gui.GuiGraphics
