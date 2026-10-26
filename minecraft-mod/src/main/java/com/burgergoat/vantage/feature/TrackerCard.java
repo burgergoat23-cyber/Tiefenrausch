@@ -12,6 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
@@ -56,13 +57,23 @@ public final class TrackerCard {
 		if (bad) y = 53;
 		else if (good) y = 28;
 		int w = width(mc, type, site);
-		int x = ctx.getScaledWindowWidth() - w - 4;
+		float sc = scale();
+		int x = ctx.getScaledWindowWidth() - Math.round(w * sc) - 4;
 		// Nicht ueber den Boss-Balken (z. B. Enderdrache) zeichnen: dann darunter
 		int bars = ((BossBarHudAccessor) mc.inGameHud.getBossBarHud()).vantage$getBossBars().size();
 		if (bars > 0 && x < ctx.getScaledWindowWidth() / 2 + 96) {
 			y = Math.max(y, Math.min(12 + bars * 19, ctx.getScaledWindowHeight() / 3) + 4);
 		}
-		render(ctx, mc, x, y, w, type, site);
+		ctx.getMatrices().pushMatrix();
+		ctx.getMatrices().translate(x, y);
+		ctx.getMatrices().scale(sc, sc);
+		render(ctx, mc, 0, 0, w, type, site);
+		ctx.getMatrices().popMatrix();
+	}
+
+	/** Groesse der Karte aus den Einstellungen (50 % bis 150 %). */
+	public static float scale() {
+		return MathHelper.clamp(VantageConfig.get().trackerScale, 0.5f, 1.5f);
 	}
 
 	/** Breite passend zum Inhalt. */

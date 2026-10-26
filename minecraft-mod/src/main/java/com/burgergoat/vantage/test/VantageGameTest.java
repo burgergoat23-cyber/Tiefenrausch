@@ -376,6 +376,13 @@ public class VantageGameTest implements FabricClientGameTest {
 			logLoot(ctx, "naechstes");
 			ctx.takeScreenshot("ship_skip");
 			ctx.runOnClient(mc -> VantageConfig.get().trackerSkipLooted = false);
+			// Groesse der Tracker-Karte
+			for (float scale : new float[]{0.6f, 1.4f}) {
+				ctx.runOnClient(mc -> VantageConfig.get().trackerScale = scale);
+				ctx.waitTicks(3);
+				ctx.takeScreenshot("card_scale_" + Math.round(scale * 100));
+			}
+			ctx.runOnClient(mc -> VantageConfig.get().trackerScale = 1f);
 		}
 	}
 

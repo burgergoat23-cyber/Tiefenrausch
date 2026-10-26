@@ -84,6 +84,8 @@ public class VantageConfig {
 	public Map<String, String> trackTarget = new HashMap<>(Map.of("overworld", "stronghold", "the_nether", "bastion", "the_end", "end_ship"));
 	/** Gepluenderte Fundorte ueberspringen und das naechste ungepluenderte Ziel zeigen. */
 	public boolean trackerSkipLooted = false;
+	/** Groesse der Tracker-Karte im HUD (1 = normal) */
+	public float trackerScale = 1f;
 	/** Server-Adresse -> Seed (nur fuer Server, deren Seed man kennt, z. B. den eigenen Aternos-Server). */
 	public Map<String, String> serverSeeds = new HashMap<>();
 	public boolean trackerHud = true;

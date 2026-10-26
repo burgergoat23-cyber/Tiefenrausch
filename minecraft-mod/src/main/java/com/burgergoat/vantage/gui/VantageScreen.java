@@ -766,8 +766,15 @@ public class VantageScreen extends Screen {
 			TrackType type = StructureTracker.targetType(dim);
 			if (type != null) {
 				Site site = StructureTracker.target(client);
-				int cw = Math.min(w - 112, TrackerCard.width(client, type, site));
-				int h = TrackerCard.render(ctx, client, x, y, cw, type, site);
+				// Vorschau in der eingestellten Groesse (notfalls kleiner, damit die Knoepfe daneben passen)
+				int full = TrackerCard.width(client, type, site);
+				float sc = Math.min(TrackerCard.scale(), (w - 112) / (float) full);
+				ctx.getMatrices().pushMatrix();
+				ctx.getMatrices().translate(x, y);
+				ctx.getMatrices().scale(sc, sc);
+				int h = Math.round(TrackerCard.render(ctx, client, 0, 0, full, type, site) * sc);
+				ctx.getMatrices().popMatrix();
+				int cw = Math.round(full * sc);
 				int bx = x + cw + 8;
 				int bw = w - cw - 8;
 				button(ctx, bx, y, bw, 20, StructureTracker.searching() ? "Sucht …" : "Neu suchen", false, () -> StructureTracker.search(client));
@@ -810,6 +817,7 @@ public class VantageScreen extends Screen {
 
 		y = header(ctx, x, y, w, "Einstellungen");
 		y = toggle(ctx, x, y, w, "Tracker-Karte rechts oben im HUD", c.trackerHud, v -> c.trackerHud = v);
+		y = slider(ctx, x, y, w, "Größe der Tracker-Karte", 0.5, 1.5, c.trackerScale, 0.05, Math.round(c.trackerScale * 100) + " %", v -> c.trackerScale = (float) v);
 		y = toggle(ctx, x, y, w, "Geplünderte überspringen (nächstes volles Ziel zeigen)", c.trackerSkipLooted, v -> c.trackerSkipLooted = v);
 		y = toggle(ctx, x, y, w, "Lichtsäule über dem Ziel (in der Nähe)", c.trackerBeam, v -> c.trackerBeam = v);
 		y = toggle(ctx, x, y, w, "Immer automatisch suchen (beim Laufen, neue Dimension, neues Ziel)", c.trackerAuto, v -> c.trackerAuto = v);
