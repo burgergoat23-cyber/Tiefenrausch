@@ -948,7 +948,20 @@ public class VantageScreen extends Screen {
 		y = keyRow(ctx, x, y, w, "Zoom (halten)", VantageClient.zoomKey);
 		y = keyRow(ctx, x, y, w, "Tracker: jetzt suchen", VantageClient.trackerKey);
 		y = keyRow(ctx, x, y, w, "Tracker: Ziel wechseln", VantageClient.trackerCycleKey);
+		y = keyRow(ctx, x, y, w, "Freelook (umschauen)", VantageClient.freelookKey);
+		y = keyRow(ctx, x, y, w, "Freecam an/aus", VantageClient.freecamKey);
 		y = paragraph(ctx, x, y + 2, w, "Esc während „Taste drücken“ = Taste entfernen. Maus-Seitentasten gehen auch.", GRAY);
+
+		y = header(ctx, x, y + 2, w, "Kamera");
+		y = toggle(ctx, x, y, w, "Freelook umschalten statt halten", c.freelookToggle, v -> c.freelookToggle = v);
+		y = toggle(ctx, x, y, w, "Freelook in der dritten Person", c.freelookThirdPerson, v -> c.freelookThirdPerson = v);
+		y = slider(ctx, x, y, w, "Freecam-Tempo", 0.2, 2.0, c.freecamSpeed, 0.1, fmt(c.freecamSpeed), v -> c.freecamSpeed = (float) v);
+		y = paragraph(ctx, x, y, w, "Freecam: fliegen mit W/A/S/D, Leertaste hoch, Schleichen runter, Sprinten schneller. "
+				+ "Die Kamera fliegt nicht durch Blöcke. Manche Server verbieten Freelook/Freecam – vorher die Regeln lesen.", GRAY);
+
+		y = header(ctx, x, y + 2, w, "Combo-Zähler (unter dem Fadenkreuz)");
+		y = toggle(ctx, x, y, w, "Combo-Zähler (Treffer am Stück)", c.comboCounter, v -> c.comboCounter = v);
+		y = toggle(ctx, x, y, w, "Reichweite des letzten Treffers", c.reachDisplay, v -> c.reachDisplay = v);
 
 		y = header(ctx, x, y + 2, w, "Zoom");
 		y = slider(ctx, x, y, w, "Zoom-Stärke", 1.5, 10, c.zoom, 0.5, fmt(c.zoom) + "×", v -> c.zoom = (float) v);

@@ -1,5 +1,6 @@
 package com.burgergoat.vantage.mixin;
 
+import com.burgergoat.vantage.feature.CameraControl;
 import com.burgergoat.vantage.feature.Viewmodel;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -17,6 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Viewmodel (Position/Groesse der Hand) und Inspect-Animation in der Ich-Perspektive. */
 @Mixin(HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
+	/** In der Freecam keine Hand vor der Kamera. */
+	@Inject(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",
+			at = @At("HEAD"), cancellable = true)
+	private void vantage$hideHands(CallbackInfo ci) {
+		if (CameraControl.freeCam()) ci.cancel();
+	}
+
 	/** Waehrend der Zieh-Animation (Messer) kein zusaetzliches Hochfahren von unten. */
 	@ModifyVariable(method = "renderFirstPersonItem", at = @At("HEAD"), argsOnly = true, ordinal = 3)
 	private float vantage$equipProgress(float equipProgress, @Local(argsOnly = true) Hand hand) {

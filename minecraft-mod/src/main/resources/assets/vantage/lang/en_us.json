@@ -9,5 +9,7 @@
 	"key.vantage.tracker_cycle": "Tracker: next target type",
 	"key.arsenal.mace_toggle": "Toggle attribute swap",
 	"key.arsenal.shield_toggle": "Toggle shield breaker",
-	"key.category.vantage.main": "Vantage Client"
+	"key.category.vantage.main": "Vantage Client",
+	"key.vantage.freelook": "Freelook",
+	"key.vantage.freecam": "Freecam on/off"
 }

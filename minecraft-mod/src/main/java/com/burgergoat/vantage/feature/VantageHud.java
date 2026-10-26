@@ -1,5 +1,6 @@
 package com.burgergoat.vantage.feature;
 
+import com.burgergoat.vantage.VantageClient;
 import com.burgergoat.vantage.config.VantageConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -80,5 +81,12 @@ public final class VantageHud {
 			}
 		}
 		if (c.trackerHud) TrackerCard.renderHud(ctx);
+		ComboCounter.render(ctx);
+		if (CameraControl.freeCam()) {
+			String s = "Freecam – " + VantageClient.freecamKey.getBoundKeyLocalizedText().getString() + " zum Beenden";
+			int x = (ctx.getScaledWindowWidth() - tr.getWidth(s)) / 2;
+			ctx.fill(x - 4, 3, x + tr.getWidth(s) + 4, 15, 0x90000000);
+			ctx.drawTextWithShadow(tr, s, x, 5, 0xFFE8A33D);
+		}
 	}
 }

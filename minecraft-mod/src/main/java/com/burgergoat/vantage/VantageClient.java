@@ -2,6 +2,8 @@ package com.burgergoat.vantage;
 
 import com.burgergoat.vantage.config.VantageConfig;
 import com.burgergoat.vantage.feature.VantageHud;
+import com.burgergoat.vantage.feature.CameraControl;
+import com.burgergoat.vantage.feature.ComboCounter;
 import com.burgergoat.vantage.feature.Crosshair;
 import com.burgergoat.vantage.feature.Filters;
 import com.burgergoat.vantage.feature.Macros;
@@ -50,6 +52,8 @@ public class VantageClient implements ClientModInitializer {
 	public static KeyBinding trackerCycleKey;
 	public static KeyBinding maceToggleKey;
 	public static KeyBinding shieldToggleKey;
+	public static KeyBinding freelookKey;
+	public static KeyBinding freecamKey;
 
 	private static boolean greeted;
 
@@ -69,6 +73,8 @@ public class VantageClient implements ClientModInitializer {
 		trackerCycleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vantage.tracker_cycle", GLFW.GLFW_KEY_UNKNOWN, cat));
 		maceToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.mace_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
 		shieldToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.arsenal.shield_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
+		freelookKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vantage.freelook", GLFW.GLFW_KEY_LEFT_ALT, cat));
+		freecamKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vantage.freecam", GLFW.GLFW_KEY_F4, cat));
 
 		ClientTickEvents.END_CLIENT_TICK.register(VantageClient::tick);
 		ServerTickEvents.END_SERVER_TICK.register(ServerSearch::serverTick);
@@ -80,7 +86,10 @@ public class VantageClient implements ClientModInitializer {
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> SkinManager.appendTooltip(stack, lines));
 
 		AttackEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			if (world.isClient()) SkinManager.onAttack(entity, player.getStackInHand(hand));
+			if (world.isClient()) {
+				SkinManager.onAttack(entity, player.getStackInHand(hand));
+				ComboCounter.onAttack(entity);
+			}
 			return ActionResult.PASS;
 		});
 		UseItemCallback.EVENT.register((player, world, hand) -> {
@@ -138,6 +147,8 @@ public class VantageClient implements ClientModInitializer {
 		}
 
 		Macros.tick(client);
+		CameraControl.tick(client);
+		ComboCounter.tick(client);
 		Viewmodel.tick(client);
 		Zoom.tick(client);
 		Filters.tick(client);

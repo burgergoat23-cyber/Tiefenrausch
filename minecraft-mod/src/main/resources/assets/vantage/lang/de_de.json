@@ -9,5 +9,7 @@
 	"key.vantage.tracker_cycle": "Tracker: Ziel wechseln",
 	"key.arsenal.mace_toggle": "Attribut-Swap an/aus",
 	"key.arsenal.shield_toggle": "Schild-Brecher an/aus",
-	"key.category.vantage.main": "Vantage Client"
+	"key.category.vantage.main": "Vantage Client",
+	"key.vantage.freelook": "Freelook (umschauen)",
+	"key.vantage.freecam": "Freecam an/aus"
 }
