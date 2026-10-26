@@ -8,8 +8,10 @@ import com.burgergoat.vantage.feature.Viewmodel;
 import com.burgergoat.vantage.gui.VantageScreen;
 import com.burgergoat.vantage.skin.SkinPacks;
 import com.burgergoat.vantage.tracker.LootStatus;
+import com.burgergoat.vantage.tracker.SeedSearch;
 import com.burgergoat.vantage.tracker.Site;
 import com.burgergoat.vantage.tracker.StructureTracker;
+import com.burgergoat.vantage.tracker.TrackType;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -26,6 +28,9 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Automatischer Test (laeuft nur auf GitHub mit -Dfabric.client.gametest, nie beim normalen Spielen):
@@ -268,6 +273,19 @@ public class VantageGameTest implements FabricClientGameTest {
 			ctx.waitTicks(5);
 			ctx.waitFor(mc -> !StructureTracker.searching(), 6000);
 			ctx.runOnClient(mc -> VantageClient.LOG.info("TEST Tracker End: {} | {}", StructureTracker.status(), StructureTracker.results(mc)));
+			// Seed-Suche (fuer eigene Server): muss dieselben Schiffe finden wie die echte Welt
+			long worldSeed = sp.getServer().computeOnServer(server -> server.getOverworld().getSeed());
+			long t0 = System.currentTimeMillis();
+			Map<TrackType, List<Site>> bySeed = ctx.computeOnClient(mc -> SeedSearch.find(worldSeed, mc.world.getRegistryManager(), new BlockPos(0, 80, 0), 3000, 0, null));
+			long took = System.currentTimeMillis() - t0;
+			List<BlockPos> real = ctx.computeOnClient(mc -> StructureTracker.results(mc).stream().map(Site::pos).toList());
+			int hits = 0;
+			for (BlockPos p : real) {
+				for (Site s : bySeed.getOrDefault(TrackType.END_SHIP, List.of())) if (s.pos().equals(p)) hits++;
+			}
+			VantageClient.LOG.info("TEST Seed-Suche: {} von {} Schiffen gleich, {} Endsiedlungen, {} ms | Seed-Schiffe {}", hits, real.size(),
+					bySeed.getOrDefault(TrackType.END_CITY, List.of()).size(), took,
+					bySeed.getOrDefault(TrackType.END_SHIP, List.of()).stream().map(Site::pos).toList());
 			waitLoot(ctx);
 			logLoot(ctx, "fern");
 			ctx.takeScreenshot("tracker_end");

@@ -9,6 +9,7 @@ import com.burgergoat.vantage.skin.SkinCatalog;
 import com.burgergoat.vantage.skin.SkinManager;
 import com.burgergoat.vantage.skin.SkinPacks;
 import com.burgergoat.vantage.feature.TrackerCard;
+import com.burgergoat.vantage.tracker.SeedStore;
 import com.burgergoat.vantage.tracker.Site;
 import com.burgergoat.vantage.tracker.StructureTracker;
 import com.burgergoat.vantage.tracker.TrackType;
@@ -769,7 +770,7 @@ public class VantageScreen extends Screen {
 				int h = TrackerCard.render(ctx, client, x, y, cw, type, site);
 				int bx = x + cw + 8;
 				int bw = w - cw - 8;
-				button(ctx, bx, y, bw, 20, StructureTracker.searching() ? "Sucht …" : "Jetzt suchen", false, () -> StructureTracker.search(client));
+				button(ctx, bx, y, bw, 20, StructureTracker.searching() ? "Sucht …" : "Neu suchen", false, () -> StructureTracker.search(client));
 				button(ctx, bx, y + 24, bw, 20, "Beute neu prüfen", false, StructureTracker::recheck);
 				button(ctx, bx, y + 48, bw, 20, "Ziel überspringen", false, () -> StructureTracker.skip(client));
 				button(ctx, bx, y + 72, bw, 20, "Liste leeren", false, StructureTracker::clear);
@@ -780,8 +781,26 @@ public class VantageScreen extends Screen {
 		y += 13;
 		y = paragraph(ctx, x, y, w, single
 				? "Einzelspieler: Die Suche kennt die ganze Welt – auch weit außerhalb der Sichtweite. Die Beute wird echt geprüft: Elytra im Rahmen, Drachenkopf, ob Kisten noch nie geöffnet, offen, leer oder abgebaut sind."
-				: "Server: Die Mod kennt nur die geladenen Chunks (Sichtweite). Geprüft wird, was man sieht (Elytra im Rahmen, Drachenkopf, Kisten vorhanden). Was in Kisten liegt, verrät der Server nicht.",
+				: "Server: Ohne Seed kennt die Mod nur die geladenen Chunks (Sichtweite). Mit Seed (unten) findet sie Endsiedlungen und Schiffe auch weit weg. Geprüft wird, was man sieht (Elytra im Rahmen, Drachenkopf, Kisten vorhanden) – was in Kisten liegt, verrät der Server nicht.",
 				single ? 0xFF8FD18F : 0xFFE0C070);
+
+		if (!single && client != null && SeedStore.serverKey(client) != null) {
+			y = header(ctx, x, y, w, "Seed (eigener Server, z. B. Aternos)");
+			Long seed = SeedStore.seed(client);
+			y = paragraph(ctx, x, y, w, "Mit dem Seed findet der Tracker Endsiedlungen und Endschiffe auch weit außerhalb der Sichtweite – "
+					+ "wie Chunkbase. Nur für Server, deren Seed ihr kennt (z. B. euer eigener). Den Seed zeigt das Aternos-Panel, "
+					+ "oder hol ihn mit /seed (braucht Op).", GRAY);
+			ctx.drawTextWithShadow(textRenderer, seed == null ? "Kein Seed gespeichert" : "Seed: " + seed, x + 2, y + 2,
+					seed == null ? 0xFFE0C070 : 0xFF8FD18F);
+			y += 14;
+			int bw = (w - 8) / 3;
+			button(ctx, x, y, bw, 20, "Seed eingeben …", false, () -> client.setScreen(new SeedScreen(this)));
+			button(ctx, x + bw + 4, y, bw, 20, "Seed holen (/seed)", false, () -> SeedStore.request(client));
+			button(ctx, x + 2 * (bw + 4), y, bw, 20, "Seed löschen", false, () -> SeedStore.set(client, null));
+			y += 24;
+			String msg = SeedStore.message();
+			if (!msg.isEmpty()) y = paragraph(ctx, x, y, w, msg, 0xFF8FD18F);
+		}
 
 		y = header(ctx, x, y, w, "Ziel pro Dimension");
 		y = paragraph(ctx, x, y, w, "Die Karte zeigt immer nur das nächste Ziel des gewählten Typs. Taste „Tracker: Ziel wechseln“ wechselt im Spiel.", GRAY);
@@ -793,7 +812,7 @@ public class VantageScreen extends Screen {
 		y = toggle(ctx, x, y, w, "Tracker-Karte rechts oben im HUD", c.trackerHud, v -> c.trackerHud = v);
 		y = toggle(ctx, x, y, w, "Geplünderte überspringen (nächstes volles Ziel zeigen)", c.trackerSkipLooted, v -> c.trackerSkipLooted = v);
 		y = toggle(ctx, x, y, w, "Lichtsäule über dem Ziel (in der Nähe)", c.trackerBeam, v -> c.trackerBeam = v);
-		y = toggle(ctx, x, y, w, "Automatisch suchen (beim Laufen / neue Dimension)", c.trackerAuto, v -> c.trackerAuto = v);
+		y = toggle(ctx, x, y, w, "Immer automatisch suchen (beim Laufen, neue Dimension, neues Ziel)", c.trackerAuto, v -> c.trackerAuto = v);
 		y = slider(ctx, x, y, w, "Suchradius (Einzelspieler)", 500, 10000, c.trackerRadius, 250, c.trackerRadius + " Blöcke", v -> c.trackerRadius = (int) v);
 		y = toggle(ctx, x, y, w, "Auf Servern erlauben (nur geladene Chunks)", c.trackerServers, v -> c.trackerServers = v);
 		y = paragraph(ctx, x, y, w, "Achtung: Manche Server verbieten solche Hilfen. Vorher die Regeln lesen.", 0xFFE0C070);

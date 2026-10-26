@@ -217,7 +217,7 @@ public final class LootScanner {
 			case END_CITY -> {
 				rows.add(chests(main, -1, exact, complete, "Kisten (Stadt)"));
 				if (part != null) {
-					rows.add(elytra(part, part.unloaded == 0, "Schiff: Elytra"));
+					rows.add(elytra(part, part.unloaded == 0 && (exact || near), "Schiff: Elytra"));
 				} else if (exact) {
 					rows.add(new Row(new ItemStack(Items.ELYTRA), "Schiff", "keins", State.INFO));
 				} else if (main.elytra > 0 || main.heads > 0 || main.stands > 0 || main.emptyFrames > 0) {

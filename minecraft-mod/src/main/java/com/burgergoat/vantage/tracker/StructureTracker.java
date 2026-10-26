@@ -157,6 +157,8 @@ public final class StructureTracker {
 	}
 
 	public static void clear() {
+		SeedSearch.cancel();
+		searchingType = null;
 		RESULTS.clear();
 		SEARCHED.clear();
 		IGNORED.clear();
@@ -181,10 +183,16 @@ public final class StructureTracker {
 		BlockPos center = client.player.getBlockPos();
 		SEARCHED.put(t, center);
 		IntegratedServer server = client.getServer();
+		Long seed = SeedStore.seed(client);
 		if (server != null) {
 			searchingType = t;
 			status = "Suche läuft …";
 			ServerSearch.start(server, d, center, Set.of(t), VantageConfig.get().trackerRadius);
+		} else if (seed != null && SeedSearch.supports(d, t)) {
+			// Eigener Server mit bekanntem Seed: wie im Einzelspieler weit ueber die Sichtweite hinaus
+			searchingType = t;
+			status = "Suche mit Seed …";
+			SeedSearch.start(client, seed, center, VantageConfig.get().trackerRadius);
 		} else if (VantageConfig.get().trackerServers) {
 			SCANNED.clear();
 			scanIndex = 0;
@@ -215,6 +223,7 @@ public final class StructureTracker {
 	}
 
 	private static void resetDimension(RegistryKey<World> d) {
+		SeedSearch.cancel();
 		RESULTS.clear();
 		SEARCHED.clear();
 		IGNORED.clear();
@@ -246,10 +255,12 @@ public final class StructureTracker {
 		if (!d.equals(dim)) resetDimension(d);
 		TrackType t = targetType(d);
 		if (t == null) return;
-		if (c.trackerAuto && !searching() && ticks % 20 == 0 && (singleplayer || c.trackerServers)) {
+		// Sucht immer von selbst: beim Betreten, beim Wechsel des Ziels und wenn man ein Stueck gelaufen ist
+		boolean seedMode = !singleplayer && SeedStore.seed(client) != null && SeedSearch.supports(d, t);
+		if (c.trackerAuto && !searching() && ticks % 20 == 0 && (singleplayer || seedMode || c.trackerServers)) {
 			BlockPos p = client.player.getBlockPos();
 			BlockPos last = SEARCHED.get(t);
-			if (last == null || (singleplayer && last.getSquaredDistance(p) > 400 * 400)) search(client);
+			if (last == null || ((singleplayer || seedMode) && last.getSquaredDistance(p) > 300 * 300)) search(client);
 		}
 		if (!singleplayer && c.trackerServers) scanChunks(client, world);
 		if (ticks % 5 == 0) checkLoot(client, world, singleplayer);
@@ -275,9 +286,12 @@ public final class StructureTracker {
 					ServerLoot.request(client.getServer(), dim, s);
 				}
 			} else if (st == null || st.age() > 1_000) {
-				boolean near = dist < 64;
-				LootScanner.Census census = LootScanner.census(world, s.scanBox(), null, s.type(), l -> false);
-				LOOT.put(s.pos(), LootScanner.evaluate(s, census, null, false, near));
+				double partDist = s.part() == null ? dist : Math.sqrt(d2(s.part().getCenter(), client.player.getX(), client.player.getZ()));
+				boolean near = Math.min(dist, partDist) < 64;
+				LootScanner.Census main = LootScanner.census(world, s.scanBox(), s.part(), s.type(), l -> false);
+				LootScanner.Census part = s.part() == null ? null
+						: LootScanner.census(world, s.part(), null, s.type() == TrackType.END_CITY ? TrackType.END_SHIP : s.type(), l -> false);
+				LOOT.put(s.pos(), LootScanner.evaluate(s, main, part, false, near));
 			}
 			// Bei "ueberspringen" nur so weit pruefen, bis ein nicht gepluendertes Ziel gefunden ist
 			LootStatus now2 = LOOT.get(s.pos());

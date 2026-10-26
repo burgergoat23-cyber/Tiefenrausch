@@ -247,28 +247,28 @@ public final class KnifeAnimations {
 			k(0.56f, -0.25f, -0.02f, -0.34f, -30, 0, 15),
 			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.25f));
 
-	/** Axt: Hieb von oben (Danger-Zone-Axt). */
+	/** Axt: Hieb von oben (Danger-Zone-Axt): hoch ueber den Kopf, dann nach vorne unten. */
 	public static final Anim CHOP = a("chop", 11, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.3f, 0.04f, 0.22f, 0.12f, 50, -10, -12),
-			k(0.5f, -0.08f, -0.16f, -0.32f, -70, 8, 12),
-			k(0.66f, -0.08f, -0.18f, -0.3f, -72, 8, 12),
+			k(0.3f, 0.02f, 0.38f, 0.04f, 12, -5, 8),
+			k(0.5f, -0.1f, -0.18f, -0.3f, -60, 5, 10),
+			k(0.66f, -0.1f, -0.2f, -0.28f, -62, 5, 10),
 			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.4f));
 
 	public static final Anim CHOP_DIAGONAL = a("chop_d", 11, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.3f, 0.12f, 0.2f, 0.1f, 40, -25, -35),
-			k(0.5f, -0.2f, -0.14f, -0.3f, -60, 25, 35),
-			k(0.66f, -0.22f, -0.16f, -0.28f, -62, 26, 36),
+			k(0.3f, 0.1f, 0.34f, 0.04f, 10, -5, -25),
+			k(0.5f, -0.24f, -0.16f, -0.28f, -55, 10, 40),
+			k(0.66f, -0.26f, -0.18f, -0.26f, -57, 10, 42),
 			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.4f));
 
 	/** Streitkolben: schwerer Hammerschlag mit langem Ausholen. */
 	public static final Anim SMASH = a("smash", 14, new Key[]{
 			k(0, 0, 0, 0, 0, 0, 0),
-			k(0.35f, 0.02f, 0.3f, 0.16f, 65, -5, -8),
-			k(0.55f, -0.06f, -0.22f, -0.34f, -80, 5, 8),
-			k(0.62f, -0.06f, -0.2f, -0.33f, -76, 5, 8),
-			k(0.72f, -0.06f, -0.24f, -0.33f, -82, 5, 8),
+			k(0.35f, 0, 0.45f, 0.06f, 15, 0, 5),
+			k(0.55f, -0.08f, -0.24f, -0.32f, -70, 5, 8),
+			k(0.62f, -0.08f, -0.21f, -0.31f, -66, 5, 8),
+			k(0.72f, -0.08f, -0.25f, -0.31f, -72, 5, 8),
 			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.45f));
 
 	/** Passende Schlaganimation. kind: 0 = Schwert/Messer, 1 = Axt, 2 = Streitkolben. */

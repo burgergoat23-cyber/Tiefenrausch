@@ -10,6 +10,7 @@ import com.burgergoat.vantage.feature.Zoom;
 import com.burgergoat.vantage.gui.VantageScreen;
 import com.burgergoat.vantage.skin.SkinCatalog;
 import com.burgergoat.vantage.skin.SkinManager;
+import com.burgergoat.vantage.tracker.SeedStore;
 import com.burgergoat.vantage.tracker.ServerLoot;
 import com.burgergoat.vantage.tracker.ServerSearch;
 import com.burgergoat.vantage.tracker.StructureTracker;
@@ -18,6 +19,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
@@ -85,6 +87,10 @@ public class VantageClient implements ClientModInitializer {
 			MinecraftClient mc = MinecraftClient.getInstance();
 			if (world.isClient() && player == mc.player) Macros.afterUse(mc, player.getStackInHand(hand));
 			return ActionResult.PASS;
+		});
+
+		ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+			if (!overlay) SeedStore.onGameMessage(message);
 		});
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> client.execute(() -> {

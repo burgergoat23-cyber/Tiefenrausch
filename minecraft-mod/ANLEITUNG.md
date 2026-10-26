@@ -62,7 +62,9 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.3.
 - Ganz unten steht das Urteil: **UNBERÜHRT**, **TEILWEISE GEPLÜNDERT** oder **GEPLÜNDERT**.
 - „Geplünderte überspringen“ (im Menü) zeigt gleich das nächste volle Ziel – praktisch für die Elytra-Suche.
 - **Einzelspieler:** sucht in der ganzen Welt – weit über die Sichtweite hinaus (Suchradius einstellbar bis 10 000 Blöcke). Auch die Beute wird dort echt geprüft, auch bei weit entfernten Schiffen. Wo noch nie jemand war, ist alles „unberührt“.
-- **Server:** nur in geladenen Chunks und nur, wenn du es im Menü erlaubst. Geprüft wird nur, was man sehen kann (Elytra im Rahmen, Drachenkopf, ob Kisten da sind) – was in Kisten liegt, verrät der Server nicht. Weiter weg ginge nur mit dem Seed – das wäre Cheaten und ist absichtlich nicht drin.
+- Der Tracker sucht **immer von selbst** (beim Betreten, beim Wechsel des Ziels und wenn du ein Stück gelaufen bist) – du musst nichts drücken.
+- **Server (ohne Seed):** findet, was in geladenen Chunks (Sichtweite) liegt. Geprüft wird, was man sehen kann (Elytra im Rahmen, Drachenkopf, ob Kisten da sind) – was in Kisten liegt, verrät der Server nicht.
+- **Eigener Server mit Seed (z. B. Aternos):** Im Menü → Tracker → „Seed eingeben …“ den Seed eintragen oder „Seed holen (/seed)“ drücken (braucht Op-Rechte). Dann findet der Tracker **Endsiedlungen und Endschiffe auch weit außerhalb der Sichtweite** – genau wie Chunkbase. Den Seed zeigt auch das Aternos-Panel. Nur für Server benutzen, deren Seed ihr wirklich kennt; Seeds werden nicht geknackt.
 
 **Makros (alles einzeln an/aus):**
 - **Lunge-Swap (R):** Taste drücken → im selben Moment Speer (am liebsten mit Sprungangriff/Lunge), Stoß, zurück zum vorherigen Item. Halte vorher kurz ein anderes Item (z. B. Windladung), dessen volle Aufladung zählt für den Stoß. Optional: „Auch beim Werfen einer Windladung (Rechtsklick)“ – dann löst jeder Windladungs-Wurf sofort den Lunge-Swap aus.

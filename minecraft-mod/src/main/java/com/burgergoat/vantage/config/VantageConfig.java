@@ -84,9 +84,11 @@ public class VantageConfig {
 	public Map<String, String> trackTarget = new HashMap<>(Map.of("overworld", "stronghold", "the_nether", "bastion", "the_end", "end_ship"));
 	/** Gepluenderte Fundorte ueberspringen und das naechste ungepluenderte Ziel zeigen. */
 	public boolean trackerSkipLooted = false;
+	/** Server-Adresse -> Seed (nur fuer Server, deren Seed man kennt, z. B. den eigenen Aternos-Server). */
+	public Map<String, String> serverSeeds = new HashMap<>();
 	public boolean trackerHud = true;
 	public boolean trackerBeam = true;
-	public boolean trackerServers = false;
+	public boolean trackerServers = true;
 	public boolean trackerAuto = true;
 	public int trackerRadius = 3000;
 
@@ -150,6 +152,7 @@ public class VantageConfig {
 		if (instance.skins == null) instance.skins = new HashMap<>();
 		if (instance.statTrakKills == null) instance.statTrakKills = new HashMap<>();
 		if (instance.trackTarget == null) instance.trackTarget = new HashMap<>();
+		if (instance.serverSeeds == null) instance.serverSeeds = new HashMap<>();
 		if (instance.filter == null) instance.filter = "none";
 		if (instance.configVersion < 2) {
 			// Ab 1.2: Lunge-Swap sticht und wechselt sofort zurueck (alles im selben Tick)
@@ -157,6 +160,13 @@ public class VantageConfig {
 			instance.lungeReturnDelay = 0;
 			instance.lungeAfterWindDelay = 0;
 			instance.configVersion = 2;
+			save();
+		}
+		if (instance.configVersion < 3) {
+			// Ab 1.3: Tracker sucht immer von selbst, auch auf Servern
+			instance.trackerAuto = true;
+			instance.trackerServers = true;
+			instance.configVersion = 3;
 			save();
 		}
 		version++;
