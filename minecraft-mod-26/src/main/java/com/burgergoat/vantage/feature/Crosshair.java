@@ -10,7 +10,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 public final class Crosshair {
 	public static final String[] STYLES = {"Klassisch", "Nur Punkt", "T-Form", "Kreis"};
 	public static final int[] COLORS = {0x00FF40, 0xFFFF00, 0x00FFFF, 0xFFFFFF, 0xFF2020, 0xFF40FF, 0xFF9900, 0x4080FF};
-	public static final String[] PRESETS = {"CS Standard", "Klein", "Punkt", "Groß", "T-Form", "Kreis"};
+	public static final String[] PRESETS = {"Standard", "Klein", "Punkt", "Groß", "T-Form", "Kreis"};
 
 	private Crosshair() {
 	}

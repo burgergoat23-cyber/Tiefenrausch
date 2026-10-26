@@ -286,7 +286,8 @@ public class VantageGameTest implements FabricClientGameTest {
 					String.format(java.util.Locale.ROOT, "%.1f", camDist),
 					String.format(java.util.Locale.ROOT, "%.2f", Math.hypot(end[0] - start[0], end[1] - start[1])), camOff);
 
-			// Freecam im Einzelspieler durch den Boden: 25 Ticks nach unten -> Kamera unter der Erde, die Welt bleibt sichtbar
+			// Freecam im Einzelspieler durch den Boden: schnell 25 Ticks nach unten (50 Bloecke) -> Kamera unter der Erde
+			ctx.runOnClient(mc -> VantageConfig.get().freecamSpeed = 2f);
 			ctx.getInput().pressKey(VantageClient.freecamKey);
 			ctx.waitTicks(3);
 			ctx.getInput().holdKeyFor(o -> o.keyShift, 25);
@@ -294,6 +295,7 @@ public class VantageGameTest implements FabricClientGameTest {
 			double camBelow = ctx.computeOnClient(mc -> mc.player.getEyePosition().y - CameraControl.position(1f).y);
 			boolean cullOff = ctx.computeOnClient(mc -> !mc.smartCull);
 			ctx.takeScreenshot("freecam_underground");
+			ctx.runOnClient(mc -> VantageConfig.get().freecamSpeed = 0.6f);
 			ctx.getInput().pressKey(VantageClient.freecamKey);
 			ctx.waitTicks(3);
 			boolean cullBack = ctx.computeOnClient(mc -> mc.smartCull);

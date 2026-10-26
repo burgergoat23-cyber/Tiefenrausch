@@ -61,7 +61,7 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 
 **Freelook und Freecam:** Freelook (Alt halten) dreht nur die Kamera um dich herum – praktisch, um beim Laufen hinter dich zu schauen. Freecam (F4) lässt die Kamera frei fliegen, dein Spieler bleibt stehen; im **Einzelspieler fliegt sie durch Blöcke** (wie im Zuschauermodus), auf Servern nicht – dort wäre das wie X-Ray. Tempo und „umschalten statt halten“ im Reiter „Tasten & HUD“. Manche Server verbieten Freelook/Freecam.
 
-**Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch). Es ist von Anfang an an; oben im Reiter siehst du, ob es an ist, und kannst es mit einem Klick umschalten. Fertige **Vorlagen** (CS Standard, Klein, Punkt, Groß, T-Form, Kreis) gehen mit einem Klick. Jede Änderung schaltet es automatisch an. Zu sehen ist es in der Ich-Ansicht (F5 wieder auf die normale Ansicht).
+**Fadenkreuz:** eigenes CS-Fadenkreuz (Länge, Dicke, Lücke, Farbe, Punkt, Umrandung, T-Form, Kreis, dynamisch). Es ist von Anfang an an; oben im Reiter siehst du, ob es an ist, und kannst es mit einem Klick umschalten. Fertige **Vorlagen** (Standard, Klein, Punkt, Groß, T-Form, Kreis) gehen mit einem Klick. Jede Änderung schaltet es automatisch an. Zu sehen ist es in der Ich-Ansicht (F5 wieder auf die normale Ansicht).
 
 **Menü-Farbe:** unten links im Menü (bunte Punkte) oder im Reiter „Tasten & HUD“ – Orange, Eisblau, Lila, Grün, Rot oder Pink.
 
