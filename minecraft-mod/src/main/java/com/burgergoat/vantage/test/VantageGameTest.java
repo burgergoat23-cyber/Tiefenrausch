@@ -255,14 +255,18 @@ public class VantageGameTest implements FabricClientGameTest {
 			ctx.getInput().moveCursor(600, 0);
 			ctx.waitTicks(5);
 			float yawDuring = ctx.computeOnClient(mc -> mc.player.getYaw());
-			float camYaw = ctx.computeOnClient(mc -> CameraControl.yaw());
+			// Direkt wie eine Mausbewegung drehen (falls die Test-Maus nicht greift)
+			ctx.runOnClient(mc -> mc.player.changeLookDirection(400, 0));
+			ctx.waitTicks(2);
+			float yawAfterTurn = ctx.computeOnClient(mc -> mc.player.getYaw());
 			boolean lookOn = ctx.computeOnClient(mc -> CameraControl.freeLook());
+			float camYaw = ctx.computeOnClient(mc -> CameraControl.yaw());
 			ctx.takeScreenshot("freelook");
 			ctx.getInput().releaseKey(VantageClient.freelookKey);
 			ctx.waitTicks(3);
 			String persp = ctx.computeOnClient(mc -> mc.options.getPerspective().name());
-			VantageClient.LOG.info("TEST Freelook: aktiv={} Spieler-Blick vorher={} waehrend={} Kamera={} Perspektive danach={}",
-					lookOn, yawBefore, yawDuring, camYaw, persp);
+			VantageClient.LOG.info("TEST Freelook: aktiv={} Spieler-Blick vorher={} waehrend={} nach Drehen={} Kamera={} Perspektive danach={}",
+					lookOn, yawBefore, yawDuring, yawAfterTurn, camYaw, persp);
 
 			// Freecam: einschalten, 20 Ticks vorwaerts fliegen -> Kamera bewegt sich, Spieler bleibt
 			double[] start = ctx.computeOnClient(mc -> new double[]{mc.player.getX(), mc.player.getZ()});
