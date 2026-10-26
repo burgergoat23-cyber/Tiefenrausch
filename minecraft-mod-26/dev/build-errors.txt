@@ -1,18 +1,2 @@
-20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/BrewGuide.java:218: error: ')' expected
-21-				if (tr.width((name) <= right - x) {
-22-				                                 ^
-23-1 error
---
-35:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/BrewGuide.java:218: error: ')' expected
-36-  				if (tr.width((name) <= right - x) {
-37-  				                                 ^
-38-  1 error
---
-75:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/BrewGuide.java:218: error: ')' expected
-76-				if (tr.width((name) <= right - x) {
-77-				                                 ^
-78-1 error
-1 error
-1 error
-Bau: failure
+Bau: success
 Fertiges Jar: minecraft-mod-26/download/
