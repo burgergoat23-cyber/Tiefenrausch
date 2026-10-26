@@ -1,1 +1,27 @@
 Bau fehlgeschlagen (Spieltest nicht gelaufen)
+22:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:244: error: reference to append is ambiguous
+23-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+24-				      ^
+25-  both method append(char[]) in StringBuilder and method append(String) in StringBuilder match
+26:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:244: error: incompatible types: inference variable T has incompatible bounds
+27-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+28-				                                 ^
+29-    upper bounds: char[],Object
+--
+47:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:244: error: reference to append is ambiguous
+48-  				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+49-  				      ^
+50-    both method append(char[]) in StringBuilder and method append(String) in StringBuilder match
+51:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:244: error: incompatible types: inference variable T has incompatible bounds
+52-  				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+53-  				                                 ^
+54-      upper bounds: char[],Object
+--
+97:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:244: error: reference to append is ambiguous
+98-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+99-				      ^
+100-  both method append(char[]) in StringBuilder and method append(String) in StringBuilder match
+101:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/test/VantageGameTest.java:244: error: incompatible types: inference variable T has incompatible bounds
+102-				combos.append(ctx.computeOnClient(mc -> ComboCounter.combo())).append(' ');
+103-				                                 ^
+104-    upper bounds: char[],Object
