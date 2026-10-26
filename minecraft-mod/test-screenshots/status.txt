@@ -1,1 +1,15 @@
-Spieltest: success
+Bau fehlgeschlagen (Spieltest nicht gelaufen)
+22:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/feature/BrewGuide.java:218: error: ')' expected
+23-				if (tr.getWidth((name) <= right - x) {
+24-				                                    ^
+25-1 error
+--
+37:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/feature/BrewGuide.java:218: error: ')' expected
+38-  				if (tr.getWidth((name) <= right - x) {
+39-  				                                    ^
+40-  1 error
+--
+77:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod/src/main/java/com/burgergoat/vantage/feature/BrewGuide.java:218: error: ')' expected
+78-				if (tr.getWidth((name) <= right - x) {
+79-				                                    ^
+80-1 error
