@@ -215,7 +215,7 @@ public final class BrewGuide {
 				int right = panelX + panelW - 6 - (r.longer ? 5 : 0) - (r.stronger ? 5 : 0);
 				// Lange Namen etwas kleiner, damit sie in die Liste passen
 				String name = shortName(r.to);
-				if (tr.width((name) <= right - x) {
+				if (tr.width(name) <= right - x) {
 					ctx.text(tr, name, x, y + 5, 0xFFE3E7EC);
 				} else {
 					ctx.pose().pushMatrix();
