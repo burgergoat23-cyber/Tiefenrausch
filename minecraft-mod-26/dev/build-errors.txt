@@ -1,48 +1,18 @@
-20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:51: error: cannot find symbol
-21-				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
-22-				                                                                                ^
-23-  symbol:   method getHeight()
+20:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:90: error: cannot find symbol
+21-				EntityType<LightningBolt> type = (EntityType<LightningBolt>) EntityType.byString("lightning_bolt").orElse(null);
+22-				                                                                       ^
+23-  symbol:   method byString(String)
 --
-25:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:89: error: cannot find symbol
-26-				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
-27-				                                                 ^
-28-  symbol:   variable LIGHTNING_BOLT
+37:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:90: error: cannot find symbol
+38-  				EntityType<LightningBolt> type = (EntityType<LightningBolt>) EntityType.byString("lightning_bolt").orElse(null);
+39-  				                                                                       ^
+40-    symbol:   method byString(String)
 --
-30:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:94: error: incompatible types: WeatheringCopperCollection<Item> cannot be converted to Item
-31-				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
-32-				                                                  ^
-33-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
---
-46:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:51: error: cannot find symbol
-47-  				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
-48-  				                                                                                ^
-49-    symbol:   method getHeight()
---
-51:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:89: error: cannot find symbol
-52-  				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
-53-  				                                                 ^
-54-    symbol:   variable LIGHTNING_BOLT
---
-56:  /home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:94: error: incompatible types: WeatheringCopperCollection<Item> cannot be converted to Item
-57-  				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
-58-  				                                                  ^
-59-  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
---
-127:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:51: error: cannot find symbol
-128-				if (VantageConfig.get().killEffects) play(mc, new Vec3(le.getX(), le.getY() + le.getHeight() / 2, le.getZ()), VantageConfig.get().killEffect);
-129-				                                                                                ^
-130-  symbol:   method getHeight()
---
-132:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:89: error: cannot find symbol
-133-				LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, w);
-134-				                                                 ^
-135-  symbol:   variable LIGHTNING_BOLT
---
-137:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/gui/VantageScreen.java:94: error: incompatible types: WeatheringCopperCollection<Item> cannot be converted to Item
-138-				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
-139-				                                                  ^
-140-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
-3 errors
-3 errors
+79:/home/runner/work/Tiefenrausch/Tiefenrausch/minecraft-mod-26/src/main/java/com/burgergoat/vantage/feature/KillEffects.java:90: error: cannot find symbol
+80-				EntityType<LightningBolt> type = (EntityType<LightningBolt>) EntityType.byString("lightning_bolt").orElse(null);
+81-				                                                                       ^
+82-  symbol:   method byString(String)
+1 error
+1 error
 Bau: failure
 Fertiges Jar: minecraft-mod-26/download/
