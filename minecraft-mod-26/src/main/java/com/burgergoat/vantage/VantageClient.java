@@ -5,6 +5,9 @@ import com.burgergoat.vantage.feature.VantageHud;
 import com.burgergoat.vantage.feature.BrewGuide;
 import com.burgergoat.vantage.feature.GuiThemes;
 import com.burgergoat.vantage.feature.Hotbar;
+import com.burgergoat.vantage.feature.Extras;
+import com.burgergoat.vantage.feature.KillEffects;
+import com.burgergoat.vantage.feature.Waypoints;
 import com.burgergoat.vantage.feature.CameraControl;
 import com.burgergoat.vantage.feature.ComboCounter;
 import com.burgergoat.vantage.feature.Crosshair;
@@ -59,6 +62,7 @@ public class VantageClient implements ClientModInitializer {
 	public static KeyMapping shieldToggleKey;
 	public static KeyMapping freelookKey;
 	public static KeyMapping freecamKey;
+	public static KeyMapping waypointKey;
 
 	private static boolean greeted;
 
@@ -80,6 +84,7 @@ public class VantageClient implements ClientModInitializer {
 		shieldToggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.arsenal.shield_toggle", GLFW.GLFW_KEY_UNKNOWN, cat));
 		freelookKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vantage.freelook", GLFW.GLFW_KEY_LEFT_ALT, cat));
 		freecamKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vantage.freecam", GLFW.GLFW_KEY_F4, cat));
+		waypointKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vantage.waypoint", GLFW.GLFW_KEY_J, cat));
 
 		ClientTickEvents.END_CLIENT_TICK.register(VantageClient::tick);
 		ServerTickEvents.END_SERVER_TICK.register(ServerSearch::serverTick);
@@ -87,6 +92,11 @@ public class VantageClient implements ClientModInitializer {
 
 		HudElementRegistry.replaceElement(VanillaHudElements.CROSSHAIR, Crosshair::wrap);
 		HudElementRegistry.replaceElement(VanillaHudElements.HOTBAR, Hotbar::wrap);
+		// Trank-Timer an: die Symbole oben rechts vom Spiel auf Wunsch ausblenden
+		HudElementRegistry.replaceElement(VanillaHudElements.MOB_EFFECTS, vanilla -> (ctx, tickCounter) -> {
+			VantageConfig c = VantageConfig.get();
+			if (!(c.potionHud && c.potionHideVanilla)) vanilla.extractRenderState(ctx, tickCounter);
+		});
 		// GUI-Designs: vor jedem Kisten-/Ofen-/Inventar-Fenster die Bilder im gewaehlten Design bereitlegen
 		ScreenEvents.BEFORE_INIT.register((client, screen, w, h) -> {
 			if (screen instanceof AbstractContainerScreen<?>) GuiThemes.ensure(client);
@@ -100,6 +110,7 @@ public class VantageClient implements ClientModInitializer {
 			if (world.isClientSide()) {
 				SkinManager.onAttack(entity, player.getItemInHand(hand));
 				ComboCounter.onAttack(entity);
+				KillEffects.onAttack(entity);
 			}
 			return InteractionResult.PASS;
 		});
@@ -160,6 +171,10 @@ public class VantageClient implements ClientModInitializer {
 		Macros.tick(client);
 		CameraControl.tick(client);
 		ComboCounter.tick(client);
+		Waypoints.tick(client);
+		KillEffects.tick(client);
+		Extras.tick(client);
+		while (waypointKey.consumeClick()) Waypoints.addHere(client);
 		Viewmodel.tick(client);
 		Zoom.tick(client);
 		Filters.tick(client);

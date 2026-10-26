@@ -6,6 +6,8 @@
 	"client": [
 		"BossBarHudAccessor",
 		"CameraMixin",
+		"ChatHudAccessor",
+		"ChatHudMixin",
 		"ClientPlayerInteractionManagerAccessor",
 		"DrawContextMixin",
 		"EntityMixin",
@@ -16,9 +18,11 @@
 		"KeyboardInputMixin",
 		"MinecraftClientAccessor",
 		"MinecraftClientMixin",
+		"OverlayTextureAccessor",
 		"ServerChunkLoadingManagerInvoker",
 		"ServerChunkManagerAccessor",
-		"SimpleStructurePieceAccessor"
+		"SimpleStructurePieceAccessor",
+		"WorldRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

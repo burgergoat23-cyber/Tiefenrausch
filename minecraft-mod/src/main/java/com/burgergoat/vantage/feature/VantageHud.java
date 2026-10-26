@@ -24,6 +24,15 @@ public final class VantageHud {
 	private VantageHud() {
 	}
 
+	/** Klicks pro Sekunde (links / rechts) fuer die Tasten-Anzeige. */
+	public static int leftCps() {
+		return cps(LEFT, System.currentTimeMillis());
+	}
+
+	public static int rightCps() {
+		return cps(RIGHT, System.currentTimeMillis());
+	}
+
 	private static int cps(ArrayDeque<Long> q, long now) {
 		while (!q.isEmpty() && now - q.peekFirst() > 1000) q.pollFirst();
 		return q.size();
@@ -82,6 +91,8 @@ public final class VantageHud {
 				}
 			}
 		}
+		HudModules.render(ctx);
+		Waypoints.render(ctx);
 		if (c.trackerHud) TrackerCard.renderHud(ctx);
 		ComboCounter.render(ctx);
 		if (CameraControl.freeCam()) {

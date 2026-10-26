@@ -6,6 +6,8 @@ import com.burgergoat.vantage.config.VantageConfig;
 import com.burgergoat.vantage.feature.CameraControl;
 import com.burgergoat.vantage.feature.ComboCounter;
 import com.burgergoat.vantage.feature.Crosshair;
+import com.burgergoat.vantage.feature.KillEffects;
+import com.burgergoat.vantage.feature.Waypoints;
 import com.burgergoat.vantage.feature.Macros;
 import com.burgergoat.vantage.feature.Viewmodel;
 import com.burgergoat.vantage.gui.VantageScreen;
@@ -400,6 +402,70 @@ public class VantageGameTest implements FabricClientGameTest {
 				VantageConfig.get().hotbarNumbers = false;
 				mc.player.getInventory().setSelectedSlot(0);
 			});
+
+			// Neue HUD-Module: Tasten-Anzeige, Ruestung, Trank-Timer, Wegpunkt, Blockrahmen
+			sp.getServer().runCommand("item replace entity @p armor.head with diamond_helmet");
+			sp.getServer().runCommand("item replace entity @p armor.chest with netherite_chestplate");
+			sp.getServer().runCommand("item replace entity @p armor.feet with iron_boots");
+			sp.getServer().runCommand("item replace entity @p hotbar.8 with arrow 32");
+			sp.getServer().runCommand("effect give @p minecraft:speed 120 1");
+			sp.getServer().runCommand("effect give @p minecraft:strength 8 0");
+			sp.getServer().runCommand("effect give @p minecraft:night_vision 300 0");
+			sp.getServer().runCommand("execute at @p run setblock ~ ~1 ~2 minecraft:gold_block");
+			ctx.runOnClient(mc -> {
+				VantageConfig c = VantageConfig.get();
+				c.keystrokes = true;
+				c.armorHud = true;
+				c.potionHud = true;
+				c.outlineCustom = true;
+				c.outlineColor = 0xFFFF74B8;
+				c.outlineWidth = 4f;
+				mc.player.setYaw(0f);
+				mc.player.setPitch(0f);
+				Waypoints.addHere(mc);
+			});
+			ctx.waitTicks(10);
+			ctx.takeScreenshot("hud_modules");
+
+			// Chat: Uhrzeit und gleiche Nachrichten zusammenfassen
+			ctx.runOnClient(mc -> {
+				VantageConfig.get().chatTimestamps = true;
+				VantageConfig.get().chatStack = true;
+			});
+			for (int i = 0; i < 3; i++) {
+				sp.getServer().runCommand("say Hallo vom Server");
+				ctx.waitTicks(2);
+			}
+			sp.getServer().runCommand("say Andere Nachricht");
+			ctx.waitTicks(5);
+			ctx.takeScreenshot("chat_tweaks");
+
+			// Treffer-Farbe und Kill-Effekt
+			ctx.runOnClient(mc -> {
+				VantageConfig.get().hitColorCustom = true;
+				VantageConfig.get().hitColor = 0x993FC3E8;
+			});
+			sp.getServer().runCommand("execute at @p run summon minecraft:husk ~ ~ ~3 {NoAI:1b}");
+			ctx.waitTicks(5);
+			sp.getServer().runCommand("damage @e[type=minecraft:husk,limit=1] 1");
+			ctx.waitTicks(2);
+			ctx.takeScreenshot("hit_color");
+			sp.getServer().runCommand("kill @e[type=minecraft:husk]");
+			ctx.runOnClient(mc -> KillEffects.play(mc, mc.player.getEyePos().add(0, 0, 4), 2));
+			ctx.waitTicks(3);
+			ctx.takeScreenshot("kill_effect");
+			ctx.runOnClient(mc -> {
+				VantageConfig c = VantageConfig.get();
+				c.keystrokes = false;
+				c.armorHud = false;
+				c.potionHud = false;
+				c.outlineCustom = false;
+				c.hitColorCustom = false;
+				c.chatTimestamps = false;
+				Waypoints.setActive(mc, null);
+			});
+			sp.getServer().runCommand("effect clear @p");
+			sp.getServer().runCommand("execute at @p run setblock ~ ~1 ~2 minecraft:air");
 
 			for (String f : new String[]{"clear", "vivid", "cinematic", "golden", "frost", "dream", "hdr", "noir", "comic", "nightvision"}) {
 				ctx.runOnClient(mc -> VantageConfig.get().filter = f);

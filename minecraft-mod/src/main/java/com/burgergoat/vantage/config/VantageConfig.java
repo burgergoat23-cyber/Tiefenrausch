@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Alle Einstellungen der Mod. Wird als config/vantage.json gespeichert. */
@@ -103,6 +104,43 @@ public class VantageConfig {
 	public boolean hotbarSmooth = true;
 	/** Brau-Rezepte neben dem Braustand */
 	public boolean brewHelper = true;
+
+	// ---- Menue-Fenster
+	/** Kategorie -> "x,y,offen" (Lage der Fenster im Menue) */
+	public Map<String, String> menuWindows = new HashMap<>();
+
+	// ---- HUD-Module (Lage: 0 oben links, 1 oben rechts, 2 unten links, 3 unten rechts, 4 Mitte links, 5 Mitte rechts)
+	public boolean keystrokes = false;
+	public int keystrokesPos = 4;
+	public float keystrokesScale = 1f;
+	public boolean armorHud = false;
+	public int armorPos = 3;
+	public boolean armorCounts = true;
+	public boolean potionHud = false;
+	public int potionPos = 5;
+	public boolean potionHideVanilla = true;
+
+	// ---- Wegpunkte (Welt/Server -> Liste "Name|x|y|z|Dimension|Farbe")
+	public boolean waypoints = true;
+	public boolean deathPoint = true;
+	public boolean waypointBeam = true;
+	public Map<String, List<String>> waypointList = new HashMap<>();
+	/** Welt/Server -> Name des Wegpunkts, der gerade angezeigt wird */
+	public Map<String, String> activeWaypoint = new HashMap<>();
+
+	// ---- Extras
+	public boolean outlineCustom = false;
+	public int outlineColor = 0xFF3FC3E8;
+	public float outlineWidth = 2.5f;
+	public boolean hitColorCustom = false;
+	public int hitColor = 0x993FC3E8;
+	public boolean killEffects = false;
+	/** 0 Blitz, 1 Blut, 2 Feuerwerk, 3 Seelen */
+	public int killEffect = 0;
+	public boolean killSound = true;
+	public boolean chatTimestamps = false;
+	public boolean chatStack = true;
+	public boolean chatLongHistory = true;
 
 	// ---- Tracker
 	/** Dimension ("overworld", "the_nether", "the_end") -> gesuchter Typ (immer nur einer pro Dimension). */

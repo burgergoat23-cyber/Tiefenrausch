@@ -6,6 +6,10 @@ import com.burgergoat.vantage.feature.Crosshair;
 import com.burgergoat.vantage.feature.Filters;
 import com.burgergoat.vantage.feature.GuiThemes;
 import com.burgergoat.vantage.feature.Hotbar;
+import com.burgergoat.vantage.feature.Extras;
+import com.burgergoat.vantage.feature.HudModules;
+import com.burgergoat.vantage.feature.KillEffects;
+import com.burgergoat.vantage.feature.Waypoints;
 import com.burgergoat.vantage.feature.Viewmodel;
 import com.burgergoat.vantage.skin.SkinCatalog;
 import com.burgergoat.vantage.skin.SkinManager;
@@ -43,6 +47,7 @@ import java.util.Random;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
 
 /**
  * Das Vantage-Client-Menue (Taste K). Startseite mit einer Kachel pro Modul (an/aus mit einem Klick),
@@ -61,40 +66,59 @@ public class VantageScreen extends Screen {
 	private static int accent = THEMES[0];
 	private static int accentDim = 0xFF5A4220;
 
-	/** Startseite mit den Kacheln. */
+	/** Kein Einstellungs-Fenster offen. */
 	public static final int HOME = -1;
 	public static final String[] PAGES = {"Skins", "Pakete", "Fadenkreuz", "Viewmodel", "Shader", "Tracker", "Lunge-Swap",
 			"Attribut-Swap", "Schild-Brecher", "Schnell-Wurf", "Combo-Zähler", "Freecam & Freelook", "Zoom", "Info-Anzeige",
-			"GUI-Design", "Brau-Helfer", "Tasten"};
+			"GUI-Design", "Brau-Helfer", "Tasten", "Tasten-Anzeige", "Rüstung", "Trank-Timer", "Wegpunkte", "Blockrahmen & Treffer",
+			"Kill-Effekte", "Chat"};
 	public static final int P_SKINS = 0, P_PACKS = 1, P_CROSSHAIR = 2, P_VIEWMODEL = 3, P_SHADER = 4, P_TRACKER = 5, P_LUNGE = 6,
 			P_MACE = 7, P_SHIELD = 8, P_QUICK = 9, P_COMBO = 10, P_CAMERA = 11, P_ZOOM = 12, P_INFO = 13, P_GUI = 14, P_BREW = 15,
-			P_KEYS = 16;
-	private static final String[] CATEGORIES = {"Alle", "Kampf", "Optik", "Welt", "HUD & Kamera"};
+			P_KEYS = 16, P_KEYSTROKES = 17, P_ARMOR = 18, P_POTIONS = 19, P_WAYPOINTS = 20, P_OUTLINE = 21, P_KILL = 22, P_CHAT = 23;
+	/** Ein Fenster pro Kategorie. */
+	private static final String[] CATEGORIES = {"Kampf", "Optik", "Welt", "HUD"};
+	private static final Item[] CATEGORY_ICONS = {Items.DIAMOND_SWORD, Items.ENDER_EYE, Items.FILLED_MAP, Items.CLOCK};
 
-	/** Kachel auf der Startseite: Seite, kurze Beschreibung, Symbol, Kategorie und (falls vorhanden) An/Aus. */
+	/** Zeile in einem Kategorie-Fenster: Seite, kurze Beschreibung, Symbol, Kategorie und (falls vorhanden) An/Aus. */
 	private record Module(int page, String desc, Item icon, int cat, @Nullable BooleanSupplier on, @Nullable Consumer<Boolean> set) {
 	}
 
 	private static List<Module> modules() {
 		VantageConfig c = VantageConfig.get();
 		return List.of(
-				new Module(P_SKINS, "CS-Messer, Äxte, Schilde", Items.NETHERITE_SWORD, 2, () -> c.skinsEnabled, v -> c.skinsEnabled = v),
-				new Module(P_PACKS, "Alles mit einem Klick", Items.BUNDLE, 2, null, null),
-				new Module(P_CROSSHAIR, "Eigenes CS-Fadenkreuz", Items.TARGET, 4, () -> c.chEnabled, v -> c.chEnabled = v),
-				new Module(P_VIEWMODEL, "Hand & Schlag-Animationen", Items.ARMOR_STAND, 2, () -> c.swingAnim, v -> c.swingAnim = v),
-				new Module(P_SHADER, "Bloom und Kino-Farben", Items.ENDER_EYE, 2, null, null),
-				new Module(P_GUI, "Kisten, Öfen, Inventar, Hotbar", Items.CHEST, 2, null, null),
-				new Module(P_LUNGE, "Speer-Stoß mit Wechsel", Items.NETHERITE_SPEAR, 1, () -> c.lungeEnabled, v -> c.lungeEnabled = v),
-				new Module(P_MACE, "Streitkolben-Schlag", Items.MACE, 1, () -> c.maceSwap, v -> c.maceSwap = v),
-				new Module(P_SHIELD, "Axt gegen Schilde", Items.NETHERITE_AXE, 1, () -> c.shieldBreaker, v -> c.shieldBreaker = v),
-				new Module(P_QUICK, "Perle und Windladung", Items.ENDER_PEARL, 1, null, null),
-				new Module(P_COMBO, "Treffer am Stück", Items.BLAZE_POWDER, 1, () -> c.comboCounter, v -> c.comboCounter = v),
-				new Module(P_TRACKER, "Strukturen und Beute", Items.COMPASS, 3, () -> c.trackerHud, v -> c.trackerHud = v),
-				new Module(P_BREW, "Rezepte am Braustand", Items.BREWING_STAND, 3, () -> c.brewHelper, v -> c.brewHelper = v),
-				new Module(P_CAMERA, "Frei umschauen und fliegen", Items.FEATHER, 4, null, null),
-				new Module(P_ZOOM, "Heranzoomen", Items.SPYGLASS, 4, null, null),
-				new Module(P_INFO, "FPS, CPS, Koordinaten", Items.CLOCK, 4, () -> c.hudInfo, v -> c.hudInfo = v),
-				new Module(P_KEYS, "Alle Tasten ändern", Items.LEVER, 4, null, null));
+				new Module(P_LUNGE, "Speer-Stoß mit Wechsel", Items.NETHERITE_SPEAR, 0, () -> c.lungeEnabled, v -> c.lungeEnabled = v),
+				new Module(P_MACE, "Streitkolben-Schlag", Items.MACE, 0, () -> c.maceSwap, v -> c.maceSwap = v),
+				new Module(P_SHIELD, "Axt gegen Schilde", Items.NETHERITE_AXE, 0, () -> c.shieldBreaker, v -> c.shieldBreaker = v),
+				new Module(P_QUICK, "Perle und Windladung", Items.ENDER_PEARL, 0, null, null),
+				new Module(P_COMBO, "Treffer am Stück", Items.BLAZE_POWDER, 0, () -> c.comboCounter, v -> c.comboCounter = v),
+				new Module(P_KILL, "Blitz, Blut, Feuerwerk", Items.LIGHTNING_ROD, 0, () -> c.killEffects, v -> c.killEffects = v),
+				new Module(P_SKINS, "CS-Messer, Äxte, Schilde", Items.NETHERITE_SWORD, 1, () -> c.skinsEnabled, v -> c.skinsEnabled = v),
+				new Module(P_PACKS, "Alles mit einem Klick", Items.BUNDLE, 1, null, null),
+				new Module(P_VIEWMODEL, "Hand & Schlag-Animationen", Items.ARMOR_STAND, 1, () -> c.swingAnim, v -> c.swingAnim = v),
+				new Module(P_CROSSHAIR, "Eigenes CS-Fadenkreuz", Items.TARGET, 1, () -> c.chEnabled, v -> c.chEnabled = v),
+				new Module(P_SHADER, "Bloom und Kino-Farben", Items.ENDER_EYE, 1, () -> !"none".equals(c.filter), v -> c.filter = v ? "clear" : "none"),
+				new Module(P_GUI, "Kisten, Öfen, Inventar, Hotbar", Items.CHEST, 1, () -> c.guiTheme != 0 || c.hotbarStyle != 0, v -> {
+					c.guiTheme = v ? 1 : 0;
+					c.hotbarStyle = v ? 1 : 0;
+				}),
+				new Module(P_OUTLINE, "Farbe für Blockrahmen und Treffer", Items.GLASS, 1, () -> c.outlineCustom || c.hitColorCustom, v -> {
+					c.outlineCustom = v;
+					c.hitColorCustom = v;
+				}),
+				new Module(P_TRACKER, "Strukturen und Beute", Items.COMPASS, 2, () -> c.trackerHud, v -> c.trackerHud = v),
+				new Module(P_WAYPOINTS, "Orte merken, Todespunkt", Items.RECOVERY_COMPASS, 2, () -> c.waypoints, v -> c.waypoints = v),
+				new Module(P_BREW, "Rezepte am Braustand", Items.BREWING_STAND, 2, () -> c.brewHelper, v -> c.brewHelper = v),
+				new Module(P_CHAT, "Uhrzeit, Nachrichten stapeln", Items.WRITABLE_BOOK, 2, () -> c.chatTimestamps || c.chatStack, v -> {
+					c.chatTimestamps = v;
+					c.chatStack = v;
+				}),
+				new Module(P_CAMERA, "Frei umschauen und fliegen", Items.FEATHER, 2, null, null),
+				new Module(P_ZOOM, "Heranzoomen", Items.SPYGLASS, 2, null, null),
+				new Module(P_INFO, "FPS, CPS, Koordinaten", Items.CLOCK, 3, () -> c.hudInfo, v -> c.hudInfo = v),
+				new Module(P_KEYSTROKES, "W A S D und Maus mit CPS", Items.OAK_BUTTON, 3, () -> c.keystrokes, v -> c.keystrokes = v),
+				new Module(P_ARMOR, "Haltbarkeit und Vorräte", Items.DIAMOND_CHESTPLATE, 3, () -> c.armorHud, v -> c.armorHud = v),
+				new Module(P_POTIONS, "Effekte mit Restzeit", Items.POTION, 3, () -> c.potionHud, v -> c.potionHud = v),
+				new Module(P_KEYS, "Alle Tasten ändern", Items.LEVER, 3, null, null));
 	}
 
 	@Nullable
@@ -104,13 +128,30 @@ public class VantageScreen extends Screen {
 	}
 
 	private static int page = HOME;
-	private static int category;
+	/** Lage der Einstellungs-Fenster (-1 = neben das Kategorie-Fenster legen). */
+	private static float setX = -1, setY = -1;
+	/** Lage und Zustand der Kategorie-Fenster. */
+	private static final int[] winX = new int[CATEGORIES.length];
+	private static final int[] winY = new int[CATEGORIES.length];
+	private static final boolean[] winOpen = new boolean[CATEGORIES.length];
+	private static boolean winLoaded;
+	/** Reihenfolge beim Zeichnen (das zuletzt angeklickte Fenster liegt oben). */
+	private static final List<Integer> order = new ArrayList<>(List.of(0, 1, 2, 3));
 	private static String skinCat = "knife";
 	private static String skinTarget = "*";
 	private static String skinShape;
 
-	private record Hit(int x, int y, int w, int h, boolean content, @Nullable Runnable click, @Nullable DoubleConsumer drag) {
+	private record Hit(int x, int y, int w, int h, boolean content, @Nullable Runnable click, @Nullable DoubleConsumer drag,
+					   @Nullable Runnable right) {
 	}
+
+	/** Kopfzeile eines Fensters, an der man es mit der Maus verschieben kann (id 0-3 Kategorie, 4 Einstellungen). */
+	private record Grab(int id, int x, int y, int w, int h) {
+	}
+
+	private final List<Grab> grabs = new ArrayList<>();
+	private int moving = -1;
+	private double grabDx, grabDy;
 
 	private final List<Hit> hits = new ArrayList<>();
 	private Hit dragging;
@@ -151,10 +192,57 @@ public class VantageScreen extends Screen {
 	}
 
 	private void openPage(int p) {
+		if (p != page) {
+			setX = -1;
+			setY = -1;
+		}
 		page = p;
 		scroll = 0;
 		scrollAnim = 0;
 		pageAt = System.nanoTime();
+	}
+
+	// ------------------------------------------------------------------ Fenster-Lage
+
+	private int winW() {
+		return Math.max(96, Math.min(118, (width - 16 - 3 * 6) / 4));
+	}
+
+	private void loadWindows() {
+		if (winLoaded) return;
+		winLoaded = true;
+		int w = winW();
+		int total = CATEGORIES.length * w + (CATEGORIES.length - 1) * 6;
+		for (int i = 0; i < CATEGORIES.length; i++) {
+			winX[i] = (width - total) / 2 + i * (w + 6);
+			winY[i] = 34;
+			winOpen[i] = true;
+			String s = VantageConfig.get().menuWindows.get(CATEGORIES[i]);
+			if (s == null) continue;
+			String[] p = s.split(",");
+			try {
+				winX[i] = Integer.parseInt(p[0]);
+				winY[i] = Integer.parseInt(p[1]);
+				winOpen[i] = p.length < 3 || !"0".equals(p[2]);
+			} catch (RuntimeException ignored) {
+				// kaputter Eintrag: Standard-Lage behalten
+			}
+		}
+	}
+
+	private void saveWindows() {
+		for (int i = 0; i < CATEGORIES.length; i++) {
+			VantageConfig.get().menuWindows.put(CATEGORIES[i], winX[i] + "," + winY[i] + "," + (winOpen[i] ? 1 : 0));
+		}
+		VantageConfig.save();
+	}
+
+	/** Alle Fenster wieder an ihren Standard-Platz. */
+	private void resetWindows() {
+		VantageConfig.get().menuWindows.clear();
+		winLoaded = false;
+		loadWindows();
+		saveWindows();
 	}
 
 	private void back() {
@@ -171,7 +259,7 @@ public class VantageScreen extends Screen {
 		// Im Viewmodel frei lassen, damit man die Hand live sieht
 		if (page == P_VIEWMODEL) return;
 		float o = openProgress();
-		ctx.fillGradient(0, 0, width, height, alpha(0x05070A, Math.round(0xD0 * o)), alpha(0x05070A, Math.round(0xF0 * o)));
+		ctx.fillGradient(0, 0, width, height, alpha(0x05070A, Math.round(0x70 * o)), alpha(0x05070A, Math.round(0xB8 * o)));
 		ctx.fillGradient(0, 0, width, 70, alpha(accent, Math.round(0x2C * o)), alpha(accent, 0));
 	}
 
@@ -219,12 +307,17 @@ public class VantageScreen extends Screen {
 			bind(listening, InputUtil.Type.MOUSE.createFromCode(click.button()));
 			return true;
 		}
-		if (click.button() == 0) {
+		if (click.button() == 0 || click.button() == 1) {
+			boolean left = click.button() == 0;
 			for (int i = hits.size() - 1; i >= 0; i--) {
 				Hit h = hits.get(i);
 				if (mx < h.x || my < h.y || mx >= h.x + h.w || my >= h.y + h.h) continue;
 				if (h.content && (my < cy || my >= cy + ch)) continue;
-				if (h.drag != null) {
+				if (!left) {
+					if (h.right == null) continue;
+					playClick(1.2f);
+					h.right.run();
+				} else if (h.drag != null) {
 					dragging = h;
 					h.drag.accept(mx);
 				} else if (h.click != null) {
@@ -233,12 +326,40 @@ public class VantageScreen extends Screen {
 				}
 				return true;
 			}
+			// Fenster an der Kopfzeile anfassen und verschieben
+			if (left) {
+				for (int i = grabs.size() - 1; i >= 0; i--) {
+					Grab g = grabs.get(i);
+					if (mx < g.x || my < g.y || mx >= g.x + g.w || my >= g.y + g.h) continue;
+					moving = g.id;
+					grabDx = mx - g.x;
+					grabDy = my - g.y;
+					if (g.id < CATEGORIES.length) {
+						order.remove((Integer) g.id);
+						order.add(g.id);
+					}
+					return true;
+				}
+			}
 		}
 		return super.mouseClicked(click, doubled);
 	}
 
 	@Override
 	public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+		if (moving >= 0) {
+			updateMouse();
+			int nx = (int) Math.round(mx - grabDx);
+			int ny = (int) Math.round(my - grabDy);
+			if (moving < CATEGORIES.length) {
+				winX[moving] = MathHelper.clamp(nx, 0, Math.max(0, width - winW()));
+				winY[moving] = MathHelper.clamp(ny, 0, Math.max(0, height - 18));
+			} else {
+				setX = MathHelper.clamp(nx, 0, Math.max(0, width - 40));
+				setY = MathHelper.clamp(ny, 0, Math.max(0, height - 20));
+			}
+			return true;
+		}
 		if (dragging != null) {
 			updateMouse();
 			dragging.drag.accept(mx);
@@ -249,6 +370,11 @@ public class VantageScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(Click click) {
+		if (moving >= 0) {
+			if (moving < CATEGORIES.length) saveWindows();
+			moving = -1;
+			return true;
+		}
 		if (dragging != null) {
 			dragging = null;
 			if (dirty) {
@@ -344,8 +470,10 @@ public class VantageScreen extends Screen {
 		applyTheme();
 
 		int slide = Math.round((1f - openProgress()) * 12);
-		if (page == HOME) drawHome(ctx, slide);
-		else drawPage(ctx, slide);
+		grabs.clear();
+		loadWindows();
+		drawWindows(ctx, slide);
+		if (page != HOME) drawSettings(ctx, slide);
 		if (tooltip != null) ctx.drawTooltip(textRenderer, tooltip, mouseX, mouseY);
 	}
 
@@ -366,121 +494,95 @@ public class VantageScreen extends Screen {
 		ctx.getMatrices().popMatrix();
 	}
 
-	// ------------------------------------------------------------------ Startseite
+	// ------------------------------------------------------------------ Kategorie-Fenster
 
-	private void drawHome(DrawContext ctx, int slide) {
-		int top = 10 + slide;
-		logo(ctx, width / 2, top, 2.4f);
-		ctx.drawCenteredTextWithShadow(textRenderer, "CLIENT  •  v" + VERSION, width / 2, top + 23, GRAY);
-
-		// Kategorien
-		int chipY = top + 37;
-		int total = -4;
-		for (String cat : CATEGORIES) total += textRenderer.getWidth(cat) + 20;
-		int x = (width - total) / 2;
-		for (int i = 0; i < CATEGORIES.length; i++) {
-			int w = textRenderer.getWidth(CATEGORIES[i]) + 16;
-			boolean sel = i == category;
-			boolean hov = hovered(x, chipY, w, 16, false);
-			roundRect(ctx, x, chipY, w, 16, sel ? alpha(accent, 0x55) : hov ? 0x30FFFFFF : 0x16FFFFFF);
-			if (sel) border(ctx, x, chipY, w, 16, accent);
-			ctx.drawCenteredTextWithShadow(textRenderer, CATEGORIES[i], x + w / 2, chipY + 4, sel ? 0xFFFFFFFF : hov ? TEXT : GRAY);
-			int idx = i;
-			hit(x, chipY, w, 16, false, () -> {
-				category = idx;
-				scroll = 0;
-				scrollAnim = 0;
-				pageAt = System.nanoTime();
-			});
-			x += w + 4;
-		}
-
-		// Kacheln
-		List<Module> list = new ArrayList<>();
-		for (Module m : modules()) if (category == 0 || m.cat == category) list.add(m);
-		int cardW = 98;
-		int cardH = 80;
-		int gap = 8;
-		int gridTop = chipY + 24;
-		int gridBottom = height - 20;
-		int cols = Math.max(2, Math.min(6, (width - 24 + gap) / (cardW + gap)));
-		int rows = (list.size() + cols - 1) / cols;
-		int gridW = cols * cardW + (cols - 1) * gap;
-		int gx = (width - gridW) / 2;
-		cx = gx - 6;
-		cy = gridTop;
-		cw = gridW + 12;
-		ch = gridBottom - gridTop;
-		contentHeight = rows * (cardH + gap) + 6;
-		int max = Math.max(0, contentHeight - ch);
-		if (scroll > max) scroll = max;
-		scrollAnim = approach(scrollAnim, scroll, 22f);
-		float since = (System.nanoTime() - pageAt) / 1e9f;
-		ctx.enableScissor(0, gridTop, width, gridBottom);
-		for (int i = 0; i < list.size(); i++) {
-			// Kacheln erscheinen kurz nacheinander
-			float appear = MathHelper.clamp((since - i * 0.025f) / 0.22f, 0f, 1f);
-			float u = 1f - appear;
-			int x0 = gx + (i % cols) * (cardW + gap);
-			int y0 = gridTop + 6 + (i / cols) * (cardH + gap) - Math.round(scrollAnim) + Math.round(u * u * 14);
-			drawCard(ctx, list.get(i), x0, y0, cardW, cardH);
-		}
-		ctx.disableScissor();
-		if (max > 0) {
-			int barH = Math.max(16, ch * ch / contentHeight);
-			int barY = cy + (int) ((ch - barH) * Math.min(1.0, scrollAnim / (double) max));
-			roundRect(ctx, cx + cw - 2, cy, 3, ch, 0x26FFFFFF);
-			roundRect(ctx, cx + cw - 2, barY, 3, barH, accent);
-		}
-
-		// Fusszeile: Hinweis links, Menue-Farbe rechts
-		ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth("Kachel anklicken = Einstellungen  •  " + keyName(VantageClient.menuKey)
-				+ " schließt", width - 110), 8, height - 13, GRAY);
+	private void drawWindows(DrawContext ctx, int slide) {
+		logo(ctx, width / 2, 8 + slide, 1.6f);
+		for (int id : new ArrayList<>(order)) drawCategory(ctx, id, slide);
+		ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth("Linksklick = an/aus  •  Rechtsklick = Einstellungen  •  Fenster oben anfassen = verschieben",
+				width - 130), 8, height - 13, GRAY);
+		// Fenster zurueck an den Standard-Platz
+		int rx = width - 8 - THEMES.length * 14 - 24;
+		boolean hr = hovered(rx, height - 17, 18, 14, false);
+		roundRect(ctx, rx, height - 17, 18, 14, hr ? 0x40FFFFFF : 0x20FFFFFF);
+		ctx.drawCenteredTextWithShadow(textRenderer, "↺", rx + 9, height - 14, 0xFFFFFFFF);
+		if (hr) tooltip = List.of(Text.literal("Fenster zurück an ihren Platz"));
+		hit(rx, height - 17, 18, 14, false, this::resetWindows);
 		themeDots(ctx, width - 8 - THEMES.length * 14, height - 15);
 	}
 
-	private void drawCard(DrawContext ctx, Module m, int x, int y, int w, int h) {
-		boolean hov = hovered(x, y, w, h, true);
-		float k = anim("card" + m.page, hov ? 1f : 0f, 16f);
-		y -= Math.round(k * 2);
-		boolean has = m.on != null;
-		boolean on = has && m.on.getAsBoolean();
-		if (k > 0.02f) Draw.glow(ctx, x, y, w, h, accent, Math.round(0x60 * k), 3);
-		roundGradient(ctx, x, y, w, h, mix(0xF0212934, 0xF02B3644, k), 0xF0141920);
-		border(ctx, x, y, w, h, mix(on ? mix(LINE, accent, 0.45f) : LINE, accent, k));
-		// Ganze Kachel = Einstellungen (die Leiste unten liegt darueber und hat Vorrang)
-		hit(x, y, w, h, true, () -> openPage(m.page));
+	private void drawCategory(DrawContext ctx, int id, int slide) {
+		int w = winW();
+		winX[id] = MathHelper.clamp(winX[id], 0, Math.max(0, width - w));
+		winY[id] = MathHelper.clamp(winY[id], 0, Math.max(0, height - 18));
+		int x = winX[id];
+		int y = winY[id] + slide;
+		List<Module> mods = new ArrayList<>();
+		for (Module m : modules()) if (m.cat == id) mods.add(m);
+		float open = anim("win" + id, winOpen[id] ? 1f : 0f, 18f);
+		int bodyH = Math.round((mods.size() * 15 + 4) * open);
+		int h = 18 + bodyH;
 
+		Draw.glow(ctx, x, y, w, h, accent, moving == id ? 0x90 : 0x50, 3);
+		roundGradient(ctx, x, y, w, h, 0xF2171D26, 0xF20E1217);
+		border(ctx, x, y, w, h, alpha(accent, 0x90));
+		// Kopfzeile: Symbol, Name, auf/zu
+		roundGradient(ctx, x, y, w, 18, mix(accent, 0xFF000000, 0.12f), mix(accent, 0xFF000000, 0.5f));
 		ctx.getMatrices().pushMatrix();
-		ctx.getMatrices().translate(x + w / 2f - 14, y + 6);
-		ctx.getMatrices().scale(1.75f, 1.75f);
-		ctx.drawItem(new ItemStack(m.icon), 0, 0);
+		ctx.getMatrices().translate(x + 3, y + 2);
+		ctx.getMatrices().scale(0.85f, 0.85f);
+		ctx.drawItem(new ItemStack(CATEGORY_ICONS[id]), 0, 0);
 		ctx.getMatrices().popMatrix();
-		ctx.drawCenteredTextWithShadow(textRenderer, textRenderer.trimToWidth(PAGES[m.page], w - 6), x + w / 2, y + 37, 0xFFFFFFFF);
-		String d = textRenderer.trimToWidth(m.desc, Math.round((w - 6) / 0.75f));
-		ctx.getMatrices().pushMatrix();
-		ctx.getMatrices().translate(x + w / 2f, y + 49);
-		ctx.getMatrices().scale(0.75f, 0.75f);
-		ctx.drawTextWithShadow(textRenderer, d, -textRenderer.getWidth(d) / 2, 0, GRAY);
-		ctx.getMatrices().popMatrix();
+		ctx.drawTextWithShadow(textRenderer, CATEGORIES[id].toUpperCase(java.util.Locale.ROOT), x + 20, y + 5, 0xFFFFFFFF);
+		boolean ha = hovered(x + w - 16, y, 16, 18, false);
+		ctx.drawCenteredTextWithShadow(textRenderer, winOpen[id] ? "▾" : "▸", x + w - 8, y + 5, ha ? 0xFFFFFFFF : 0xD0FFFFFF);
+		hit(x + w - 16, y, 16, 18, false, () -> {
+			winOpen[id] = !winOpen[id];
+			saveWindows();
+		});
+		grabs.add(new Grab(id, x, y, w - 16, 18));
+		if (bodyH <= 0) return;
 
-		int bx = x + 5;
-		int by = y + h - 18;
-		int bw = w - 10;
-		int bh = 13;
-		if (has) {
-			boolean hb = hovered(bx, by, bw, bh, true);
-			int col = on ? 0xFF2F9E5B : 0xFF8E3434;
-			roundRect(ctx, bx, by, bw, bh, hb ? mix(col, 0xFFFFFFFF, 0.18f) : col);
-			ctx.drawCenteredTextWithShadow(textRenderer, on ? "AN" : "AUS", x + w / 2, by + 3, 0xFFFFFFFF);
-			hit(bx, by, bw, bh, true, () -> {
+		ctx.enableScissor(x, y + 18, x + w, y + h);
+		int ry = y + 20;
+		for (Module m : mods) {
+			boolean has = m.on != null;
+			boolean on = has && m.on.getAsBoolean();
+			boolean hov = hovered(x + 2, ry, w - 4, 14, false) && my < y + h;
+			boolean sel = page == m.page;
+			float k = anim("row" + m.page, hov ? 1f : 0f, 20f);
+			if (sel) roundRect(ctx, x + 2, ry, w - 4, 14, alpha(accent, 0x45));
+			else if (k > 0.02f) roundRect(ctx, x + 2, ry, w - 4, 14, alpha(0xFFFFFF, Math.round(0x1C * k)));
+			if (on) roundRect(ctx, x + 3, ry + 2, 2, 10, accent);
+			int off = Math.round(k * 2);
+			ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(PAGES[m.page], w - 24), x + 8 + off, ry + 3,
+					on ? 0xFFFFFFFF : has ? GRAY : TEXT);
+			if (has) {
+				// kleiner Punkt: gefuellt = an
+				if (on) roundRect(ctx, x + w - 11, ry + 4, 6, 6, accent);
+				else border(ctx, x + w - 11, ry + 4, 6, 6, 0x80FFFFFF);
+			} else {
+				ctx.drawTextWithShadow(textRenderer, "›", x + w - 10, ry + 3, GRAY);
+			}
+			if (hov) {
+				// Hinweis erst nach kurzem Zeigen
+				if (anim("tip" + m.page, 1f, 2.5f) > 0.7f) {
+					tooltip = List.of(Text.literal(PAGES[m.page]).withColor(accent), Text.literal(m.desc),
+							Text.literal(has ? "Linksklick: an/aus · Rechtsklick: Einstellungen" : "Klick: Einstellungen").withColor(0xFF98A2AE));
+				}
+			} else {
+				anims.remove("tip" + m.page);
+			}
+			Runnable settings = () -> openPage(m.page);
+			Runnable toggle = has ? () -> {
 				m.set.accept(!on);
 				VantageConfig.save();
-			});
-		} else {
-			roundRect(ctx, bx, by, bw, bh, alpha(accent, hov ? 0x80 : 0x45));
-			ctx.drawCenteredTextWithShadow(textRenderer, "EINSTELLEN", x + w / 2, by + 3, 0xFFFFFFFF);
+				if (m.page == P_GUI && client != null) GuiThemes.ensure(client);
+			} : settings;
+			hits.add(new Hit(x + 2, ry, w - 4, Math.min(14, y + h - ry), false, toggle, null, settings));
+			ry += 15;
 		}
+		ctx.disableScissor();
 	}
 
 	/** Bunte Punkte zum Wechseln der Menue-Farbe. */
@@ -500,88 +602,111 @@ public class VantageScreen extends Screen {
 		}
 	}
 
-	// ------------------------------------------------------------------ Einstellungs-Seite
+	// ------------------------------------------------------------------ Einstellungs-Fenster
 
-	private void drawPage(DrawContext ctx, int slide) {
-		boolean vm = page == P_VIEWMODEL;
-		int colW = vm ? Math.min(330, Math.max(240, width * 11 / 20 - 12)) : Math.min(width - 24, 400);
-		int colX = vm ? 8 : (width - colW) / 2;
-		int top = 8 + slide;
-
-		// Kopfzeile: Zurueck, Symbol + Name, An/Aus
-		boolean hb = hovered(colX, top, 60, 18, false);
-		roundRect(ctx, colX, top, 60, 18, hb ? alpha(accent, 0x70) : 0x26FFFFFF);
-		ctx.drawTextWithShadow(textRenderer, "‹ Zurück", colX + 8, top + 5, hb ? 0xFFFFFFFF : TEXT);
-		hit(colX, top, 60, 18, false, this::back);
+	private void drawSettings(DrawContext ctx, int slide) {
 		Module m = module(page);
-		int tx = colX + 68;
-		if (m != null) {
-			ctx.drawItem(new ItemStack(m.icon), tx, top + 1);
-			tx += 20;
+		boolean vm = page == P_VIEWMODEL;
+		int w = vm ? Math.min(320, Math.max(240, width * 11 / 20 - 12)) : Math.min(340, width - 16);
+		int h = Math.min(height - 16, 320);
+		if (setX < 0) {
+			// Neben das Fenster der Kategorie legen (Viewmodel: ganz links, damit die Hand frei bleibt)
+			if (vm) {
+				setX = 6;
+				setY = 6;
+			} else {
+				int cat = m == null ? 0 : m.cat;
+				int ww = winW();
+				float nx = winX[cat] + ww + 6;
+				if (nx + w > width - 4) nx = winX[cat] - w - 6;
+				if (nx < 4) nx = (width - w) / 2f;
+				setX = nx;
+				setY = Math.max(4, Math.min(winY[cat], height - h - 4));
+			}
 		}
-		ctx.getMatrices().pushMatrix();
-		ctx.getMatrices().translate(tx, top + 4);
-		ctx.getMatrices().scale(1.3f, 1.3f);
-		ctx.drawTextWithShadow(textRenderer, PAGES[page], 0, 0, 0xFFFFFFFF);
-		ctx.getMatrices().popMatrix();
+		setX = MathHelper.clamp(setX, 0, Math.max(0, width - w));
+		setY = MathHelper.clamp(setY, 0, Math.max(0, height - h));
+		int x = Math.round(setX);
+		int y = Math.round(setY) + slide;
+
+		Draw.glow(ctx, x, y, w, h, accent, 0x80, 4);
+		roundGradient(ctx, x, y, w, h, 0xF6171D26, 0xF60D1116);
+		border(ctx, x, y, w, h, alpha(accent, 0xB0));
+		// Kopfzeile
+		roundGradient(ctx, x, y, w, 20, mix(accent, 0xFF000000, 0.12f), mix(accent, 0xFF000000, 0.5f));
+		int tx = x + 5;
+		if (m != null) {
+			ctx.drawItem(new ItemStack(m.icon), tx, y + 2);
+			tx += 19;
+		}
+		ctx.drawTextWithShadow(textRenderer, PAGES[page], tx, y + 6, 0xFFFFFFFF);
+		int bx = x + w - 18;
+		boolean hc = hovered(bx, y + 2, 16, 16, false);
+		roundRect(ctx, bx, y + 2, 16, 16, hc ? 0xFFC0392B : 0x30000000);
+		ctx.drawCenteredTextWithShadow(textRenderer, "✕", bx + 8, y + 6, 0xFFFFFFFF);
+		hit(bx, y + 2, 16, 16, false, this::back);
+		int grabW = w - 20;
 		if (m != null && m.on != null) {
 			boolean on = m.on.getAsBoolean();
-			int sx = colX + colW - 28;
-			String label = on ? "An" : "Aus";
-			ctx.drawTextWithShadow(textRenderer, label, sx - textRenderer.getWidth(label) - 5, top + 5, on ? 0xFF8FE3A8 : GRAY);
-			switchKnob(ctx, sx, top + 4, anim("page_on", on ? 1f : 0f, 18f));
-			hit(sx - 30, top, 58, 18, false, () -> {
+			int sx = bx - 30;
+			switchKnob(ctx, sx, y + 5, anim("page_on", on ? 1f : 0f, 18f));
+			hit(sx - 2, y + 2, 26, 16, false, () -> {
 				m.set.accept(!on);
 				if (page == P_CROSSHAIR) skipAutoEnable = true;
 				changed();
+				if (page == P_GUI && client != null) GuiThemes.ensure(client);
 			});
+			grabW = sx - 4 - x;
 		}
-		ctx.fill(colX, top + 23, colX + colW, top + 24, alpha(accent, 0x90));
+		grabs.add(new Grab(4, x, y, grabW, 20));
 
 		// Inhalt (blendet beim Wechsel kurz von unten ein)
 		float since = Math.min(1f, (System.nanoTime() - pageAt) / 1.6e8f);
 		int rise = Math.round((1f - since) * (1f - since) * 10);
-		cx = colX + 6;
-		cy = top + 30;
-		cw = colW - 12;
-		ch = height - cy - 8;
-		roundRect(ctx, colX, cy - 4, colW, ch + 8, PANEL);
-		border(ctx, colX, cy - 4, colW, ch + 8, 0x30FFFFFF);
-		ctx.enableScissor(colX, cy - 2, colX + colW, cy + ch + 2);
+		cx = x + 6;
+		cy = y + 24;
+		cw = w - 12;
+		ch = h - 28;
+		ctx.enableScissor(x + 1, cy - 2, x + w - 1, cy + ch + 2);
 		scrollAnim = approach(scrollAnim, scroll, 22f);
 		int y0 = cy + 2 - Math.round(scrollAnim) + rise;
-		int w = cw - 6;
+		int cw2 = cw - 6;
 		int end = switch (page) {
-			case P_SKINS -> drawSkins(ctx, cx, y0, w);
-			case P_PACKS -> drawPacks(ctx, cx, y0, w);
-			case P_CROSSHAIR -> drawCrosshair(ctx, cx, y0, w);
-			case P_VIEWMODEL -> drawViewmodel(ctx, cx, y0, w);
-			case P_SHADER -> drawFilters(ctx, cx, y0, w);
-			case P_TRACKER -> drawTracker(ctx, cx, y0, w);
-			case P_LUNGE -> drawLunge(ctx, cx, y0, w);
-			case P_MACE -> drawMace(ctx, cx, y0, w);
-			case P_SHIELD -> drawShield(ctx, cx, y0, w);
-			case P_QUICK -> drawQuick(ctx, cx, y0, w);
-			case P_COMBO -> drawCombo(ctx, cx, y0, w);
-			case P_CAMERA -> drawCamera(ctx, cx, y0, w);
-			case P_ZOOM -> drawZoom(ctx, cx, y0, w);
-			case P_INFO -> drawInfo(ctx, cx, y0, w);
-			case P_GUI -> drawGui(ctx, cx, y0, w);
-			case P_BREW -> drawBrew(ctx, cx, y0, w);
-			default -> drawKeys(ctx, cx, y0, w);
+			case P_SKINS -> drawSkins(ctx, cx, y0, cw2);
+			case P_PACKS -> drawPacks(ctx, cx, y0, cw2);
+			case P_CROSSHAIR -> drawCrosshair(ctx, cx, y0, cw2);
+			case P_VIEWMODEL -> drawViewmodel(ctx, cx, y0, cw2);
+			case P_SHADER -> drawFilters(ctx, cx, y0, cw2);
+			case P_TRACKER -> drawTracker(ctx, cx, y0, cw2);
+			case P_LUNGE -> drawLunge(ctx, cx, y0, cw2);
+			case P_MACE -> drawMace(ctx, cx, y0, cw2);
+			case P_SHIELD -> drawShield(ctx, cx, y0, cw2);
+			case P_QUICK -> drawQuick(ctx, cx, y0, cw2);
+			case P_COMBO -> drawCombo(ctx, cx, y0, cw2);
+			case P_CAMERA -> drawCamera(ctx, cx, y0, cw2);
+			case P_ZOOM -> drawZoom(ctx, cx, y0, cw2);
+			case P_INFO -> drawInfo(ctx, cx, y0, cw2);
+			case P_GUI -> drawGui(ctx, cx, y0, cw2);
+			case P_BREW -> drawBrew(ctx, cx, y0, cw2);
+			case P_KEYSTROKES -> drawKeystrokes(ctx, cx, y0, cw2);
+			case P_ARMOR -> drawArmor(ctx, cx, y0, cw2);
+			case P_POTIONS -> drawPotions(ctx, cx, y0, cw2);
+			case P_WAYPOINTS -> drawWaypoints(ctx, cx, y0, cw2);
+			case P_OUTLINE -> drawOutline(ctx, cx, y0, cw2);
+			case P_KILL -> drawKill(ctx, cx, y0, cw2);
+			case P_CHAT -> drawChat(ctx, cx, y0, cw2);
+			default -> drawKeys(ctx, cx, y0, cw2);
 		};
 		ctx.disableScissor();
 		contentHeight = end - y0 + 6;
 		int max = Math.max(0, contentHeight - ch);
 		if (scroll > max) scroll = max;
 		if (max > 0) {
-			// Sanfte Kanten: zeigen, dass es oben/unten weitergeht
-			if (scroll < max) ctx.fillGradient(colX + 1, cy + ch - 12, colX + colW - 1, cy + ch + 3, alpha(PANEL, 0), PANEL);
-			if (scroll > 0) ctx.fillGradient(colX + 1, cy - 3, colX + colW - 1, cy + 9, PANEL, alpha(PANEL, 0));
+			if (scroll < max) ctx.fillGradient(x + 1, cy + ch - 12, x + w - 1, cy + ch + 2, 0x000D1116, 0xF60D1116);
 			int barH = Math.max(16, ch * ch / contentHeight);
 			int barY = cy + (int) ((ch - barH) * Math.min(1.0, scrollAnim / (double) max));
-			roundRect(ctx, colX + colW - 4, cy, 3, ch, 0x26FFFFFF);
-			roundRect(ctx, colX + colW - 4, barY, 3, barH, accent);
+			roundRect(ctx, x + w - 5, cy, 3, ch, 0x26FFFFFF);
+			roundRect(ctx, x + w - 5, barY, 3, barH, accent);
 		}
 	}
 
@@ -593,7 +718,7 @@ public class VantageScreen extends Screen {
 	}
 
 	private void hit(int x, int y, int w, int h, boolean content, Runnable click) {
-		hits.add(new Hit(x, y, w, h, content, click, null));
+		hits.add(new Hit(x, y, w, h, content, click, null, null));
 	}
 
 	private static void border(DrawContext ctx, int x, int y, int w, int h, int color) {
@@ -682,7 +807,7 @@ public class VantageScreen extends Screen {
 			v = Math.round(v / step) * step;
 			set.accept(MathHelper.clamp(v, min, max));
 			changed();
-		}));
+		}, null));
 		return y + 25;
 	}
 
@@ -1501,5 +1626,150 @@ public class VantageScreen extends Screen {
 			y += 12;
 		}
 		return paragraph(ctx, x, y + 4, w, "Die Rezepte kommen direkt aus dem Spiel – sie stimmen also immer, auch auf Servern.", 0xFF8FD18F);
+	}
+
+	// ------------------------------------------------------------------ Seiten: neue HUD-Module
+
+	/** Wo auf dem Bildschirm (6 Plaetze als Knoepfe). */
+	private int positionPicker(DrawContext ctx, int x, int y, int w, int current, IntConsumer set) {
+		ctx.drawTextWithShadow(textRenderer, "Platz auf dem Bildschirm", x + 3, y + 1, TEXT);
+		y += 12;
+		int bw = (w - 4) / 3;
+		for (int i = 0; i < HudModules.POSITIONS.length; i++) {
+			int idx = i;
+			button(ctx, x + (i % 3) * (bw + 2), y + (i / 3) * 18, bw, 16, HudModules.POSITIONS[i], current == i, () -> {
+				set.accept(idx);
+				changed();
+			});
+		}
+		return y + 38;
+	}
+
+	/** Farbfelder zum Anklicken. */
+	private int swatches(DrawContext ctx, int x, int y, int[] colors, int current, IntConsumer set) {
+		for (int i = 0; i < colors.length; i++) {
+			int col = colors[i];
+			int sx = x + 2 + i * 21;
+			boolean sel = (current & 0xFFFFFF) == (col & 0xFFFFFF);
+			boolean hov = hovered(sx, y, 16, 16, true);
+			roundRect(ctx, sx, y, 16, 16, 0xFF000000 | col);
+			if (col == 0xFF000000) border(ctx, sx, y, 16, 16, 0x60FFFFFF);
+			if (sel) border(ctx, sx - 2, y - 2, 20, 20, 0xFFFFFFFF);
+			else if (hov) border(ctx, sx - 1, y - 1, 18, 18, 0xA0FFFFFF);
+			hit(sx, y, 16, 16, true, () -> {
+				set.accept(col);
+				changed();
+			});
+		}
+		return y + 22;
+	}
+
+	private int drawKeystrokes(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = toggle(ctx, x, y, w, "Tasten-Anzeige an", c.keystrokes, v -> c.keystrokes = v);
+		y = positionPicker(ctx, x, y, w, c.keystrokesPos, v -> c.keystrokesPos = v);
+		y = slider(ctx, x, y, w, "Größe", 0.5, 2.0, c.keystrokesScale, 0.1, Math.round(c.keystrokesScale * 100) + " %", v -> c.keystrokesScale = (float) v);
+		return paragraph(ctx, x, y + 2, w, "Zeigt W, A, S, D, die Leertaste und die Maustasten mit Klicks pro Sekunde (CPS). "
+				+ "Gedrückte Tasten leuchten in deiner Menü-Farbe – praktisch für Videos.", GRAY);
+	}
+
+	private int drawArmor(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = toggle(ctx, x, y, w, "Rüstung & Haltbarkeit an", c.armorHud, v -> c.armorHud = v);
+		y = positionPicker(ctx, x, y, w, c.armorPos, v -> c.armorPos = v);
+		y = toggle(ctx, x, y, w, "Pfeile, Perlen, Totems und goldene Äpfel zählen", c.armorCounts, v -> c.armorCounts = v);
+		return paragraph(ctx, x, y + 2, w, "Zeigt deine Rüstung und die Items in den Händen mit der Haltbarkeit: grün = gut, gelb = halb, "
+				+ "rot = fast kaputt. Unter 10 % blinkt die Zahl.", GRAY);
+	}
+
+	private int drawPotions(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = toggle(ctx, x, y, w, "Trank-Timer an", c.potionHud, v -> c.potionHud = v);
+		y = positionPicker(ctx, x, y, w, c.potionPos, v -> c.potionPos = v);
+		y = toggle(ctx, x, y, w, "Symbole oben rechts vom Spiel ausblenden", c.potionHideVanilla, v -> c.potionHideVanilla = v);
+		return paragraph(ctx, x, y + 2, w, "Zeigt alle aktiven Effekte mit Stufe und Restzeit. In den letzten 10 Sekunden blinkt die Zeit rot.", GRAY);
+	}
+
+	private int drawWaypoints(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = toggle(ctx, x, y, w, "Ziel oben in der Mitte anzeigen (Pfeil + Entfernung)", c.waypoints, v -> c.waypoints = v);
+		y = toggle(ctx, x, y, w, "Todespunkt automatisch merken", c.deathPoint, v -> c.deathPoint = v);
+		y = toggle(ctx, x, y, w, "Lichtsäule über dem Ziel", c.waypointBeam, v -> c.waypointBeam = v);
+		y = keyRow(ctx, x, y, w, "Taste: Wegpunkt hier setzen", VantageClient.waypointKey);
+		if (client == null || client.world == null || client.player == null || Waypoints.worldKey(client) == null) {
+			return paragraph(ctx, x, y + 2, w, "Wegpunkte gibt es, sobald du in einer Welt oder auf einem Server bist.", 0xFFE0C070);
+		}
+		button(ctx, x, y, Math.min(160, w), 18, "+ Hier setzen", false, () -> Waypoints.addHere(client));
+		y += 24;
+		y = header(ctx, x, y, w, "Gespeicherte Orte");
+		List<Waypoints.Point> points = Waypoints.list(client);
+		if (points.isEmpty()) return paragraph(ctx, x, y, w, "Noch keine Wegpunkte.", GRAY);
+		Waypoints.Point active = Waypoints.active(client);
+		for (Waypoints.Point p : points) {
+			boolean isActive = active != null && active.name().equals(p.name());
+			boolean hov = hovered(x, y, w, 20, true);
+			roundRect(ctx, x, y, w, 20, isActive ? alpha(p.color(), 0x30) : hov ? 0x18FFFFFF : 0x0CFFFFFF);
+			roundRect(ctx, x + 4, y + 6, 8, 8, p.color());
+			String where = p.x() + " " + p.y() + " " + p.z() + "  " + Waypoints.dimName(p.dim());
+			ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(p.name(), 80), x + 16, y + 6, 0xFFFFFFFF);
+			ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(where, w - 180), x + 100, y + 6, GRAY);
+			button(ctx, x + w - 78, y + 2, 54, 16, isActive ? "Ziel ✔" : "Zeigen", isActive, () -> Waypoints.setActive(client, isActive ? null : p));
+			button(ctx, x + w - 22, y + 2, 20, 16, "✕", false, () -> Waypoints.remove(client, p));
+			y += 22;
+		}
+		return y;
+	}
+
+	// ------------------------------------------------------------------ Seiten: Extras
+
+	private int drawOutline(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = header(ctx, x, y, w, "Blockrahmen");
+		y = toggle(ctx, x, y, w, "Eigene Farbe für den Rahmen um den angeschauten Block", c.outlineCustom, v -> c.outlineCustom = v);
+		y = swatches(ctx, x, y + 2, Extras.COLORS, c.outlineColor, v -> {
+			c.outlineColor = v;
+			c.outlineCustom = true;
+		});
+		y = slider(ctx, x, y, w, "Dicke", 1, 6, c.outlineWidth, 0.5, fmt(c.outlineWidth), v -> c.outlineWidth = (float) v);
+		y = header(ctx, x, y + 2, w, "Treffer-Farbe");
+		y = toggle(ctx, x, y, w, "Getroffene Gegner leuchten in dieser Farbe statt rot", c.hitColorCustom, v -> c.hitColorCustom = v);
+		y = swatches(ctx, x, y + 2, Extras.COLORS, c.hitColor, v -> {
+			c.hitColor = 0x99000000 | (v & 0xFFFFFF);
+			c.hitColorCustom = true;
+		});
+		return paragraph(ctx, x, y + 2, w, "Nur auf deinem Bildschirm – andere Spieler sehen nichts davon.", GRAY);
+	}
+
+	private int drawKill(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = toggle(ctx, x, y, w, "Kill-Effekte an", c.killEffects, v -> c.killEffects = v);
+		int bw = (w - 6) / 4;
+		for (int i = 0; i < KillEffects.NAMES.length; i++) {
+			int idx = i;
+			button(ctx, x + i * (bw + 2), y, bw, 18, KillEffects.NAMES[i], c.killEffect == i, () -> {
+				c.killEffect = idx;
+				c.killEffects = true;
+				changed();
+			});
+		}
+		y += 24;
+		y = toggle(ctx, x, y, w, "Mit Geräusch", c.killSound, v -> c.killSound = v);
+		if (client != null && client.player != null && client.world != null) {
+			button(ctx, x, y + 2, Math.min(160, w), 18, "▶ Vorschau", false, () -> {
+				var look = client.player.getRotationVector();
+				KillEffects.play(client, client.player.getEyePos().add(look.x * 4, look.y * 4 - 0.5, look.z * 4), c.killEffect);
+			});
+			y += 26;
+		}
+		return paragraph(ctx, x, y + 2, w, "Besiegst du einen Gegner, den du kurz vorher getroffen hast, gibt es den Effekt an seiner Stelle. "
+				+ "Nur auf deinem Bildschirm – andere sehen nichts.", GRAY);
+	}
+
+	private int drawChat(DrawContext ctx, int x, int y, int w) {
+		VantageConfig c = VantageConfig.get();
+		y = toggle(ctx, x, y, w, "Uhrzeit vor jeder Nachricht", c.chatTimestamps, v -> c.chatTimestamps = v);
+		y = toggle(ctx, x, y, w, "Gleiche Nachrichten zusammenfassen (x2, x3 …)", c.chatStack, v -> c.chatStack = v);
+		y = toggle(ctx, x, y, w, "Längerer Verlauf (1000 statt 100 Nachrichten)", c.chatLongHistory, v -> c.chatLongHistory = v);
+		return paragraph(ctx, x, y + 2, w, "Gilt für neue Nachrichten. Spam von Servern wird so zu einer Zeile mit Zähler.", GRAY);
 	}
 }

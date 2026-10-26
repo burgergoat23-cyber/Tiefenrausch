@@ -11,5 +11,6 @@
 	"key.arsenal.shield_toggle": "Schild-Brecher an/aus",
 	"key.category.vantage.main": "Vantage Client",
 	"key.vantage.freelook": "Freelook (umschauen)",
-	"key.vantage.freecam": "Freecam an/aus"
+	"key.vantage.freecam": "Freecam an/aus",
+	"key.vantage.waypoint": "Wegpunkt hier setzen"
 }
