@@ -276,7 +276,14 @@ public class VantageGameTest implements FabricClientGameTest {
 			// Seed-Suche (fuer eigene Server): muss dieselben Schiffe finden wie die echte Welt
 			long worldSeed = sp.getServer().computeOnServer(server -> server.getOverworld().getSeed());
 			long t0 = System.currentTimeMillis();
-			Map<TrackType, List<Site>> bySeed = ctx.computeOnClient(mc -> SeedSearch.find(worldSeed, mc.world.getRegistryManager(), new BlockPos(0, 80, 0), 3000, 0, null));
+			Map<TrackType, List<Site>> bySeed = ctx.computeOnClient(mc -> {
+				try {
+					return SeedSearch.find(worldSeed, mc.world.getRegistryManager(), new BlockPos(0, 80, 0), 3000, 0, null);
+				} catch (Exception e) {
+					VantageClient.LOG.error("TEST Seed-Suche fehlgeschlagen", e);
+					return Map.<TrackType, List<Site>>of();
+				}
+			});
 			long took = System.currentTimeMillis() - t0;
 			List<BlockPos> real = ctx.computeOnClient(mc -> StructureTracker.results(mc).stream().map(Site::pos).toList());
 			int hits = 0;
