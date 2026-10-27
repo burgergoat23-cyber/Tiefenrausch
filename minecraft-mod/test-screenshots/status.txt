@@ -1,1 +1,1 @@
-Spieltest: cancelled
+Spieltest: success
