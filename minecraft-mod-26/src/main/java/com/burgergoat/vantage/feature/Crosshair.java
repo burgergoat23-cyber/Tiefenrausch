@@ -81,6 +81,7 @@ public final class Crosshair {
 
 	public static HudElement wrap(HudElement vanilla) {
 		return (ctx, tickCounter) -> {
+			if (Snipers.scoped()) return;
 			if (!VantageConfig.get().chEnabled) {
 				vanilla.extractRenderState(ctx, tickCounter);
 				return;

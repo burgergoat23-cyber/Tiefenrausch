@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/ssg_shape_closed",
+ "textures": {
+  "tex": "vantage:item/ssg_blood_in_the_water"
+ }
+}

@@ -49,7 +49,14 @@ public final class SkinManager {
 			if (owner != null && owner != Minecraft.getInstance().player) return null;
 		}
 		if (cacheVersion != VantageConfig.version()) rebuild();
-		return MODEL_CACHE.get(stack.getItem());
+		Identifier id = MODEL_CACHE.get(stack.getItem());
+		// Gewehr: Modell mit offenem Verschluss waehrend Repetieren/Nachladen (nur eigenes Gewehr in der Hand)
+		Minecraft mc = Minecraft.getInstance();
+		if (id != null && mc.player != null && stack == mc.player.getMainHandItem()) {
+			String suffix = com.burgergoat.vantage.feature.Snipers.boltSuffix();
+			if (!suffix.isEmpty()) return Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath() + suffix);
+		}
+		return id;
 	}
 
 	private static void rebuild() {

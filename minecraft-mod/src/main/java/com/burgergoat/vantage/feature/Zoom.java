@@ -15,6 +15,7 @@ public final class Zoom {
 	public static void tick(MinecraftClient client) {
 		last = current;
 		float target = VantageClient.zoomKey.isPressed() && client.currentScreen == null ? Math.max(1.1f, VantageConfig.get().zoom) : 1f;
+		target = Math.max(target, Snipers.zoomTarget());
 		current += (target - current) * 0.5f;
 		if (Math.abs(current - target) < 0.01f) current = target;
 	}

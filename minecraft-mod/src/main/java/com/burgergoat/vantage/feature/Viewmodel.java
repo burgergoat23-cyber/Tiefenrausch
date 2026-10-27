@@ -207,6 +207,7 @@ public final class Viewmodel {
 			float s = MathHelper.clamp(scale, 0.2f, 2f);
 			matrices.scale(s, s, s);
 		}
+		if (hand == Hand.MAIN_HAND) Snipers.apply(matrices, item, sd, tickProgress);
 		if (anim == null || hand != Hand.MAIN_HAND) return;
 		float time = frozen >= 0 ? frozen * anim.ticks() : MathHelper.lerp(tickProgress, lastAnimTime, animTime);
 		float[] v = anim.sample(MathHelper.clamp(time / anim.ticks(), 0f, 1f));

@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "vantage:item/axe_shape_tomahawk",
  "textures": {
-  "layer0": "vantage:item/axe_tomahawk_ruby"
+  "tex": "vantage:item/axe_tomahawk_ruby"
  }
 }

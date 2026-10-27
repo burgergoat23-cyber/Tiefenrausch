@@ -590,6 +590,116 @@
    ]
   },
   {
+   "id": "awp",
+   "name": "AWP",
+   "items": [
+    "bow"
+   ],
+   "shapes": [],
+   "finishes": [
+    {
+     "id": "default",
+     "name": "Standard",
+     "rarity": 1
+    },
+    {
+     "id": "asiimov",
+     "name": "Asiimov",
+     "rarity": 5
+    },
+    {
+     "id": "dragon_lore",
+     "name": "Dragon Lore",
+     "rarity": 6
+    },
+    {
+     "id": "lightning_strike",
+     "name": "Lightning Strike",
+     "rarity": 4
+    },
+    {
+     "id": "medusa",
+     "name": "Medusa",
+     "rarity": 6
+    },
+    {
+     "id": "hyper_beast",
+     "name": "Hyper Beast",
+     "rarity": 5
+    },
+    {
+     "id": "redline",
+     "name": "Redline",
+     "rarity": 4
+    },
+    {
+     "id": "gungnir",
+     "name": "Gungnir",
+     "rarity": 6
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "neo_noir",
+     "name": "Neo-Noir",
+     "rarity": 5
+    }
+   ]
+  },
+  {
+   "id": "ssg",
+   "name": "SSG 08",
+   "items": [
+    "crossbow"
+   ],
+   "shapes": [],
+   "finishes": [
+    {
+     "id": "default",
+     "name": "Standard",
+     "rarity": 1
+    },
+    {
+     "id": "dragonfire",
+     "name": "Dragonfire",
+     "rarity": 5
+    },
+    {
+     "id": "blood_in_the_water",
+     "name": "Blood in the Water",
+     "rarity": 5
+    },
+    {
+     "id": "abyss",
+     "name": "Abyss",
+     "rarity": 3
+    },
+    {
+     "id": "deaths_head",
+     "name": "Death's Head",
+     "rarity": 4
+    },
+    {
+     "id": "big_iron",
+     "name": "Big Iron",
+     "rarity": 4
+    },
+    {
+     "id": "fade",
+     "name": "Fade",
+     "rarity": 5
+    },
+    {
+     "id": "detour",
+     "name": "Detour",
+     "rarity": 3
+    }
+   ]
+  },
+  {
    "id": "shield",
    "name": "Schilde",
    "items": [

@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/awp_shape_up",
+ "textures": {
+  "tex": "vantage:item/awp_default"
+ }
+}

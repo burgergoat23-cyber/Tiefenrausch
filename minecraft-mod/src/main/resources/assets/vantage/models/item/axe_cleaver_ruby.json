@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "vantage:item/axe_shape_cleaver",
  "textures": {
-  "layer0": "vantage:item/axe_cleaver_ruby"
+  "tex": "vantage:item/axe_cleaver_ruby"
  }
 }

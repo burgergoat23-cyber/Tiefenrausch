@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld_mace",
+ "parent": "vantage:item/mace_shape_mjolnir",
  "textures": {
-  "layer0": "vantage:item/mace_mjolnir_sapphire"
+  "tex": "vantage:item/mace_mjolnir_sapphire"
  }
 }

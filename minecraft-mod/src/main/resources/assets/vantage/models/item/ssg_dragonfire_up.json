@@ -1,0 +1,6 @@
+{
+ "parent": "vantage:item/ssg_shape_up",
+ "textures": {
+  "tex": "vantage:item/ssg_dragonfire"
+ }
+}

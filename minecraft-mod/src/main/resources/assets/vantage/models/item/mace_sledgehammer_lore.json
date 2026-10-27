@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld_mace",
+ "parent": "vantage:item/mace_shape_sledgehammer",
  "textures": {
-  "layer0": "vantage:item/mace_sledgehammer_lore"
+  "tex": "vantage:item/mace_sledgehammer_lore"
  }
 }

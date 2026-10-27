@@ -5,6 +5,7 @@ import com.burgergoat.vantage.feature.VantageHud;
 import com.burgergoat.vantage.feature.BrewGuide;
 import com.burgergoat.vantage.feature.GuiThemes;
 import com.burgergoat.vantage.feature.Hotbar;
+import com.burgergoat.vantage.feature.Snipers;
 import com.burgergoat.vantage.feature.Extras;
 import com.burgergoat.vantage.feature.KillEffects;
 import com.burgergoat.vantage.feature.Waypoints;
@@ -92,6 +93,7 @@ public class VantageClient implements ClientModInitializer {
 
 		HudElementRegistry.replaceElement(VanillaHudElements.CROSSHAIR, Crosshair::wrap);
 		HudElementRegistry.replaceElement(VanillaHudElements.HOTBAR, Hotbar::wrap);
+		HudElementRegistry.attachElementBefore(VanillaHudElements.CROSSHAIR, Identifier.fromNamespaceAndPath(MOD_ID, "scope"), Snipers::renderScope);
 		// Trank-Timer an: die Symbole oben rechts vom Spiel auf Wunsch ausblenden
 		HudElementRegistry.replaceElement(VanillaHudElements.MOB_EFFECTS, vanilla -> (ctx, tickCounter) -> {
 			VantageConfig c = VantageConfig.get();
@@ -171,6 +173,7 @@ public class VantageClient implements ClientModInitializer {
 		Macros.tick(client);
 		CameraControl.tick(client);
 		ComboCounter.tick(client);
+		Snipers.tick(client);
 		Waypoints.tick(client);
 		KillEffects.tick(client);
 		Extras.tick(client);

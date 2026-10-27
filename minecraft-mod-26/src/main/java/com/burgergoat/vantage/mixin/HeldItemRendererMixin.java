@@ -1,7 +1,10 @@
 package com.burgergoat.vantage.mixin;
 
 import com.burgergoat.vantage.feature.CameraControl;
+import com.burgergoat.vantage.feature.Snipers;
 import com.burgergoat.vantage.feature.Viewmodel;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -9,6 +12,8 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -46,5 +51,25 @@ public abstract class HeldItemRendererMixin {
 	private void vantage$inspect(AbstractClientPlayer player, float tickProgress, float pitch, InteractionHand hand, float swingProgress,
 			ItemStack item, float equipProgress, PoseStack matrices, SubmitNodeCollector queue, int light, CallbackInfo ci) {
 		Viewmodel.applyItem(matrices, hand, item, tickProgress);
+	}
+
+	/** Durchs Zielfernrohr (AWP): Gewehr und Hand ausblenden wie in CS. */
+	@Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
+	private void vantage$scopeHide(AbstractClientPlayer player, float tickProgress, float pitch, InteractionHand hand, float swingProgress,
+			ItemStack item, float equipProgress, PoseStack matrices, SubmitNodeCollector queue, int light, CallbackInfo ci) {
+		if (hand == InteractionHand.MAIN_HAND && Snipers.scoped() && Snipers.kind(item) != null) ci.cancel();
+	}
+
+	/** Gewehr-Skins: keine Armbrust-Sonderhaltung von Minecraft. */
+	@WrapOperation(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Ljava/lang/Object;)Z"), require = 0)
+	private boolean vantage$noCrossbowPose(ItemStack stack, Object item, Operation<Boolean> original) {
+		if (item == Items.CROSSBOW && Snipers.overrideVanilla(stack)) return false;
+		return original.call(stack, item);
+	}
+
+	/** Gewehr-Skins: kein Bogen-Zittern, die eigene Anlege-Animation uebernimmt. */
+	@WrapOperation(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"), require = 0)
+	private ItemUseAnimation vantage$noBowPose(ItemStack stack, Operation<ItemUseAnimation> original) {
+		return Snipers.overrideVanilla(stack) ? ItemUseAnimation.NONE : original.call(stack);
 	}
 }

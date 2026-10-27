@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld",
+ "parent": "vantage:item/axe_shape_battle_axe",
  "textures": {
-  "layer0": "vantage:item/axe_battle_axe_damascus"
+  "tex": "vantage:item/axe_battle_axe_damascus"
  }
 }

@@ -451,7 +451,7 @@ def part_color(part, x, y, px, py):
 FINISHED_PARTS = ('blade', 'head')
 
 
-def render(shape, size, start, end, finish, flip_light=False, outline=0.58):
+def render(shape, size, start, end, finish, flip_light=False, outline=0.62):
     parts, prof, (nx, ny) = raster(shape, size, start, end)
     img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     b0, b1 = shape.blade_x
@@ -485,16 +485,18 @@ def render(shape, size, start, end, finish, flip_light=False, outline=0.58):
 
 # ---------------------------------------------------------------- Messer
 # ---------------------------------------------------------------- Messer (64x64, echte 3D-Tiefe)
-KNIFE_SIZE = 64
-KNIFE_START, KNIFE_END = (4.0, 60.0), (60.0, 4.0)
-THICK = {'E': 0.3, 'S': 0.6, 'H': 1.1, 'R': 0.9, 'G': 1.6, 'V': 1.3}
+KNIFE_SIZE = 96
+KNIFE_START, KNIFE_END = (6.0, 90.0), (90.0, 6.0)
+THICK = {'E': 0.25, 'S': 0.6, 'P': 0.85, 'H': 1.1, 'R': 0.9, 'G': 1.6, 'V': 1.3}
+FINISHED = ('blade', 'head')
 
 
 class KShape(Shape):
-    def __init__(self, prims, x0=0, x1=100, blade_x=(40, 100), half=8, double=False, fuller=None):
+    def __init__(self, prims, x0=0, x1=100, blade_x=(40, 100), half=8, double=False, fuller=None, edge='down'):
         super().__init__(prims, x0, x1, blade_x, half)
         self.double = double
         self.fuller = fuller  # (x_start, x_end, v_mitte)
+        self.edge = 'both' if double else edge  # Lage der Schneide: down, up, both, none
 
 
 def RIV(x, y, r=1.7, brass=False):
@@ -535,51 +537,55 @@ def prim_for(shape, part, x, y):
 
 def handle_color(part, x, y, v, px, py):
     """Griff-Materialien in Profil-Koordinaten (x entlang, y quer), v = 0..1 quer."""
-    roll = 1.12 - 0.42 * abs(v - 0.62) * 2  # runde Form: oben heller
+    roll = 1.16 - 0.5 * abs(v - 0.64) * 2  # runde Form: oben heller
     if part in ('g10', 'ring'):
-        n = fbm(x * 1.4, y * 1.4, 501, 2.0)
-        grip = ((x * 1.1 + y * 1.1) % 2.6) < 0.7
-        c = (30 + 12 * n, 31 + 12 * n, 37 + 14 * n)
+        n = fbm(x * 1.6, y * 1.6, 501, 2.0)
+        grip = ((x * 1.3 + y * 1.3) % 2.4) < 0.6
+        c = (30 + 14 * n, 32 + 14 * n, 38 + 16 * n)
         if grip and part == 'g10':
-            c = mul(c, 1.35)
+            c = mul(c, 1.4)
     elif part == 'carbon':
-        c = (44, 46, 52) if (int(x * 0.9) + int(y * 0.9)) % 2 else (26, 27, 31)
+        c = (46, 48, 54) if (int(x * 1.1) + int(y * 1.1)) % 2 else (24, 25, 29)
     elif part == 'wood':
-        g = (math.sin(y * 2.3 + fbm(x, y * 3, 503, 6.0) * 5) + 1) / 2
-        c = mix((104, 62, 32), (156, 104, 58), g * 0.8)
+        g = (math.sin(y * 2.6 + fbm(x * 0.8, y * 3, 503, 6.0) * 6) + 1) / 2
+        c = mix((96, 56, 28), (166, 112, 62), g * 0.85)
+        c = mul(c, 0.94 + 0.12 * fbm(x * 4, y * 4, 507, 1.0))
     elif part == 'ribbed':
-        c = (58, 60, 66) if int(x * 0.75) % 2 else (34, 36, 40)
+        c = (62, 64, 70) if int(x * 0.9) % 2 else (32, 34, 38)
     elif part in ('cord', 'cord_orange'):
-        band = (x * 0.9 + y * 0.55) % 3.0
+        band = (x * 1.1 + y * 0.7) % 3.0
         if part == 'cord':
-            c = mix((54, 62, 40), (104, 114, 74), band / 3.0)
+            c = mix((50, 58, 38), (110, 120, 78), band / 3.0)
         else:
-            c = mix((150, 66, 18), (236, 128, 44), band / 3.0)
-        if band < 0.35:
-            c = mul(c, 0.55)
+            c = mix((146, 62, 16), (240, 134, 48), band / 3.0)
+        if band < 0.4:
+            c = mul(c, 0.5)
     elif part in ('steel', 'guard_steel'):
-        c = mix((120, 126, 138), (214, 220, 230), 0.5 + 0.5 * math.sin(v * 3.1))
+        c = mix((112, 118, 130), (226, 230, 238), 0.5 + 0.5 * math.sin(v * 3.1))
+        c = mul(c, 0.96 + 0.08 * fbm(x * 6, y * 0.6, 509, 1.0))
     elif part in ('darksteel', 'guard_dark'):
-        c = mix((64, 68, 78), (132, 138, 150), 0.5 + 0.5 * math.sin(v * 3.1))
+        c = mix((58, 62, 72), (140, 146, 158), 0.5 + 0.5 * math.sin(v * 3.1))
     elif part in ('brass', 'guard_brass'):
-        c = mix((150, 106, 40), (240, 196, 104), 0.5 + 0.5 * math.sin(v * 3.1))
+        c = mix((144, 100, 36), (250, 208, 116), 0.5 + 0.5 * math.sin(v * 3.1))
     elif part == 'leather':
-        c = (98, 60, 34)
+        c = mul((98, 60, 34), 0.92 + 0.16 * fbm(x * 3, y * 3, 511, 1.0))
         if int(x * 1.2) % 3 == 0 and abs(v - 0.5) < 0.12:
             c = (196, 170, 120)
     elif part == 'rivet':
-        d = v
-        return mix((230, 234, 240), (120, 124, 134), d)
+        return mix((240, 244, 250), (110, 114, 124), v)
     elif part == 'rivet_brass':
-        return mix((252, 220, 140), (150, 110, 46), v)
+        return mix((255, 226, 150), (140, 100, 40), v)
     else:
-        c = PART_COLORS.get(part, (200, 0, 200))
+        c = part_color(part, x, y, px, py)
+    # schmaler Glanzstreifen oben auf runden Griffen
+    if abs(v - 0.8) < 0.07 and part not in ('rivet', 'rivet_brass'):
+        c = mix(c, (255, 255, 255), 0.12)
     return mul(c, roll)
 
 
 def knife_class(part, e):
-    if part == 'blade':
-        return 'E' if e < 0.34 else 'S'
+    if part in FINISHED:
+        return 'E' if e < 0.3 else 'S'
     if part.startswith('guard'):
         return 'G'
     if part.startswith('rivet'):
@@ -589,25 +595,30 @@ def knife_class(part, e):
     return 'H'
 
 
-_KNIFE_RASTER = {}
+_RASTER = {}
 
 
-def knife_raster(sid, shape):
-    if sid not in _KNIFE_RASTER:
-        _KNIFE_RASTER[sid] = raster(shape, KNIFE_SIZE, KNIFE_START, KNIFE_END)
-    return _KNIFE_RASTER[sid]
+def shape_raster(key, shape, size, start, end):
+    if key not in _RASTER:
+        _RASTER[key] = raster(shape, size, start, end)
+    return _RASTER[key]
 
 
 def render_knife(sid, shape, finish):
-    size = KNIFE_SIZE
-    parts, prof, (nx, ny) = knife_raster(sid, shape)
-    L = math.hypot(KNIFE_END[0] - KNIFE_START[0], KNIFE_END[1] - KNIFE_START[1])
+    return render_3d('knife_' + sid, shape, finish, KNIFE_SIZE, KNIFE_START, KNIFE_END)
+
+
+def render_3d(key, shape, finish, size, start, end):
+    """Textur + Dicken-Klassen fuer ein 3D-Modell (Messer, Aexte, Kolben)."""
+    parts, prof, (nx, ny) = shape_raster(key, shape, size, start, end)
+    L = math.hypot(end[0] - start[0], end[1] - start[1])
     px_per_unit = L / (shape.x1 - shape.x0)
     img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     cls = [[None] * size for _ in range(size)]
     info = [[None] * size for _ in range(size)]
     b0, b1 = shape.blade_x
     sc = size / 32.0
+    edge = getattr(shape, 'edge', 'down')
     for py in range(size):
         for px in range(size):
             p = parts[py][px]
@@ -615,41 +626,57 @@ def render_knife(sid, shape, finish):
                 continue
             x, y = prof[py][px]
             pr = prim_for(shape, p, x, y)
-            if pr is not None and 'poly' in pr or (pr is not None and 'circle' in pr):
+            if pr is not None:
                 lo, hi = cross_interval(pr, x, y)
             else:
                 lo, hi = y - 1, y + 1
             width = max(1e-3, hi - lo)
             v = max(0.0, min(1.0, (y - lo) / width))
-            e = min(v, 1 - v) * 2 if (p == 'blade' and shape.double) else v
+            if edge == 'both':
+                e = min(v, 1 - v) * 2
+            elif edge == 'up':
+                e = 1 - v
+            elif edge == 'none':
+                e = 0.5 + 0.5 * min(v, 1 - v) * 2
+            else:
+                e = v
             if p.startswith('rivet') and pr is not None and 'circle' in pr:
                 cx, cy, r = pr['circle']
                 v = min(1.0, math.hypot(x - cx + r * 0.3, y - cy - r * 0.3) / (r * 1.3))
             fx, fy = px / sc, py / sc
-            if p == 'blade':
+            if p in FINISHED:
                 u = (x - b0) / max(1e-6, b1 - b0)
                 c = FIN[finish][3](u, 2 * e - 1, fx, fy)
-                bevel = 0.34
+                # feiner Schliff entlang der Klinge
+                c = mul(c, 0.97 + 0.06 * fbm(x * 3.0, y * 0.25, 601, 1.0))
+                bevel = 0.32 if edge != 'none' else 0.0
                 if e < bevel:
                     k = 1 - e / bevel
-                    c = mix(mul(c, 1.05 + 0.2 * k), (255, 255, 255), 0.05 + 0.14 * k * k)
+                    c = mix(mul(c, 1.06 + 0.22 * k), (255, 255, 255), 0.04 + 0.18 * k * k)
                 else:
-                    c = mul(c, 0.98 - 0.14 * (e - bevel) / (1 - bevel))
-                line = 0.75 / max(1.0, width * px_per_unit)
-                if abs(e - bevel) < line:
-                    c = mul(c, 0.72)
-                if shape.fuller:
+                    c = mul(c, 0.99 - 0.16 * (e - bevel) / max(1e-6, 1 - bevel))
+                line = 0.8 / max(1.0, width * px_per_unit)
+                if bevel and abs(e - bevel) < line:
+                    c = mul(c, 0.7)
+                if bevel and abs(e - bevel - line * 1.6) < line * 0.7:
+                    c = mix(c, (255, 255, 255), 0.18)
+                if shape.fuller if hasattr(shape, 'fuller') else False:
                     f0, f1, fv = shape.fuller
                     if f0 <= x <= f1 and abs(v - fv) < 0.11:
-                        c = mul(c, 0.68 if v > fv else 0.82)
-                spec = math.exp(-((u - 0.52) * 5.5) ** 2) * 0.13 * (0.4 + 0.6 * e)
-                c = mix(c, (255, 255, 255), spec)
+                        c = mul(c, 0.66 if v > fv else 0.84)
+                # zwei Lichtreflexe: breit in der Mitte, scharf nahe der Spitze
+                spec = math.exp(-((u - 0.45) * 4.5) ** 2) * 0.12 * (0.4 + 0.6 * e)
+                spec += math.exp(-((u - 0.82) * 14) ** 2) * 0.22 * max(0.0, 1 - abs(e - 0.65) * 3)
+                c = mix(c, (255, 255, 255), min(0.45, spec))
             else:
                 c = handle_color(p, x, y, v, px, py)
+                # Schatten am Uebergang zur Klinge
+                if b0 - 5 < x < b0 and p not in ('guard_steel', 'guard_dark', 'guard_brass'):
+                    c = mul(c, 0.82 + 0.18 * (b0 - x) / 5)
             cls[py][px] = knife_class(p, e)
-            info[py][px] = (p, e)
+            info[py][px] = (p, e, v)
             img.putpixel((px, py), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
-    # Umriss: dunkler Rand, an der Schneide ein heller Glanz
+    # Umriss: weicher dunkler Rand, an der Schneide ein heller Glanz
     out = img.copy()
     for py in range(size):
         for px in range(size):
@@ -662,18 +689,20 @@ def render_knife(sid, shape, finish):
             border = empty(px + 1, py) or empty(px - 1, py) or empty(px, py + 1) or empty(px, py - 1)
             if not border:
                 continue
-            p, e = info[py][px]
+            p, e, v = info[py][px]
             r, g, b, a = img.getpixel((px, py))
-            if p == 'blade' and e < 0.2:
-                c = mix((r, g, b), (255, 255, 255), 0.35)
+            if p in FINISHED and e < 0.2:
+                c = mix((r, g, b), (255, 255, 255), 0.4)
+            elif v > 0.6:
+                c = mul((r, g, b), 0.68)
             else:
-                c = mul((r, g, b), 0.52)
+                c = mul((r, g, b), 0.5)
             out.putpixel((px, py), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
     return out, cls
 
 
-def knife_shape_model(cls):
-    size = KNIFE_SIZE
+def knife_shape_model(cls, size=None, display=None):
+    size = size or len(cls)
     s = 16.0 / size
     elements = []
     for py in range(size):
@@ -708,16 +737,19 @@ def knife_shape_model(cls):
         "gui_light": "front",
         "textures": {"particle": "#tex"},
         "elements": elements,
-        "display": {
-            "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4.0, 0.5], "scale": [0.85, 0.85, 0.85]},
-            "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4.0, 0.5], "scale": [0.85, 0.85, 0.85]},
-            "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-            "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-            "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
-            "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
-            "fixed": {"rotation": [0, 180, 0], "scale": [1, 1, 1]},
-        },
+        "display": display or HANDHELD_DISPLAY,
     }
+
+
+HANDHELD_DISPLAY = {
+    "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4.0, 0.5], "scale": [0.85, 0.85, 0.85]},
+    "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4.0, 0.5], "scale": [0.85, 0.85, 0.85]},
+    "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+    "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+    "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
+    "fixed": {"rotation": [0, 180, 0], "scale": [1, 1, 1]},
+}
 
 
 def knives():
@@ -1286,6 +1318,395 @@ def totem_skin(kind):
     return cv.img
 
 
+# ---------------------------------------------------------------- Scharfschuetzengewehre (AWP auf dem Bogen, SSG 08 auf der Armbrust)
+SN_D = 3          # Pixel pro Modell-Einheit
+SN_ATLAS = 256    # Texturgroesse
+
+
+def _b(part, f, t):
+    return {'part': part, 'from': f, 'to': t}
+
+
+def awp_boxes():
+    """Alle Teile der AWP (Lauf zeigt nach +x). Verschluss-Teile je Zustand."""
+    common = {
+        'pad': _b('rubber', (-16, 3.5, 6.9), (-15, 11, 9.1)),
+        'stock_rear': _b('body', (-15, 3.5, 7), (-11, 11, 9)),
+        'comb': _b('body', (-11, 8.5, 7), (1, 11, 9)),
+        'stock_low': _b('body', (-11, 3.5, 7), (-5, 6, 9)),
+        'stock_slope': _b('body', (-5, 4.5, 7), (-1, 6.5, 9)),
+        'grip': _b('grip', (-2, 1.5, 7.1), (1.5, 8.5, 8.9)),
+        'receiver': _b('body', (1, 6, 6.8), (14, 10.3, 9.2)),
+        'guard_low': _b('black', (1.5, 4, 7.6), (6, 4.8, 8.4)),
+        'guard_front': _b('black', (5.2, 4.8, 7.6), (6, 6, 8.4)),
+        'trigger': _b('metal', (3, 4.8, 7.8), (3.6, 6, 8.2)),
+        'mag': _b('black', (6.5, 3, 7.1), (10.5, 6, 8.9)),
+        'handguard': _b('body', (14, 6.3, 6.9), (24, 9.8, 9.1)),
+        'handguard_low': _b('body', (15, 5.6, 7.3), (23, 6.3, 8.7)),
+        'barrel': _b('metal', (24, 7.3, 7.4), (30.5, 8.7, 8.6)),
+        'muzzle': _b('black', (30.5, 7, 7.15), (32, 9, 8.85)),
+        'mount_a': _b('black', (5, 10.3, 7.3), (6.5, 11.2, 8.7)),
+        'mount_b': _b('black', (12, 10.3, 7.3), (13.5, 11.2, 8.7)),
+        'tube': _b('scope', (1.5, 11.2, 7.2), (17, 12.8, 8.8)),
+        'bell': _b('scope', (17, 10.8, 6.7), (22, 13.2, 9.3)),
+        'lens_front': _b('lens', (22, 11.1, 7.0), (22.15, 12.9, 9.0)),
+        'eyepiece': _b('scope', (-1, 10.9, 6.9), (1.5, 13.1, 9.1)),
+        'lens_rear': _b('lens', (-1.15, 11.2, 7.2), (-1, 12.8, 8.8)),
+        'turret_top': _b('black', (8, 12.8, 7.5), (10, 13.8, 8.5)),
+        'turret_side': _b('black', (8, 11.5, 8.8), (10, 12.5, 9.8)),
+    }
+    states = {
+        'closed': {'stem_c': _b('bolt', (11, 7.4, 9.2), (12, 8.2, 11.4)),
+                   'knob_c': _b('black', (10.5, 6.6, 11), (12.5, 8.6, 12.6))},
+        'up': {'stem_u': _b('bolt', (11, 8.2, 9.2), (12, 10.6, 10.2)),
+               'knob_u': _b('black', (10.5, 10.2, 9.0), (12.5, 12.0, 10.8))},
+        'back': {'stem_b': _b('bolt', (7, 8.2, 9.2), (8, 10.6, 10.2)),
+                 'knob_b': _b('black', (6.5, 10.2, 9.0), (8.5, 12.0, 10.8)),
+                 'bolt_body': _b('bolt', (7.5, 9.0, 8.1), (11.5, 10.2, 9.3)),
+                 'shell': _b('brass', (11.5, 9.6, 7.6), (13.5, 10.3, 8.4))},
+    }
+    return common, states
+
+
+def ssg_boxes():
+    common = {
+        'pad': _b('rubber', (-16, 4, 7.1), (-15, 10.5, 8.9)),
+        'stock_rear': _b('body', (-15, 4, 7.2), (-13.5, 10.5, 8.8)),
+        'stock_top': _b('body', (-13.5, 9, 7.3), (-1, 10.5, 8.7)),
+        'stock_low': _b('body', (-13.5, 4, 7.3), (-6, 5.3, 8.7)),
+        'stock_brace': _b('body', (-6, 4.6, 7.3), (-2, 6, 8.7)),
+        'grip': _b('grip', (-2, 1.5, 7.2), (1.3, 8.5, 8.8)),
+        'receiver': _b('body', (1, 6.4, 7), (12, 9.6, 9)),
+        'guard_low': _b('black', (1.5, 4.4, 7.6), (5.5, 5.1, 8.4)),
+        'guard_front': _b('black', (4.8, 5.1, 7.6), (5.5, 6.4, 8.4)),
+        'trigger': _b('metal', (2.8, 5.1, 7.8), (3.4, 6.4, 8.2)),
+        'mag': _b('black', (5.5, 3.2, 7.2), (8.5, 6.4, 8.8)),
+        'handguard': _b('body', (12, 6.6, 7), (22, 9.4, 9)),
+        'vent_a': _b('black', (14, 7.5, 8.95), (16, 8.5, 9.1)),
+        'vent_b': _b('black', (17, 7.5, 8.95), (19, 8.5, 9.1)),
+        'vent_c': _b('black', (20, 7.5, 8.95), (21.5, 8.5, 9.1)),
+        'barrel': _b('metal', (22, 7.5, 7.5), (30.5, 8.5, 8.5)),
+        'muzzle': _b('black', (30.5, 7.3, 7.3), (32, 8.7, 8.7)),
+        'mount_a': _b('black', (4, 9.6, 7.4), (5.2, 10.4, 8.6)),
+        'mount_b': _b('black', (10, 9.6, 7.4), (11.2, 10.4, 8.6)),
+        'tube': _b('scope', (1.5, 10.4, 7.35), (15, 11.8, 8.65)),
+        'bell': _b('scope', (15, 10.1, 7), (19, 12.1, 9)),
+        'lens_front': _b('lens', (19, 10.3, 7.2), (19.15, 11.9, 8.8)),
+        'eyepiece': _b('scope', (-0.5, 10.2, 7.1), (1.5, 12, 8.9)),
+        'lens_rear': _b('lens', (-0.65, 10.4, 7.3), (-0.5, 11.8, 8.7)),
+        'turret_top': _b('black', (7, 11.8, 7.6), (8.6, 12.6, 8.4)),
+    }
+    states = {
+        'closed': {'stem_c': _b('bolt', (10, 7.6, 9), (10.9, 8.3, 10.9)),
+                   'knob_c': _b('black', (9.6, 7, 10.6), (11.3, 8.7, 12))},
+        'up': {'stem_u': _b('bolt', (10, 8.3, 9), (10.9, 10.4, 9.9)),
+               'knob_u': _b('black', (9.6, 10.0, 8.8), (11.3, 11.6, 10.4))},
+        'back': {'stem_b': _b('bolt', (6.5, 8.3, 9), (7.4, 10.4, 9.9)),
+                 'knob_b': _b('black', (6.1, 10.0, 8.8), (7.8, 11.6, 10.4)),
+                 'bolt_body': _b('bolt', (6.5, 8.8, 8.1), (10, 9.8, 9.1)),
+                 'shell': _b('brass', (10, 9.2, 7.6), (11.8, 9.8, 8.4))},
+    }
+    return common, states
+
+
+SN_FACES = ('north', 'south', 'east', 'west', 'up', 'down')
+
+
+def _face_dims(f, t, face):
+    dx, dy, dz = t[0] - f[0], t[1] - f[1], t[2] - f[2]
+    if face in ('north', 'south'):
+        return dx, dy
+    if face in ('east', 'west'):
+        return dz, dy
+    return dx, dz
+
+
+def _face_point(f, t, face, a, b):
+    x0, y0, z0 = f
+    x1, y1, z1 = t
+    dx, dy, dz = x1 - x0, y1 - y0, z1 - z0
+    if face == 'south':
+        return x0 + a * dx, y1 - b * dy, z1
+    if face == 'north':
+        return x1 - a * dx, y1 - b * dy, z0
+    if face == 'east':
+        return x1, y1 - b * dy, z1 - a * dz
+    if face == 'west':
+        return x0, y1 - b * dy, z0 + a * dz
+    if face == 'up':
+        return x0 + a * dx, y1, z0 + b * dz
+    return x0 + a * dx, y0, z1 - b * dz
+
+
+def sn_layout(boxes):
+    """Teilt jedem Teil und jeder Seite ein Rechteck in der Textur zu (einfaches Regal-Packen)."""
+    rects = {}
+    x = y = row_h = 0
+    items = []
+    for name, bx in boxes.items():
+        for face in SN_FACES:
+            w, h = _face_dims(bx['from'], bx['to'], face)
+            pw, ph = max(1, int(math.ceil(w * SN_D - 1e-6))), max(1, int(math.ceil(h * SN_D - 1e-6)))
+            items.append((ph, pw, name, face))
+    items.sort(key=lambda it: -it[0])
+    for ph, pw, name, face in items:
+        if x + pw > SN_ATLAS:
+            x = 0
+            y += row_h
+            row_h = 0
+        if y + ph > SN_ATLAS:
+            raise RuntimeError('Gewehr-Textur zu klein')
+        rects[(name, face)] = (x, y, pw, ph)
+        x += pw
+        row_h = max(row_h, ph)
+    return rects
+
+
+# Muster der Gewehr-Skins: (u entlang 0 Kolben .. 1 Muendung, w Hoehe 0..1, x, y, z)
+def _sn_default_awp(u, w, x, y, z):
+    return mul((78, 92, 58), 0.9 + 0.2 * fbm(x * 2, y * 2 + z, 701, 1.0))
+
+
+def _sn_default_ssg(u, w, x, y, z):
+    return mul((66, 70, 75), 0.9 + 0.2 * fbm(x * 2, y * 2 + z, 703, 1.0))
+
+
+def _sn_asiimov(u, w, x, y, z):
+    c = (236, 236, 232)
+    if (w < 0.42 and u > 0.36) or u > 0.8:
+        c = (246, 112, 30)
+    if 0.56 < u < 0.62 or (w > 0.72 and u < 0.3):
+        c = (32, 32, 34)
+    if int(u * 48) % 11 == 0 and 0.45 < w < 0.6:
+        c = (150, 150, 150)
+    return c
+
+
+def _sn_dragon_lore(u, w, x, y, z):
+    c = mul((214, 196, 150), 0.88 + 0.2 * fbm(x * 1.5, y * 1.5 + z, 711, 2.0))
+    d = abs(w - (0.52 + 0.2 * math.sin(u * 13)))
+    if d < 0.13:
+        c = (72, 122, 76) if (int(u * 70 + w * 35) % 2) else (180, 152, 62)
+    elif d < 0.16:
+        c = (120, 84, 30)
+    if 0.12 < u < 0.38 and fbm(x * 3, y * 3, 713, 1.0) > 0.62:
+        c = (176, 52, 36)
+    if abs(w - 0.12) < 0.025 or abs(w - 0.9) < 0.025:
+        c = (204, 166, 70)
+    return c
+
+
+def _sn_lightning(u, w, x, y, z):
+    c = mix((30, 8, 48), (74, 18, 104), fbm(x * 1.4, y * 1.4 + z, 721, 2.0))
+    for k in range(3):
+        zz = (u * 22 + k * 3.7) % 2
+        line = 0.22 + k * 0.28 + 0.07 * (zz if zz < 1 else 2 - zz)
+        dd = abs(w - line)
+        if dd < 0.018:
+            return (240, 210, 255)
+        if dd < 0.06:
+            c = mix(c, (170, 80, 240), 0.6 * (1 - dd / 0.06))
+    return c
+
+
+def _sn_medusa(u, w, x, y, z):
+    n = fbm(x * 1.2, y * 1.2 + z, 731, 2.0)
+    c = mul((156, 154, 142), 0.85 + 0.3 * n)
+    if abs(math.sin(u * 42 + n * 7)) < 0.12:
+        c = mul(c, 0.55)
+    if n > 0.66:
+        c = mix(c, (70, 116, 84), 0.6)
+    return c
+
+
+def _sn_hyper_beast(u, w, x, y, z):
+    t = fbm(x * 0.9, y * 0.9 + z * 0.7, 741, 2.0)
+    c = grad([(0, (40, 200, 170)), (0.35, (120, 40, 180)), (0.65, (240, 60, 140)), (1, (250, 222, 60))], t)
+    if (t * 9) % 1 < 0.09:
+        c = (20, 16, 24)
+    return c
+
+
+def _sn_redline(u, w, x, y, z):
+    c = (46, 48, 54) if (int(x * 2) + int(y * 2)) % 2 else (24, 25, 29)
+    if abs(w - 0.32) < 0.03 or abs(w - 0.6) < 0.022:
+        c = (222, 30, 30)
+    if abs(w - 0.64) < 0.01:
+        c = (240, 240, 240)
+    return c
+
+
+def _sn_gungnir(u, w, x, y, z):
+    c = mix((26, 44, 112), (64, 108, 196), w)
+    if abs(math.sin(u * 34) * math.sin(w * 22 + u * 6)) > 0.9:
+        c = (232, 192, 84)
+    return c
+
+
+def _sn_fade(u, w, x, y, z):
+    return grad([(0, (250, 214, 64)), (0.5, (240, 92, 164)), (1, (112, 62, 204))], u)
+
+
+def _sn_neo_noir(u, w, x, y, z):
+    n = fbm(x * 1.3, y * 1.3 + z, 751, 2.0)
+    if n > 0.6:
+        return (22, 22, 26)
+    if 0.46 < n < 0.5:
+        return (214, 40, 52)
+    return (232, 232, 230)
+
+
+def _sn_dragonfire(u, w, x, y, z):
+    h = 0.5 + 0.3 * fbm(x * 0.8, z, 761, 2.0)
+    if w < h:
+        return grad([(0, (255, 234, 90)), (0.5, (250, 120, 30)), (1, (190, 30, 20))], 1 - w / h)
+    return mul((32, 20, 18), 0.9 + 0.2 * fbm(x * 3, y * 3, 763, 1.0))
+
+
+def _sn_blood_water(u, w, x, y, z):
+    c = mix((18, 68, 128), (66, 156, 206), w + 0.1 * math.sin(u * 30))
+    if ((u - 0.55) / 0.2) ** 2 + ((w - 0.55) / 0.22) ** 2 < 1:
+        c = (150, 160, 172)
+    if fbm(x * 3, y * 3 + z, 771, 1.0) > 0.73:
+        c = (190, 22, 32)
+    return c
+
+
+def _sn_abyss(u, w, x, y, z):
+    return mix((8, 36, 46), (40, 122, 132), fbm(x * 1.2, y * 1.2 + z, 781, 2.0))
+
+
+def _sn_deaths_head(u, w, x, y, z):
+    n = fbm(x * 1.5, y * 1.5 + z, 791, 2.0)
+    if n > 0.67:
+        return (222, 220, 208) if n < 0.75 else (20, 20, 22)
+    return (58, 60, 62)
+
+
+def _sn_big_iron(u, w, x, y, z):
+    c = mul((84, 104, 124), 0.9 + 0.2 * fbm(x * 4, y * 0.5, 801, 1.0))
+    if abs(w - 0.5) < 0.045:
+        c = (232, 122, 40)
+    return c
+
+
+def _sn_detour(u, w, x, y, z):
+    s = math.sin(u * 34 + w * 9)
+    if s > 0.45:
+        return (24, 24, 24)
+    return (196, 214, 64) if s > -0.3 else (90, 120, 40)
+
+
+SNIPERS = {
+    'awp': ('AWP', 'bow', awp_boxes, [
+        ('default', 'Standard', 1, _sn_default_awp), ('asiimov', 'Asiimov', 5, _sn_asiimov),
+        ('dragon_lore', 'Dragon Lore', 6, _sn_dragon_lore), ('lightning_strike', 'Lightning Strike', 4, _sn_lightning),
+        ('medusa', 'Medusa', 6, _sn_medusa), ('hyper_beast', 'Hyper Beast', 5, _sn_hyper_beast),
+        ('redline', 'Redline', 4, _sn_redline), ('gungnir', 'Gungnir', 6, _sn_gungnir),
+        ('fade', 'Fade', 5, _sn_fade), ('neo_noir', 'Neo-Noir', 5, _sn_neo_noir)]),
+    'ssg': ('SSG 08', 'crossbow', ssg_boxes, [
+        ('default', 'Standard', 1, _sn_default_ssg), ('dragonfire', 'Dragonfire', 5, _sn_dragonfire),
+        ('blood_in_the_water', 'Blood in the Water', 5, _sn_blood_water), ('abyss', 'Abyss', 3, _sn_abyss),
+        ('deaths_head', "Death's Head", 4, _sn_deaths_head), ('big_iron', 'Big Iron', 4, _sn_big_iron),
+        ('fade', 'Fade', 5, _sn_fade), ('detour', 'Detour', 3, _sn_detour)]),
+}
+
+
+def sn_material(part, pattern, x, y, z, face):
+    u = (x + 16) / 48.0
+    w = (y - 2) / 12.0
+    n = fbm(x * 2.2, y * 2.2 + z * 1.3, 811, 1.0)
+    if part == 'body':
+        c = pattern(u, w, x, y, z)
+    elif part == 'black':
+        c = mul((38, 40, 44), 0.9 + 0.2 * n)
+    elif part == 'metal':
+        c = mul((70, 74, 82), 0.9 + 0.2 * fbm(x * 6, y * 0.4, 813, 1.0))
+    elif part == 'scope':
+        c = mul((26, 28, 33), 0.92 + 0.16 * n)
+    elif part == 'lens':
+        c = mix((30, 70, 150), (150, 90, 220), w)
+        if (y % 1.0) < 0.3:
+            c = mix(c, (255, 255, 255), 0.35)
+    elif part == 'bolt':
+        c = mix((130, 136, 148), (214, 220, 230), 0.5 + 0.5 * math.sin(y * 3))
+    elif part == 'brass':
+        c = mix((176, 128, 48), (250, 214, 120), 0.5 + 0.5 * math.sin(y * 4))
+    elif part == 'rubber':
+        c = mul((22, 22, 25), 0.9 + 0.2 * n)
+    elif part == 'grip':
+        c = (34, 36, 40) if (int(x * 4) + int(y * 4) + int(z * 4)) % 3 else (54, 56, 62)
+    else:
+        c = (255, 0, 255)
+    if face == 'up':
+        c = mul(c, 1.08)
+    return c
+
+
+SNIPER_DISPLAY = {
+    "firstperson_righthand": {"rotation": [0, 95, 0], "translation": [0, 1, -10], "scale": [0.55, 0.55, 0.55]},
+    "firstperson_lefthand": {"rotation": [0, 85, 0], "translation": [0, 1, -10], "scale": [0.55, 0.55, 0.55]},
+    "thirdperson_righthand": {"rotation": [0, 90, 0], "translation": [0, 2, 3], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 2, 3], "scale": [0.5, 0.5, 0.5]},
+    "gui": {"rotation": [0, 0, 28], "translation": [0, 0, 0], "scale": [0.36, 0.36, 0.36]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]},
+    "fixed": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]},
+    "head": {"rotation": [0, 90, 0], "translation": [0, 10, 0], "scale": [0.5, 0.5, 0.5]},
+}
+
+
+def sniper_cats(cats, previews):
+    for rid, (rname, item, boxes_fn, finishes) in SNIPERS.items():
+        common, states = boxes_fn()
+        all_boxes = dict(common)
+        for st in states.values():
+            all_boxes.update(st)
+        rects = sn_layout(all_boxes)
+        uvs = 16.0 / SN_ATLAS
+        # Geometrie je Verschluss-Zustand (Textur ueber #tex)
+        for st_name, st in states.items():
+            elements = []
+            for name, bx in list(common.items()) + list(st.items()):
+                faces = {}
+                for face in SN_FACES:
+                    rx, ry, rw, rh = rects[(name, face)]
+                    faces[face] = {"uv": [round(rx * uvs, 4), round(ry * uvs, 4), round((rx + rw) * uvs, 4), round((ry + rh) * uvs, 4)],
+                                   "texture": "#tex"}
+                elements.append({"from": [round(v, 4) for v in bx['from']], "to": [round(v, 4) for v in bx['to']], "faces": faces})
+            write_json(os.path.join(RES, 'models', 'item', f'{rid}_shape_{st_name}.json'),
+                       {"gui_light": "side", "textures": {"particle": "#tex"}, "elements": elements, "display": SNIPER_DISPLAY})
+        row = []
+        for fid, fname, rar, pattern in finishes:
+            key = f"{rid}_{fid}"
+            img = Image.new('RGBA', (SN_ATLAS, SN_ATLAS), (0, 0, 0, 0))
+            for (name, face), (rx, ry, rw, rh) in rects.items():
+                bx = all_boxes[name]
+                for j in range(rh):
+                    for i in range(rw):
+                        x, y, z = _face_point(bx['from'], bx['to'], face, (i + 0.5) / rw, (j + 0.5) / rh)
+                        c = sn_material(bx['part'], pattern, x, y, z, face)
+                        if rw >= 3 and rh >= 3 and (i in (0, rw - 1) or j in (0, rh - 1)):
+                            c = mul(c, 0.78)
+                        img.putpixel((rx + i, ry + j), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
+            save_png(img, key)
+            for st_name in states:
+                suffix = '' if st_name == 'closed' else '_' + st_name
+                write_json(os.path.join(RES, 'models', 'item', key + suffix + '.json'),
+                           {"parent": f"{NS}:item/{rid}_shape_{st_name}", "textures": {"tex": f"{NS}:item/{key}"}})
+                item_def(key + suffix, {"model": {"type": "minecraft:model", "model": f"{NS}:item/{key}{suffix}"}})
+            # Vorschau: Seitenansicht flach
+            prev = Image.new('RGBA', (48 * 2, 14 * 2), (0, 0, 0, 0))
+            for name, bx in list(common.items()) + list(states['closed'].items()):
+                rx, ry, rw, rh = rects[(name, 'south')]
+                tile = img.crop((rx, ry, rx + rw, ry + rh)).resize(
+                    (max(1, round((bx['to'][0] - bx['from'][0]) * 2)), max(1, round((bx['to'][1] - bx['from'][1]) * 2))), Image.NEAREST)
+                prev.alpha_composite(tile, (round((bx['from'][0] + 16) * 2), round((16 - bx['to'][1]) * 2)))
+            row.append(prev)
+        cats.append({"id": rid, "name": rname, "items": [item], "shapes": [],
+                     "finishes": [{"id": f, "name": n, "rarity": r} for f, n, r, _ in finishes]})
+        previews[rid] = [row]
+
+
 # ---------------------------------------------------------------- Ausgabe
 RARITY_NAMES = ['Konsum', 'Industrie', 'Militär', 'Begrenzt', 'Geheim', 'Verdeckt', '★ Gold']
 
@@ -1338,14 +1759,28 @@ def main():
     def finish_list(ids):
         return [{"id": f, "name": FIN[f][1], "rarity": FIN[f][2]} for f in ids]
 
-    def tool_cat(cid, name, shapes, finishes, parent, size, items, start, end, spear=False):
+    def tool_cat(cid, name, shapes, finishes, parent, size, items, start, end, spear=False, edge=None):
         sh_list = []
         rows = []
         for sid, (sname, shape) in shapes.items():
             sh_list.append({"id": sid, "name": sname})
             row = []
+            shape_written = False
             for fid in finishes:
                 key = f"{cid}_{sid}_{fid}"
+                if edge is not None:
+                    # 3D-Modell wie bei den Messern (Kopf mit Tiefe und Glanz)
+                    shape.edge = edge
+                    img, cls = render_3d(f"{cid}_{sid}", shape, fid, size, start, end)
+                    if not shape_written:
+                        write_json(os.path.join(RES, 'models', 'item', f'{cid}_shape_{sid}.json'), knife_shape_model(cls))
+                        shape_written = True
+                    save_png(img, key)
+                    row.append(img)
+                    write_json(os.path.join(RES, 'models', 'item', key + '.json'),
+                               {"parent": f"{NS}:item/{cid}_shape_{sid}", "textures": {"tex": f"{NS}:item/{key}"}})
+                    item_def(key, {"model": {"type": "minecraft:model", "model": f"{NS}:item/{key}"}})
+                    continue
                 img = render(shape, size, start, end, fid)
                 save_png(img, key)
                 row.append(img)
@@ -1391,12 +1826,13 @@ def main():
 
     mats = ['wooden', 'stone', 'copper', 'iron', 'golden', 'diamond', 'netherite']
     knife_cat([m + '_sword' for m in mats])
-    tool_cat('axe', 'Äxte', axes(), TOOL_FINISHES, 'minecraft:item/handheld', 32,
-             [m + '_axe' for m in mats], (3.0, 30.0), (29.0, 3.0))
-    tool_cat('mace', 'Kolben', maces(), TOOL_FINISHES, 'minecraft:item/handheld_mace', 32,
-             ['mace'], (3.0, 30.0), (29.0, 3.0))
-    tool_cat('spear', 'Speere', spears(), TOOL_FINISHES, None, 32,
-             [m + '_spear' for m in mats], (31.0, 31.0), (0.5, 0.5), spear=True)
+    tool_cat('axe', 'Äxte', axes(), TOOL_FINISHES, 'minecraft:item/handheld', 64,
+             [m + '_axe' for m in mats], (6.0, 60.0), (58.0, 6.0), edge='up')
+    tool_cat('mace', 'Kolben', maces(), TOOL_FINISHES, 'minecraft:item/handheld_mace', 64,
+             ['mace'], (6.0, 60.0), (58.0, 6.0), edge='none')
+    tool_cat('spear', 'Speere', spears(), TOOL_FINISHES, None, 64,
+             [m + '_spear' for m in mats], (62.0, 62.0), (1.0, 1.0), spear=True)
+    sniper_cats(cats, previews)
 
     # Schild
     sh_rows = []

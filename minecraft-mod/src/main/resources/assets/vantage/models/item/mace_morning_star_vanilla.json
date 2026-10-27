@@ -1,6 +1,6 @@
 {
- "parent": "minecraft:item/handheld_mace",
+ "parent": "vantage:item/mace_shape_morning_star",
  "textures": {
-  "layer0": "vantage:item/mace_morning_star_vanilla"
+  "tex": "vantage:item/mace_morning_star_vanilla"
  }
 }

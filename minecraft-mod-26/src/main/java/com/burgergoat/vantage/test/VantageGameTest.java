@@ -7,6 +7,7 @@ import com.burgergoat.vantage.feature.CameraControl;
 import com.burgergoat.vantage.feature.ComboCounter;
 import com.burgergoat.vantage.feature.Crosshair;
 import com.burgergoat.vantage.feature.KillEffects;
+import com.burgergoat.vantage.feature.Snipers;
 import com.burgergoat.vantage.feature.Waypoints;
 import com.burgergoat.vantage.feature.Macros;
 import com.burgergoat.vantage.feature.Viewmodel;
@@ -464,6 +465,55 @@ public class VantageGameTest implements FabricClientGameTest {
 				Waypoints.setActive(mc, null);
 			});
 			sp.getServer().runCommand("effect clear @p");
+
+			// Scharfschuetzengewehre: AWP (Bogen) und SSG 08 (Armbrust)
+			ctx.runOnClient(mc -> {
+				VantageConfig c = VantageConfig.get();
+				c.skins.put("bow", "awp_dragon_lore");
+				c.skins.put("crossbow", "ssg_dragonfire");
+				VantageConfig.save();
+			});
+			sp.getServer().runCommand("item replace entity @p hotbar.0 with bow");
+			sp.getServer().runCommand("item replace entity @p hotbar.1 with crossbow");
+			sp.getServer().runCommand("item replace entity @p inventory.5 with arrow 64");
+			ctx.runOnClient(mc -> {
+				mc.player.getInventory().setSelectedSlot(0);
+				mc.options.setCameraType(CameraType.FIRST_PERSON);
+			});
+			ctx.waitTicks(15);
+			ctx.takeScreenshot("awp_idle");
+			ctx.getInput().holdKey(o -> o.keyUse);
+			ctx.waitTicks(3);
+			ctx.takeScreenshot("awp_aim");
+			ctx.waitTicks(12);
+			boolean scoped = ctx.computeOnClient(mc -> Snipers.scoped());
+			ctx.takeScreenshot("awp_scope");
+			ctx.getInput().releaseKey(o -> o.keyUse);
+			ctx.waitTicks(2);
+			ctx.takeScreenshot("awp_shot");
+			ctx.waitTicks(11);
+			String bolt = ctx.computeOnClient(mc -> Snipers.boltSuffix());
+			ctx.takeScreenshot("awp_bolt");
+			ctx.waitTicks(25);
+			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(1));
+			ctx.waitTicks(12);
+			ctx.takeScreenshot("ssg_idle");
+			ctx.getInput().holdKey(o -> o.keyUse);
+			ctx.waitTicks(11);
+			String reload = ctx.computeOnClient(mc -> Snipers.boltSuffix());
+			ctx.takeScreenshot("ssg_reload");
+			ctx.waitTicks(22);
+			ctx.getInput().releaseKey(o -> o.keyUse);
+			ctx.waitTicks(5);
+			ctx.takeScreenshot("ssg_loaded");
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			ctx.waitTicks(5);
+			ctx.takeScreenshot("ssg_third_person");
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+			VantageClient.LOG.info("TEST Gewehre: Zielfernrohr={} Verschluss nach Schuss={} beim Laden={}", scoped, bolt, reload);
+			sp.getServer().runCommand("item replace entity @p hotbar.0 with netherite_sword");
+			sp.getServer().runCommand("item replace entity @p hotbar.1 with diamond_sword");
+			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			sp.getServer().runCommand("execute at @p run setblock ~ ~1 ~2 minecraft:air");
 
 			for (String f : new String[]{"clear", "vivid", "cinematic", "golden", "frost", "dream", "hdr", "noir", "comic", "nightvision"}) {
