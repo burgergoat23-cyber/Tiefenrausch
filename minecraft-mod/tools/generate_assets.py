@@ -7,6 +7,7 @@ beschrieben, schraeg ins Pixelraster gelegt und mit einem Muster (Finish) eingef
 """
 import json
 import math
+import multiprocessing
 import os
 import shutil
 import sys
@@ -161,8 +162,8 @@ class Shape:
         self.ribs = ribs
 
 
-def raster(shape, size, start, end, ss=4, thresh=7):
-    """Gibt (parts[y][x], prof[y][x]=(x,y) Profilkoordinaten) zurueck."""
+def raster(shape, size, start, end, ss=4, thresh=7, cov=None):
+    """Gibt (parts[y][x], prof[y][x]=(x,y) Profilkoordinaten) zurueck. cov (Liste) bekommt die Abdeckung 0..1 je Pixel."""
     sx, sy = start
     ex, ey = end
     L = math.hypot(ex - sx, ey - sy)
@@ -171,6 +172,8 @@ def raster(shape, size, start, end, ss=4, thresh=7):
     scale = L / (shape.x1 - shape.x0)
     parts = [[None] * size for _ in range(size)]
     prof = [[None] * size for _ in range(size)]
+    if cov is not None:
+        cov.extend([0.0] * size for _ in range(size))
     for py in range(size):
         for px in range(size):
             counts = {}
@@ -186,6 +189,8 @@ def raster(shape, size, start, end, ss=4, thresh=7):
             if counts and sum(counts.values()) >= thresh:
                 best = max(counts.items(), key=lambda kv: kv[1])[0]
                 parts[py][px] = best
+                if cov is not None:
+                    cov[py][px] = min(1.0, sum(counts.values()) / (ss * ss))
                 qx, qy = px + 0.5 - sx, py + 0.5 - sy
                 prof[py][px] = ((qx * dx + qy * dy) / scale + shape.x0, (qx * nx + qy * ny) / scale)
     return parts, prof, (nx, ny)
@@ -485,8 +490,8 @@ def render(shape, size, start, end, finish, flip_light=False, outline=0.62):
 
 # ---------------------------------------------------------------- Messer
 # ---------------------------------------------------------------- Messer (64x64, echte 3D-Tiefe)
-KNIFE_SIZE = 96
-KNIFE_START, KNIFE_END = (6.0, 90.0), (90.0, 6.0)
+KNIFE_SIZE = 256
+KNIFE_START, KNIFE_END = (16.0, 240.0), (240.0, 16.0)
 THICK = {'E': 0.25, 'S': 0.6, 'P': 0.85, 'H': 1.1, 'R': 0.9, 'G': 1.6, 'V': 1.3}
 FINISHED = ('blade', 'head')
 
@@ -598,19 +603,29 @@ def knife_class(part, e):
 _RASTER = {}
 
 
-def shape_raster(key, shape, size, start, end):
+_COVER = {}
+
+
+def shape_raster(key, shape, size, start, end, smooth=False):
     if key not in _RASTER:
-        _RASTER[key] = raster(shape, size, start, end)
+        if smooth:
+            cov = []
+            _RASTER[key] = raster(shape, size, start, end, thresh=1, cov=cov)
+            _COVER[key] = cov
+        else:
+            _RASTER[key] = raster(shape, size, start, end)
     return _RASTER[key]
 
 
 def render_knife(sid, shape, finish):
-    return render_3d('knife_' + sid, shape, finish, KNIFE_SIZE, KNIFE_START, KNIFE_END)
+    return render_3d('knife_' + sid, shape, finish, KNIFE_SIZE, KNIFE_START, KNIFE_END, smooth=True)
 
 
-def render_3d(key, shape, finish, size, start, end):
-    """Textur + Dicken-Klassen fuer ein 3D-Modell (Messer, Aexte, Kolben)."""
-    parts, prof, (nx, ny) = shape_raster(key, shape, size, start, end)
+def render_3d(key, shape, finish, size, start, end, smooth=False):
+    """Textur + Dicken-Klassen fuer ein 3D-Modell (Messer, Aexte, Kolben).
+    smooth: hohe Aufloesung mit weichen (halbdurchsichtigen) Kanten statt Pixel-Treppen."""
+    parts, prof, (nx, ny) = shape_raster(key, shape, size, start, end, smooth)
+    cover = _COVER.get(key) if smooth else None
     L = math.hypot(end[0] - start[0], end[1] - start[1])
     px_per_unit = L / (shape.x1 - shape.x0)
     img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
@@ -694,10 +709,18 @@ def render_3d(key, shape, finish, size, start, end):
             if p in FINISHED and e < 0.2:
                 c = mix((r, g, b), (255, 255, 255), 0.4)
             elif v > 0.6:
-                c = mul((r, g, b), 0.68)
+                c = mul((r, g, b), 0.8 if smooth else 0.68)
             else:
-                c = mul((r, g, b), 0.5)
+                c = mul((r, g, b), 0.7 if smooth else 0.5)
             out.putpixel((px, py), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
+    if cover is not None:
+        # weiche Kanten: Deckkraft = wie viel vom Pixel die Form bedeckt
+        px_ = out.load()
+        for py in range(size):
+            for px in range(size):
+                if parts[py][px] is not None:
+                    r, g, b, a = px_[px, py]
+                    px_[px, py] = (r, g, b, int(round(255 * cover[py][px])))
     return out, cls
 
 
@@ -733,6 +756,26 @@ def knife_shape_model(cls, size=None, display=None):
                     "west": {"uv": [u0, v0, round(u0 + s, 4), v1], "texture": "#tex"},
                 },
             })
+    return {
+        "gui_light": "front",
+        "textures": {"particle": "#tex"},
+        "elements": elements,
+        "display": display or HANDHELD_DISPLAY,
+    }
+
+
+def smooth_knife_model(display=None, thick=0.7, layers=4):
+    """Glattes Messer: einige duenne Ebenen mit der ganzen Textur hintereinander (Tiefe ohne Pixel-Treppen)."""
+    elements = []
+    for i in range(layers):
+        z = round(8 - thick / 2 + thick * i / (layers - 1), 4)
+        elements.append({
+            "from": [0, 0, z], "to": [16, 16, z],
+            "faces": {
+                "south": {"uv": [0, 0, 16, 16], "texture": "#tex"},
+                "north": {"uv": [16, 0, 0, 16], "texture": "#tex"},
+            },
+        })
     return {
         "gui_light": "front",
         "textures": {"particle": "#tex"},
@@ -1732,6 +1775,11 @@ def simple_model(name, parent, tex=None):
                {"parent": parent, "textures": {"layer0": f"{NS}:item/{tex or name}"}})
 
 
+def _knife_job(job):
+    sid, fid = job
+    return render_knife(sid, knives()[sid][1], fid)[0]
+
+
 def knife_preview(out, names):
     sheet = Image.new('RGBA', (len(names) * 260, 260), (54, 57, 63, 255))
     K = knives()
@@ -1805,15 +1853,20 @@ def main():
         sh_list = []
         rows = []
         finishes = [f[0] for f in FINISHES]
-        for sid, (sname, shape) in knives().items():
+        K = knives()
+        jobs = [(sid, fid) for sid in K for fid in finishes]
+        # hohe Aufloesung dauert: auf alle Kerne verteilen (eine Messerform pro Paket)
+        with multiprocessing.Pool() as pool:
+            done = dict(zip(jobs, pool.map(_knife_job, jobs, chunksize=len(finishes))))
+        for sid, (sname, shape) in K.items():
             sh_list.append({"id": sid, "name": sname})
             row = []
             shape_written = False
             for fid in finishes:
                 key = f"knife_{sid}_{fid}"
-                img, cls = render_knife(sid, shape, fid)
+                img = done[(sid, fid)]
                 if not shape_written:
-                    write_json(os.path.join(RES, 'models', 'item', f'knife_shape_{sid}.json'), knife_shape_model(cls))
+                    write_json(os.path.join(RES, 'models', 'item', f'knife_shape_{sid}.json'), smooth_knife_model())
                     shape_written = True
                 save_png(img, key)
                 row.append(img)
