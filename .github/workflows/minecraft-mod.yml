@@ -114,10 +114,24 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add download test-screenshots videos
-          if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
-          git commit -m "Mod-Jar und Testbilder automatisch erstellt [skip ci]"
-          for i in 1 2 3 4; do git pull --rebase -X theirs origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; git rebase --abort 2>/dev/null || true; sleep 5; done
+          # Auf den neuesten Stand des Zweigs setzen (ohne Rebase-Konflikte), dann nur die Ergebnisse festschreiben
+          for i in 1 2 3 4; do
+            git fetch -q origin "${GITHUB_REF_NAME}"
+            git reset -q --mixed "origin/${GITHUB_REF_NAME}"
+            git add -A download test-screenshots videos
+            if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
+            git commit -q -m "Mod-Jar und Testbilder automatisch erstellt [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep 5
+          done
+
+      - name: Videos hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: animations-videos
+          path: minecraft-mod/videos/*.mp4
+          if-no-files-found: ignore
 
       - name: Ergebnis des Spieltests
         if: steps.gametest.outcome == 'failure'
