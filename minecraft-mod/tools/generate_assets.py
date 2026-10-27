@@ -202,6 +202,14 @@ def steel(u, v):
     return mix((108, 114, 126), (222, 226, 234), 0.25 + 0.75 * t)
 
 
+SMOOTH = [False]  # True beim Zeichnen der feinen Messer: Muster ohne Pixel-Stufen
+
+
+def smoothstep(a, b, t):
+    t = max(0.0, min(1.0, (t - a) / (b - a)))
+    return t * t * (3 - 2 * t)
+
+
 def f_vanilla(u, v, x, y):
     return steel(u, v)
 
@@ -271,6 +279,9 @@ def f_crimson(u, v, x, y):
     dist = math.hypot(x - cx, y - cy)
     radial = abs(math.sin(ang * 9.0))
     ring = abs(math.sin(dist * 0.85))
+    if SMOOTH[0]:
+        k = max(1 - smoothstep(0.08, 0.2, radial), 1 - smoothstep(0.06, 0.16, ring))
+        return mix(base, (14, 6, 8), k)
     if radial < 0.16 or ring < 0.13:
         return (14, 6, 8)
     return base
@@ -303,6 +314,12 @@ def f_blue_steel(u, v, x, y):
 
 def f_lore(u, v, x, y):
     base = mix((196, 146, 46), (250, 214, 110), (1 - v) / 2)
+    if SMOOTH[0]:
+        # verschnoerkeltes Gold-Ornament wie bei Lore
+        a = abs(math.sin((x + y) * 0.63)) * abs(math.sin((x - y) * 0.63))
+        r = abs(math.sin(math.hypot((x % 5) - 2.5, (y % 5) - 2.5) * 2.2))
+        k = max(1 - smoothstep(0.03, 0.12, a), (1 - smoothstep(0.05, 0.2, r)) * 0.7)
+        return mix(mul(base, 1.05), mul(base, 0.5), k)
     x, y = int(x), int(y)
     a = (x + y) % 5
     b = (x - y) % 5
@@ -313,6 +330,12 @@ def f_lore(u, v, x, y):
 
 def f_autotronic(u, v, x, y):
     base = mix((176, 22, 26), (226, 52, 44), (1 - v) / 2)
+    if SMOOTH[0]:
+        n = h2(int(x // 3), int(y // 3), 151)
+        lx = 1 - smoothstep(0.0, 0.18, abs(((x + 0.5) % 4) - 0.5) / 4)
+        ly = 1 - smoothstep(0.0, 0.14, abs(((y + 0.5) % 5) - 0.5) / 5)
+        k = max(lx if n > 0.4 else 0.0, ly if n < 0.55 else 0.0)
+        return mix(base, (26, 20, 22), k)
     x, y = int(x), int(y)
     n = h2(x // 3, y // 3, 151)
     if (x % 4 == 0 and n > 0.4) or (y % 5 == 0 and n < 0.55):
@@ -339,6 +362,12 @@ def f_bright_water(u, v, x, y):
 
 
 def camo(cols, x, y, seed, block=2, sc=3.0):
+    if SMOOTH[0]:
+        n = fbm(x, y, seed, sc)
+        f = n * len(cols) * 1.15 - 0.1 * len(cols)
+        i = max(0, min(len(cols) - 1, int(f)))
+        j = max(0, min(len(cols) - 1, i + 1))
+        return mix(cols[i], cols[j], smoothstep(0.85, 1.0, f - int(f)))
     n = fbm((x // block) * block, (y // block) * block, seed, sc)
     idx = min(len(cols) - 1, int(n * len(cols) * 1.15 - 0.1 * len(cols)))
     return cols[max(0, idx)]
@@ -350,6 +379,9 @@ def f_ddpat(u, v, x, y):
 
 def f_safari(u, v, x, y):
     base = mix((150, 130, 88), (196, 176, 124), fbm(x, y, 191, 4.0))
+    if SMOOTH[0]:
+        k = max(1 - smoothstep(0.0, 0.12, abs((x % 3) - 0.3) / 3), 1 - smoothstep(0.0, 0.12, abs((y % 3) - 0.3) / 3))
+        return mix(base, mul(base, 0.72), k)
     if int(x) % 3 == 0 or int(y) % 3 == 0:
         return mul(base, 0.72)
     return base
@@ -617,6 +649,33 @@ def shape_raster(key, shape, size, start, end, smooth=False):
     return _RASTER[key]
 
 
+MATTE = {'ultraviolet', 'night', 'forest_ddpat', 'boreal_forest', 'urban_masked', 'safari_mesh', 'scorched',
+         'freehand', 'autotronic', 'stained', 'rust_coat', 'bright_water'}
+
+
+def metal_look(c, finish, u, e, x, y, edge):
+    """Echtes Metall: Spiegelung von Himmel und Boden quer zur Klinge, feiner Schliff, Abnutzung an der Schneide."""
+    matte = finish in MATTE
+    k = 0.35 if matte else 1.0
+    # Spiegelbild: oben dunkel (Boden), helles Band (Himmel), darunter wieder dunkler, an der Fase hell
+    t = e if edge != 'none' else 0.5
+    refl = (0.82 + 0.3 * smoothstep(0.35, 0.55, t) - 0.22 * smoothstep(0.62, 0.9, t)
+            + 0.18 * math.exp(-((t - 0.5) * 9) ** 2))
+    c = mul(c, 1 + (refl - 1) * k)
+    # feiner Laengsschliff (geht entlang der Klinge)
+    g = fbm(x * 0.6, y * 9.0, 777, 1.0, oct=2)
+    c = mul(c, 1 + (g - 0.5) * (0.14 if not matte else 0.06))
+    # weiches Glanzlicht, wandert leicht schraeg ueber die Klinge
+    h = math.exp(-(((u - 0.35) - (t - 0.5) * 0.25) * 5.5) ** 2) * math.exp(-((t - 0.52) * 6) ** 2)
+    c = mix(c, (255, 255, 255), h * (0.32 if not matte else 0.1))
+    if matte:
+        # Lack an der Schneide abgenutzt: blanker Stahl schaut durch
+        wear = fbm(x * 2, y * 2, 779, 1.5)
+        if t < 0.14 and wear > 0.45:
+            c = mix(c, steel(u, 0.2), 0.7)
+    return c
+
+
 def render_knife(sid, shape, finish):
     return render_3d('knife_' + sid, shape, finish, KNIFE_SIZE, KNIFE_START, KNIFE_END, smooth=True)
 
@@ -661,7 +720,10 @@ def render_3d(key, shape, finish, size, start, end, smooth=False):
             fx, fy = px / sc, py / sc
             if p in FINISHED:
                 u = (x - b0) / max(1e-6, b1 - b0)
+                SMOOTH[0] = smooth
                 c = FIN[finish][3](u, 2 * e - 1, fx, fy)
+                if smooth:
+                    c = metal_look(c, finish, u, e, x, y, edge)
                 # feiner Schliff entlang der Klinge
                 c = mul(c, 0.97 + 0.06 * fbm(x * 3.0, y * 0.25, 601, 1.0))
                 bevel = 0.32 if edge != 'none' else 0.0
