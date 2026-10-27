@@ -1581,23 +1581,25 @@ def _face_point(f, t, face, a, b):
     return x0 + a * dx, y0, z1 - b * dz
 
 
-def sn_layout(boxes):
+def sn_layout(boxes, d=None, atlas=None):
     """Teilt jedem Teil und jeder Seite ein Rechteck in der Textur zu (einfaches Regal-Packen)."""
+    d = d or SN_D
+    atlas = atlas or SN_ATLAS
     rects = {}
     x = y = row_h = 0
     items = []
     for name, bx in boxes.items():
         for face in SN_FACES:
             w, h = _face_dims(bx['from'], bx['to'], face)
-            pw, ph = max(1, int(math.ceil(w * SN_D - 1e-6))), max(1, int(math.ceil(h * SN_D - 1e-6)))
+            pw, ph = max(1, int(math.ceil(w * d - 1e-6))), max(1, int(math.ceil(h * d - 1e-6)))
             items.append((ph, pw, name, face))
     items.sort(key=lambda it: -it[0])
     for ph, pw, name, face in items:
-        if x + pw > SN_ATLAS:
+        if x + pw > atlas:
             x = 0
             y += row_h
             row_h = 0
-        if y + ph > SN_ATLAS:
+        if y + ph > atlas:
             raise RuntimeError('Gewehr-Textur zu klein')
         rects[(name, face)] = (x, y, pw, ph)
         x += pw
@@ -1850,6 +1852,218 @@ def sniper_cats(cats, previews):
         previews[rid] = [row]
 
 
+# ---------------------------------------------------------------- 3D-Gegenstaende (Granaten, Windkugeln, Totems)
+OBJ_D = 8  # Pixel pro Modell-Einheit
+
+
+def ob(part, f, t, rot=None):
+    b = {'part': part, 'from': f, 'to': t}
+    if rot:
+        b['rot'] = rot  # (Achse, Winkel, Ursprung)
+    return b
+
+
+def cyl(part, cx, cz, r, y0, y1):
+    """Runder Koerper (senkrecht) aus 4 gedrehten Quadern = fast rund."""
+    a = r * 0.77  # 4 gedrehte Quadrate: mittlerer Radius ~ r
+    out = []
+    for ang in (0, 22.5, 45, -22.5):
+        out.append(ob(part, (cx - a, y0, cz - a), (cx + a, y1, cz + a), None if ang == 0 else ('y', ang, (cx, y0, cz))))
+    return out
+
+
+def cyl_z(part, cx, cy, r, z0, z1):
+    """Runder Koerper entlang z (fuer Herz-Boegen)."""
+    a = r * 0.77  # 4 gedrehte Quadrate: mittlerer Radius ~ r
+    out = []
+    for ang in (0, 22.5, 45, -22.5):
+        out.append(ob(part, (cx - a, cy - a, z0), (cx + a, cy + a, z1), None if ang == 0 else ('z', ang, (cx, cy, z0))))
+    return out
+
+
+def ball(part, cx, cy, cz, R):
+    """Kugel aus 5 runden Scheiben."""
+    out = []
+    for y0, y1, f in ((-1.0, -0.72, 0.6), (-0.72, -0.4, 0.88), (-0.4, 0.4, 1.0), (0.4, 0.72, 0.88), (0.72, 1.0, 0.6)):
+        out += cyl(part, cx, cz, R * f, cy + y0 * R, cy + y1 * R)
+    return out
+
+
+def pin_set(top):
+    """Zuender, Buegel und Abzugsring wie bei CS-Granaten."""
+    out = cyl('metal', 8, 8, 1.1, top, top + 1.4)
+    out.append(ob('steel', (9.0, top - 5.0, 7.45), (9.7, top + 1.5, 8.55)))
+    out.append(ob('steel', (7.6, top + 1.2, 7.45), (9.7, top + 1.8, 8.55)))
+    for f, t in (((4.6, top + 0.6, 7.85), (7.4, top + 1.0, 8.15)), ((4.6, top + 3.0, 7.85), (7.4, top + 3.4, 8.15)),
+                 ((4.6, top + 0.6, 7.85), (5.0, top + 3.4, 8.15)), ((7.0, top + 0.6, 7.85), (7.4, top + 3.4, 8.15))):
+        out.append(ob('ring', f, t, ('z', 45, (6.0, top + 2.0, 8.0))))
+    return out
+
+
+def grenade_boxes(kind):
+    if kind == 'he':
+        return ball('body', 8, 6, 8, 3.8) + cyl('metal', 8, 8, 1.4, 9.4, 10.2) + pin_set(10.2)
+    if kind == 'molotov':
+        return (cyl('glass', 8, 8, 2.5, 0.5, 7.0) + cyl('label', 8, 8, 2.56, 2.6, 4.8) + cyl('glass', 8, 8, 1.7, 7.0, 8.0)
+                + cyl('glass', 8, 8, 0.95, 8.0, 11.0) + [ob('rag', (7.0, 10.4, 7.0), (9.0, 12.6, 9.0)),
+                                                          ob('flame', (6.9, 12.6, 6.9), (9.1, 14.4, 9.1)),
+                                                          ob('flame2', (7.5, 14.4, 7.5), (8.5, 15.6, 8.5))])
+    out = cyl('body', 8, 8, 2.6, 1.0, 9.4) + cyl('band', 8, 8, 2.68, 5.0, 6.4) + cyl('metal', 8, 8, 1.9, 9.4, 10.2)
+    out += cyl('metal', 8, 8, 2.1, 0.6, 1.0) + pin_set(10.2)
+    if kind == 'decoy':
+        out.append(ob('black', (6.3, 10.2, 7.85), (6.6, 15.0, 8.15)))
+    return out
+
+
+def wind_boxes(kind):
+    out = ball('body', 8, 6.5, 8, 4.4)
+    if kind == 'smoke_bomb':
+        out += cyl('metal', 8, 8, 0.9, 10.6, 11.6) + [ob('fuse', (7.85, 11.6, 7.85), (8.15, 14.0, 8.15)),
+                                                      ob('flame2', (7.6, 14.0, 7.6), (8.4, 14.8, 8.4))]
+    return out
+
+
+def totem_boxes(kind):
+    if kind == 'medishot':
+        return (cyl('barrel', 8, 8, 1.3, 2.0, 10.0) + [ob('steel', (7.88, -0.6, 7.88), (8.12, 2.0, 8.12)),
+                                                      ob('white', (5.4, 9.6, 7.4), (10.6, 10.2, 8.6)),
+                                                      ob('white', (7.6, 10.2, 7.6), (8.4, 13.2, 8.4)),
+                                                      ob('white', (6.4, 13.2, 6.4), (9.6, 13.8, 9.6))])
+    if kind == 'defuse_kit':
+        return [ob('pouch', (4.0, 1.5, 6.4), (12.0, 9.0, 9.6)), ob('flap', (3.9, 7.4, 6.2), (12.1, 9.3, 9.8)),
+                ob('yellow', (5.6, 9.0, 7.5), (6.6, 12.6, 8.5)), ob('red', (9.4, 9.0, 7.5), (10.4, 12.0, 8.5)),
+                ob('steel', (5.8, 12.6, 7.7), (6.4, 14.0, 8.3)), ob('steel', (9.6, 12.0, 7.7), (10.2, 13.6, 8.3))]
+    if kind == 'c4':
+        return [ob('brick', (2.5, 1.0, 5.2), (13.5, 5.6, 10.8)), ob('tape', (5.0, 0.9, 5.1), (6.4, 5.7, 10.9)),
+                ob('tape', (9.6, 0.9, 5.1), (11.0, 5.7, 10.9)), ob('black', (4.6, 5.6, 6.2), (11.4, 6.8, 9.8)),
+                ob('screen', (5.4, 6.8, 6.8), (10.6, 7.1, 7.8)), ob('keys', (5.4, 6.8, 8.2), (10.6, 7.0, 9.4)),
+                ob('red', (13.5, 2.0, 6.0), (14.4, 2.6, 6.6)), ob('blue', (13.5, 3.0, 9.0), (14.4, 3.6, 9.6))]
+    if kind == 'dogtags':
+        return [ob('tag', (4.6, 2.5, 7.7), (8.6, 9.0, 8.1)), ob('tag2', (7.6, 1.5, 8.1), (11.6, 8.0, 8.5), ('z', -22.5, (9.6, 8.0, 8.3))),
+                ob('chain', (6.4, 9.0, 7.8), (6.8, 14.5, 8.0), ('z', -22.5, (6.6, 9.0, 7.9))),
+                ob('chain', (9.4, 8.0, 8.2), (9.8, 14.0, 8.4), ('z', 22.5, (9.6, 8.0, 8.3)))]
+    if kind == 'heart':
+        return ([ob('crystal', (5.0, 3.6, 6.4), (11.0, 9.6, 9.6), ('z', 45, (8.0, 6.6, 8.0)))]
+                + cyl_z('crystal', 5.9, 9.0, 2.95, 6.4, 9.6) + cyl_z('crystal', 10.1, 9.0, 2.95, 6.4, 9.6))
+    return []
+
+
+GRENADE_COL = {'he': (88, 104, 56), 'flash': (170, 176, 186), 'smoke': (104, 118, 98), 'incendiary': (176, 54, 30),
+               'decoy': (140, 116, 76), 'ta': (86, 66, 150), 'molotov': (126, 74, 30)}
+GRENADE_BAND = {'flash': (60, 120, 220), 'smoke': (220, 200, 60), 'incendiary': (250, 170, 40),
+                'decoy': (70, 60, 40), 'ta': (232, 232, 240), 'he': (60, 60, 60), 'molotov': (60, 60, 60)}
+
+
+def obj_material(cat, kind, part, x, y, z, face):
+    n = fbm(x * 3, y * 3 + z * 2, 901, 1.0)
+    ang = math.atan2(z - 8, x - 8)
+    if part == 'body':
+        if cat == 'grenade':
+            c = mul(GRENADE_COL[kind], 0.9 + 0.2 * n)
+            if kind == 'he':
+                # Splitter-Raster
+                if abs(math.sin(ang * 4)) < 0.16 or abs(math.sin((y - 6) * 1.6)) < 0.14:
+                    c = mul(c, 0.62)
+            if kind == 'smoke' and abs(y - 3.2) < 0.5 and abs(math.sin(ang * 3)) > 0.8:
+                c = (36, 40, 36)
+            return c
+        if kind == 'smoke_bomb':
+            return mul((36, 38, 44), 0.9 + 0.25 * n)
+        if kind == 'vortex':
+            t = (ang / math.pi + y * 0.22) % 1.0
+            return mix((16, 80, 110), (150, 240, 255), abs(t - 0.5) * 2)
+        if kind == 'lightning':
+            c = mix((50, 30, 110), (110, 60, 190), n)
+            if abs(((ang / math.pi * 3 + y * 0.6) % 2) - 1) < 0.12:
+                c = (255, 236, 90)
+            return c
+        if kind == 'frost':
+            c = mix((150, 210, 240), (236, 250, 255), n)
+            if abs(math.sin(ang * 3 + y * 0.3)) < 0.08:
+                c = (255, 255, 255)
+            return c
+        return (200, 200, 200)
+    table = {
+        'metal': (110, 114, 122), 'steel': (176, 180, 190), 'ring': (200, 200, 206), 'black': (30, 30, 34),
+        'glass': (120, 70, 24), 'label': (232, 222, 196), 'rag': (210, 200, 176), 'flame': (255, 140, 30),
+        'flame2': (255, 232, 100), 'fuse': (150, 120, 70), 'white': (232, 236, 240), 'pouch': (52, 74, 54),
+        'flap': (36, 52, 38), 'yellow': (232, 186, 40), 'red': (210, 40, 40), 'blue': (50, 90, 210),
+        'brick': (190, 172, 122), 'tape': (60, 60, 62), 'screen': (60, 220, 90), 'keys': (150, 150, 156),
+        'tag': (200, 202, 210), 'tag2': (176, 178, 188), 'chain': (160, 160, 168), 'crystal': (240, 70, 120),
+    }
+    if part == 'band':
+        return GRENADE_BAND.get(kind, (60, 60, 60))
+    if part == 'barrel':
+        return (220, 40, 50) if y < 8.4 else (220, 228, 236)
+    c = table.get(part, (255, 0, 255))
+    if part in ('metal', 'steel', 'ring', 'tag', 'tag2', 'chain'):
+        c = mul(c, 0.85 + 0.3 * (0.5 + 0.5 * math.sin(y * 2.2 + ang)))
+    elif part == 'crystal':
+        c = mix(c, (255, 200, 225), max(0.0, math.sin(x * 1.3 + y * 0.9)) * 0.5)
+    elif part == 'glass':
+        c = mix(c, (220, 160, 90), max(0.0, math.sin(ang * 2)) * 0.35)
+    elif part == 'keys' and (int(x * 2) + int(z * 2)) % 2:
+        c = (60, 60, 64)
+    elif part not in ('flame', 'flame2', 'screen'):
+        c = mul(c, 0.92 + 0.16 * n)
+    return c
+
+
+OBJ_DISPLAY = {
+    "thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 1.5, 1], "scale": [0.55, 0.55, 0.55]},
+    "thirdperson_lefthand": {"rotation": [0, 0, 0], "translation": [0, 1.5, 1], "scale": [0.55, 0.55, 0.55]},
+    "firstperson_righthand": {"rotation": [0, -25, 0], "translation": [1.5, 2.5, 0], "scale": [0.6, 0.6, 0.6]},
+    "firstperson_lefthand": {"rotation": [0, 25, 0], "translation": [1.5, 2.5, 0], "scale": [0.6, 0.6, 0.6]},
+    "gui": {"rotation": [20, -35, 0], "translation": [0, 0, 0], "scale": [0.85, 0.85, 0.85]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.45, 0.45, 0.45]},
+    "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.8, 0.8, 0.8]},
+    "head": {"rotation": [0, 0, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
+}
+
+
+def obj_model(cat, kind, boxes):
+    """Textur + Modell fuer einen 3D-Gegenstand. Gibt (Textur, Modell) zurueck."""
+    named = {f"b{i}": b for i, b in enumerate(boxes)}
+    atlas = 256
+    while True:
+        try:
+            rects = sn_layout(named, d=OBJ_D, atlas=atlas)
+            break
+        except RuntimeError:
+            atlas *= 2
+    img = Image.new('RGBA', (atlas, atlas), (0, 0, 0, 0))
+    uvs = 16.0 / atlas
+    elements = []
+    for name, bx in named.items():
+        faces = {}
+        for face in SN_FACES:
+            rx, ry, rw, rh = rects[(name, face)]
+            for j in range(rh):
+                for i in range(rw):
+                    x, y, z = _face_point(bx['from'], bx['to'], face, (i + 0.5) / rw, (j + 0.5) / rh)
+                    c = obj_material(cat, kind, bx['part'], x, y, z, face)
+                    if bx['part'] not in ('flame', 'flame2', 'screen') and rw >= 4 and rh >= 4 and (i in (0, rw - 1) or j in (0, rh - 1)):
+                        c = mul(c, 0.85)
+                    img.putpixel((rx + i, ry + j), (int(clamp(c[0])), int(clamp(c[1])), int(clamp(c[2])), 255))
+            faces[face] = {"uv": [round(rx * uvs, 4), round(ry * uvs, 4), round((rx + rw) * uvs, 4), round((ry + rh) * uvs, 4)],
+                           "texture": "#tex"}
+        el = {"from": [round(v, 4) for v in bx['from']], "to": [round(v, 4) for v in bx['to']], "faces": faces}
+        if 'rot' in bx:
+            axis, angle, origin = bx['rot']
+            el["rotation"] = {"angle": angle, "axis": axis, "origin": [round(v, 4) for v in origin]}
+        if bx['part'] in ('flame', 'flame2', 'screen'):
+            el["shade"] = False
+        elements.append(el)
+    model = {"gui_light": "side", "textures": {"particle": "#tex", "tex": None}, "elements": elements, "display": OBJ_DISPLAY}
+    return img, model
+
+
+def obj_preview(model, img):
+    """Kleine Vorschau von vorne (fuer Uebersichtsbilder)."""
+    prev = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+    return prev
+
+
 # ---------------------------------------------------------------- Ausgabe
 RARITY_NAMES = ['Konsum', 'Industrie', 'Militär', 'Begrenzt', 'Geheim', 'Verdeckt', '★ Gold']
 
@@ -2008,10 +2222,14 @@ def main():
         row = []
         for eid, ename, rar in entries:
             key = f"{cid}_{eid}"
-            img = fn(eid)
+            icon = fn(eid)
+            row.append(icon)
+            # echtes 3D-Modell statt flachem Bild
+            boxes = {'grenade': grenade_boxes, 'wind': wind_boxes, 'totem': totem_boxes}[cid](eid)
+            img, model = obj_model(cid, eid, boxes)
+            model["textures"]["tex"] = f"{NS}:item/{key}"
             save_png(img, key)
-            row.append(img)
-            simple_model(key, 'minecraft:item/generated')
+            write_json(os.path.join(RES, 'models', 'item', key + '.json'), model)
             item_def(key, {"model": {"type": "minecraft:model", "model": f"{NS}:item/{key}"}})
         cats.append({"id": cid, "name": name, "items": items, "shapes": [],
                      "finishes": [{"id": e, "name": n, "rarity": r} for e, n, r in entries]})
