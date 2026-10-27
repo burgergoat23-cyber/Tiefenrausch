@@ -1646,8 +1646,8 @@ def sn_material(part, pattern, x, y, z, face):
 SNIPER_DISPLAY = {
     "firstperson_righthand": {"rotation": [0, 95, 0], "translation": [0, 1, -10], "scale": [0.55, 0.55, 0.55]},
     "firstperson_lefthand": {"rotation": [0, 85, 0], "translation": [0, 1, -10], "scale": [0.55, 0.55, 0.55]},
-    "thirdperson_righthand": {"rotation": [0, 90, 0], "translation": [0, 2, 3], "scale": [0.5, 0.5, 0.5]},
-    "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 2, 3], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_righthand": {"rotation": [0, -90, 90], "translation": [0, 3, 1], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_lefthand": {"rotation": [0, 90, -90], "translation": [0, 3, 1], "scale": [0.5, 0.5, 0.5]},
     "gui": {"rotation": [0, 0, 28], "translation": [0, 0, 0], "scale": [0.36, 0.36, 0.36]},
     "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]},
     "fixed": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]},
