@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.Item;
@@ -52,18 +53,40 @@ public final class Viewmodel {
 		return null;
 	}
 
+	/** Welche Animationen: Messerform, sonst Skin-Art (evtl. mit Form) oder Art des Gegenstands. */
+	private static String animKey(ItemStack stack) {
+		if (stack.isEmpty()) return null;
+		SkinCatalog.Skin skin = SkinManager.skinFor(stack);
+		if (skin != null) {
+			String cat = skin.category().id;
+			if ("awp".equals(cat) || "ssg".equals(cat)) return null;
+			if ("knife".equals(cat) && skin.shape() != null) return skin.shape().id();
+			if (skin.shape() != null && KnifeAnimations.has(cat + ":" + skin.shape().id())) return cat + ":" + skin.shape().id();
+			return cat;
+		}
+		if (stack.is(ItemTags.SWORDS)) return "sword";
+		if (stack.is(ItemTags.AXES)) return "axe";
+		if (stack.is(Items.MACE)) return "mace";
+		if (stack.is(Items.ENDER_PEARL)) return "grenade";
+		if (stack.is(Items.WIND_CHARGE)) return "wind";
+		if (stack.is(Items.TOTEM_OF_UNDYING)) return "totem";
+		if (stack.is(Items.SHIELD)) return "shield";
+		if (BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("_spear")) return "spear";
+		return null;
+	}
+
 	public static void startInspect(Minecraft client) {
 		if (!VantageConfig.get().inspect || client.player == null) return;
 		ItemStack held = client.player.getMainHandItem();
 		if (held.isEmpty()) return;
-		String shape = knifeShape(held);
-		start(client, shape == null ? KnifeAnimations.INSPECT_LOOK : KnifeAnimations.inspect(shape), Kind.INSPECT);
+		String key = animKey(held);
+		start(client, key == null ? KnifeAnimations.INSPECT_LOOK : KnifeAnimations.inspect(key), Kind.INSPECT);
 	}
 
 	public static void playDraw(Minecraft client) {
 		if (client.player == null) return;
-		String shape = knifeShape(client.player.getMainHandItem());
-		start(client, shape == null ? KnifeAnimations.DRAW_RAISE : KnifeAnimations.draw(shape), Kind.DRAW);
+		String key = animKey(client.player.getMainHandItem());
+		start(client, key == null ? KnifeAnimations.DRAW_RAISE : KnifeAnimations.draw(key), Kind.DRAW);
 	}
 
 	/**
@@ -141,8 +164,8 @@ public final class Viewmodel {
 				animSlot = slot;
 			} else {
 				stop();
-				String shape = knifeShape(held);
-				if (shape != null && c.drawAnim && !Macros.isBusyOrJustDone()) start(client, KnifeAnimations.draw(shape), Kind.DRAW);
+				String key = animKey(held);
+				if (key != null && c.drawAnim && !Macros.isBusyOrJustDone()) start(client, KnifeAnimations.draw(key), Kind.DRAW);
 			}
 		}
 		if (anim == null) return;

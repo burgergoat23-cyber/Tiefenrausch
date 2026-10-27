@@ -414,6 +414,146 @@ public final class KnifeAnimations {
 			k(0.85f, LX + 0.03f, LY, LZ, -12, 128, -32),
 			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.6f));
 
+	// ------------------------------------------------------------------ Andere Waffen und Gegenstaende
+
+	public static final Anim DRAW_AXE = a("axe", 22, new Key[]{
+			k(0, 0.05f, 0.35f, 0.15f, -80, 0, -20),
+			k(0.35f, 0, -0.12f, 0, 35, 0, 5),
+			k(0.6f, 0, 0.03f, 0, -8, 0, -2),
+			k(0.8f, 0, 0, 0, 3, 0, 0),
+			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.3f));
+
+	public static final Anim INSPECT_AXE = a("axe", 74, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.15f, LX, LY, LZ, -10, -60, 25),
+			k(0.32f, LX, LY + 0.02f, LZ, -14, -62, 28),
+			k(0.45f, SX, SY + 0.04f, 0, -10, 0, -340),
+			k(0.55f, SX, SY, 0, -10, 0, -360),
+			k(0.72f, LX + 0.03f, LY, LZ, -10, 120, -385),
+			k(0.86f, LX + 0.03f, LY, LZ, -12, 122, -387),
+			k(1, 0, 0, 0, 0, 0, -360)}, swish(0.45f), swish(0.65f));
+
+	public static final Anim DRAW_AXE_TOSS = a("axe_toss", 24, new Key[]{
+			k(0, 0, -0.45f, 0, 30, 0, 0),
+			k(0.25f, 0, 0.0f, 0, 0, 0, 0),
+			k(0.5f, 0, 0.32f, 0, -360, 0, 0),
+			k(0.75f, 0, 0.02f, 0, -720, 0, 0),
+			k(1, 0, 0, 0, -720, 0, 0)}, swish(0.35f), click(0.75f));
+
+	public static final Anim INSPECT_AXE_TOSS = a("axe_toss", 72, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.12f, SX, SY - 0.04f, 0, 10, 0, 0),
+			k(0.32f, SX, SY + 0.4f, 0, -360, 0, 0),
+			k(0.5f, SX, SY, 0, -720, 0, 0),
+			k(0.68f, LX, LY, LZ, -730, -60, 22),
+			k(0.85f, LX + 0.03f, LY, LZ, -730, 120, -22),
+			k(1, 0, 0, 0, -720, 0, 0)}, swish(0.2f), click(0.5f));
+
+	public static final Anim DRAW_MACE = a("mace", 26, new Key[]{
+			k(0, 0, -0.6f, 0, 60, 0, 0),
+			k(0.4f, 0, -0.15f, 0, 20, 0, 0),
+			k(0.6f, 0, 0.06f, 0, -12, 0, 0),
+			k(0.75f, 0, -0.03f, 0, 5, 0, 0),
+			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.45f));
+
+	public static final Anim INSPECT_MACE = a("mace", 80, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.15f, -0.1f, 0.25f, 0.1f, -60, -20, 40),
+			k(0.35f, -0.12f, 0.27f, 0.1f, -62, -20, 42),
+			k(0.5f, LX, LY, LZ, -10, -60, 25),
+			k(0.65f, LX, LY, LZ, -10, 120, -25),
+			k(0.82f, LX, LY, LZ, -12, 122, -27),
+			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.12f), swish(0.6f));
+
+	public static final Anim DRAW_MACE_SPIN = a("mace_spin", 24, new Key[]{
+			k(0, 0, -0.5f, 0, 30, 0, 0),
+			k(0.3f, 0, -0.1f, 0, 0, 0, -200),
+			k(0.6f, 0, 0.03f, 0, 0, 0, -350),
+			k(0.8f, 0, 0, 0, 0, 0, -362),
+			k(1, 0, 0, 0, 0, 0, -360)}, swish(0.3f));
+
+	public static final Anim INSPECT_MACE_SPIN = a("mace_spin", 74, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.12f, SX, SY, 0, -10, 0, 0),
+			k(0.3f, SX, SY, 0, -10, 0, -360),
+			k(0.45f, SX, SY, 0, -10, 0, -720),
+			k(0.62f, LX, LY, LZ, -10, -60, -695),
+			k(0.82f, LX + 0.03f, LY, LZ, -10, 120, -745),
+			k(1, 0, 0, 0, 0, 0, -720)}, swish(0.2f), swish(0.38f));
+
+	public static final Anim DRAW_SPEAR = a("spear", 24, new Key[]{
+			k(0, 0, -0.5f, 0, 30, 0, 0),
+			k(0.3f, 0, -0.08f, 0, 0, 0, -180),
+			k(0.6f, 0, 0.04f, 0, -6, 0, -355),
+			k(1, 0, 0, 0, 0, 0, -360)}, swish(0.3f));
+
+	public static final Anim INSPECT_SPEAR = a("spear", 76, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.12f, SX, SY, 0, -5, 0, 0),
+			k(0.3f, SX, SY, 0, -5, 0, -540),
+			k(0.45f, SX, SY, 0, -5, 0, -720),
+			k(0.62f, LX, LY, LZ, -10, -60, -700),
+			k(0.82f, LX + 0.03f, LY, LZ, -10, 120, -740),
+			k(1, 0, 0, 0, 0, 0, -720)}, swish(0.18f), swish(0.32f));
+
+	public static final Anim DRAW_SHIELD = a("shield", 18, new Key[]{
+			k(0, 0.15f, -0.5f, 0, 20, 60, 0),
+			k(0.5f, 0, 0.03f, 0, -4, -6, 0),
+			k(0.75f, 0, 0, 0, 2, 2, 0),
+			k(1, 0, 0, 0, 0, 0, 0)}, click(0.5f));
+
+	public static final Anim INSPECT_SHIELD = a("shield", 70, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.15f, -0.15f, 0.12f, 0.05f, -5, -30, 0),
+			k(0.35f, -0.15f, 0.12f, 0.05f, -5, -32, 0),
+			k(0.55f, -0.15f, 0.1f, 0.05f, -5, 150, 0),
+			k(0.8f, -0.15f, 0.1f, 0.05f, -5, 152, 0),
+			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.45f));
+
+	public static final Anim DRAW_GRENADE = a("grenade", 22, new Key[]{
+			k(0, 0, -0.45f, 0, 30, 0, 0),
+			k(0.25f, 0, -0.02f, 0, 0, 0, 0),
+			k(0.5f, 0, 0.3f, 0, -180, 90, 0),
+			k(0.75f, 0, 0.0f, 0, -360, 180, 0),
+			k(1, 0, 0, 0, -360, 180, 0)}, swish(0.3f), click(0.75f));
+
+	public static final Anim INSPECT_GRENADE = a("grenade", 70, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.15f, LX * 0.8f, LY, LZ, -10, -40, 10),
+			k(0.3f, LX * 0.8f, LY, LZ, -10, 80, 10),
+			k(0.45f, LX * 0.8f, LY, LZ, -10, 200, 10),
+			k(0.6f, LX * 0.8f, LY + 0.35f, LZ, -200, 300, 10),
+			k(0.78f, LX * 0.8f, LY, LZ, -360, 360, 10),
+			k(1, 0, 0, 0, -360, 360, 0)}, swish(0.55f), click(0.78f));
+
+	public static final Anim DRAW_WIND = a("wind", 20, new Key[]{
+			k(0, 0, -0.45f, 0, 30, 0, 0),
+			k(0.35f, 0, -0.05f, 0, 0, 240, 0),
+			k(0.7f, 0, 0.03f, 0, 0, 350, 0),
+			k(1, 0, 0, 0, 0, 360, 0)}, swish(0.3f));
+
+	public static final Anim INSPECT_WIND = a("wind", 66, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.15f, LX * 0.8f, LY, LZ, -10, 0, 0),
+			k(0.4f, LX * 0.8f, LY + 0.04f, LZ, -10, 540, 0),
+			k(0.65f, LX * 0.8f, LY, LZ, -10, 1080, 0),
+			k(0.8f, LX * 0.8f, LY, LZ, -10, 1100, 0),
+			k(1, 0, 0, 0, 0, 1080, 0)}, swish(0.25f), swish(0.5f));
+
+	public static final Anim DRAW_TOTEM = a("totem", 20, new Key[]{
+			k(0, 0, -0.5f, 0, 20, 0, 0),
+			k(0.5f, 0, 0.05f, 0, -6, 0, 0),
+			k(0.75f, 0, -0.01f, 0, 2, 0, 0),
+			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.3f));
+
+	public static final Anim INSPECT_TOTEM = a("totem", 70, new Key[]{
+			k(0, 0, 0, 0, 0, 0, 0),
+			k(0.2f, LX * 0.8f, LY + 0.05f, LZ + 0.05f, -5, -30, 0),
+			k(0.4f, LX * 0.8f, LY + 0.07f, LZ + 0.05f, -5, -30, 0),
+			k(0.6f, LX * 0.8f, LY + 0.05f, LZ + 0.05f, -5, 150, 0),
+			k(0.8f, LX * 0.8f, LY + 0.07f, LZ + 0.05f, -5, 150, 0),
+			k(1, 0, 0, 0, 0, 0, 0)}, swish(0.5f));
+
 	// ------------------------------------------------------------------ Schlaege
 	// Wie in CS: zwei Hiebe im Wechsel (Vorhand von rechts, Rueckhand von links), dazu ein schwerer Stich.
 	// Axt und Streitkolben schlagen wie Axt und Hammer aus CS (Danger Zone) von oben.
@@ -527,7 +667,17 @@ public final class KnifeAnimations {
 		put(DRAW_SURVIVAL, INSPECT_SURVIVAL, "survival");
 		put(DRAW_SKELETON, INSPECT_SKELETON, "skeleton");
 		put(DRAW_KUKRI, INSPECT_KUKRI, "kukri");
-		put(DRAW_RAISE, INSPECT_LOOK, "default");
+		put(DRAW_RAISE, INSPECT_LOOK, "default", "sword");
+		// andere Waffen: eigene Bewegungen je Art (und Wurf-Variante fuer leichte Aexte und Keulen)
+		put(DRAW_AXE, INSPECT_AXE, "axe");
+		put(DRAW_AXE_TOSS, INSPECT_AXE_TOSS, "axe:tomahawk", "axe:cleaver", "axe:ice_axe");
+		put(DRAW_MACE, INSPECT_MACE, "mace");
+		put(DRAW_MACE_SPIN, INSPECT_MACE_SPIN, "mace:scepter", "mace:baseball", "mace:wrench", "mace:morning_star");
+		put(DRAW_SPEAR, INSPECT_SPEAR, "spear");
+		put(DRAW_SHIELD, INSPECT_SHIELD, "shield");
+		put(DRAW_GRENADE, INSPECT_GRENADE, "grenade");
+		put(DRAW_WIND, INSPECT_WIND, "wind");
+		put(DRAW_TOTEM, INSPECT_TOTEM, "totem");
 	}
 
 	private static void put(Anim draw, Anim inspect, String... shapes) {
@@ -535,6 +685,10 @@ public final class KnifeAnimations {
 	}
 
 	private KnifeAnimations() {
+	}
+
+	public static boolean has(String key) {
+		return BY_SHAPE.containsKey(key);
 	}
 
 	public static Anim draw(String shape) {

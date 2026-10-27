@@ -826,18 +826,56 @@ def knife_shape_model(cls, size=None, display=None):
     }
 
 
-def smooth_knife_model(display=None, thick=0.7, layers=4):
-    """Glattes Messer: einige duenne Ebenen mit der ganzen Textur hintereinander (Tiefe ohne Pixel-Treppen)."""
+def smooth_knife_model(cls, display=None, grid=32):
+    """Scharfes Messer: Klinge als hauchduenne Flaeche (Schneide), Ruecken etwas dicker, Griff als fester Koerper.
+    Die Umrisse kommen aus der feinen Textur (weiche Kanten), die Dicke aus einem groben Raster."""
+    size = len(cls)
+    step = size // grid
+    s = 16.0 / grid
+    # Mehrheits-Klasse je Rasterzelle (None = leer)
+    cells = [[None] * grid for _ in range(grid)]
+    for gy in range(grid):
+        for gx in range(grid):
+            cnt = {}
+            for yy in range(gy * step, (gy + 1) * step):
+                for xx in range(gx * step, (gx + 1) * step):
+                    k = cls[yy][xx]
+                    cnt[k] = cnt.get(k, 0) + 1
+            best = max(cnt.items(), key=lambda kv: kv[1])
+            if best[0] is not None and best[1] >= step * step * 0.5:
+                cells[gy][gx] = best[0]
+    thick = {'S': 0.32, 'P': 0.5, 'H': 1.1, 'R': 0.9, 'G': 1.5, 'V': 1.25}
     elements = []
-    for i in range(layers):
-        z = round(8 - thick / 2 + thick * i / (layers - 1), 4)
-        elements.append({
-            "from": [0, 0, z], "to": [16, 16, z],
-            "faces": {
-                "south": {"uv": [0, 0, 16, 16], "texture": "#tex"},
-                "north": {"uv": [16, 0, 0, 16], "texture": "#tex"},
-            },
-        })
+    # Klinge: zwei Flaechen fast aufeinander = scharfe Schneide
+    for z in (7.97, 8.03):
+        elements.append({"from": [0, 0, z], "to": [16, 16, z],
+                         "faces": {"south": {"uv": [0, 0, 16, 16], "texture": "#tex"},
+                                   "north": {"uv": [16, 0, 0, 16], "texture": "#tex"}}})
+    for gy in range(grid):
+        gx = 0
+        while gx < grid:
+            k = cells[gy][gx]
+            if k is None or k not in thick:
+                gx += 1
+                continue
+            x0 = gx
+            while gx < grid and cells[gy][gx] == k:
+                gx += 1
+            t = thick[k]
+            u0, u1 = round(x0 * s, 4), round(gx * s, 4)
+            v0, v1 = round(gy * s, 4), round((gy + 1) * s, 4)
+            y0, y1 = round(16 - v1, 4), round(16 - v0, 4)
+            elements.append({
+                "from": [u0, y0, round(8 - t / 2, 4)], "to": [u1, y1, round(8 + t / 2, 4)],
+                "faces": {
+                    "south": {"uv": [u0, v0, u1, v1], "texture": "#tex"},
+                    "north": {"uv": [u1, v0, u0, v1], "texture": "#tex"},
+                    "up": {"uv": [u0, v0, u1, round(v0 + s * 0.5, 4)], "texture": "#tex"},
+                    "down": {"uv": [u0, round(v1 - s * 0.5, 4), u1, v1], "texture": "#tex"},
+                    "east": {"uv": [round(u1 - s * 0.5, 4), v0, u1, v1], "texture": "#tex"},
+                    "west": {"uv": [u0, v0, round(u0 + s * 0.5, 4), v1], "texture": "#tex"},
+                },
+            })
     return {
         "gui_light": "front",
         "textures": {"particle": "#tex"},
@@ -1838,8 +1876,9 @@ def simple_model(name, parent, tex=None):
 
 
 def _knife_job(job):
-    sid, fid = job
-    return render_knife(sid, knives()[sid][1], fid)[0]
+    sid, fid, want_cls = job
+    img, cls = render_knife(sid, knives()[sid][1], fid)
+    return img, (cls if want_cls else None)
 
 
 def knife_preview(out, names):
@@ -1916,19 +1955,19 @@ def main():
         rows = []
         finishes = [f[0] for f in FINISHES]
         K = knives()
-        jobs = [(sid, fid) for sid in K for fid in finishes]
+        jobs = [(sid, fid, fid == finishes[0]) for sid in K for fid in finishes]
         # hohe Aufloesung dauert: auf alle Kerne verteilen (eine Messerform pro Paket)
         with multiprocessing.Pool() as pool:
-            done = dict(zip(jobs, pool.map(_knife_job, jobs, chunksize=len(finishes))))
+            done = {(j[0], j[1]): r for j, r in zip(jobs, pool.map(_knife_job, jobs, chunksize=len(finishes)))}
         for sid, (sname, shape) in K.items():
             sh_list.append({"id": sid, "name": sname})
             row = []
             shape_written = False
             for fid in finishes:
                 key = f"knife_{sid}_{fid}"
-                img = done[(sid, fid)]
+                img, cls = done[(sid, fid)]
                 if not shape_written:
-                    write_json(os.path.join(RES, 'models', 'item', f'knife_shape_{sid}.json'), smooth_knife_model())
+                    write_json(os.path.join(RES, 'models', 'item', f'knife_shape_{sid}.json'), smooth_knife_model(cls))
                     shape_written = True
                 save_png(img, key)
                 row.append(img)
