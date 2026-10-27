@@ -1,0 +1,113 @@
+name: Minecraft-Mod mit Sodium und Iris testen
+
+# Prueft, ob Vantage zusammen mit Sodium (FPS) und Iris (Shader, mit Complementary-Shaderpack) laeuft.
+on:
+  push:
+    paths:
+      - '.github/workflows/minecraft-mod-compat.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: minecraft-mod-compat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: minecraft-mod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Versionen suchen (Yarn, Sodium, Iris, Shaderpack)
+        run: |
+          MC=1.21.11
+          YARN=$(curl -sf https://meta.fabricmc.net/v2/versions/yarn/$MC | jq -r '.[0].version')
+          q() { curl -sf "https://api.modrinth.com/v2/project/$1/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$MC%22%5D" | jq -r '.[0].version_number // empty'; }
+          SODIUM=$(q sodium)
+          IRIS=$(q iris)
+          echo "Yarn: $YARN  Sodium: $SODIUM  Iris: $IRIS"
+          echo "YARN=$YARN" >> "$GITHUB_ENV"
+          echo "SODIUM=$SODIUM" >> "$GITHUB_ENV"
+          echo "IRIS=$IRIS" >> "$GITHUB_ENV"
+          # Shaderpack (Complementary Reimagined) fuer Iris
+          mkdir -p run/shaderpacks run/config
+          URL=$(curl -sf "https://api.modrinth.com/v2/project/complementary-reimagined/version" | jq -r '[.[] | select(.loaders | index("iris"))][0].files[0].url // empty')
+          NAME=$(basename "$URL")
+          if [ -n "$URL" ]; then
+            curl -sfL "$URL" -o "run/shaderpacks/$NAME"
+            printf 'enableShaders=true\nshaderPack=%s\n' "$NAME" > run/config/iris.properties
+          fi
+          echo "Shaderpack: $NAME"
+          echo "SHADERPACK=$NAME" >> "$GITHUB_ENV"
+
+      - name: Bauen
+        run: |
+          chmod +x gradlew
+          ./gradlew build -Pyarn_mappings="$YARN" --no-daemon
+
+      - name: Spieltest mit Sodium + Iris + Shader
+        id: gametest
+        continue-on-error: true
+        timeout-minutes: 40
+        run: |
+          ARGS="-Pyarn_mappings=$YARN -Pcompat=true"
+          [ -n "$SODIUM" ] && ARGS="$ARGS -Psodium_version=$SODIUM"
+          [ -n "$IRIS" ] && ARGS="$ARGS -Piris_version=$IRIS"
+          ./gradlew runProductionClientGameTest $ARGS --no-daemon --stacktrace
+
+      - name: Ergebnisse einsammeln
+        if: always()
+        run: |
+          rm -rf compat-test && mkdir -p compat-test
+          # nur die wichtigsten Bilder (Hand, Animationen, Gewehre, Menue)
+          find run -path '*screenshots*' -name '*.png' | grep -E 'hand_|inspect_|draw_|awp_|ssg_|menu_home|third_person|hud_modules|freecam' | while read -r f; do
+            cp "$f" compat-test/
+          done
+          if [ -f run/logs/latest.log ]; then
+            {
+              echo "=== Geladene Mods ==="
+              grep -n -E "Loading [0-9]+ mods|sodium|iris|Iris|Sodium" run/logs/latest.log | head -n 40
+              echo
+              echo "=== Fehler und Vantage-Tests ==="
+              grep -n -E "TEST |ERROR|Exception|Mixin|FATAL|Caused by" run/logs/latest.log | head -n 300
+              echo
+              echo "=== Ende des Logs ==="
+              tail -n 120 run/logs/latest.log
+            } > compat-test/log.txt
+          fi
+          ls run/crash-reports 2>/dev/null && cp run/crash-reports/*.txt compat-test/ 2>/dev/null || true
+          {
+            echo "Spieltest: ${{ steps.gametest.outcome }}"
+            echo "Sodium: $SODIUM"
+            echo "Iris: $IRIS"
+            echo "Shaderpack: $SHADERPACK"
+          } > compat-test/status.txt
+          ls -la compat-test
+
+      - name: Ergebnisse ins Repo legen
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for i in 1 2 3 4; do
+            git fetch -q origin "${GITHUB_REF_NAME}"
+            git reset -q --mixed "origin/${GITHUB_REF_NAME}"
+            git add -A compat-test
+            if git diff --cached --quiet; then echo "Keine Aenderung"; exit 0; fi
+            git commit -q -m "Vertraeglichkeits-Test mit Sodium und Iris [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep 5
+          done

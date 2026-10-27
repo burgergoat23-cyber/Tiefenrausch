@@ -35,8 +35,18 @@ java {
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
+repositories {
+	maven {
+		url = "https://api.modrinth.com/maven"
+		content { includeGroup "maven.modrinth" }
+	}
+}
+
 dependencies {
 	productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Vertraeglichkeits-Test: Sodium (mehr FPS) und Iris (Shader) mitstarten
+	if (project.hasProperty("sodium_version")) productionRuntimeMods "maven.modrinth:sodium:${project.sodium_version}"
+	if (project.hasProperty("iris_version")) productionRuntimeMods "maven.modrinth:iris:${project.iris_version}"
 }
 
 // Automatischer Spieltest auf GitHub (startet Minecraft ohne Bildschirm und macht Screenshots)
@@ -44,4 +54,5 @@ tasks.register("runProductionClientGameTest", net.fabricmc.loom.task.prod.Client
 	jvmArgs.add("-Dfabric.client.gametest")
 	jvmArgs.add("-Dfabric.client.gametest.disableNetworkSynchronizer=true")
 	useXVFB = true
+	if (project.hasProperty("compat")) jvmArgs.add("-Dvantage.compat=true")
 }

@@ -118,7 +118,8 @@ public class VantageGameTest implements FabricClientGameTest {
 			// Videos der Animationen: Bild fuer Bild an festen Zeitpunkten, der Bau macht daraus kleine Filme
 			sp.getServer().runCommand("item replace entity @p hotbar.8 with totem_of_undying");
 			ctx.runOnClient(mc -> mc.inGameHud.getChatHud().clear(false));
-			String[][] vids = {{"0", "karambit"}, {"1", "butterfly"}, {"7", "schattendolche"}, {"2", "axt"}, {"3", "keule"},
+			// Im Vertraeglichkeits-Test (Sodium/Iris) keine Videos: nur pruefen, ob alles laeuft
+			String[][] vids = Boolean.getBoolean("vantage.compat") ? new String[0][] : new String[][]{{"0", "karambit"}, {"1", "butterfly"}, {"7", "schattendolche"}, {"2", "axt"}, {"3", "keule"},
 					{"4", "speer"}, {"5", "enderperle"}, {"6", "windkugel"}, {"8", "totem"}};
 			for (String[] v : vids) {
 				final int vslot = Integer.parseInt(v[0]);
