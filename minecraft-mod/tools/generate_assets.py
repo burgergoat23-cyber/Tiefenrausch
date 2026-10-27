@@ -2012,8 +2012,8 @@ def obj_material(cat, kind, part, x, y, z, face):
 OBJ_DISPLAY = {
     "thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 1.5, 1], "scale": [0.55, 0.55, 0.55]},
     "thirdperson_lefthand": {"rotation": [0, 0, 0], "translation": [0, 1.5, 1], "scale": [0.55, 0.55, 0.55]},
-    "firstperson_righthand": {"rotation": [0, -25, 0], "translation": [1.5, 2.5, 0], "scale": [0.6, 0.6, 0.6]},
-    "firstperson_lefthand": {"rotation": [0, 25, 0], "translation": [1.5, 2.5, 0], "scale": [0.6, 0.6, 0.6]},
+    "firstperson_righthand": {"rotation": [0, -25, 0], "translation": [2, 3, 0], "scale": [0.45, 0.45, 0.45]},
+    "firstperson_lefthand": {"rotation": [0, 25, 0], "translation": [2, 3, 0], "scale": [0.45, 0.45, 0.45]},
     "gui": {"rotation": [20, -35, 0], "translation": [0, 0, 0], "scale": [0.85, 0.85, 0.85]},
     "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.45, 0.45, 0.45]},
     "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.8, 0.8, 0.8]},
