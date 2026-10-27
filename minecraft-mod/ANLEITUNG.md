@@ -2,7 +2,7 @@
 
 CS-Skins für deine Waffen, PvP-Makros und ein Struktur-Tracker – alles in **einer** Jar-Datei.
 
-Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.6.0+mc1.21.11.jar`).
+Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.7.0+mc1.21.11.jar`).
 
 > Früher hieß die Mod „Arsenal“. Beim Wechsel die alte `arsenal-….jar` aus dem Ordner `mods` löschen. Deine Einstellungen werden automatisch übernommen.
 
@@ -10,8 +10,8 @@ Die fertige Datei liegt in `minecraft-mod/download/` (z. B. `vantage-client-1.6.
 
 | Minecraft-Version | Datei | Ordner |
 |---|---|---|
-| **1.21.11** | `vantage-client-1.6.0+mc1.21.11.jar` | `minecraft-mod/download/` |
-| **26.2** | `vantage-client-1.6.0+mc26.2.jar` | `minecraft-mod-26/download/` |
+| **1.21.11** | `vantage-client-1.7.0+mc1.21.11.jar` | `minecraft-mod/download/` |
+| **26.2** | `vantage-client-1.7.0+mc26.2.jar` | `minecraft-mod-26/download/` |
 
 Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neuer und **Fabric API für 26.2**.
 
@@ -79,6 +79,8 @@ Beide können genau dasselbe. Für 26.2 braucht man Fabric Loader 0.19 oder neue
 **Trank-Timer:** alle aktiven Effekte mit Stufe und Restzeit; in den letzten 10 Sekunden blinkt die Zeit. Die Symbole oben rechts vom Spiel können ausgeblendet werden.
 
 **Wegpunkte:** Mit **J** (oder im Menü) merkst du dir Orte. Oben in der Mitte zeigen ein Pfeil und die Entfernung den Weg, auf Wunsch mit Lichtsäule. Stirbst du, wird der **Todespunkt** automatisch gespeichert und angezeigt. Wegpunkte gelten pro Welt bzw. Server.
+
+**Scharfschützengewehre (wie in CS2):** Unter Skins gibt es für den **Bogen** die **AWP** und für die **Armbrust** die **SSG 08**, jeweils in vielen Lackierungen (z. B. Dragon Lore, Asiimov, Dragonfire). Mit der AWP: Bogen spannen = Gewehr anlegen und durchs Zielfernrohr schauen, loslassen = Schuss mit Rückstoß und Nachladen. Mit der SSG 08: Armbrust laden = der Verschluss wird hochgeklappt, zurückgezogen und wieder vorgeschoben. Das ist nur die Optik, Schaden und Reichweite bleiben normal.
 
 **Blockrahmen & Treffer-Farbe:** eigene Farbe und Dicke für den Rahmen um den angeschauten Block und eine eigene Farbe statt Rot, wenn Gegner getroffen werden.
 
