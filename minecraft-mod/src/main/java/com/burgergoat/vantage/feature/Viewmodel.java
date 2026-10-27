@@ -54,7 +54,7 @@ public final class Viewmodel {
 	}
 
 	/** Welche Animationen: Messerform, sonst Skin-Art (evtl. mit Form) oder Art des Gegenstands. */
-	private static String animKey(ItemStack stack) {
+	public static String animKey(ItemStack stack) {
 		if (stack.isEmpty()) return null;
 		SkinCatalog.Skin skin = SkinManager.skinFor(stack);
 		if (skin != null) {

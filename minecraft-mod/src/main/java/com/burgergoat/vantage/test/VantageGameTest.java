@@ -112,6 +112,34 @@ public class VantageGameTest implements FabricClientGameTest {
 				ctx.takeScreenshot("inspect_" + slot + "_c");
 				ctx.waitTicks(50);
 			}
+			// Videos der Animationen: Bild fuer Bild an festen Zeitpunkten, der Bau macht daraus kleine Filme
+			sp.getServer().runCommand("item replace entity @p hotbar.8 with totem_of_undying");
+			ctx.runOnClient(mc -> mc.inGameHud.getChatHud().clear(false));
+			String[][] vids = {{"0", "karambit"}, {"1", "butterfly"}, {"7", "schattendolche"}, {"2", "axt"}, {"3", "keule"},
+					{"4", "speer"}, {"5", "enderperle"}, {"6", "windkugel"}, {"8", "totem"}};
+			for (String[] v : vids) {
+				final int vslot = Integer.parseInt(v[0]);
+				ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(vslot));
+				ctx.waitTicks(30);
+				for (int pass = 0; pass < 2; pass++) {
+					final boolean drawPass = pass == 0;
+					final KnifeAnimations.Anim anim = ctx.computeOnClient(mc -> {
+						String key = Viewmodel.animKey(mc.player.getMainHandStack());
+						if (key == null) key = "default";
+						return drawPass ? KnifeAnimations.draw(key) : KnifeAnimations.inspect(key);
+					});
+					int frames = Math.max(8, anim.ticks() / 2);
+					for (int i = 0; i < frames; i++) {
+						final float t = i / (float) (frames - 1);
+						ctx.runOnClient(mc -> Viewmodel.freeze(mc, anim, t));
+						ctx.waitTicks(1);
+						ctx.takeScreenshot("vid_" + v[1] + "_" + (drawPass ? "a" : "b") + String.format("%03d", i));
+					}
+					ctx.runOnClient(mc -> Viewmodel.stop());
+					ctx.waitTicks(2);
+				}
+			}
+			sp.getServer().runCommand("item replace entity @p hotbar.8 with air");
 			ctx.runOnClient(mc -> mc.player.getInventory().setSelectedSlot(0));
 			ctx.waitTicks(30);
 			// Viewmodel verstellt

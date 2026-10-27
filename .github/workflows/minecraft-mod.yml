@@ -6,6 +6,7 @@ on:
       - 'minecraft-mod/**'
       - '!minecraft-mod/download/**'
       - '!minecraft-mod/test-screenshots/**'
+      - '!minecraft-mod/videos/**'
       - '.github/workflows/minecraft-mod.yml'
   workflow_dispatch:
 
@@ -81,6 +82,24 @@ jobs:
               tail -n 150 run/logs/latest.log
             } > test-screenshots/log.txt
           fi
+          # Videos der Animationen aus den Einzelbildern (vid_*) zusammensetzen
+          if ls test-screenshots/*_vid_* >/dev/null 2>&1; then
+            command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+            rm -rf videos && mkdir -p videos
+            make_video() {
+              out="$1"; shift
+              tmp=$(mktemp -d); i=0; ext="${1##*.}"
+              for f in "$@"; do cp "$f" "$tmp/$(printf %05d $i).$ext"; i=$((i+1)); done
+              ffmpeg -loglevel error -y -framerate 10 -i "$tmp/%05d.$ext" -vf "fps=30,scale=960:-2,format=yuv420p" -c:v libx264 -crf 24 -movflags +faststart "$out" || true
+              rm -rf "$tmp"
+            }
+            for name in $(ls test-screenshots | sed -n 's/^[0-9]*_vid_\([a-z]*\)_[ab][0-9]*\.[a-z]*$/\1/p' | sort -u); do
+              make_video "videos/$name.mp4" $(ls test-screenshots/*_vid_${name}_* | sort)
+            done
+            make_video "videos/alle_animationen.mp4" $(ls test-screenshots/*_vid_* | sort)
+            rm -f test-screenshots/*_vid_*
+            ls -la videos
+          fi
           ls run/crash-reports 2>/dev/null && cp run/crash-reports/*.txt test-screenshots/ 2>/dev/null || true
           echo "Spieltest: ${{ steps.gametest.outcome }}" > test-screenshots/status.txt
           ls -la test-screenshots
@@ -88,14 +107,14 @@ jobs:
       - name: Jar und Test-Ergebnisse ins Repo legen
         if: always()
         run: |
-          mkdir -p download
+          mkdir -p download videos
           if ls build/libs/*.jar >/dev/null 2>&1; then
             rm -f download/*.jar
             for f in build/libs/*.jar; do case "$f" in *-sources.jar) ;; *) cp "$f" download/ ;; esac; done
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add download test-screenshots
+          git add download test-screenshots videos
           if git diff --cached --quiet; then echo "Keine Änderung"; exit 0; fi
           git commit -m "Mod-Jar und Testbilder automatisch erstellt [skip ci]"
           for i in 1 2 3 4; do git pull --rebase -X theirs origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; git rebase --abort 2>/dev/null || true; sleep 5; done
