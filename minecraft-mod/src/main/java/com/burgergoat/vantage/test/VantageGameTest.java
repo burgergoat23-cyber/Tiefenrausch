@@ -61,6 +61,9 @@ public class VantageGameTest implements FabricClientGameTest {
 			c.skins.put("diamond_sword", "knife_butterfly_doppler");
 			c.skins.put("golden_sword", "knife_shadow_daggers_sapphire");
 			c.skins.put("shield", "shield_riot");
+			c.skins.put("ender_pearl", "grenade_he");
+			c.skins.put("wind_charge", "wind_vortex");
+			c.skins.put("totem_of_undying", "totem_c4");
 			c.chEnabled = true;
 			c.hudInfo = true;
 			VantageConfig.save();
