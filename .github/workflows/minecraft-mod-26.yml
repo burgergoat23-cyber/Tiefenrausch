@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'minecraft-mod-26/**'
+      - 'minecraft-mod/src/main/resources/**'
       - '!minecraft-mod-26/download/**'
       - '!minecraft-mod-26/test-screenshots/**'
       - '!minecraft-mod-26/dev/*-out.txt'
