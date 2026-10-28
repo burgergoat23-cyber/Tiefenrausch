@@ -101,3 +101,6 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Mit nur dem Start-Schwert (1 Schaden) ist der erste Boss (Ebene 3, 66 Leben) sehr zäh.
 - Koop-Lobby: „Abbrechen“ und sofort neu „Raum erstellen“ (innerhalb ~2 s) zeigt „Raum wird erstellt …“ ohne Fortschritt – nochmal Abbrechen hilft (Lösung wäre ein Zähler `CO.gen`).
 - Bomben-Gegner, die sich selbst sprengen (`e.nolo`), zählen trotzdem als besiegt (Beute, Aufgaben). Boss-Beute, die beim Verlassen noch am Boden lag, ist nach „Fortsetzen“ weg (Absicht: kein doppeltes Plündern).
+
+## CodeBuddy (eigenes Nebenprojekt, Ordner `codebuddy/`)
+Lokale, kostenlose Coding-KI für den PC des Nutzers (Python, nur Standardbibliothek, Ollama). Anleitung: `codebuddy/README.md`. Tests: `cd codebuddy && python -m unittest discover -s tests` (nachgebauter Ollama-Server, `tests/fake_ollama.py`). Hat nichts mit dem Spiel zu tun.
