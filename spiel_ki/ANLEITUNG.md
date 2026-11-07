@@ -32,7 +32,8 @@ Was sie gelernt hat, wird gespeichert. Beim nächsten Start macht sie da weiter.
 
 ## Gut zu wissen
 
-- **Geduld!** Die ersten 15–20 Minuten probiert sie fast nur zufällig. Richtig gut wird sie oft erst nach 1–3 Stunden Üben.
+- **Geduld!** Die ersten ~10 Minuten probiert sie viel zufällig. Bei einfachen Spielen wird sie oft schon nach 10–30 Minuten
+  deutlich besser, bei schwereren dauert es 1–3 Stunden.
 - Während sie übt, Maus und Tastatur nicht benutzen. Drückst du selbst eine Taste, macht sie kurz Pause.
 - Reagiert F8 einmal nicht: einfach auf das Fenster **Spiel-KI** klicken. Dann ist das Spiel nicht mehr vorne
   und die KI hält sofort an. Danach auf **Stopp** klicken.

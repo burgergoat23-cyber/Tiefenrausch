@@ -25,8 +25,8 @@ TAKT = 15                # Entscheidungen pro Sekunde
 NSTEP, GAMMA = 3, 0.99
 SPEICHER = 30000         # so viele Momente merkt sie sich (~400 MB)
 START_LERNEN = 1000      # erst so viele Momente sammeln, dann lernen
-VERHAELTNIS = 0.5        # Lernschritte je Spielmoment (höchstens)
-ZUFALL_SCHRITTE = 15000  # bis hierhin sinkt der Zufall von 100 % auf 10 %
+VERHAELTNIS = 1.0        # Lernschritte je Spielmoment (höchstens)
+ZUFALL_SCHRITTE = 8000   # bis hierhin sinkt der Zufall von 100 % auf 10 % (~9 min)
 STILL_SEK = 1.5          # so lange stehendes Bild = verloren
 STILL_WARTEN = 2         # steht das Bild so viele Takte, lässt die KI los und wartet ab
 UEBERNAHME_SEK = 1.0     # so lange nach einer eigenen Taste steuert der Mensch
