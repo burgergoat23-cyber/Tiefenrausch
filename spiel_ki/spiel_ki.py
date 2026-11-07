@@ -116,6 +116,19 @@ class App:
         self.wahl_box.bind('<<ComboboxSelected>>', lambda e: self._projekt_waehlen(self.wahl.get()))
         ttk.Button(zeile, text='Neues Spiel …', command=self._neues_projekt).pack(side='left')
 
+        # Erklärung (freiwillig): das Programm liest sie und stellt Tasten/Neustart passend ein
+        k0 = ttk.LabelFrame(haupt, text=' Erklär das Spiel (freiwillig) ', style='Karte.TLabelframe',
+                            padding=(8, 4))
+        k0.pack(fill='x', pady=3)
+        self.erkl = tk.Text(k0, height=2, width=40, wrap='word', font=self.f['n'], relief='solid', bd=1,
+                            highlightthickness=0, padx=4, pady=2)
+        self.erkl.pack(side='left', fill='x', expand=True)
+        ttk.Button(k0, text='Übernehmen', command=self._erklaerung_uebernehmen).pack(
+            side='right', padx=(6, 0), fill='y')
+        self.erkl.bind('<FocusIn>', lambda e: self._erkl_fokus(True))
+        self.erkl.bind('<FocusOut>', lambda e: self._erkl_fokus(False))
+        self._erkl_leer = True
+
         # 1 Bereich
         k1 = ttk.LabelFrame(haupt, text=' 1 · Wo ist das Spiel? ', style='Karte.TLabelframe',
                             padding=(8, 4))
@@ -175,7 +188,7 @@ class App:
         self.status.pack(fill='x', pady=(6, 0))
         self.zahlen = ttk.Label(k4, text='', wraplength=480)
         self.zahlen.pack(fill='x')
-        self.bild = tk.Canvas(k4, height=80, bg=FARBE['karte'], highlightthickness=1,
+        self.bild = tk.Canvas(k4, height=70, bg=FARBE['karte'], highlightthickness=1,
                               highlightbackground='#d8d2c4')
         self.bild.pack(fill='both', expand=True, pady=(4, 3))
         u = ttk.Frame(k4)
@@ -238,6 +251,7 @@ class App:
         self.fang_knopf = self.ttk.Button(self.tasten_rahmen, text='Andere Taste …',
                                           command=self._taste_fangen)
         self.fang_knopf.grid(row=n // 7, column=n % 7, columnspan=7 - n % 7, sticky='w')
+        self._erkl_setzen(p.info.get('erklaerung', ''))
         self.still_var.set(bool(p.info.get('stillstand', True)))
         ns = p.info.get('neustart', 'vk:32')
         self.neustart_var.set(next((n for n, c in K.NEUSTARTS if c == ns), K.NEUSTARTS[0][0]))
@@ -329,6 +343,60 @@ class App:
         p.info['stillstand'] = bool(self.still_var.get())
         p.info['neustart'] = dict(K.NEUSTARTS).get(self.neustart_var.get(), 'vk:32')
         p.speichern()
+
+    # ------------------------------------------------------------ Erklärung
+    BEISPIEL = ('Zum Beispiel: Mit Leertaste springen, mit Pfeil runter ducken. '
+                'Nach Game Over mit Leertaste neu starten.')
+
+    def _erkl_setzen(self, text):
+        self.erkl.delete('1.0', 'end')
+        self._erkl_leer = not text
+        self.erkl.insert('1.0', text or self.BEISPIEL)
+        self.erkl.config(fg=FARBE['leise'] if self._erkl_leer else FARBE['text'])
+
+    def _erkl_fokus(self, rein):
+        if rein and self._erkl_leer:
+            self.erkl.delete('1.0', 'end')
+            self.erkl.config(fg=FARBE['text'])
+            self._erkl_leer = False
+        elif not rein and not self.erkl.get('1.0', 'end').strip():
+            self._erkl_setzen('')
+
+    def _erkl_text(self):
+        return '' if self._erkl_leer else self.erkl.get('1.0', 'end').strip()
+
+    def _erklaerung_uebernehmen(self):
+        if self.laeuft():
+            self._status('Erst stoppen (F8), dann die Erklärung übernehmen.', 'rot')
+            return
+        p, text = self.projekt, self._erkl_text()
+        p.info['erklaerung'] = text
+        e = K.erklaerung_verstehen(text)
+        teile, tipps = [], []
+        if e['tasten']:
+            if self._tasten_aendern(e['tasten']):
+                teile.append('Tasten ' + ', '.join(K.tasten_name(v) for v in e['tasten']))
+            else:
+                teile.append('Tasten nicht geändert')
+        if e['neustart'] is not None:
+            p.info['neustart'] = e['neustart']
+            teile.append('Neustart: ' + next((n for n, c in K.NEUSTARTS if c == e['neustart']),
+                                             e['neustart']))
+        if e['stillstand']:
+            p.info['stillstand'] = True
+            teile.append('Verloren = Bild bleibt stehen')
+        if e['gameover_erwaehnt'] and not p.info.get('gameover'):
+            tipps.append('Markier das „Game Over“-Bild (Schritt 3).')
+        if e['punkte_erwaehnt'] and not p.info.get('punkte'):
+            tipps.append('Markier die Punkte-Anzeige (Schritt 3).')
+        p.speichern()
+        self._anzeigen()
+        if not teile:
+            self._status('Ich habe keine Tasten gefunden. Schreib zum Beispiel: '
+                         '„Mit Leertaste springen, mit A und D laufen.“', 'rot')
+        else:
+            self._status('Verstanden: ' + ' · '.join(teile) +
+                         ('\nTipp: ' + ' '.join(tipps) if tipps else ''), 'blau')
 
     def _gehirn_loeschen(self):
         if self.laeuft():

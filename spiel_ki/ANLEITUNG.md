@@ -19,6 +19,9 @@ Im Fenster siehst du eine Kurve: Wie viele Sekunden hält sie pro Runde durch?
 ## Für jedes Spiel
 
 1. **Spiel öffnen**, im Fenster-Modus (nicht Vollbild). Das Fenster danach nicht mehr verschieben.
+   - **Freiwillig:** Erklär das Spiel oben im Textfeld, zum Beispiel „Mit Leertaste springen, mit Pfeil runter ducken.
+     Nach Game Over mit Enter neu starten.“ Dann auf **Übernehmen** klicken. Das Programm hakt dann die
+     Tasten an und stellt den Neustart ein. (Die KI selbst kann nicht lesen, sie lernt danach trotzdem durch Ausprobieren.)
 2. **Spielfeld markieren:** auf den Knopf klicken und einen Rahmen um das Spielfeld ziehen.
 3. **Tasten anhaken**, die das Spiel braucht, zum Beispiel ↑ und Leertaste. Je weniger Tasten, desto schneller lernt sie.
 4. **Verlieren erkennen:**

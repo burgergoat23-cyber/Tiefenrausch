@@ -105,6 +105,85 @@ def aktionen_aus(tasten):
     return akt
 
 
+# ---------------------------------------------------------------- Spiel-Erklärung lesen
+
+_WORT_TASTEN = [
+    (r'leer-?taste|leerzeichen|space(bar)?', [0x20]),
+    (r'\bw\s*a\s*s\s*d\b', [0x57, 0x41, 0x53, 0x44]),
+    (r'(pfeil\w*|arrow\w*)\s*(nach\s*|ganz\s*)?(links|left)|(linke[nr]?|left)\s*(pfeil\w*|arrow)', [0x25]),
+    (r'(pfeil\w*|arrow\w*)\s*(nach\s*|ganz\s*)?(rechts|right)|(rechte[nr]?|right)\s*(pfeil\w*|arrow)', [0x27]),
+    (r'(pfeil\w*|arrow\w*)\s*(nach\s*)?(oben|hoch|up)|(obere[nr]?|up)\s*(pfeil\w*|arrow)', [0x26]),
+    (r'(pfeil\w*|arrow\w*)\s*(nach\s*)?(unten|runter|down)|(untere[nr]?|down)\s*(pfeil\w*|arrow)', [0x28]),
+    (r'\benter\b|eingabe-?taste|\breturn\b', [0x0D]),
+    (r'\bshift\b|umschalt\w*', [0xA0]),
+    (r'\bstrg\b|\bctrl\b|steuerung-?taste', [0xA2]),
+    (r'klick\w*|click\w*|\bmaus\b|anklick\w*|linksklick', [0x01]),
+]
+_PFEILE_ALLE = r'pfeiltasten|pfeil-tasten|arrow keys|\bpfeilen\b'
+_NEIN = r'\b(nicht|nie|niemals|kein\w*|never|not)\b'
+_NEUSTART = (r'neu\s*-?\s*start\w*|neustart|start\w*\s+(von selbst\s+|automatisch\s+|wieder\s+)?neu\b|'
+             r'nochmal|noch einmal|restart|von vorne|erneut|'
+             r'wieder\s*start\w*|neue runde|play again|try again')
+_STILL = r'stehen\s*bleibt|bleibt\b.{0,25}?\bstehen|steht\s+still|friert|eingefroren|stillstand|freeze|frozen|bleibt h(ä|ae)ngen'
+_GO = r'game\s*-?\s*over|verlor\w*|\btot\b|stirbt|gestorben|verlierst|\blose\b|you died'
+_PKT = r'punkt\w*|score|highscore|münze\w*|muenze\w*|coins?\b|sammel\w*|meter\b'
+
+
+def _tasten_im_satz(satz):
+    """Alle Tasten, die in einem Satz genannt werden (in der Reihenfolge des Auftretens)."""
+    gefunden = []
+    for muster, vks in _WORT_TASTEN:
+        for m in re.finditer(muster, satz):
+            gefunden += [(m.start(), v) for v in vks]
+    if re.search(_PFEILE_ALLE, satz) and not any(v in (0x25, 0x26, 0x27, 0x28) for _, v in gefunden):
+        m = re.search(_PFEILE_ALLE, satz)
+        gefunden += [(m.start(), v) for v in (0x25, 0x26, 0x27, 0x28)]
+    # einzelne Buchstaben/Ziffern: "Taste E", "mit E", "E-Taste", „E“, "A und D"
+    einzeln = [r'(?:taste|mit|drück\w*|drueck\w*|press\w*|key)\s+["„\'‚]?([a-z])["“\'‘]?(?=[\s.,!?;:)/]|$)',
+               r'taste\s+["„\'‚]?([0-9])\b',
+               r'(?<![\w-])([a-z0-9])[- ]taste\b',
+               r'["„‚\']([a-z0-9])["“‘\']']
+    for muster in einzeln:
+        for m in re.finditer(muster, satz):
+            gefunden.append((m.start(1), ord(m.group(1).upper())))
+    for m in re.finditer(r'(?<![\w-])([a-z])\s*(?:,|und|oder|/|bzw\.?)\s*([a-z])(?![\w-])', satz):
+        gefunden += [(m.start(1), ord(m.group(1).upper())), (m.start(2), ord(m.group(2).upper()))]
+    reihe = []
+    for _, v in sorted(gefunden, key=lambda x: x[0]):
+        if v not in reihe and v not in NIE:
+            reihe.append(v)
+    return reihe
+
+
+def erklaerung_verstehen(text):
+    """Liest eine Spiel-Erklärung (Deutsch/Englisch) und macht daraus Einstellungen.
+
+    Gibt {'tasten', 'neustart', 'stillstand', 'tipps', 'gameover_erwaehnt', 'punkte_erwaehnt'} zurück.
+    Die KI selbst kann keinen Text lesen – das hier stellt nur das Programm passend ein.
+    """
+    t = (text or '').lower().replace('ß', 'ss')
+    saetze = [x.strip() for x in re.split(r'[.!?;\n]+', t) if x.strip()]
+    spiel, neustart_tasten = [], []
+    for satz in saetze:
+        tasten = _tasten_im_satz(satz)
+        if not tasten or re.search(_NEIN, satz):
+            continue
+        if re.search(_NEUSTART, satz):
+            neustart_tasten += [v for v in tasten if v not in neustart_tasten]
+        else:
+            spiel += [v for v in tasten if v not in spiel]
+    neustart = None
+    if neustart_tasten:
+        v = neustart_tasten[0]
+        neustart = ('klick_go' if re.search(_GO, t) else 'klick_mitte') if v == 0x01 else f'vk:{v}'
+    elif re.search(_NEUSTART, t) and re.search(r'von selbst|automatisch|alleine|allein', t):
+        neustart = ''
+    return {'tasten': spiel, 'neustart': neustart,
+            'stillstand': True if re.search(_STILL, t) else None,
+            'gameover_erwaehnt': bool(re.search(_GO, t)),
+            'punkte_erwaehnt': bool(re.search(_PKT, t))}
+
+
 class Fehler(Exception):
     """Fehler mit einer Meldung, die man dem Nutzer zeigen kann."""
 

@@ -92,6 +92,23 @@ def main():
     foto(root, 'gui_1_leer.png')
     assert app.projekt.name == 'Mein Spiel'
 
+    # Erklärung eintippen und übernehmen -> Tasten und Neustart werden eingestellt
+    app._erkl_fokus(True)
+    app.erkl.insert('1.0', 'Mit A und D laufen, mit Leertaste springen. Nach Game Over mit Enter '
+                           'neu starten. Sammle Punkte!')
+    app._erklaerung_uebernehmen()
+    assert app.projekt.info['tasten'] == sorted([0x41, 0x44, LEER]), app.projekt.info['tasten']
+    assert app.projekt.info['neustart'] == 'vk:13', app.projekt.info['neustart']
+    assert app.tasten_vars[0x41].get() and app.tasten_vars[LEER].get()
+    warte(root, 0.3)
+    foto(root, 'gui_0_erklaert.png')
+    print('Erklärung:', app.status.cget('text').replace(chr(10), ' | '))
+    app.tasten_vars[0x41].set(False)
+    app._taste_umschalten(0x41)
+    app.tasten_vars[0x44].set(False)
+    app._taste_umschalten(0x44)
+    app.projekt.info['neustart'] = 'vk:32'
+
     # Einstellungen wie ein Nutzer: Bereich, Tasten
     app.projekt.info['bereich'] = [100, 100, 240, 160]
     app.projekt.speichern()
