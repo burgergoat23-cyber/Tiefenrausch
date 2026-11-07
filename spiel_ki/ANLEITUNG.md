@@ -19,9 +19,16 @@ Im Fenster siehst du eine Kurve: Wie viele Sekunden hält sie pro Runde durch?
 ## Für jedes Spiel
 
 1. **Spiel öffnen**, im Fenster-Modus (nicht Vollbild). Das Fenster danach nicht mehr verschieben.
-   - **Freiwillig:** Erklär das Spiel oben im Textfeld, zum Beispiel „Mit Leertaste springen, mit Pfeil runter ducken.
-     Nach Game Over mit Enter neu starten.“ Dann auf **Übernehmen** klicken. Das Programm hakt dann die
-     Tasten an und stellt den Neustart ein. (Die KI selbst kann nicht lesen, sie lernt danach trotzdem durch Ausprobieren.)
+   - **Freiwillig: Erklär der KI das Spiel** oben im Textfeld und klick auf **Übernehmen**. Zum Beispiel:
+     „Mit Leertaste springen, mit Pfeil runter ducken. Das Ziel ist, so weit wie möglich nach rechts zu kommen.
+     Nach Game Over mit Enter neu starten. Drück nie Q.“
+     Das nutzt sie dann beim Lernen:
+     - **Tasten, die du nennst**, probiert sie viel öfter aus (wichtig bei „Ganze Tastatur“).
+     - **Ziel-Richtung** („Ziel: nach rechts/links/oben/unten“): Sie bekommt Extrapunkte, wenn das Bild in diese Richtung weiterläuft.
+     - **„Drück nie …“**: Diese Taste wird gesperrt.
+     - Neustart-Taste, „Bild bleibt stehen“, Tipps zu Game-Over-Bild und Punkten.
+     Unter dem Textfeld steht, was die KI davon benutzt. Sie versteht nur diese Dinge, keinen beliebigen Text.
+
 2. **Spielfeld markieren:** auf den Knopf klicken und einen Rahmen um das Spielfeld ziehen.
 3. **Tasten anhaken**, die das Spiel braucht, zum Beispiel ↑ und Leertaste. Je weniger Tasten, desto schneller lernt sie.
    - Auch möglich: **Rechtsklick**, **Mausrad ↑/↓**, **Maus bewegen** (zum Zielen) und **Ganze Tastatur**

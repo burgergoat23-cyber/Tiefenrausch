@@ -117,14 +117,18 @@ class App:
         ttk.Button(zeile, text='Neues Spiel …', command=self._neues_projekt).pack(side='left')
 
         # Erklärung (freiwillig): das Programm liest sie und stellt Tasten/Neustart passend ein
-        k0 = ttk.LabelFrame(haupt, text=' Erklär das Spiel (freiwillig) ', style='Karte.TLabelframe',
-                            padding=(8, 4))
+        k0 = ttk.LabelFrame(haupt, text=' Erklär der KI das Spiel (freiwillig) ',
+                            style='Karte.TLabelframe', padding=(8, 4))
         k0.pack(fill='x', pady=3)
-        self.erkl = tk.Text(k0, height=2, width=40, wrap='word', font=self.f['n'], relief='solid', bd=1,
-                            highlightthickness=0, padx=4, pady=2)
+        z0 = ttk.Frame(k0)
+        z0.pack(fill='x')
+        self.erkl = tk.Text(z0, height=2, width=40, wrap='word', font=self.f['n'], relief='solid',
+                            bd=1, highlightthickness=0, padx=4, pady=2)
         self.erkl.pack(side='left', fill='x', expand=True)
-        ttk.Button(k0, text='Übernehmen', command=self._erklaerung_uebernehmen).pack(
+        ttk.Button(z0, text='Übernehmen', command=self._erklaerung_uebernehmen).pack(
             side='right', padx=(6, 0), fill='y')
+        self.weiss = ttk.Label(k0, text='', style='Leise.TLabel', wraplength=540)
+        self.weiss.pack(fill='x', pady=(2, 0))
         self.erkl.bind('<FocusIn>', lambda e: self._erkl_fokus(True))
         self.erkl.bind('<FocusOut>', lambda e: self._erkl_fokus(False))
         self._erkl_leer = True
@@ -270,7 +274,8 @@ class App:
             self.maus_vars[text] = (vks, v)
             ttk.Checkbutton(zeile, text=text, variable=v, command=self._tasten_gui).pack(
                 side='left', padx=(0, 10))
-        self.ganze_var = tk.BooleanVar(value=set(K.GANZE_TASTATUR) <= an)
+        ganz = set(K.GANZE_TASTATUR) - set(self.projekt.info.get('verboten', []))
+        self.ganze_var = tk.BooleanVar(value=ganz <= an)
         ttk.Checkbutton(zeile, text='Ganze Tastatur', variable=self.ganze_var,
                         command=self._ganze_umschalten).pack(side='left', padx=(0, 10))
         self.fang_knopf = ttk.Button(zeile, text='Andere Taste …', command=self._taste_fangen)
@@ -282,6 +287,7 @@ class App:
                       text=f'+ {len(namen)} weitere: ' + ', '.join(namen[:16]) +
                       (' …' if len(namen) > 16 else '') +
                       '   (Andere Taste … und nochmal drücken = entfernen)').pack(fill='x')
+        self._weiss_zeigen()
 
     def _tasten_gui(self):
         neu = [vk for vk, v in self.tasten_vars.items() if v.get()]
@@ -296,7 +302,8 @@ class App:
         an = set(info.get('tasten', []))
         if self.ganze_var.get():
             vorher = sorted(an)
-            if self._tasten_aendern(sorted(an | set(K.GANZE_TASTATUR))):
+            ganz = set(K.GANZE_TASTATUR) - set(info.get('verboten', []))
+            if self._tasten_aendern(sorted(an | ganz)):
                 info['vor_ganze'] = vorher      # zum Zurückholen beim Abwählen
                 self.projekt.speichern()
         else:   # Auswahl von vorher zurück (Maus-Haken von zwischendurch bleiben)
@@ -392,8 +399,24 @@ class App:
         p.speichern()
 
     # ------------------------------------------------------------ Erklärung
-    BEISPIEL = ('Zum Beispiel: Mit Leertaste springen, mit Pfeil runter ducken. '
-                'Nach Game Over mit Leertaste neu starten.')
+    BEISPIEL = ('Zum Beispiel: Mit Leertaste springen, mit Pfeil runter ducken. Das Ziel ist, so weit '
+                'wie möglich nach rechts zu kommen. Nach Game Over mit Enter neu starten.')
+    RICHTUNG_TEXT = {'rechts': 'nach rechts', 'links': 'nach links', 'oben': 'nach oben',
+                     'unten': 'nach unten'}
+
+    def _weiss_zeigen(self):
+        """Unter dem Textfeld: was die KI aus der Erklärung beim Lernen benutzt."""
+        i = self.projekt.info
+        teile = []
+        if i.get('ziel_richtung'):
+            teile.append('Ziel: ' + self.RICHTUNG_TEXT[i['ziel_richtung']] + ' (Bonus, wenn es dorthin geht)')
+        wichtig = [v for v in i.get('wichtig', []) if v in i.get('tasten', [])]
+        if wichtig and len(wichtig) < len(i.get('tasten', [])):
+            teile.append('probiert öfter: ' + ', '.join(K.tasten_name(v) for v in wichtig))
+        if i.get('verboten'):
+            teile.append('nie: ' + ', '.join(K.tasten_name(v) for v in i['verboten']))
+        self.weiss.config(text=('Das nutzt die KI beim Lernen:  ' + '  ·  '.join(teile)) if teile
+                          else '')
 
     def _erkl_setzen(self, text):
         self.erkl.delete('1.0', 'end')
@@ -420,11 +443,30 @@ class App:
         p.info['erklaerung'] = text
         e = K.erklaerung_verstehen(text)
         teile, tipps = [], []
-        if e['tasten']:
-            if self._tasten_aendern(e['tasten']):
-                teile.append('Tasten ' + ', '.join(K.tasten_name(v) for v in e['tasten']))
+        jetzt = set(p.info.get('tasten', []))
+        verboten = set(e['verboten'])
+        if set(K.GANZE_TASTATUR) - set(p.info.get('verboten', [])) - verboten <= jetzt:
+            # ganze Tastatur bleibt, erklärte Tasten kommen dazu
+            neu = (jetzt | set(e['tasten'])) - verboten
+        elif e['tasten']:
+            neu = set(e['tasten']) - verboten
+        else:
+            neu = jetzt - verboten
+        if neu != jetzt:
+            if self._tasten_aendern(sorted(neu)):
+                if e['tasten']:
+                    teile.append('Tasten ' + ', '.join(K.tasten_name(v) for v in e['tasten']))
             else:
                 teile.append('Tasten nicht geändert')
+        elif e['tasten']:
+            teile.append('Tasten ' + ', '.join(K.tasten_name(v) for v in e['tasten']))
+        p.info['wichtig'] = list(e['tasten'])
+        p.info['verboten'] = sorted(verboten)
+        p.info['ziel_richtung'] = e['richtung']
+        if e['richtung']:
+            teile.append('Ziel ' + self.RICHTUNG_TEXT[e['richtung']])
+        if verboten:
+            teile.append('nie ' + ', '.join(K.tasten_name(v) for v in sorted(verboten)))
         if e['neustart'] is not None:
             p.info['neustart'] = e['neustart']
             teile.append('Neustart: ' + next((n for n, c in K.NEUSTARTS if c == e['neustart']),
@@ -439,8 +481,8 @@ class App:
         p.speichern()
         self._anzeigen()
         if not teile:
-            self._status('Ich habe keine Tasten gefunden. Schreib zum Beispiel: '
-                         '„Mit Leertaste springen, mit A und D laufen.“', 'rot')
+            self._status('Ich habe nichts gefunden, was ich verstehe. Schreib zum Beispiel: '
+                         '„Mit Leertaste springen. Ziel: so weit wie möglich nach rechts.“', 'rot')
         else:
             self._status('Verstanden: ' + ' · '.join(teile) +
                          ('\nTipp: ' + ' '.join(tipps) if tipps else ''), 'blau')

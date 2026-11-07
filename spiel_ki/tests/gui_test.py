@@ -100,9 +100,14 @@ def main():
 
     # Erklärung eintippen und übernehmen -> Tasten und Neustart werden eingestellt
     app._erkl_fokus(True)
-    app.erkl.insert('1.0', 'Mit A und D laufen, mit Leertaste springen. Nach Game Over mit Enter '
-                           'neu starten. Sammle Punkte!')
+    app.erkl.insert('1.0', 'Mit A und D laufen, mit Leertaste springen. Ziel: so weit wie möglich '
+                           'nach rechts. Nach Game Over mit Enter neu starten. Sammle Punkte! '
+                           'Drück nie Q.')
     app._erklaerung_uebernehmen()
+    i = app.projekt.info
+    assert i['ziel_richtung'] == 'rechts' and i['verboten'] == [0x51], (i['ziel_richtung'], i['verboten'])
+    assert i['wichtig'] == [0x41, 0x44, LEER], i['wichtig']
+    print('Die KI weiß:', app.weiss.cget('text'))
     assert app.projekt.info['tasten'] == sorted([0x41, 0x44, LEER]), app.projekt.info['tasten']
     assert app.projekt.info['neustart'] == 'vk:13', app.projekt.info['neustart']
     assert app.tasten_vars[0x41].get() and app.tasten_vars[LEER].get()
@@ -118,7 +123,10 @@ def main():
     # Ganze Tastatur + Maus an und wieder aus
     app.ganze_var.set(True)
     app._ganze_umschalten()
-    assert set(K.GANZE_TASTATUR) <= set(app.projekt.info['tasten'])
+    assert set(K.GANZE_TASTATUR) - {0x51} <= set(app.projekt.info['tasten'])
+    assert 0x51 not in app.projekt.info['tasten'], 'verbotenes Q trotz ganzer Tastatur'
+    assert app.ganze_var.get()
+    assert 'probiert öfter' in app.weiss.cget('text'), app.weiss.cget('text')
     app.maus_vars['Mausrad ↑'][1].set(True)
     app.maus_vars['Maus bewegen'][1].set(True)
     app._tasten_gui()

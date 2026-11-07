@@ -32,6 +32,8 @@ STILL_WARTEN = 2         # steht das Bild so viele Takte, lässt die KI los und 
 UEBERNAHME_SEK = 1.0     # so lange nach einer eigenen Taste steuert der Mensch
 
 LEBEN, TOD, PUNKTE, NEUGIER = 0.02, -1.0, 0.3, 0.01
+RICHTUNG = 0.05          # Bonus, wenn sich das Bild in die Ziel-Richtung bewegt (aus der Erklärung)
+WICHTIG_ANTEIL = 0.6     # so oft probiert sie beim Zufall Züge mit den erklärten Tasten
 
 F8 = 0x77
 HOTKEYS = {F8}
@@ -145,6 +147,12 @@ _NEUSTART = (r'neu\s*-?\s*start\w*|neustart|start\w*\s+(von selbst\s+|automatisc
 _STILL = r'stehen\s*bleibt|bleibt\b.{0,25}?\bstehen|steht\s+still|friert|eingefroren|stillstand|freeze|frozen|bleibt h(ä|ae)ngen'
 _GO = r'game\s*-?\s*over|verlor\w*|\btot\b|stirbt|gestorben|verlierst|\blose\b|you died'
 _PKT = r'punkt\w*|score|highscore|münze\w*|muenze\w*|coins?\b|sammel\w*|meter\b'
+_ZIEL = (r'ziel|muss|musst|soll|sollst|möglichst|moeglichst|so weit|so lange|bis zum|ans ende|'
+         r'gewinn\w*|goal|must|as far|reach')
+_RICHTUNGEN = [('rechts', r'nach rechts|rechts entlang|\bright\b'),
+               ('links', r'nach links|links entlang|\bleft\b'),
+               ('oben', r'nach oben|hoch\s*(zu\s*)?(kletter|steig|spring|flieg)\w*|\bup\b|climb'),
+               ('unten', r'nach unten|runter\s*(zu\s*)?(fall|steig|kletter)\w*|\bdown\b')]
 
 
 def _tasten_im_satz(satz):
@@ -157,7 +165,9 @@ def _tasten_im_satz(satz):
         m = re.search(_PFEILE_ALLE, satz)
         gefunden += [(m.start(), v) for v in (0x25, 0x26, 0x27, 0x28)]
     # einzelne Buchstaben/Ziffern: "Taste E", "mit E", "E-Taste", „E“, "A und D"
-    einzeln = [r'(?:taste|mit|drück\w*|drueck\w*|press\w*|key)\s+["„\'‚]?([a-z])["“\'‘]?(?=[\s.,!?;:)/]|$)',
+    einzeln = [r'(?:taste|mit|drück\w*|drueck\w*|press\w*|key)\s+'
+               r'(?:(?:nie|niemals|nicht|keine?|never|not|bloss|auf keinen fall|einfach|immer|nur)\s+)*'
+               r'["„\'‚]?([a-z])["“\'‘]?(?=[\s.,!?;:)/]|$)',
                r'taste\s+["„\'‚]?([0-9])\b',
                r'(?<![\w-])([a-z0-9])[- ]taste\b',
                r'["„‚\']([a-z0-9])["“‘\']']
@@ -181,9 +191,16 @@ def erklaerung_verstehen(text):
     """
     t = (text or '').lower().replace('ß', 'ss')
     saetze = [x.strip() for x in re.split(r'[.!?;\n]+', t) if x.strip()]
-    spiel, neustart_tasten = [], []
+    spiel, neustart_tasten, verboten, richtung = [], [], [], None
     for satz in saetze:
         tasten = _tasten_im_satz(satz)
+        if richtung is None and re.search(_ZIEL, satz):
+            for name, muster in _RICHTUNGEN:
+                if re.search(muster, satz):
+                    richtung = name
+                    break
+        if tasten and re.search(_NEIN, satz) and not re.search(_NEUSTART, satz):
+            verboten += [v for v in tasten if v not in verboten]
         if not tasten or re.search(_NEIN, satz):
             continue
         if re.search(_NEUSTART, satz):
@@ -196,7 +213,8 @@ def erklaerung_verstehen(text):
         neustart = ('klick_go' if re.search(_GO, t) else 'klick_mitte') if v == 0x01 else f'vk:{v}'
     elif re.search(_NEUSTART, t) and re.search(r'von selbst|automatisch|alleine|allein', t):
         neustart = ''
-    return {'tasten': spiel, 'neustart': neustart,
+    spiel = [v for v in spiel if v not in verboten]
+    return {'tasten': spiel, 'neustart': neustart, 'verboten': verboten, 'richtung': richtung,
             'stillstand': True if re.search(_STILL, t) else None,
             'gameover_erwaehnt': bool(re.search(_GO, t)),
             'punkte_erwaehnt': bool(re.search(_PKT, t))}
@@ -605,6 +623,44 @@ class Neugier:
         return NEUGIER / math.sqrt(c)
 
 
+def _klein_grau(bild, breite=160):
+    w, h = bild.size
+    hoehe = max(8, int(h * breite / max(w, 1)))
+    return np.asarray(bild.convert('L').resize((breite, hoehe), Image.BILINEAR), np.float32)
+
+
+_FENSTER = {}
+
+
+def verschiebung(a, b):
+    """Um wie viele Pixel sich der Bildinhalt von a nach b verschoben hat: (dx, dy).
+
+    dx > 0 = Inhalt wandert nach rechts (die "Kamera" bewegt sich nach links).
+    """
+    if a.shape != b.shape:
+        return 0, 0
+    fen = _FENSTER.get(a.shape)
+    if fen is None:
+        fen = _FENSTER[a.shape] = np.outer(np.hanning(a.shape[0]), np.hanning(a.shape[1]))
+    fa = np.fft.rfft2((a - a.mean()) * fen)
+    fb = np.fft.rfft2((b - b.mean()) * fen)
+    r = fb * np.conj(fa)
+    r /= np.abs(r) + 1e-6
+    k = np.fft.irfft2(r, s=a.shape)
+    y, x = np.unravel_index(int(np.argmax(k)), k.shape)
+    if y > a.shape[0] // 2:
+        y -= a.shape[0]
+    if x > a.shape[1] // 2:
+        x -= a.shape[1]
+    return int(x), int(y)
+
+
+def richtungs_bonus(richtung, dx, dy, breite):
+    """Belohnung, wenn die Kamera in die Ziel-Richtung fährt (Inhalt wandert entgegengesetzt)."""
+    weg = {'rechts': -dx, 'links': dx, 'oben': dy, 'unten': -dy}.get(richtung, 0)
+    return RICHTUNG * float(np.clip(weg * 40.0 / max(breite, 1), -1, 1))
+
+
 class EndeErkennung:
     """Merkt, wann eine Runde vorbei ist: Bild steht still oder Game-Over-Bild ist zu sehen."""
 
@@ -665,6 +721,12 @@ class Ueben:
         self.neustart = info.get('neustart', 'vk:32')
         self.go_rel = info['gameover'][0]['rel'] if info.get('gameover') else None
         self.neugier = Neugier()
+        wichtig = set(info.get('wichtig', [])) & self.alle_tasten
+        self.wichtig_akt = [i for i, a in enumerate(self.akt) if set(a) & wichtig]
+        if len(self.wichtig_akt) in (0, len(self.akt)):
+            self.wichtig_akt = None
+        self.richtung = info.get('ziel_richtung')
+        self.klein_vorher = None
         self.rng = np.random.default_rng(seed)
         self.ring, self.warte = [], []
         self.vorher = None
@@ -808,11 +870,17 @@ class Ueben:
             self.phase = 'spiel'
             self.ring, self.vorher, self.neu_start = [], None, True
             self.runde_takte, self.runde_punkte, self.runde_r = 0, 0, 0.0
-            self.punkte_vorher = None
+            self.punkte_vorher = self.klein_vorher = None
 
         # Belohnung für den letzten Zug
         if self.vorher is not None:
             r = LEBEN + self.neugier.bonus(f)
+            if self.richtung:
+                klein = _klein_grau(bild)
+                if self.klein_vorher is not None and not still:
+                    dx, dy = verschiebung(self.klein_vorher, klein)
+                    r += richtungs_bonus(self.richtung, dx, dy, klein.shape[1])
+                self.klein_vorher = klein
             if self.punkte_rel:
                 pk = ausschnitt(bild, self.punkte_rel, PUNKTE_GROESSE)
                 if (self.punkte_vorher is not None and self.runde_takte > TAKT
@@ -851,7 +919,10 @@ class Ueben:
                 a = self.zufall_a
                 self.zufall_rest -= 1
             elif self.rng.random() < eps:
-                a = int(self.rng.integers(len(self.akt)))
+                if self.wichtig_akt and self.rng.random() < WICHTIG_ANTEIL:
+                    a = int(self.rng.choice(self.wichtig_akt))   # erklärte Tasten öfter probieren
+                else:
+                    a = int(self.rng.integers(len(self.akt)))
                 self.zufall_a, self.zufall_rest = a, int(self.rng.integers(0, 4))
             else:
                 a = self.lerner.wahl(ring_stapel(self.ring))
