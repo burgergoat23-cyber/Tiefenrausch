@@ -1,0 +1,64 @@
+BILDKLICKER – Anleitung
+=======================
+
+Was macht das Programm?
+Du zeigst ihm ein Bild, zum Beispiel einen Knopf. Es schaut immer wieder auf
+deinen Bildschirm. Sobald das Bild dort auftaucht, klickt es darauf.
+(Nur für Windows-PCs.)
+
+
+STARTEN
+-------
+1. Die ZIP-Datei entpacken: Rechtsklick auf die ZIP -> "Alle extrahieren".
+2. Im neuen Ordner "Bildklicker" die Datei "Bildklicker" (bzw. "Bildklicker.bat")
+   doppelt anklicken.
+3. Falls "Der Computer wurde durch Windows geschützt" erscheint:
+   auf "Weitere Informationen" klicken, dann auf "Trotzdem ausführen".
+   (Das kommt bei Programmen aus dem Internet, die Windows noch nicht kennt.)
+4. Nach ein paar Sekunden geht das Fenster "Bildklicker" auf.
+
+
+BENUTZEN
+--------
+1. Das, worauf geklickt werden soll, auf dem Bildschirm sichtbar machen.
+2. Im Bildklicker auf "Vom Bildschirm ausschneiden" klicken.
+   Der Bildschirm wird dunkel. Mit gedrückter linker Maustaste einen Rahmen
+   um das Ding ziehen und loslassen.
+   Tipp: eng ausschneiden, möglichst wenig Hintergrund.
+   Andere Wege: "Bild öffnen ..." (gespeichertes Bildschirmfoto), ein Bild ins
+   Fenster ziehen, oder mit Windows-Taste + Umschalt + S ausschneiden und dann
+   auf "Einfügen" klicken.
+3. "Testen (ohne Klick)" drücken:
+   grüner Rahmen  = gefunden, dort würde geklickt
+   oranger Rahmen = nicht sicher genug gefunden
+4. "START" drücken (oder die Taste F8). Stoppen: wieder F8 oder "STOPP".
+
+
+EINSTELLUNGEN
+-------------
+- Wie genau: 90 % passt meistens.
+  Wird das Bild nicht gefunden (Testen zeigt z. B. 84 %): Regler etwas nach links.
+  Klickt es auf etwas Falsches: Regler nach rechts.
+- Klick: links, rechts oder Doppelklick.
+- Wie oft: "Jedes Mal" klickt immer wieder, solange das Bild zu sehen ist
+  (nach der eingestellten Pause). "Nur ein Mal" hört nach dem ersten Klick auf.
+- Alle ... Sekunden nachschauen: wie oft der Bildschirm angeschaut wird.
+- Nach einem Klick ... Sekunden Pause.
+- Maus zurück: Nach dem Klick springt die Maus wieder dahin, wo sie vorher war.
+
+
+GUT ZU WISSEN
+-------------
+- Ein Handy-Foto vom Bildschirm funktioniert nicht. Es muss ein Bildschirmfoto
+  (Screenshot) sein - am einfachsten mit "Vom Bildschirm ausschneiden".
+- Das Ding muss genauso groß zu sehen sein wie beim Ausschneiden
+  (also nicht hinein- oder herauszoomen).
+- Das Bildklicker-Fenster selbst wird nicht durchsucht.
+- Während es läuft, bewegt das Programm deine Maus. Mit F8 stoppst du es jederzeit,
+  auch wenn ein anderes Fenster vorne ist.
+- Das Programm merkt sich das letzte Bild und die Einstellungen.
+- Bleibt ein schwarzes Fenster offen: nicht schließen, solange der Bildklicker
+  läuft (sonst geht er mit zu).
+- Klappt das Klicken bei einem bestimmten Programm nicht: Bildklicker mit
+  Rechtsklick -> "Als Administrator ausführen" starten.
+- In Online-Spielen sind Klick-Programme oft verboten - dort lieber nicht benutzen.

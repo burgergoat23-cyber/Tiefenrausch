@@ -55,6 +55,11 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Vor dem Push: `bash tests/run.sh` (bei Konten/Koop zusätzlich `--firebase`). Ehrlich sagen, was nur simuliert und nicht auf dem iPad geprüft wurde.
 - Commits auf Deutsch, auf den Branch oben pushen.
 
+## Bildklicker (eigenes Werkzeug, nicht Teil des Spiels)
+- Ordner `bildklicker/`: Windows-Programm, das ein Bild auf dem Bildschirm sucht und darauf klickt (Nutzer-Wunsch 7.11.2026, Nutzer hat einen **Windows-PC**).
+- Quelle `Bildklicker.cs` (C# 5, nur System/Drawing/Forms – wird von Windows PowerShell 5.1 per `Add-Type` beim Start übersetzt), Startteil `huelle.ps1`, Anleitung `Anleitung.txt`. Bauen: `python3 bildklicker/baue.py` → `bildklicker/Bildklicker.bat` (Batch+PowerShell in einer Datei, CRLF, keine BOM) und `downloads/bildklicker.zip`.
+- Suche: Pixel-genau-Suche über seltene Anker-Pixel + Grobsuche (verkleinerte Graustufen-Korrelation), Bewertung = Minimum aus Form (Korrelation) und Farbe (`ColK`=2). Eigenes Fenster wird ausgespart. Test: `bash bildklicker/test/test.sh` (Mono + Playwright, 21 Prüfungen). Echte Klicks/Bildschirmfotos nur unter Windows prüfbar.
+
 ## Andere Webseiten
 - **itch.io:** ZIP bauen mit `python3 tools/build_itch.py` → `downloads/tiefenrausch_itch.zip` (online unter …/Tiefenrausch/downloads/). ZIP mit nur `index.html` hochladen (Art: HTML, „This file will be played in the browser“). Nach jedem Update muss die ZIP dort **neu hochgeladen** werden (Update-Hinweis `updCheck` gibt es nur auf GitHub Pages).
 - **CrazyGames:** eigene Version mit `python3 tools/build_crazygames.py [Ordner]` (setzt `window.TR_CG`, lädt `crazygames-sdk-v3.js`, erzeugt ZIP). Im Code `CG`: kein Firebase/Anmeldung, kein Koop, keine Ranglisten-/Beenden-Knöpfe, kein Fremd-Link, Ladebildschirm 4 s. SDK-Aufrufe in `cgTick` (loadingStart/Stop, gameplayStart/Stop) und `cgHappy` (Boss besiegt). Werbung noch nicht eingebaut. Test: `node tests/crazy.js` (SDK-Attrappe), Gast-Rangliste auf CrazyGames in `tests/fb/gast_t.js`. Fertige ZIP zum Herunterladen: `downloads/tiefenrausch_crazygames.zip`. Das echte SDK konnte in der Sitzung nicht geladen werden (Netz gesperrt) → nach dem Hochladen im CrazyGames-Entwicklerportal mit deren Prüf-Werkzeug testen.
