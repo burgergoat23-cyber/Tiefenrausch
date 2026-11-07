@@ -11,6 +11,8 @@ echo.
 echo   Dieses schwarze Fenster bitte offen lassen.
 echo.
 
+if not exist "%~dp0spiel_ki.py" goto nicht_entpackt
+
 set "WERKZEUG=%~dp0werkzeug"
 set "UV="
 if exist "%WERKZEUG%" for /r "%WERKZEUG%" %%f in (uv.exe) do if exist "%%f" set "UV=%%f"
@@ -39,6 +41,16 @@ goto ende
 echo.
 echo   FEHLER: Das Hilfsprogramm "uv" konnte nicht geladen werden.
 echo   Ist der PC mit dem Internet verbunden? Dann nochmal versuchen.
+echo.
+pause
+goto ende
+
+:nicht_entpackt
+echo   Die ZIP-Datei ist noch nicht entpackt!
+echo.
+echo   1. Dieses Fenster schliessen.
+echo   2. Rechtsklick auf spiel_ki.zip - "Alle extrahieren ..." - "Extrahieren".
+echo   3. Im neuen Ordner spiel_ki auf START.bat doppelklicken.
 echo.
 pause
 goto ende
