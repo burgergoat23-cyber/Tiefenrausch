@@ -24,6 +24,9 @@ Im Fenster siehst du eine Kurve: Wie viele Sekunden hält sie pro Runde durch?
      Tasten an und stellt den Neustart ein. (Die KI selbst kann nicht lesen, sie lernt danach trotzdem durch Ausprobieren.)
 2. **Spielfeld markieren:** auf den Knopf klicken und einen Rahmen um das Spielfeld ziehen.
 3. **Tasten anhaken**, die das Spiel braucht, zum Beispiel ↑ und Leertaste. Je weniger Tasten, desto schneller lernt sie.
+   - Auch möglich: **Rechtsklick**, **Mausrad ↑/↓**, **Maus bewegen** (zum Zielen) und **Ganze Tastatur**
+     (alle Buchstaben, Ziffern, Pfeile, Leertaste, Enter, Shift, Strg). Mit vielen Tasten braucht sie aber viel länger.
+   - **Andere Taste …** klicken und eine Taste drücken = hinzufügen. Nochmal = entfernen.
 4. **Verlieren erkennen:**
    - Bleibt das Bild nach dem Verlieren stehen, reicht der Haken „Wenn das Bild stehen bleibt“.
    - Sonst: das Spiel einmal verlieren lassen, „Game Over“-Bild → **Markieren**, und einen engen Rahmen um die „Game Over“-Schrift ziehen.
@@ -44,7 +47,8 @@ Was sie gelernt hat, wird gespeichert. Beim nächsten Start macht sie da weiter.
 - **Am besten klappt es bei einfachen, schnellen Spielen:** Dino-Spiel, Flappy-Bird-Spiele, Ausweich- und Lauf-Spiele.
   Große Spiele wie Minecraft oder Fortnite sind für so eine kleine KI viel zu schwer.
 - **Nur Spiele ohne andere Spieler!** In Online-Spielen sind Bots verboten. Dort kann dein Konto gesperrt werden.
-- Die KI drückt nie Esc und keine Windows-Taste.
+- Die KI drückt nie Esc und keine Windows-Taste. Alt, F-Tasten, Tab und Feststelltaste sind bei
+  „Ganze Tastatur“ nicht dabei (F5 würde z. B. die Seite neu laden). Wenn nötig, über „Andere Taste …“ hinzufügen.
 - Gibt es einen Fehler, steht er in der Datei `fehler.log` in diesem Ordner.
 
 ## Für Neugierige: Wie funktioniert das?

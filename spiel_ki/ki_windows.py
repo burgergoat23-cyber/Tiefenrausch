@@ -217,6 +217,20 @@ class WindowsBackend:
     def maus_setzen(self, x, y):
         user32.SetCursorPos(int(x), int(y))
 
+    def rad(self, richtung):
+        """Mausrad eine Raste drehen (+1 = vom Körper weg/hoch, -1 = runter)."""
+        inp = INPUT()
+        inp.type = INPUT_MOUSE
+        inp.mi = MOUSEINPUT(0, 0, ctypes.c_uint32(120 * int(richtung)).value, 0x0800, 0, MAGIC)
+        _senden(inp)
+
+    def maus_bewegen(self, dx, dy):
+        """Maus relativ bewegen (wirkt auch in Spielen, die die Maus selbst festhalten)."""
+        inp = INPUT()
+        inp.type = INPUT_MOUSE
+        inp.mi = MOUSEINPUT(int(dx), int(dy), 0, 0x0001, 0, MAGIC)
+        _senden(inp)
+
     def maus_pos(self):
         p = wintypes.POINT()
         user32.GetCursorPos(ctypes.byref(p))

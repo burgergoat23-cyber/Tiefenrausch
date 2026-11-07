@@ -37,14 +37,26 @@ F8 = 0x77
 HOTKEYS = {F8}
 NIE = {0x5B, 0x5C, 0x5D, 0x1B} | HOTKEYS   # Windows-Tasten, Menütaste, Esc, eigene Kurztaste
 MAUS = {0x01, 0x02, 0x04}
-GEGENTEILE = [{0x25, 0x27}, {0x26, 0x28}, {0x41, 0x44}, {0x57, 0x53}]
-VORSCHLAG = [0x25, 0x27, 0x26, 0x28, 0x20, 0x57, 0x41, 0x53, 0x44, 0x0D, 0xA0, 0xA2, 0x01]
+# Schein-Tasten für Mausrad und Mausbewegung (keine echten Windows-Tastencodes)
+RAD_HOCH, RAD_RUNTER = 0x1001, 0x1002
+MAUS_LINKS, MAUS_RECHTS, MAUS_HOCH, MAUS_RUNTER = 0x1011, 0x1012, 0x1013, 0x1014
+MAUS_BEWEGEN = [MAUS_LINKS, MAUS_RECHTS, MAUS_HOCH, MAUS_RUNTER]
+IMPULS = {RAD_HOCH, RAD_RUNTER} | set(MAUS_BEWEGEN)     # wirken einmal pro Takt, nicht "gehalten"
+GEGENTEILE = [{0x25, 0x27}, {0x26, 0x28}, {0x41, 0x44}, {0x57, 0x53}, {RAD_HOCH, RAD_RUNTER},
+              {MAUS_LINKS, MAUS_RECHTS}, {MAUS_HOCH, MAUS_RUNTER}]
+VORSCHLAG = [0x25, 0x27, 0x26, 0x28, 0x20, 0x57, 0x41, 0x53, 0x44, 0x0D, 0xA0, 0xA2, 0x01, 0x02]
+# "Ganze Tastatur": Buchstaben, Ziffern, Leertaste, Enter, Rücktaste, Pfeile, Shift, Strg.
+# Bewusst NICHT: Esc, Windows, Alt (öffnet Menüs), F-Tasten (F5 lädt neu), Tab, Feststelltaste.
+GANZE_TASTATUR = sorted(set(range(0x41, 0x5B)) | set(range(0x30, 0x3A)) |
+                        {0x20, 0x0D, 0x08, 0x25, 0x26, 0x27, 0x28, 0xA0, 0xA2})
 NEUSTARTS = [('Leertaste', 'vk:32'), ('Enter', 'vk:13'), ('Pfeil hoch', 'vk:38'),
              ('Taste R', 'vk:82'), ('Klick auf die Game-Over-Stelle', 'klick_go'),
              ('Klick in die Mitte', 'klick_mitte'), ('Nichts (startet von selbst)', '')]
 
 _NAMEN = {
-    0x01: 'Mausklick', 0x02: 'Maus rechts', 0x04: 'Maus Mitte', 0x08: 'Rücktaste',
+    0x01: 'Mausklick', 0x02: 'Rechtsklick', 0x04: 'Maus Mitte', 0x08: 'Rücktaste',
+    RAD_HOCH: 'Mausrad ↑', RAD_RUNTER: 'Mausrad ↓', MAUS_LINKS: 'Maus ←', MAUS_RECHTS: 'Maus →',
+    MAUS_HOCH: 'Maus ↑', MAUS_RUNTER: 'Maus ↓',
     0x09: 'Tab', 0x0D: 'Enter', 0x10: 'Shift', 0x11: 'Strg', 0x12: 'Alt', 0x14: 'Feststell',
     0x1B: 'Esc', 0x20: 'Leertaste', 0x21: 'Bild hoch', 0x22: 'Bild runter', 0x23: 'Ende',
     0x24: 'Pos1', 0x25: '←', 0x26: '↑', 0x27: '→', 0x28: '↓', 0x2D: 'Einfg', 0x2E: 'Entf',
@@ -117,7 +129,13 @@ _WORT_TASTEN = [
     (r'\benter\b|eingabe-?taste|\breturn\b', [0x0D]),
     (r'\bshift\b|umschalt\w*', [0xA0]),
     (r'\bstrg\b|\bctrl\b|steuerung-?taste', [0xA2]),
-    (r'klick\w*|click\w*|\bmaus\b|anklick\w*|linksklick', [0x01]),
+    (r'rechts-?klick\w*|rechte[nr]? maustaste|right[- ]click\w*', [0x02]),
+    (r'mausrad|scroll\w*|mouse ?wheel', [RAD_HOCH, RAD_RUNTER]),
+    (r'maus\w*\s+(zu\s+)?beweg\w*|beweg\w*\s+(\w+\s+)?(der\s+)?maus|ziel\w*\s+(\w+\s+)?(der\s+)?maus|'
+     r'maus\w*\s+(zum\s+)?ziel\w*|move the mouse|aim', MAUS_BEWEGEN),
+    (r'ganze[nr]? tastatur|alle[n]? tasten|whole keyboard|all keys', GANZE_TASTATUR),
+    (r'(?<!rechts)(?<!rechts-)klick\w*|(?<!right )(?<!right-)click\w*|anklick\w*|linksklick|'
+     r'linke[nr]? maustaste', [0x01]),
 ]
 _PFEILE_ALLE = r'pfeiltasten|pfeil-tasten|arrow keys|\bpfeilen\b'
 _NEIN = r'\b(nicht|nie|niemals|kein\w*|never|not)\b'
@@ -638,6 +656,8 @@ class Ueben:
         self.akt = lerner.aktionen
         self.akt_index = {frozenset(a): i for i, a in enumerate(self.akt)}
         self.alle_tasten = set().union(*[set(a) for a in self.akt])
+        self.maus_frei = bool(self.alle_tasten & set(MAUS_BEWEGEN))
+        self.schritt_px = max(8, bereich[2] // 25)
         self.scan = projekt.scan_info()
         self.erkenner = EndeErkennung(info.get('stillstand', True), projekt.gameover_bilder())
         self.punkte_rel = info.get('punkte')
@@ -658,10 +678,31 @@ class Ueben:
         eingaben.abholen()
 
     # --- Tasten
+    def _maus_ins_spiel(self):
+        """Mauszeiger im Spielfeld halten (sonst klickt die KI daneben)."""
+        x, y, w, h = self.bereich
+        mx, my = self.backend.maus_pos()
+        if not (x <= mx < x + w and y <= my < y + h):
+            self.backend.maus_setzen(min(max(mx, x + 2), x + w - 3), min(max(my, y + 2), y + h - 3))
+
+    def _impuls(self, vk):
+        if vk == RAD_HOCH or vk == RAD_RUNTER:
+            self._maus_ins_spiel()
+            self.backend.rad(1 if vk == RAD_HOCH else -1)
+        else:
+            d = self.schritt_px
+            dx = {MAUS_LINKS: -d, MAUS_RECHTS: d}.get(vk, 0)
+            dy = {MAUS_HOCH: -d, MAUS_RUNTER: d}.get(vk, 0)
+            self.backend.maus_bewegen(dx, dy)
+            self._maus_ins_spiel()
+
     def _druecken(self, vk, unten):
         if unten:
             if vk in MAUS:
-                self.backend.maus_setzen(*self._punkt(None))
+                if self.maus_frei:
+                    self._maus_ins_spiel()     # klickt dort, wo die KI hingezielt hat
+                else:
+                    self.backend.maus_setzen(*self._punkt(None))
             self.ki_haelt.add(vk)
         else:
             self.ki_haelt.discard(vk)
@@ -682,10 +723,13 @@ class Ueben:
 
     def _anwenden(self, a):
         soll = set(self.akt[a])
-        for vk in list(self.ki_haelt - soll):
+        halten = soll - IMPULS
+        for vk in list(self.ki_haelt - halten):
             self._druecken(vk, False)
-        for vk in sorted(soll - self.ki_haelt):
+        for vk in sorted(halten - self.ki_haelt):
             self._druecken(vk, True)
+        for vk in sorted(soll & IMPULS):
+            self._impuls(vk)
 
     # --- Speicher
     def _festschreiben(self, behalten):

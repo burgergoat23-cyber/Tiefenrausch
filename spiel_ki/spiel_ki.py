@@ -219,6 +219,7 @@ class App:
         self.projekt = K.Projekt(os.path.join(SPIELE, name))
         self.lerner = self.speicher = self.lerner_schluessel = None
         self._anzeigen()
+        self._erkl_setzen(self.projekt.info.get('erklaerung', ''))
 
     def _neues_projekt(self):
         if self.laeuft():
@@ -236,22 +237,7 @@ class App:
         b = p.info.get('bereich')
         self.bereich_txt.config(text=f'Markiert: {b[2]} × {b[3]} Pixel' if b else
                                 'Noch nicht markiert – zieh einen Rahmen um das Spielfeld.')
-        for w in self.tasten_rahmen.winfo_children():
-            w.destroy()
-        self.tasten_vars = {}
-        an = set(p.info.get('tasten', []))
-        liste = list(K.VORSCHLAG) + sorted(an - set(K.VORSCHLAG))
-        for i, vk in enumerate(liste):
-            v = self.tk.BooleanVar(value=vk in an)
-            self.tasten_vars[vk] = v
-            self.ttk.Checkbutton(self.tasten_rahmen, text=K.tasten_name(vk), variable=v,
-                                 command=lambda vk=vk: self._taste_umschalten(vk)).grid(
-                row=i // 7, column=i % 7, sticky='w', padx=(0, 10))
-        n = len(liste)
-        self.fang_knopf = self.ttk.Button(self.tasten_rahmen, text='Andere Taste …',
-                                          command=self._taste_fangen)
-        self.fang_knopf.grid(row=n // 7, column=n % 7, columnspan=7 - n % 7, sticky='w')
-        self._erkl_setzen(p.info.get('erklaerung', ''))
+        self._tasten_zeigen()
         self.still_var.set(bool(p.info.get('stillstand', True)))
         ns = p.info.get('neustart', 'vk:32')
         self.neustart_var.set(next((n for n, c in K.NEUSTARTS if c == ns), K.NEUSTARTS[0][0]))
@@ -259,6 +245,66 @@ class App:
         self.go_txt.config(text=f'{n_go} markiert' if n_go else 'keins (freiwillig)')
         self.pk_txt.config(text='markiert' if p.info.get('punkte') else 'nicht markiert')
         self._zahlen_zeigen()
+
+    def _tasten_zeigen(self):
+        """Schritt 2 neu aufbauen: häufige Tasten, Maus, ganze Tastatur, weitere Tasten."""
+        tk, ttk = self.tk, self.ttk
+        for w in self.tasten_rahmen.winfo_children():
+            w.destroy()
+        an = set(self.projekt.info.get('tasten', []))
+        gitter = ttk.Frame(self.tasten_rahmen)
+        gitter.pack(fill='x')
+        self.tasten_vars = {}
+        for i, vk in enumerate(K.VORSCHLAG):
+            v = tk.BooleanVar(value=vk in an)
+            self.tasten_vars[vk] = v
+            ttk.Checkbutton(gitter, text=K.tasten_name(vk), variable=v,
+                            command=self._tasten_gui).grid(row=i // 7, column=i % 7, sticky='w',
+                                                           padx=(0, 10))
+        zeile = ttk.Frame(self.tasten_rahmen)
+        zeile.pack(fill='x', pady=(2, 0))
+        self.maus_vars = {}
+        for text, vks in (('Mausrad ↑', [K.RAD_HOCH]), ('Mausrad ↓', [K.RAD_RUNTER]),
+                          ('Maus bewegen', K.MAUS_BEWEGEN)):
+            v = tk.BooleanVar(value=all(x in an for x in vks))
+            self.maus_vars[text] = (vks, v)
+            ttk.Checkbutton(zeile, text=text, variable=v, command=self._tasten_gui).pack(
+                side='left', padx=(0, 10))
+        self.ganze_var = tk.BooleanVar(value=set(K.GANZE_TASTATUR) <= an)
+        ttk.Checkbutton(zeile, text='Ganze Tastatur', variable=self.ganze_var,
+                        command=self._ganze_umschalten).pack(side='left', padx=(0, 10))
+        self.fang_knopf = ttk.Button(zeile, text='Andere Taste …', command=self._taste_fangen)
+        self.fang_knopf.pack(side='right')
+        self.extras = sorted(an - set(K.VORSCHLAG) - K.IMPULS)
+        if self.extras:
+            namen = [K.tasten_name(v) for v in self.extras]
+            ttk.Label(self.tasten_rahmen, style='Leise.TLabel', wraplength=540,
+                      text=f'+ {len(namen)} weitere: ' + ', '.join(namen[:16]) +
+                      (' …' if len(namen) > 16 else '') +
+                      '   (Andere Taste … und nochmal drücken = entfernen)').pack(fill='x')
+
+    def _tasten_gui(self):
+        neu = [vk for vk, v in self.tasten_vars.items() if v.get()]
+        for vks, v in self.maus_vars.values():
+            if v.get():
+                neu += vks
+        self._tasten_aendern(neu + self.extras)
+        self._tasten_zeigen()
+
+    def _ganze_umschalten(self):
+        info = self.projekt.info
+        an = set(info.get('tasten', []))
+        if self.ganze_var.get():
+            vorher = sorted(an)
+            if self._tasten_aendern(sorted(an | set(K.GANZE_TASTATUR))):
+                info['vor_ganze'] = vorher      # zum Zurückholen beim Abwählen
+                self.projekt.speichern()
+        else:   # Auswahl von vorher zurück (Maus-Haken von zwischendurch bleiben)
+            vorher = set(info.get('vor_ganze', set(K.VORSCHLAG) & an))
+            if self._tasten_aendern(sorted(vorher | (an - set(K.GANZE_TASTATUR)))):
+                info.pop('vor_ganze', None)
+                self.projekt.speichern()
+        self._tasten_zeigen()
 
     def _zahlen_zeigen(self):
         if self.lerner is not None:
@@ -325,12 +371,13 @@ class App:
         self.projekt.speichern()
         self.lerner = self.speicher = self.lerner_schluessel = None
         self._zahlen_zeigen()
+        if len(neu) > 12:
+            self._status(f'{len(neu)} Tasten erlaubt. Mit so vielen braucht die KI viel länger zum '
+                         'Lernen – für die meisten Spiele reichen wenige.', 'gelb')
         return True
 
-    def _taste_umschalten(self, vk):
-        neu = [k for k, v in self.tasten_vars.items() if v.get()]
-        if not self._tasten_aendern(neu):
-            self.tasten_vars[vk].set(not self.tasten_vars[vk].get())
+    def _taste_umschalten(self, vk=None):
+        self._tasten_gui()
 
     def _taste_fangen(self):
         if self.laeuft():
@@ -648,11 +695,18 @@ class App:
                         self.starten()
                 elif art == 'gefangen':
                     self.fang_knopf.config(text='Andere Taste …')
-                    tasten = self.projekt.info.get('tasten', [])
-                    if wert not in K.NIE and wert not in K.MAUS and wert not in tasten:
+                    tasten = list(self.projekt.info.get('tasten', []))
+                    name = K.tasten_name(wert)
+                    if wert in K.NIE or wert in K.MAUS:
+                        self._status(f'{name} darf die KI nicht drücken.', 'rot')
+                    elif wert in tasten:
+                        if self._tasten_aendern([v for v in tasten if v != wert]):
+                            self._status(f'{name} entfernt.', 'blau')
+                    else:
                         self.projekt.scan_merken(self.eingaben.scan)
                         if self._tasten_aendern(tasten + [wert]):
-                            self._anzeigen()
+                            self._status(f'{name} hinzugefügt.', 'blau')
+                    self._tasten_zeigen()
                 elif art == 'bereit':
                     self.torch_bereit = True
                     self._status('Bereit. Klick ins Spiel und drück F8.', 'text')

@@ -23,6 +23,11 @@ FAELLE = [
     ('Pfeil nach links und Pfeil nach rechts zum Ausweichen. Das Spiel startet von selbst neu.',
      dict(tasten=[L, R], neustart='')),
     ('Ein Spiel mit 2 Leben, man drückt die Taste „X“ zum Schießen.', dict(tasten=[0x58])),
+    ('Mit dem Mausrad zoomen, mit Rechtsklick bauen und mit Linksklick abbauen.',
+     dict(tasten=[K.RAD_HOCH, K.RAD_RUNTER, 0x02, KLICK])),
+    ('Mit der Maus zielen und mit Klick schießen. Laufen mit WASD.',
+     dict(tasten=K.MAUS_BEWEGEN + [KLICK, 0x57, 0x41, 0x53, 0x44])),
+    ('Die KI darf die ganze Tastatur benutzen.', dict(tasten=K.GANZE_TASTATUR)),
     ('', dict(tasten=[], neustart=None)),
 ]
 

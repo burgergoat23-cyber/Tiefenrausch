@@ -65,6 +65,7 @@ def main():
     root.bind('<KeyPress>', lambda e: angekommen.append(('ab', e.keysym)))
     root.bind('<KeyRelease>', lambda e: angekommen.append(('auf', e.keysym)))
     root.bind('<ButtonPress-1>', lambda e: angekommen.append(('klick', e.x, e.y)))
+    root.bind('<MouseWheel>', lambda e: angekommen.append(('rad', e.delta)))
     root.update()
     root.focus_force()
     warte(1.0, root)
@@ -127,6 +128,18 @@ def main():
     be.taste(0x01, False)
     warte(0.4, root)
     pruefe(any(a[0] == 'klick' for a in angekommen), f'Fenster hat Klick bekommen: {angekommen}')
+    angekommen.clear()
+    be.rad(1)
+    be.rad(-1)
+    warte(0.4, root)
+    raeder = [a[1] for a in angekommen if a[0] == 'rad']
+    pruefe(len(raeder) == 2 and raeder[0] > 0 > raeder[1], f'Mausrad hoch/runter angekommen: {raeder}')
+    vorher = be.maus_pos()
+    be.maus_bewegen(30, -10)
+    warte(0.3, root)
+    nachher = be.maus_pos()
+    pruefe(nachher[0] > vorher[0] and nachher[1] < vorher[1],
+           f'Maus relativ bewegt: {vorher} -> {nachher}')
 
     # 6) Fenster und Bild
     root.focus_force()

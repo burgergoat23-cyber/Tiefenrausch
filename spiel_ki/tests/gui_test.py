@@ -51,6 +51,12 @@ class GuiSchein:
     def maus_setzen(self, x, y):
         pass
 
+    def rad(self, richtung):
+        pass
+
+    def maus_bewegen(self, dx, dy):
+        pass
+
     def maus_pos(self):
         return 0, 0
 
@@ -108,6 +114,25 @@ def main():
     app.tasten_vars[0x44].set(False)
     app._taste_umschalten(0x44)
     app.projekt.info['neustart'] = 'vk:32'
+
+    # Ganze Tastatur + Maus an und wieder aus
+    app.ganze_var.set(True)
+    app._ganze_umschalten()
+    assert set(K.GANZE_TASTATUR) <= set(app.projekt.info['tasten'])
+    app.maus_vars['Mausrad ↑'][1].set(True)
+    app.maus_vars['Maus bewegen'][1].set(True)
+    app._tasten_gui()
+    t = app.projekt.info['tasten']
+    assert K.RAD_HOCH in t and all(v in t for v in K.MAUS_BEWEGEN), t
+    warte(root, 0.3)
+    foto(root, 'gui_0b_ganze.png')
+    print('Ganze Tastatur:', len(t), 'Tasten |', app.status.cget('text')[:70])
+    app.ganze_var.set(False)
+    app._ganze_umschalten()
+    app.maus_vars['Mausrad ↑'][1].set(False)
+    app.maus_vars['Maus bewegen'][1].set(False)
+    app._tasten_gui()
+    assert sorted(app.projekt.info['tasten']) == sorted([LEER]), app.projekt.info['tasten']
 
     # Einstellungen wie ein Nutzer: Bereich, Tasten
     app.projekt.info['bereich'] = [100, 100, 240, 160]

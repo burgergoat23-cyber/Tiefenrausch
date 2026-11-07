@@ -127,5 +127,11 @@ class ScheinBackend:
     def maus_setzen(self, x, y):
         pass
 
+    def rad(self, richtung):
+        pass
+
+    def maus_bewegen(self, dx, dy):
+        pass
+
     def maus_pos(self):
         return (0, 0)
