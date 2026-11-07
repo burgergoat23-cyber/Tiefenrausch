@@ -2,10 +2,16 @@ BILDKLICKER – Anleitung
 =======================
 
 Was macht das Programm?
-Du zeigst ihm ein Bild, zum Beispiel einen Knopf. Es schaut immer wieder auf
-deinen Bildschirm. Sobald das Bild dort auftaucht, klickt es darauf - und/oder
-drückt eine Taste (z. B. W kurz drücken oder gedrückt halten).
-Es kann Tasten auch ganz ohne Bild drücken, z. B. W festhalten zum Laufen im Spiel.
+Es hat zwei Reiter (oben im Fenster):
+
+- BILD-KLICKER (F8): Du zeigst ihm ein Bild, zum Beispiel einen Knopf.
+  Es schaut immer wieder auf deinen Bildschirm. Sobald das Bild dort
+  auftaucht, klickt es darauf.
+- TASTEN-DRÜCKER (F9): drückt Tasten für dich, ganz ohne Bild. Du stellst
+  einen Ablauf zusammen, z. B. "W kurz drücken", "Leertaste 2 Sekunden
+  gedrückt halten", "1 Sekunde warten" ... und er spielt ihn ab.
+
+Beide sind unabhängig voneinander und können auch gleichzeitig laufen.
 (Nur für Windows-PCs.)
 
 
@@ -20,8 +26,8 @@ STARTEN
 4. Nach ein paar Sekunden geht das Fenster "Bildklicker" auf.
 
 
-BENUTZEN
---------
+BILD-KLICKER BENUTZEN
+---------------------
 1. Das, worauf geklickt werden soll, auf dem Bildschirm sichtbar machen.
 2. Im Bildklicker auf "Vom Bildschirm ausschneiden" klicken.
    Der Bildschirm wird dunkel. Mit gedrückter linker Maustaste einen Rahmen
@@ -30,32 +36,34 @@ BENUTZEN
    Andere Wege: "Bild öffnen ..." (gespeichertes Bildschirmfoto), ein Bild ins
    Fenster ziehen, oder mit Windows-Taste + Umschalt + S ausschneiden und dann
    auf "Einfügen" klicken.
-3. "Bild testen (ohne Klick)" drücken:
+3. "Testen (ohne Klick)" drücken:
    grüner Rahmen  = gefunden, dort würde geklickt
    oranger Rahmen = nicht sicher genug gefunden
 4. "START" drücken (oder die Taste F8). Stoppen: wieder F8 oder "STOPP".
 
 
-TASTE DRÜCKEN
--------------
-1. Bei "2. Was soll dann passieren?" ins weiße Feld klicken und die gewünschte
-   Taste drücken (z. B. W). Das Häkchen "Taste drücken" geht dann von selbst an.
-2. "kurz drücken" = einmal tippen.
-   "gedrückt halten" = so viele Sekunden festhalten, wie daneben steht.
-   0 Sekunden = festhalten, bis du stoppst (F8).
-3. Soll gar nicht geklickt werden: Häkchen bei "Klicken" wegnehmen.
-4. Ohne Bild: bei "Wann" auf "Immer (ohne Bild)" stellen.
-   Dann drückt es die Taste (bzw. klickt dort, wo die Maus gerade ist)
-   alle paar Sekunden - oder hält sie fest.
-5. Die Taste geht an das Fenster, das gerade vorne ist. Darum:
-   erst ins Spiel klicken, dann F8 drücken. (Wer START mit der Maus drückt,
-   bekommt 3 Sekunden Zeit, um ins Spiel zu klicken.)
+TASTEN-DRÜCKER BENUTZEN
+-----------------------
+1. Oben auf den Reiter "Tasten-Drücker" klicken.
+2. Ins weiße Feld "Taste" klicken und die gewünschte Taste drücken (z. B. W).
+3. "kurz drücken" oder "gedrückt halten" (mit Sekunden) wählen und auf
+   "+ Taste hinzufügen" klicken. Der Schritt erscheint rechts im Ablauf.
+   Gedrückt halten mit 0 Sekunden = festhalten, bis du stoppst.
+4. Pausen dazwischen: Sekunden eintragen und "+ Warten hinzufügen".
+5. So viele Schritte hinzufügen, wie du willst. Mit "Löschen",
+   "Nach oben", "Nach unten" kannst du den Ablauf ändern.
+6. "Wie oft?": immer wieder (bis Stopp) oder eine feste Anzahl.
+7. Ins Spiel klicken und F9 drücken. Stoppen: wieder F9.
+   (Wer START mit der Maus drückt, bekommt 3 Sekunden Zeit, um ins Spiel
+   zu klicken.) Die Tasten gehen immer an das Fenster, das vorne ist.
 Beim Stoppen und beim Schließen wird eine gehaltene Taste immer losgelassen.
 
+Beispiel "Figur läuft von allein": Taste W, gedrückt halten 0 Sekunden,
+hinzufügen, ins Spiel klicken, F9.
 
-EINSTELLUNGEN
--------------
-- Wann: "Wenn das Bild auftaucht" oder "Immer (ohne Bild)".
+
+EINSTELLUNGEN BILD-KLICKER
+--------------------------
 - Wie genau: 90 % passt meistens.
   Wird das Bild nicht gefunden (Testen zeigt z. B. 84 %): Regler etwas nach links.
   Klickt es auf etwas Falsches: Regler nach rechts.
@@ -63,7 +71,7 @@ EINSTELLUNGEN
 - Wie oft: "Jedes Mal" klickt immer wieder, solange das Bild zu sehen ist
   (nach der eingestellten Pause). "Nur ein Mal" hört nach dem ersten Klick auf.
 - Alle ... Sekunden nachschauen: wie oft der Bildschirm angeschaut wird.
-- Danach ... Sekunden Pause (nachdem das Bild gefunden wurde).
+- Nach einem Klick ... Sekunden Pause.
 - Maus zurück: Nach dem Klick springt die Maus wieder dahin, wo sie vorher war.
 
 
@@ -74,9 +82,10 @@ GUT ZU WISSEN
 - Das Ding muss genauso groß zu sehen sein wie beim Ausschneiden
   (also nicht hinein- oder herauszoomen).
 - Das Bildklicker-Fenster selbst wird nicht durchsucht.
-- Während es läuft, bewegt das Programm deine Maus. Mit F8 stoppst du es jederzeit,
+- Während es läuft, bewegt das Programm deine Maus bzw. drückt Tasten.
+  Mit F8 (Bild-Klicker) und F9 (Tasten-Drücker) stoppst du es jederzeit,
   auch wenn ein anderes Fenster vorne ist.
-- Das Programm merkt sich das letzte Bild und die Einstellungen.
+- Das Programm merkt sich das letzte Bild, den Ablauf und die Einstellungen.
 - Bleibt ein schwarzes Fenster offen: nicht schließen, solange der Bildklicker
   läuft (sonst geht er mit zu).
 - Klappt das Klicken bei einem bestimmten Programm nicht: Bildklicker mit

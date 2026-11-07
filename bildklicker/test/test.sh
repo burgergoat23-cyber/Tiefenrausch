@@ -16,3 +16,7 @@ node bildklicker/test/bilder.js "$OUT/bilder" >/dev/null
 echo "== Bildsuche testen"
 mcs -noconfig -langversion:5 -main:TestMain -warnaserror $REFS -out:"$OUT/test.exe" bildklicker/Bildklicker.cs bildklicker/test/TestMatcher.cs
 LANG=C.UTF-8 mono "$OUT/test.exe" "$OUT/bilder"
+
+echo "== Tasten-Drücker testen"
+mcs -noconfig -langversion:5 -main:TestTasten -warnaserror $REFS -out:"$OUT/tasten.exe" bildklicker/Bildklicker.cs bildklicker/test/TestTasten.cs
+LANG=C.UTF-8 mono "$OUT/tasten.exe"
