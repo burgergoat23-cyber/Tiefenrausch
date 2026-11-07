@@ -1,7 +1,7 @@
 """Windows-Teil der Spiel-KI.
 
 - Bildschirm lesen (mss)
-- erkennen, was der Mensch drückt (Tastatur-/Maus-Haken über pynput)
+- erkennen, was der Mensch drückt (Tastatur-Haken über pynput)
 - selbst Tasten drücken und klicken (SendInput mit Scan-Codes, das verstehen auch Spiele)
 Eigene Tastendrücke tragen die Kennung MAGIC, damit der Haken sie nicht für menschliche hält.
 """
@@ -64,8 +64,6 @@ class INPUT(ctypes.Structure):
 INPUT_MOUSE, INPUT_KEYBOARD = 0, 1
 KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE = 0x0001, 0x0002, 0x0008
 MAUS_FLAGS = {0x01: (0x0002, 0x0004), 0x02: (0x0008, 0x0010), 0x04: (0x0020, 0x0040)}
-MAUS_MSG = {0x201: (0x01, True), 0x202: (0x01, False), 0x204: (0x02, True),
-            0x205: (0x02, False), 0x207: (0x04, True), 0x208: (0x04, False)}
 ERWEITERT = {0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x2D, 0x2E, 0xA3, 0xA5, 0x6F, 0x90}
 VERBOTENE_KLASSEN = {'ConsoleWindowClass', 'CASCADIA_HOSTING_WINDOW_CLASS', 'Shell_TrayWnd',
                      'Progman', 'WorkerW', 'PseudoConsoleWindow', 'Shell_SecondaryTrayWnd'}
@@ -112,7 +110,7 @@ class WindowsBackend:
 
     # --- Haken: was drückt der Mensch?
     def start(self, bei_taste, bei_hotkey):
-        from pynput import keyboard, mouse
+        from pynput import keyboard
         hk_unten = set()
 
         def kf(msg, data):
@@ -133,22 +131,11 @@ class WindowsBackend:
                 pass
             return False
 
-        def mf(msg, data):
-            try:
-                if msg in MAUS_MSG:
-                    if (getattr(data, 'dwExtraInfo', 0) or 0) == MAGIC:
-                        return False
-                    vk, unten = MAUS_MSG[msg]
-                    bei_taste(vk, unten, 0, False)
-            except Exception:   # noqa: BLE001
-                pass
-            return False
-
+        # Nur ein Tastatur-Haken: ein Maus-Haken würde bei jeder Mausbewegung Python aufrufen
+        # und könnte die Maus am ganzen PC verlangsamen, während die KI rechnet.
         k = keyboard.Listener(win32_event_filter=kf)
-        m = mouse.Listener(win32_event_filter=mf)
         k.start()
-        m.start()
-        self.haken = [k, m]
+        self.haken = [k]
 
     def stopp(self):
         for h in self.haken:

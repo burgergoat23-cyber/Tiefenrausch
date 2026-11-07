@@ -126,13 +126,7 @@ def main():
     warte(0.05, root)
     be.taste(0x01, False)
     warte(0.4, root)
-    pruefe(gesehen == [], f'eigener Klick nicht als menschlich gezählt ({gesehen})')
     pruefe(any(a[0] == 'klick' for a in angekommen), f'Fenster hat Klick bekommen: {angekommen}')
-    mensch_klick(True)
-    mensch_klick(False)
-    warte(0.4, root)
-    pruefe([(v, u) for v, u, s, e in gesehen] == [(1, True), (1, False)],
-           f'menschlicher Klick gesehen: {gesehen}')
 
     # 6) Fenster und Bild
     root.focus_force()

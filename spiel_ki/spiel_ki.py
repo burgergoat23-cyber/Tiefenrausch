@@ -623,6 +623,19 @@ def main():
     if sys.platform != 'win32':
         print('Die Spiel-KI läuft nur unter Windows.')
         sys.exit(1)
+    # Die großen KI-Bausteine VOR dem Fenster laden: beim ersten Mal prüft der Virenscanner
+    # die Dateien (kann 1–2 Minuten dauern). Liefe das neben dem Fenster, hinge das Fenster
+    # ("reagiert nicht") und Tastendrücke am ganzen PC würden verzögert.
+    print('  Lade die KI-Bausteine ... beim ersten Mal kann das 1-2 Minuten dauern.', flush=True)
+    t0 = time.time()
+    try:
+        import torch  # noqa: F401
+        K.baue_netz(4)
+    except Exception:
+        log_fehler(traceback.format_exc())
+        raise
+    print(f'  Fertig ({time.time() - t0:.0f} s). Das Fenster "Spiel-KI" geht jetzt auf.', flush=True)
+    print('  Dieses schwarze Fenster bitte offen lassen.', flush=True)
     import ki_windows
     ki_windows.dpi_bewusst()
     tk, root = tk_laden()
