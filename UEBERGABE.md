@@ -58,6 +58,7 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 ## Bildklicker (eigenes Werkzeug, nicht Teil des Spiels)
 - Ordner `bildklicker/`: Windows-Programm, das ein Bild auf dem Bildschirm sucht und darauf klickt (Nutzer-Wunsch 7.11.2026, Nutzer hat einen **Windows-PC**).
 - Quelle `Bildklicker.cs` (C# 5, nur System/Drawing/Forms – wird von Windows PowerShell 5.1 per `Add-Type` beim Start übersetzt), Startteil `huelle.ps1`, Anleitung `Anleitung.txt`. Bauen: `python3 bildklicker/baue.py` → `bildklicker/Bildklicker.bat` (Batch+PowerShell in einer Datei, CRLF, keine BOM) und `downloads/bildklicker.zip`.
+- Aktionen: Klick (links/rechts/doppelt) und/oder Taste (kurz oder gedrückt halten, 0 s = bis Stopp, `SendInput` mit Scancode + Tastenwiederholung wie echte Tastatur); „Wann“: wenn das Bild auftaucht oder immer (ohne Bild). Gehaltene Taste wird beim Stopp/Schließen losgelassen (`Clicker.Release`, `Join`). START per Knopf mit Taste/ohne Bild: 3 s Vorlauf.
 - Suche: Pixel-genau-Suche über seltene Anker-Pixel + Grobsuche (verkleinerte Graustufen-Korrelation), Bewertung = Minimum aus Form (Korrelation) und Farbe (`ColK`=2). Eigenes Fenster wird ausgespart. Test: `bash bildklicker/test/test.sh` (Mono + Playwright, 21 Prüfungen). Echte Klicks/Bildschirmfotos nur unter Windows prüfbar.
 
 ## Andere Webseiten

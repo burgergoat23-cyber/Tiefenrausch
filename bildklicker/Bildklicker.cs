@@ -1,4 +1,4 @@
-// Bildklicker – sucht ein Bild auf dem Bildschirm und klickt darauf, sobald es auftaucht.
+// Bildklicker – sucht ein Bild auf dem Bildschirm und klickt darauf (oder drückt eine Taste), sobald es auftaucht.
 // Wird beim Start von Windows PowerShell 5.1 (Add-Type) übersetzt:
 // nur C#-5-Schreibweise benutzen (kein $"...", kein ?., keine =>-Eigenschaften)
 // und nur System, System.Drawing und System.Windows.Forms (kein LINQ/System.Core).
@@ -46,13 +46,9 @@ namespace Bildklicker
 
         const uint LDOWN = 0x0002, LUP = 0x0004, RDOWN = 0x0008, RUP = 0x0010;
 
-        // art: 0 = links, 1 = rechts, 2 = Doppelklick (links)
-        public static void Click(int x, int y, int art, bool back)
+        // art: 0 = links, 1 = rechts, 2 = Doppelklick (links) – an der aktuellen Mausposition
+        public static void ClickHere(int art)
         {
-            POINT old;
-            bool hadOld = GetCursorPos(out old);
-            SetCursorPos(x, y);
-            Thread.Sleep(40);
             uint dn = art == 1 ? RDOWN : LDOWN, up = art == 1 ? RUP : LUP;
             mouse_event(dn, 0, 0, 0, UIntPtr.Zero); Thread.Sleep(30); mouse_event(up, 0, 0, 0, UIntPtr.Zero);
             if (art == 2)
@@ -60,7 +56,59 @@ namespace Bildklicker
                 Thread.Sleep(60);
                 mouse_event(dn, 0, 0, 0, UIntPtr.Zero); Thread.Sleep(30); mouse_event(up, 0, 0, 0, UIntPtr.Zero);
             }
+        }
+
+        public static void Click(int x, int y, int art, bool back)
+        {
+            POINT old;
+            bool hadOld = GetCursorPos(out old);
+            SetCursorPos(x, y);
+            Thread.Sleep(40);
+            ClickHere(art);
             if (back && hadOld) { Thread.Sleep(40); SetCursorPos(old.X, old.Y); }
+        }
+
+        // ---- Tastatur (SendInput mit Scancode: funktioniert auch in den meisten Spielen)
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public IntPtr dwExtraInfo; }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEYBDINPUT { public ushort wVk, wScan; public uint dwFlags, time; public IntPtr dwExtraInfo; }
+        [StructLayout(LayoutKind.Explicit)]
+        public struct INPUTU { [FieldOffset(0)] public MOUSEINPUT mi; [FieldOffset(0)] public KEYBDINPUT ki; }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct INPUT { public uint type; public INPUTU u; }
+
+        [DllImport("user32.dll")] public static extern uint SendInput(uint count, INPUT[] inputs, int size);
+        [DllImport("user32.dll")] public static extern uint MapVirtualKey(uint code, uint mapType);
+
+        static bool Extended(int vk)
+        {
+            switch (vk)
+            {
+                case 33: case 34: case 35: case 36: case 37: case 38: case 39: case 40:
+                case 45: case 46: case 91: case 92: case 93: case 111: case 144: case 163: case 165:
+                    return true;
+            }
+            return false;
+        }
+
+        public static void Key(int vk, bool down)
+        {
+            uint sc = MapVirtualKey((uint)vk, 0);
+            INPUT i = new INPUT();
+            i.type = 1;
+            i.u.ki.wVk = (ushort)vk;
+            i.u.ki.wScan = (ushort)sc;
+            uint fl = down ? 0u : 0x0002u;
+            if (sc != 0) fl |= 0x0008u;
+            if (Extended(vk)) fl |= 0x0001u;
+            i.u.ki.dwFlags = fl;
+            SendInput(1, new INPUT[] { i }, Marshal.SizeOf(typeof(INPUT)));
+        }
+
+        public static void Tap(int vk)
+        {
+            Key(vk, true); Thread.Sleep(50); Key(vk, false);
         }
     }
 
@@ -141,6 +189,45 @@ namespace Bildklicker
                 }
             }
             finally { b.UnlockBits(d); }
+        }
+
+        // Name einer Taste auf Deutsch (für die Anzeige)
+        public static string KeyName(int vk)
+        {
+            Keys k = (Keys)vk;
+            if (k >= Keys.A && k <= Keys.Z) return k.ToString();
+            if (k >= Keys.D0 && k <= Keys.D9) return ((char)('0' + (vk - (int)Keys.D0))).ToString();
+            if (k >= Keys.NumPad0 && k <= Keys.NumPad9) return "Ziffernblock " + (vk - (int)Keys.NumPad0);
+            if (k >= Keys.F1 && k <= Keys.F24) return k.ToString();
+            switch (k)
+            {
+                case Keys.Space: return "Leertaste";
+                case Keys.Enter: return "Enter";
+                case Keys.ShiftKey: case Keys.LShiftKey: case Keys.RShiftKey: return "Umschalt";
+                case Keys.ControlKey: case Keys.LControlKey: case Keys.RControlKey: return "Strg";
+                case Keys.Menu: case Keys.LMenu: case Keys.RMenu: return "Alt";
+                case Keys.Escape: return "Esc";
+                case Keys.Tab: return "Tab";
+                case Keys.Back: return "Rücktaste";
+                case Keys.Up: return "Pfeil hoch";
+                case Keys.Down: return "Pfeil runter";
+                case Keys.Left: return "Pfeil links";
+                case Keys.Right: return "Pfeil rechts";
+                case Keys.Delete: return "Entf";
+                case Keys.Insert: return "Einfg";
+                case Keys.Home: return "Pos1";
+                case Keys.End: return "Ende";
+                case Keys.PageUp: return "Bild hoch";
+                case Keys.PageDown: return "Bild runter";
+                case Keys.CapsLock: return "Feststelltaste";
+            }
+            try
+            {
+                uint ch = Nat.MapVirtualKey((uint)vk, 2) & 0xFFFF;
+                if (ch > 32) return ((char)ch).ToString().ToUpper();
+            }
+            catch { }
+            return k.ToString();
         }
 
         public static string Pct(double s)
@@ -672,29 +759,38 @@ namespace Bildklicker
         }
     }
 
-    // ------------------------------------------------------------------ Such- und Klick-Schleife
+    // ------------------------------------------------------------------ Such- und Aktions-Schleife
     public class Clicker
     {
         public volatile bool Running;
         public volatile string Status = "Bereit.";
-        public volatile int Clicks;
-        public volatile int Art;          // 0 links, 1 rechts, 2 doppelt
-        public volatile bool Once, Back = true;
-        public volatile int IntervalMs = 500, PauseMs = 1000, ThrPct = 90;
+        public volatile int Count;
+        // Was passieren soll
+        public volatile bool DoClick = true, DoKey, KeyHold, Always, Once, Back = true;
+        public volatile int Art;          // Klick: 0 links, 1 rechts, 2 doppelt
+        public volatile int KeyVk = 0x57; // Taste (Windows-Tastencode), Standard W
+        public volatile int HoldMs = 1000; // gedrückt halten; 0 = bis Stopp
+        public volatile int IntervalMs = 500, PauseMs = 1000, ThrPct = 90, StartDelayMs;
 
         readonly object lk = new object();
         Rectangle excl;
         Matcher m;
         Thread th;
 
+        // gerade gehaltene Taste (nur vom Such-Thread benutzt)
+        int heldVk = -1;
+        long holdEnd, nextRep;
+        readonly Stopwatch clock = Stopwatch.StartNew();
+
         public void SetExcl(Rectangle r) { lock (lk) excl = r; }
 
         public void Start(Matcher matcher)
         {
             if (Running) return;
+            Join(1500);
             m = matcher;
-            Clicks = 0;
-            Status = "Sucht …";
+            Count = 0;
+            Status = "Startet …";
             Running = true;
             th = new Thread(Loop);
             th.IsBackground = true;
@@ -707,54 +803,141 @@ namespace Bildklicker
             Running = false;
         }
 
+        public void Join(int ms)
+        {
+            Thread t = th;
+            if (t != null && t.IsAlive) t.Join(ms);
+        }
+
+        // Gehaltene Taste: Wiederholung wie bei einer echten Tastatur (nach 0,5 s etwa 30× pro Sekunde)
+        void HoldTick()
+        {
+            if (heldVk < 0) return;
+            long t = clock.ElapsedMilliseconds;
+            if (t >= holdEnd) { Release(); return; }
+            if (t >= nextRep) { Nat.Key(heldVk, true); nextRep = t + 33; }
+        }
+
+        void Release()
+        {
+            if (heldVk < 0) return;
+            int vk = heldVk;
+            heldVk = -1;
+            try { Nat.Key(vk, false); } catch { }
+        }
+
         void Nap(int ms)
         {
             Stopwatch w = Stopwatch.StartNew();
-            while (Running && w.ElapsedMilliseconds < ms) Thread.Sleep(15);
+            while (Running && w.ElapsedMilliseconds < ms) { HoldTick(); Thread.Sleep(15); }
+        }
+
+        void WaitHold()
+        {
+            while (Running && heldVk >= 0) { HoldTick(); Thread.Sleep(15); }
+        }
+
+        // Führt Klick und/oder Taste aus. Ergebnis: Beschreibung, oder null wenn nichts Neues passiert ist.
+        string Act(int x, int y, bool atImage)
+        {
+            List<string> did = new List<string>();
+            if (DoClick)
+            {
+                if (atImage) Nat.Click(x, y, Art, Back); else Nat.ClickHere(Art);
+                did.Add("geklickt");
+            }
+            int vk = KeyVk;
+            if (DoKey && vk > 0)
+            {
+                string kn = Util.KeyName(vk);
+                if (!KeyHold)
+                {
+                    if (heldVk == vk) Release();
+                    Nat.Tap(vk);
+                    did.Add(kn + " gedrückt");
+                }
+                else
+                {
+                    long t = clock.ElapsedMilliseconds;
+                    long end = HoldMs <= 0 ? long.MaxValue : t + HoldMs;
+                    if (heldVk != vk)
+                    {
+                        Release();
+                        Nat.Key(vk, true);
+                        heldVk = vk; holdEnd = end; nextRep = t + 500;
+                        did.Add(kn + " wird gedrückt gehalten" + (HoldMs <= 0 ? " (bis Stopp)" : ""));
+                    }
+                    else if (end > holdEnd) holdEnd = end;
+                }
+            }
+            return did.Count == 0 ? null : string.Join(" + ", did.ToArray());
         }
 
         void Loop()
         {
-            using (Grabber gr = new Grabber())
+            try
             {
-                while (Running)
+                for (int sec = StartDelayMs / 1000; sec > 0 && Running; sec--)
                 {
-                    Stopwatch w = Stopwatch.StartNew();
-                    try
+                    Status = "Startet in " + sec + " … klick jetzt in das Fenster, das den Klick/die Taste bekommen soll!";
+                    Nap(1000);
+                }
+                using (Grabber gr = new Grabber())
+                {
+                    while (Running)
                     {
-                        Pix s = gr.Grab();
-                        Rectangle v = gr.Area, ex;
-                        lock (lk) ex = excl;
-                        if (ex.Width > 0) ex.Offset(-v.Left, -v.Top);
-                        Hit h = m.Find(s, ex);
-                        if (!Running) break;
-                        if (h == null) Status = "Das Bild ist größer als der Bildschirm.";
-                        else if (h.Score >= ThrPct / 100.0)
+                        Stopwatch w = Stopwatch.StartNew();
+                        try
                         {
-                            int x = v.Left + h.X + m.TW / 2, y = v.Top + h.Y + m.TH / 2;
-                            Nat.Click(x, y, Art, Back);
-                            Clicks++;
-                            if (Once)
+                            if (Always)
                             {
-                                Status = "Gefunden (" + Util.Pct(h.Score) + ") und geklickt – fertig.";
-                                Running = false;
-                                break;
+                                string did = Act(0, 0, false);
+                                if (did != null) { Count++; Status = "Läuft: " + did + "."; }
+                                if (Once) { WaitHold(); if (Running) Status = "Fertig."; Running = false; break; }
                             }
-                            Status = "Gefunden (" + Util.Pct(h.Score) + ") – geklickt! Jetzt " + (PauseMs / 1000.0).ToString("0.#", CultureInfo.GetCultureInfo("de-DE")) + " s Pause.";
-                            Nap(PauseMs);
-                            if (Running) Status = "Sucht …";
+                            else
+                            {
+                                Pix s = gr.Grab();
+                                Rectangle v = gr.Area, ex;
+                                lock (lk) ex = excl;
+                                if (ex.Width > 0) ex.Offset(-v.Left, -v.Top);
+                                Hit h = m.Find(s, ex);
+                                HoldTick();
+                                if (!Running) break;
+                                if (h == null) Status = "Das Bild ist größer als der Bildschirm.";
+                                else if (h.Score >= ThrPct / 100.0)
+                                {
+                                    int x = v.Left + h.X + m.TW / 2, y = v.Top + h.Y + m.TH / 2;
+                                    string did = Act(x, y, true);
+                                    if (did != null) Count++;
+                                    string pc = Util.Pct(h.Score);
+                                    if (Once)
+                                    {
+                                        Status = "Gefunden (" + pc + ")" + (did != null ? " – " + did : "") + ".";
+                                        WaitHold();
+                                        if (Running) Status = "Gefunden (" + pc + ") – fertig.";
+                                        Running = false;
+                                        break;
+                                    }
+                                    Status = "Gefunden (" + pc + ")" + (did != null ? " – " + did : "") + ". Jetzt "
+                                        + (PauseMs / 1000.0).ToString("0.#", CultureInfo.GetCultureInfo("de-DE")) + " s Pause.";
+                                    Nap(PauseMs);
+                                    if (Running) Status = "Sucht …";
+                                }
+                                else Status = "Sucht … (ähnlichste Stelle bisher: " + Util.Pct(h.Score) + ")";
+                            }
                         }
-                        else Status = "Sucht … (ähnlichste Stelle bisher: " + Util.Pct(h.Score) + ")";
+                        catch (Exception e)
+                        {
+                            Status = "Fehler: " + e.Message;
+                            Nap(1000);
+                        }
+                        int rest = IntervalMs - (int)w.ElapsedMilliseconds;
+                        if (rest > 0) Nap(rest);
                     }
-                    catch (Exception e)
-                    {
-                        Status = "Kein Bildschirmfoto möglich (Bildschirm gesperrt?) – " + e.Message;
-                        Nap(1000);
-                    }
-                    int rest = IntervalMs - (int)w.ElapsedMilliseconds;
-                    if (rest > 0) Nap(rest);
                 }
             }
+            finally { Release(); }
         }
     }
 
@@ -935,19 +1118,21 @@ namespace Bildklicker
     // ------------------------------------------------------------------ Hauptfenster
     public class MainForm : Form
     {
-        TableLayoutPanel root;
+        TableLayoutPanel root, colA, colB, cur;
         PictureBox pic;
         Label lblInfo, lblThr, lblStatus, lblCount;
         TrackBar trThr;
-        RadioButton rbL, rbR, rbD, rbAlways, rbOnce;
-        NumericUpDown nuInt, nuPause;
-        CheckBox cbBack, cbTop;
+        RadioButton rbL, rbR, rbD, rbTap, rbHold, rbWhenImg, rbWhenAlways, rbAlways, rbOnce;
+        NumericUpDown nuInt, nuPause, nuHold;
+        CheckBox cbClick, cbKey, cbBack, cbTop;
+        TextBox txtKey;
         Button btnStart, btnTest, btnSnip, btnOpen, btnPaste;
         readonly System.Windows.Forms.Timer tmr;
         Bitmap tpl;
         Matcher matcher;
         readonly Clicker clk = new Clicker();
-        bool f8Prev, f8Ok = true, uiRunning, loading;
+        bool f8Prev, f8Ok = true, uiRunning, ready;
+        int keyVk = 0x57;
         string lastTitle = "";
         readonly float k = 1f;
 
@@ -971,18 +1156,26 @@ namespace Bildklicker
             AllowDrop = true;
             try { Icon = SystemIcons.Application; } catch { }
 
+            // zwei Spalten: links Bild + Start, rechts Aktion + Einstellungen
             root = new TableLayoutPanel();
-            root.ColumnCount = 1;
+            root.ColumnCount = 2;
+            root.RowCount = 1;
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             root.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             root.AutoSize = true;
             root.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            root.Padding = new Padding(S(12), S(4), S(12), S(12));
+            root.Padding = new Padding(S(10), S(2), S(10), S(12));
             root.Location = new Point(0, 0);
+            colA = Col(); colB = Col();
+            colB.Margin = new Padding(S(24), 0, 0, 0);
+            root.Controls.Add(colA, 0, 0);
+            root.Controls.Add(colB, 1, 0);
 
-            // 1. Bild
-            Add(Head("1.  Worauf soll geklickt werden?"));
+            // ===== linke Spalte
+            cur = colA;
+            Add(Head("1.  Welches Bild soll es suchen?"));
             pic = new PictureBox();
-            pic.Size = new Size(S(440), S(130));
+            pic.Size = new Size(S(420), S(120));
             pic.SizeMode = PictureBoxSizeMode.Zoom;
             pic.BorderStyle = BorderStyle.FixedSingle;
             pic.BackColor = Color.White;
@@ -997,47 +1190,112 @@ namespace Bildklicker
             row.Controls.Add(btnSnip); row.Controls.Add(btnOpen); row.Controls.Add(btnPaste);
             Add(row);
             lblInfo = Lbl("Noch kein Bild. Klicke auf „Vom Bildschirm ausschneiden“.");
-            lblInfo.MaximumSize = new Size(S(440), 0);
+            lblInfo.MaximumSize = new Size(S(420), 0);
             Add(lblInfo);
 
-            // 2. Einstellungen
-            Add(Head("2.  Einstellungen"));
+            Add(Head("4.  Los geht's"));
+            row = Row();
+            btnStart = Btn("START   (F8)", StartClick);
+            btnStart.Font = new Font(Font.FontFamily, 13f, FontStyle.Bold);
+            btnStart.MinimumSize = new Size(S(210), S(46));
+            btnStart.BackColor = Green;
+            btnStart.ForeColor = Color.White;
+            btnStart.FlatStyle = FlatStyle.Flat;
+            btnStart.FlatAppearance.BorderSize = 0;
+            row.Controls.Add(btnStart);
+            btnTest = Btn("Bild testen (ohne Klick)", TestClick);
+            btnTest.MinimumSize = new Size(0, S(46));
+            row.Controls.Add(btnTest);
+            Add(row);
+            lblStatus = Lbl("Bereit.");
+            lblStatus.MaximumSize = new Size(S(420), 0);
+            lblStatus.Font = new Font(Font, FontStyle.Bold);
+            Add(lblStatus);
+            lblCount = Lbl("Ausgeführt: 0-mal");
+            Add(lblCount);
+            Add(Hint("F8 startet und stoppt – auch wenn ein anderes Fenster vorne ist. Tipp: erst ins Spiel klicken, dann F8 drücken."));
+
+            // ===== rechte Spalte
+            cur = colB;
+            Add(Head("2.  Was soll dann passieren?"));
+            row = Row();
+            cbClick = Check("Klicken:", true);
+            cbClick.Margin = new Padding(S(2), S(5), S(6), S(2));
+            row.Controls.Add(cbClick);
+            rbL = Radio("Links", true); rbR = Radio("Rechts", false); rbD = Radio("Doppelklick", false);
+            row.Controls.Add(rbL); row.Controls.Add(rbR); row.Controls.Add(rbD);
+            Add(row);
+
+            row = Row();
+            cbKey = Check("Taste drücken:", false);
+            cbKey.Margin = new Padding(S(2), S(5), S(6), S(2));
+            row.Controls.Add(cbKey);
+            txtKey = new TextBox();
+            txtKey.ReadOnly = true;
+            txtKey.ShortcutsEnabled = false;
+            txtKey.Width = S(130);
+            txtKey.TextAlign = HorizontalAlignment.Center;
+            txtKey.BackColor = Color.White;
+            txtKey.Font = new Font(Font, FontStyle.Bold);
+            txtKey.Cursor = Cursors.Hand;
+            txtKey.Anchor = AnchorStyles.Left;
+            txtKey.Text = Util.KeyName(keyVk);
+            txtKey.PreviewKeyDown += delegate(object s, PreviewKeyDownEventArgs e) { e.IsInputKey = true; };
+            txtKey.KeyDown += KeyBoxDown;
+            txtKey.Enter += delegate { txtKey.BackColor = Color.LightYellow; };
+            txtKey.Leave += delegate { txtKey.BackColor = Color.White; };
+            row.Controls.Add(txtKey);
+            Add(row);
+
+            row = Row();
+            row.Padding = new Padding(S(22), 0, 0, 0);
+            rbTap = Radio("kurz drücken", true);
+            rbHold = Radio("gedrückt halten:", false);
+            nuHold = Num(0m, 3600m, 1m);
+            row.Controls.Add(rbTap); row.Controls.Add(rbHold); row.Controls.Add(nuHold);
+            row.Controls.Add(Lbl("Sekunden"));
+            Add(row);
+            Add(Hint("Ins weiße Feld klicken und die Taste drücken. Halten mit 0 Sekunden = bis du stoppst. Die Taste geht an das Fenster, das gerade vorne ist."));
+
+            Add(Head("3.  Einstellungen"));
+            row = Row();
+            row.Controls.Add(Lbl("Wann:"));
+            rbWhenImg = Radio("Wenn das Bild auftaucht", true);
+            rbWhenAlways = Radio("Immer (ohne Bild)", false);
+            rbWhenAlways.CheckedChanged += delegate { UpdateEnabled(); };
+            row.Controls.Add(rbWhenImg); row.Controls.Add(rbWhenAlways);
+            Add(row);
+
             row = Row();
             row.Controls.Add(Lbl("Wie genau:"));
             trThr = new TrackBar();
             trThr.Minimum = 50; trThr.Maximum = 100; trThr.TickFrequency = 5; trThr.SmallChange = 1; trThr.LargeChange = 5;
             trThr.Value = 90;
-            trThr.Width = S(240);
+            trThr.Width = S(220);
             trThr.ValueChanged += delegate { lblThr.Text = trThr.Value + " %"; Apply(); };
             row.Controls.Add(trThr);
             lblThr = Lbl("90 %");
             lblThr.Font = new Font(Font, FontStyle.Bold);
             row.Controls.Add(lblThr);
             Add(row);
-            Add(Hint("Weniger = klickt auch auf Stellen, die nur ähnlich aussehen. 90 % passt meistens."));
-
-            row = Row();
-            row.Controls.Add(Lbl("Klick:"));
-            rbL = Radio("Links", true); rbR = Radio("Rechts", false); rbD = Radio("Doppelklick", false);
-            row.Controls.Add(rbL); row.Controls.Add(rbR); row.Controls.Add(rbD);
-            Add(row);
+            Add(Hint("Weniger = reagiert auch auf Stellen, die nur ähnlich aussehen. 90 % passt meistens."));
 
             row = Row();
             row.Controls.Add(Lbl("Wie oft:"));
-            rbAlways = Radio("Jedes Mal, wenn es auftaucht", true);
+            rbAlways = Radio("Jedes Mal", true);
             rbOnce = Radio("Nur ein Mal", false);
             row.Controls.Add(rbAlways); row.Controls.Add(rbOnce);
             Add(row);
 
             row = Row();
             row.Controls.Add(Lbl("Alle"));
-            nuInt = Num(0.1m, 60m, 0.5m);
+            nuInt = Num(0.1m, 600m, 0.5m);
             row.Controls.Add(nuInt);
             row.Controls.Add(Lbl("Sekunden nachschauen"));
             Add(row);
 
             row = Row();
-            row.Controls.Add(Lbl("Nach einem Klick"));
+            row.Controls.Add(Lbl("Danach"));
             nuPause = Num(0m, 600m, 1m);
             row.Controls.Add(nuPause);
             row.Controls.Add(Lbl("Sekunden Pause"));
@@ -1049,29 +1307,6 @@ namespace Bildklicker
             cbTop.CheckedChanged += delegate { TopMost = cbTop.Checked; };
             Add(cbTop);
 
-            // 3. Start
-            Add(Head("3.  Los geht's"));
-            row = Row();
-            btnStart = Btn("START   (F8)", StartClick);
-            btnStart.Font = new Font(Font.FontFamily, 13f, FontStyle.Bold);
-            btnStart.MinimumSize = new Size(S(210), S(46));
-            btnStart.BackColor = Green;
-            btnStart.ForeColor = Color.White;
-            btnStart.FlatStyle = FlatStyle.Flat;
-            btnStart.FlatAppearance.BorderSize = 0;
-            row.Controls.Add(btnStart);
-            btnTest = Btn("Testen (ohne Klick)", TestClick);
-            btnTest.MinimumSize = new Size(0, S(46));
-            row.Controls.Add(btnTest);
-            Add(row);
-            lblStatus = Lbl("Bereit.");
-            lblStatus.MaximumSize = new Size(S(440), 0);
-            lblStatus.Font = new Font(Font, FontStyle.Bold);
-            Add(lblStatus);
-            lblCount = Lbl("Klicks: 0");
-            Add(lblCount);
-            Add(Hint("F8 startet und stoppt – auch wenn ein anderes Fenster vorne ist."));
-
             Controls.Add(root);
 
             tmr = new System.Windows.Forms.Timer();
@@ -1080,6 +1315,7 @@ namespace Bildklicker
 
             KeyDown += delegate(object s, KeyEventArgs e)
             {
+                if (ActiveControl == txtKey) return;
                 if (e.Control && e.KeyCode == Keys.V) { PasteClick(null, EventArgs.Empty); e.Handled = true; }
             };
             DragEnter += delegate(object s, DragEventArgs e)
@@ -1088,10 +1324,10 @@ namespace Bildklicker
             };
             DragDrop += OnDropFile;
 
-            loading = true;
             LoadSettings();
-            loading = false;
+            ready = true;
             Apply();
+            UpdateEnabled();
             try
             {
                 string bild = Path.Combine(Dir, "bild.png");
@@ -1101,14 +1337,26 @@ namespace Bildklicker
         }
 
         // ---------- kleine Bausteine
-        void Add(Control c) { root.Controls.Add(c); }
+        void Add(Control c) { cur.Controls.Add(c); }
+
+        TableLayoutPanel Col()
+        {
+            TableLayoutPanel t = new TableLayoutPanel();
+            t.ColumnCount = 1;
+            t.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            t.AutoSize = true;
+            t.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            t.Margin = new Padding(0);
+            t.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            return t;
+        }
 
         Label Head(string t)
         {
             Label l = Lbl(t);
             l.Font = new Font(Font.FontFamily, 11.5f, FontStyle.Bold);
             l.ForeColor = Color.FromArgb(30, 70, 130);
-            l.Margin = new Padding(0, S(root.Controls.Count == 0 ? 6 : 16), 0, S(2));
+            l.Margin = new Padding(0, S(cur.Controls.Count == 0 ? 8 : 18), 0, S(2));
             return l;
         }
 
@@ -1138,7 +1386,7 @@ namespace Bildklicker
             Label l = Lbl(t);
             l.ForeColor = Color.DimGray;
             l.Font = new Font(Font.FontFamily, 9f);
-            l.MaximumSize = new Size(S(440), 0);
+            l.MaximumSize = new Size(S(420), 0);
             return l;
         }
 
@@ -1172,6 +1420,7 @@ namespace Bildklicker
             c.Text = t;
             c.AutoSize = true;
             c.Checked = on;
+            c.Anchor = AnchorStyles.Left;
             c.Margin = new Padding(S(2), S(4), S(2), S(2));
             c.CheckedChanged += delegate { Apply(); };
             return c;
@@ -1183,7 +1432,6 @@ namespace Bildklicker
             n.Minimum = min; n.Maximum = max; n.DecimalPlaces = 1; n.Increment = 0.1m; n.Value = val;
             n.Width = S(70);
             n.Anchor = AnchorStyles.Left;
-            n.TextAlign = HorizontalAlignment.Right;
             n.ValueChanged += delegate { Apply(); };
             return n;
         }
@@ -1192,16 +1440,43 @@ namespace Bildklicker
 
         void Msg(string t) { MessageBox.Show(this, t, "Bildklicker", MessageBoxButtons.OK, MessageBoxIcon.Information); }
 
+        // ---------- Taste wählen
+        void KeyBoxDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+            int vk = (int)e.KeyCode;
+            if (vk == 0x77) return;   // F8 = Start/Stopp, nicht als Taste
+            if (vk == 0) return;
+            keyVk = vk;
+            txtKey.Text = Util.KeyName(vk);
+            cbKey.Checked = true;
+            Apply();
+        }
+
         // ---------- Einstellungen
         void Apply()
         {
-            if (loading || clk == null || trThr == null || nuPause == null || cbBack == null || cbTop == null) return;
+            if (!ready) return;
             clk.ThrPct = trThr.Value;
+            clk.DoClick = cbClick.Checked;
             clk.Art = rbR.Checked ? 1 : rbD.Checked ? 2 : 0;
+            clk.DoKey = cbKey.Checked;
+            clk.KeyVk = keyVk;
+            clk.KeyHold = rbHold.Checked;
+            clk.HoldMs = (int)(nuHold.Value * 1000m);
+            clk.Always = rbWhenAlways.Checked;
             clk.Once = rbOnce.Checked;
             clk.IntervalMs = (int)(nuInt.Value * 1000m);
             clk.PauseMs = (int)(nuPause.Value * 1000m);
             clk.Back = cbBack.Checked;
+        }
+
+        void UpdateEnabled()
+        {
+            bool img = !rbWhenAlways.Checked;
+            trThr.Enabled = img;
+            cbBack.Enabled = img;
         }
 
         void LoadSettings()
@@ -1219,7 +1494,13 @@ namespace Bildklicker
                     try
                     {
                         if (key == "genau") trThr.Value = Math.Max(50, Math.Min(100, int.Parse(v, ci)));
+                        else if (key == "klicken") cbClick.Checked = v == "1";
                         else if (key == "klick") { int a = int.Parse(v, ci); rbR.Checked = a == 1; rbD.Checked = a == 2; rbL.Checked = a != 1 && a != 2; }
+                        else if (key == "taste_an") cbKey.Checked = v == "1";
+                        else if (key == "taste") { int t = int.Parse(v, ci); if (t > 0 && t < 256 && t != 0x77) { keyVk = t; txtKey.Text = Util.KeyName(t); } }
+                        else if (key == "halten") { rbHold.Checked = v == "1"; rbTap.Checked = v != "1"; }
+                        else if (key == "haltezeit") nuHold.Value = Clamp(nuHold, decimal.Parse(v, ci));
+                        else if (key == "immer") { rbWhenAlways.Checked = v == "1"; rbWhenImg.Checked = v != "1"; }
                         else if (key == "einmal") { rbOnce.Checked = v == "1"; rbAlways.Checked = v != "1"; }
                         else if (key == "alle") nuInt.Value = Clamp(nuInt, decimal.Parse(v, ci));
                         else if (key == "pause") nuPause.Value = Clamp(nuPause, decimal.Parse(v, ci));
@@ -1240,7 +1521,13 @@ namespace Bildklicker
                 CultureInfo ci = CultureInfo.InvariantCulture;
                 string[] lines = {
                     "genau=" + trThr.Value.ToString(ci),
+                    "klicken=" + (cbClick.Checked ? "1" : "0"),
                     "klick=" + (rbR.Checked ? 1 : rbD.Checked ? 2 : 0).ToString(ci),
+                    "taste_an=" + (cbKey.Checked ? "1" : "0"),
+                    "taste=" + keyVk.ToString(ci),
+                    "halten=" + (rbHold.Checked ? "1" : "0"),
+                    "haltezeit=" + nuHold.Value.ToString(ci),
+                    "immer=" + (rbWhenAlways.Checked ? "1" : "0"),
                     "einmal=" + (rbOnce.Checked ? "1" : "0"),
                     "alle=" + nuInt.Value.ToString(ci),
                     "pause=" + nuPause.Value.ToString(ci),
@@ -1262,7 +1549,7 @@ namespace Bildklicker
             pic.Image = tpl;
             if (old != null) old.Dispose();
             matcher = new Matcher(Pix.Of(tpl));
-            lblInfo.Text = "Bild: " + tpl.Width + " × " + tpl.Height + " Pixel. Jetzt am besten „Testen“ drücken.";
+            lblInfo.Text = "Bild: " + tpl.Width + " × " + tpl.Height + " Pixel. Jetzt am besten „Bild testen“ drücken.";
             lblStatus.Text = "Bereit.";
             if (save)
             {
@@ -1355,23 +1642,36 @@ namespace Bildklicker
         }
 
         // ---------- Start / Stopp / Test
-        void StartClick(object sender, EventArgs e) { Toggle(); }
+        void StartClick(object sender, EventArgs e)
+        {
+            if (clk.Running) StopRun(); else StartRun(true);
+        }
 
         void Toggle()
         {
-            if (clk.Running) StopRun(); else StartRun();
+            if (clk.Running) StopRun(); else StartRun(false);
         }
 
-        void StartRun()
+        void StartRun(bool viaButton)
         {
-            if (matcher == null)
+            Apply();
+            bool always = rbWhenAlways.Checked;
+            if (!cbClick.Checked && !cbKey.Checked)
             {
                 Activate();
-                Msg("Bitte zuerst ein Bild wählen (Schritt 1).");
+                Msg("Bitte bei „2. Was soll dann passieren?“ ankreuzen: „Klicken“ und/oder „Taste drücken“.");
                 return;
             }
-            Apply();
+            if (!always && matcher == null)
+            {
+                Activate();
+                Msg("Bitte zuerst ein Bild wählen (Schritt 1).\n\nOder bei „Wann“ auf „Immer (ohne Bild)“ stellen.");
+                return;
+            }
+            // Mit dem Knopf gestartet: 3 Sekunden Zeit, um ins richtige Fenster zu klicken
+            clk.StartDelayMs = viaButton && (always || cbKey.Checked) ? 3000 : 0;
             UpdateExcl();
+            ActiveControl = null;   // damit z. B. die Leertaste nicht den Stopp-Knopf drückt
             clk.Start(matcher);
             uiRunning = true;
             btnStart.Text = "STOPP   (F8)";
@@ -1392,12 +1692,13 @@ namespace Bildklicker
             btnStart.BackColor = Green;
             SetTools(true);
             lblStatus.Text = clk.Status;
-            lblCount.Text = "Klicks: " + clk.Clicks;
+            lblCount.Text = "Ausgeführt: " + clk.Count + "-mal";
         }
 
         void SetTools(bool on)
         {
             btnTest.Enabled = on; btnSnip.Enabled = on; btnOpen.Enabled = on; btnPaste.Enabled = on;
+            rbWhenImg.Enabled = on; rbWhenAlways.Enabled = on; txtKey.Enabled = on;
         }
 
         void UpdateExcl()
@@ -1450,10 +1751,10 @@ namespace Bildklicker
             if (uiRunning)
             {
                 lblStatus.Text = clk.Status;
-                lblCount.Text = "Klicks: " + clk.Clicks;
+                lblCount.Text = "Ausgeführt: " + clk.Count + "-mal";
                 if (!clk.Running) UiStopped();
             }
-            string title = clk.Running ? "Bildklicker – läuft (" + clk.Clicks + " Klicks)" : "Bildklicker";
+            string title = clk.Running ? "Bildklicker – läuft (" + clk.Count + "-mal)" : "Bildklicker";
             if (title != lastTitle) { Text = title; lastTitle = title; }
         }
 
@@ -1467,6 +1768,7 @@ namespace Bildklicker
         {
             tmr.Stop();
             clk.Stop();
+            clk.Join(2000);   // gehaltene Taste sicher loslassen
             SaveSettings();
             base.OnFormClosing(e);
         }
