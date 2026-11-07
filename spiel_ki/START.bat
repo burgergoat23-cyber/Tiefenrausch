@@ -13,7 +13,7 @@ echo.
 
 set "WERKZEUG=%~dp0werkzeug"
 set "UV="
-if exist "%WERKZEUG%\uv.exe" set "UV=%WERKZEUG%\uv.exe"
+if exist "%WERKZEUG%" for /r "%WERKZEUG%" %%f in (uv.exe) do if exist "%%f" set "UV=%%f"
 if defined UV goto starten
 
 echo   Erster Start: Ich lade das Hilfsprogramm "uv" (ca. 20 MB) ...
