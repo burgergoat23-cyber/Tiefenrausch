@@ -54,6 +54,12 @@ class GuiSchein:
     def rad(self, richtung):
         pass
 
+    def ist_eigenes(self, hwnd):
+        return False
+
+    def nach_vorne(self, hwnd):
+        pass
+
     def maus_bewegen(self, dx, dy):
         pass
 
@@ -64,7 +70,7 @@ class GuiSchein:
         self.pieps.append(art)
 
 
-def foto(root, name):
+def foto(root, name, ganz=False):
     import mss
     from PIL import Image
     root.update()
@@ -72,6 +78,8 @@ def foto(root, name):
     root.update()
     x, y = root.winfo_rootx(), root.winfo_rooty()
     w, h = root.winfo_width(), root.winfo_height()
+    if ganz:
+        x, y, w, h = 0, 0, 1400, 1000
     with (getattr(mss, 'MSS', None) or mss.mss)() as sct:
         raw = sct.grab({'left': x, 'top': y, 'width': w, 'height': h})
     Image.frombytes('RGB', raw.size, raw.bgra, 'raw', 'BGRX').save(os.path.join(aus, name))
@@ -143,7 +151,22 @@ def main():
     assert sorted(app.projekt.info['tasten']) == sorted([LEER]), app.projekt.info['tasten']
 
     # Einstellungen wie ein Nutzer: Bereich, Tasten
-    app.projekt.info['bereich'] = [100, 100, 240, 160]
+    app.projekt.info['bereich'] = [720, 140, 480, 320]
+    # das Testspiel sichtbar an die Stelle des Spielfelds legen (nur fürs Foto)
+    from PIL import ImageTk
+    spielfenster = tk.Toplevel(root)
+    spielfenster.overrideredirect(True)
+    spielfenster.geometry('480x320+720+140')
+    spiel_bild = tk.Label(spielfenster, bd=0)
+    spiel_bild.pack()
+
+    def spiel_zeigen():
+        if not spielfenster.winfo_exists():
+            return
+        spiel_bild.img = ImageTk.PhotoImage(be.spiel.zeichnen().resize((480, 320)))
+        spiel_bild.config(image=spiel_bild.img)
+        root.after(70, spiel_zeigen)
+    spiel_zeigen()
     app.projekt.speichern()
     app._anzeigen()
     for vk in (LEER, RUNTER):
@@ -157,6 +180,16 @@ def main():
     assert app.laeuft(), app.status.cget('text')
     warte(root, 20)
     foto(root, 'gui_2_uebt.png')
+    g = app.gfenster.top
+    assert g is not None, 'Gedanken-Fenster fehlt'
+    gx, gy, gw, gh = g.winfo_rootx(), g.winfo_rooty(), g.winfo_width(), g.winfo_height()
+    b = app.projekt.info['bereich']
+    ueberlappt = gx < b[0] + b[2] and gx + gw > b[0] and gy < b[1] + b[3] and gy + gh > b[1]
+    assert not ueberlappt, f'Gedanken-Fenster liegt über dem Spielfeld: {(gx, gy, gw, gh)} {b}'
+    zeilen = app.gfenster.text.get('1.0', 'end').strip().splitlines()
+    assert len(zeilen) >= 3, zeilen
+    print('Gedanken-Fenster bei', (gx, gy, gw, gh), '| letzte Gedanken:', zeilen[-3:])
+    foto(root, 'gui_4_gedanken.png', ganz=True)
     n_runden = len(app.lerner.runden)
     print('Runden nach 20 s:', n_runden, '| Status:', app.status.cget('text'))
     be.bei_hotkey(K.F8)

@@ -516,10 +516,13 @@ class Lerner:
         with self.lock:
             self.ki.load_state_dict(self.netz.state_dict())
 
-    def wahl(self, st):
+    def werte(self, st):
+        """Wie viel Belohnung die KI nach jedem möglichen Zug noch erwartet."""
         with self.lock, self.torch.inference_mode():
-            q = self.ki(self.torch.from_numpy(st))
-        return int(q.argmax(1).item())
+            return self.ki(self.torch.from_numpy(st))[0].numpy().copy()
+
+    def wahl(self, st):
+        return int(self.werte(st).argmax())
 
     def update(self, speicher, rng, bs=32):
         torch = self.torch
@@ -700,6 +703,39 @@ class EndeErkennung:
         return ende, still
 
 
+# ---------------------------------------------------------------- Gedanken (was die KI gerade tut)
+
+class Gedanken:
+    """Sätze, die aus den echten Zahlen der KI übersetzt werden (thread-sicher)."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self.liste = []
+        self.n = 0
+        self._zuletzt = {}
+
+    def sag(self, text, art='denk', schluessel=None, abstand=0.0):
+        jetzt = time.monotonic()
+        if schluessel is not None:
+            if jetzt - self._zuletzt.get(schluessel, -1e9) < abstand:
+                return
+            self._zuletzt[schluessel] = jetzt
+        with self._lock:
+            self.liste.append((time.strftime('%H:%M:%S'), text, art))
+            del self.liste[:-300]
+            self.n += 1
+
+    def seit(self, n):
+        """Neue Einträge seit Zählerstand n -> (neuer Zählerstand, Liste)."""
+        with self._lock:
+            neu = min(self.n - n, len(self.liste))
+            return self.n, (self.liste[-neu:] if neu > 0 else [])
+
+
+def zug_text(a):
+    return 'Abwarten' if not a else aktion_name(a)
+
+
 # ---------------------------------------------------------------- Üben (die KI spielt)
 
 class Ueben:
@@ -727,6 +763,12 @@ class Ueben:
             self.wichtig_akt = None
         self.richtung = info.get('ziel_richtung')
         self.klein_vorher = None
+        self.gedanken = Gedanken()
+        self.denk_zeit, self.denk_a, self.q_schnitt = -1e9, None, None
+        self.meilenstein_eps = lerner.zufall()   # nur Schwellen melden, die jetzt überschritten werden
+        self.meilenstein_upd = lerner.updates
+        self.gedanken.sag('Hallo! Ich schaue mir das Spiel an.' if not lerner.schritte else
+                          f'Weiter geht\'s! Ich habe schon {len(lerner.runden)} Runden geübt.', 'info')
         self.rng = np.random.default_rng(seed)
         self.ring, self.warte = [], []
         self.vorher = None
@@ -800,6 +842,8 @@ class Ueben:
             self.speicher.hinzu(e['f'], e['a'], e['r'], e['ende'], e['s'])
 
     def _unterbrechen(self, text):
+        self.gedanken.sag('Pause – das Spiel ist nicht vorne. Klick ins Spiel, dann mache ich weiter.',
+                          'info', 'pause', 15)
         self.alle_los()
         self._festschreiben(0)
         self.vorher, self.ring, self.neu_start = None, [], True
@@ -816,7 +860,13 @@ class Ueben:
         self._festschreiben(0)
         dauer = max(0, self.runde_takte - weg) / TAKT
         self.runde_r += TOD
+        bisher = max((x[0] for x in self.lerner.runden), default=None)
         self.lerner.runden.append([round(dauer, 2), self.runde_punkte, round(self.runde_r, 2)])
+        sek = f'{dauer:.1f}'.replace('.', ',')
+        if bisher is not None and dauer > bisher * 1.05 and dauer >= 2:
+            self.gedanken.sag(f'Neuer Rekord: {sek} s! Das hat geklappt.', 'gut')
+        else:
+            self.gedanken.sag(f'Autsch! Verloren nach {sek} s. Das merke ich mir.', 'schlecht')
         self.alle_los()
         self.vorher, self.ring = None, []
         self.phase, self.ende_takte, self.ok_takte = 'ende', 0, 0
@@ -836,6 +886,7 @@ class Ueben:
             return
         self.backend.taste(vk, True, self.scan.get(vk))
         self.tipp = vk
+        self.gedanken.sag(f'Ich drücke {tasten_name(vk)}, um neu zu starten.', 'info', 'neustart', 4)
 
     # --- ein Takt
     def schritt(self):
@@ -868,6 +919,10 @@ class Ueben:
             if self.ok_takte < 3:
                 return
             self.phase = 'spiel'
+            if self.lerner.runden:
+                self.gedanken.sag(['Neue Runde! Diesmal mache ich es besser.', 'Auf ein Neues!',
+                                   'Neue Runde – mal sehen, was ich gelernt habe.'][len(self.lerner.runden) % 3],
+                                  'info')
             self.ring, self.vorher, self.neu_start = [], None, True
             self.runde_takte, self.runde_punkte, self.runde_r = 0, 0, 0.0
             self.punkte_vorher = self.klein_vorher = None
@@ -879,7 +934,11 @@ class Ueben:
                 klein = _klein_grau(bild)
                 if self.klein_vorher is not None and not still:
                     dx, dy = verschiebung(self.klein_vorher, klein)
-                    r += richtungs_bonus(self.richtung, dx, dy, klein.shape[1])
+                    rb = richtungs_bonus(self.richtung, dx, dy, klein.shape[1])
+                    r += rb
+                    if rb > 0.02:
+                        self.gedanken.sag(f'Es geht nach {self.richtung} – genau wie du gesagt hast.',
+                                          'gut', 'richtung', 8)
                 self.klein_vorher = klein
             if self.punkte_rel:
                 pk = ausschnitt(bild, self.punkte_rel, PUNKTE_GROESSE)
@@ -887,6 +946,7 @@ class Ueben:
                         and float(np.mean(np.abs(pk - self.punkte_vorher))) > 4):
                     r += PUNKTE
                     self.runde_punkte += 1
+                    self.gedanken.sag('Punkte! Das war gut.', 'gut', 'punkte', 3)
                 self.punkte_vorher = pk
             r = float(np.clip(r, -1, 1))
             self.runde_r += r
@@ -906,6 +966,7 @@ class Ueben:
             self.alle_los()
             a = self.akt_index.get(frozenset(mensch & self.alle_tasten), -1)
             self.status = 'Du steuerst – die KI schaut zu'
+            self.gedanken.sag('Du steuerst – ich schaue zu und lerne mit.', 'info', 'mensch', 8)
         elif self.erkenner.still_n >= STILL_WARTEN and self.erkenner.stillstand:
             # Bild steht: nichts drücken, sonst startet sie das Spiel aus Versehen neu,
             # bevor sie merkt, dass sie verloren hat
@@ -913,8 +974,11 @@ class Ueben:
             self._anwenden(a)
             self.zufall_rest = 0
             self.status = 'Bild steht still – ist die Runde vorbei?'
+            self.gedanken.sag('Das Bild steht still … habe ich verloren? Ich lasse mal alles los.',
+                              'info', 'still', 6)
         else:
             eps = self.lerner.zufall()
+            q, zufaellig = None, True
             if self.zufall_rest > 0:
                 a = self.zufall_a
                 self.zufall_rest -= 1
@@ -925,14 +989,63 @@ class Ueben:
                     a = int(self.rng.integers(len(self.akt)))
                 self.zufall_a, self.zufall_rest = a, int(self.rng.integers(0, 4))
             else:
-                a = self.lerner.wahl(ring_stapel(self.ring))
+                q, zufaellig = self.lerner.werte(ring_stapel(self.ring)), False
+                a = int(q.argmax())
             self._anwenden(a)
+            self._denken(a, zufaellig, q, eps)
             self.lerner.schritte += 1
             self.status = f'KI übt  ·  drückt: {aktion_name(self.akt[a])}'
         self.vorher = (f, a, self.neu_start, still)
         self.neu_start = False
 
+    def _denken(self, a, zufaellig, q, eps):
+        """Übersetzt die Entscheidung in einen Satz (höchstens etwa jede Sekunde einer)."""
+        g = self.gedanken
+        upd = self.lerner.updates
+        if self.meilenstein_upd == 0 and upd > 0:
+            g.sag('Jetzt fange ich an zu lernen! Ich schaue mir meine Erinnerungen an.', 'gut')
+        elif upd // 2000 > self.meilenstein_upd // 2000:
+            g.sag(f'Ich habe schon {upd // 1000 * 1000} Mal aus meinen Erinnerungen gelernt.', 'info')
+        self.meilenstein_upd = upd
+        for stufe in (0.5, 0.2, 0.1):
+            if eps <= stufe < self.meilenstein_eps:
+                g.sag(f'Ich probiere jetzt nur noch {int(stufe * 100)} % zufällig – '
+                      'den Rest entscheide ich selbst.', 'gut')
+                self.meilenstein_eps = stufe
+        if q is not None:
+            self.q_schnitt = float(q.max()) if self.q_schnitt is None else \
+                0.97 * self.q_schnitt + 0.03 * float(q.max())
+        jetzt = time.monotonic()
+        if jetzt - self.denk_zeit < (0.8 if a != self.denk_a else 2.0):
+            return
+        self.denk_zeit, self.denk_a = jetzt, a
+        name = zug_text(self.akt[a])
+        if zufaellig:
+            if self.speicher.n < START_LERNEN:
+                text = f'Noch keine Ahnung – ich probiere: {name}.'
+                g.sag(f'Ich habe {self.speicher.n} von {START_LERNEN} Erinnerungen gesammelt. '
+                      'Danach fange ich an zu lernen.', 'info', 'sammeln', 12)
+            else:
+                text = [f'Ich probiere mal: {name}.', f'Mal sehen, was passiert bei: {name}.',
+                        f'Einfach testen: {name}.'][int(self.rng.integers(3))]
+            g.sag(text, 'zufall')
+            return
+        s = np.sort(q)[::-1]
+        abstand = float(s[0] - s[1]) if len(s) > 1 else 1.0
+        if abstand > 0.15:
+            text = f'Ich bin mir sicher: {name} ist jetzt am besten.'
+        elif abstand > 0.04:
+            text = f'Ich glaube, {name} ist jetzt am besten.'
+        else:
+            text = f'Schwer zu sagen … ich nehme {name}.'
+        if self.q_schnitt is not None and s[0] < self.q_schnitt - 0.25:
+            text += ' Achtung, das sieht gefährlich aus!'
+        elif self.q_schnitt is not None and s[0] > self.q_schnitt + 0.2:
+            text += ' Läuft gut!'
+        g.sag(text, 'denk')
+
     def ende(self):
+        self.gedanken.sag('Gestoppt. Ich speichere, was ich gelernt habe.', 'info')
         self.alle_los()
         if self.tipp is not None:
             self.backend.taste(self.tipp, False, self.scan.get(self.tipp))

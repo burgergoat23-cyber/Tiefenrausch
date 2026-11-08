@@ -130,6 +130,12 @@ class ScheinBackend:
     def rad(self, richtung):
         pass
 
+    def ist_eigenes(self, hwnd):
+        return False
+
+    def nach_vorne(self, hwnd):
+        pass
+
     def maus_bewegen(self, dx, dy):
         pass
 

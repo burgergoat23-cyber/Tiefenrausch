@@ -51,6 +51,94 @@ FARBE = {'bg': '#f4f1ea', 'karte': '#ffffff', 'text': '#222222', 'leise': '#6b6b
          'balken': '#9cc3e6', 'linie': '#1d4f91'}
 
 
+class GedankenFenster:
+    """Kleines Fenster neben dem Spielfeld: Sätze aus den Zahlen der KI.
+
+    Es darf nie über dem Spielfeld liegen, sonst wäre es auf den Bildern der KI zu sehen.
+    """
+    FARBEN = {'denk': '#1d4f91', 'zufall': '#6b6b6b', 'gut': '#1f7a3a', 'schlecht': '#b3261e',
+              'info': '#222222'}
+
+    def __init__(self, app):
+        self.app = app
+        self.top = None
+        self.n = 0
+
+    def _bauen(self):
+        tk, f = self.app.tk, self.app.f
+        top = tk.Toplevel(self.app.root)
+        top.title('Was die KI denkt')
+        top.configure(bg=FARBE['bg'])
+        top.protocol('WM_DELETE_WINDOW', self.schliessen)
+        tk.Label(top, text='Was die KI denkt', font=f['b'], bg=FARBE['bg']).pack(anchor='w', padx=8,
+                                                                                  pady=(6, 0))
+        tk.Label(top, text='(übersetzt aus ihren Zahlen – sie denkt nicht in Worten)', font=f['k'],
+                 fg=FARBE['leise'], bg=FARBE['bg']).pack(anchor='w', padx=8)
+        self.text = tk.Text(top, width=46, height=9, wrap='word', font=f['n'], relief='flat',
+                            bg=FARBE['karte'], padx=6, pady=4, highlightthickness=0)
+        self.text.pack(fill='both', expand=True, padx=8, pady=(4, 8))
+        for art, farbe in self.FARBEN.items():
+            self.text.tag_configure(art, foreground=farbe)
+        self.text.configure(state='disabled')
+        self.top = top
+
+    def _platz(self, b, w, h):
+        """Stelle neben dem Spielfeld, die es nicht überdeckt (oder None)."""
+        gx, gy, gw, gh = self.app.backend.gesamtbildschirm()
+        x0, y0, x1, y1 = b[0], b[1], b[0] + b[2], b[1] + b[3]
+        for x, y in ((x1 + 12, y0), (x0 - 12 - w, y0), (x0, y1 + 40), (x0, y0 - 40 - h)):
+            x = min(max(x, gx), gx + gw - w)
+            y = min(max(y, gy), gy + gh - h)
+            if x >= x1 or x + w <= x0 or y >= y1 or y + h <= y0:
+                return x, y
+        return None
+
+    def zeigen(self, bereich, hwnd_spiel):
+        if self.top is None:
+            self._bauen()
+        self.top.update_idletasks()
+        w, h = self.top.winfo_reqwidth(), self.top.winfo_reqheight() + 30   # + Titelleiste
+        pos = self._platz(bereich, w, h)
+        if pos is None:
+            self.schliessen()
+            return False
+        self.top.geometry(f'+{pos[0]}+{pos[1]}')
+        self.top.attributes('-topmost', True)
+        self.top.deiconify()
+        self.n = 0
+        self.text.configure(state='normal')
+        self.text.delete('1.0', 'end')
+        self.text.configure(state='disabled')
+        be = self.app.backend
+
+        def fokus_zurueck():   # falls das neue Fenster dem Spiel den Fokus genommen hat
+            if be.vorne() != hwnd_spiel and be.ist_eigenes(be.vorne()):
+                be.nach_vorne(hwnd_spiel)
+        self.app.root.after(300, fokus_zurueck)
+        return True
+
+    def aktualisieren(self, gedanken):
+        if self.top is None:
+            return
+        self.n, neu = gedanken.seit(self.n)
+        if not neu:
+            return
+        t = self.text
+        t.configure(state='normal')
+        for zeit, text, art in neu:
+            t.insert('end', text + '\n', art)
+        zeilen = int(t.index('end-1c').split('.')[0])
+        if zeilen > 200:
+            t.delete('1.0', f'{zeilen - 200}.0')
+        t.see('end')
+        t.configure(state='disabled')
+
+    def schliessen(self):
+        if self.top is not None:
+            self.top.destroy()
+            self.top = None
+
+
 class App:
     def __init__(self, backend, tk, root):
         from tkinter import font as tkfont
@@ -198,8 +286,10 @@ class App:
         u = ttk.Frame(k4)
         u.pack(fill='x')
         ttk.Button(u, text='Gelerntes löschen', command=self._gehirn_loeschen).pack(side='right')
-        ttk.Label(u, text='Klick ins Spiel und drück F8. Nochmal F8 = sofort Stopp.',
-                  style='Leise.TLabel').pack(side='left')
+        self.gedanken_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(u, text='„Was die KI denkt“ neben dem Spiel zeigen', variable=self.gedanken_var,
+                        command=self._gedanken_einst).pack(side='left')
+        self.gfenster = GedankenFenster(self)
 
         ttk.Label(haupt, text='⚠  Nur für Spiele ohne andere Spieler – in Online-Spielen sind '
                   'Bots verboten (Sperre!).', style='Leise.TLabel').pack(fill='x', pady=(4, 0))
@@ -243,6 +333,7 @@ class App:
                                 'Noch nicht markiert – zieh einen Rahmen um das Spielfeld.')
         self._tasten_zeigen()
         self.still_var.set(bool(p.info.get('stillstand', True)))
+        self.gedanken_var.set(bool(p.info.get('gedanken', True)))
         ns = p.info.get('neustart', 'vk:32')
         self.neustart_var.set(next((n for n, c in K.NEUSTARTS if c == ns), K.NEUSTARTS[0][0]))
         n_go = len(p.info.get('gameover', []))
@@ -391,6 +482,12 @@ class App:
             return
         self.fang_knopf.config(text='Drück jetzt die Taste …')
         self.eingaben.fangen = lambda vk: self.q.put(('gefangen', vk))
+
+    def _gedanken_einst(self):
+        self.projekt.info['gedanken'] = bool(self.gedanken_var.get())
+        self.projekt.speichern()
+        if not self.gedanken_var.get():
+            self.gfenster.schliessen()
 
     def _einst_speichern(self):
         p = self.projekt
@@ -689,6 +786,9 @@ class App:
         self.backend.piep('start')
         self.start_knopf.config(text='■  Stopp  (F8)')
         self._status('KI übt …', 'gruen')
+        self.gedanken_im_status = False
+        if p.info.get('gedanken', True):
+            self.gedanken_im_status = not self.gfenster.zeigen(p.info['bereich'], hwnd)
 
     def stoppen(self):
         if not self.laeuft():
@@ -699,6 +799,7 @@ class App:
         self._status('Speichere das Gelernte …', 'leise')
 
     def _aufraeumen(self):
+        self.gfenster.aktualisieren(self.ueben.gedanken)
         fehler = self.takt.fehler or self.lern.fehler
         langsam = self.takt.zu_langsam
         self.takt = self.lern = None
@@ -763,7 +864,13 @@ class App:
             elif self.takt.is_alive():
                 farbe = 'gelb' if 'pausiert' in self.ueben.status or 'Du ' in self.ueben.status \
                     else 'gruen'
-                self._status(self.ueben.status, farbe)
+                text = self.ueben.status
+                if self.gedanken_im_status:   # kein Platz neben dem Spiel: Gedanke hier zeigen
+                    liste = self.ueben.gedanken.seit(self.ueben.gedanken.n - 1)[1]
+                    if liste:
+                        text = liste[-1][1]
+                self._status(text, farbe)
+                self.gfenster.aktualisieren(self.ueben.gedanken)
                 if int(time.monotonic() * 2) % 4 == 0:
                     self._zahlen_zeigen()
         self.root.after(250, self._schleife)

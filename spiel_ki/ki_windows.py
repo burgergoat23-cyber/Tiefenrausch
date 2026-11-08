@@ -86,6 +86,7 @@ user32.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
 user32.GetCursorPos.argtypes = [ctypes.POINTER(wintypes.POINT)]
 user32.SetCursorPos.argtypes = [ctypes.c_int, ctypes.c_int]
 user32.IsIconic.argtypes = [wintypes.HWND]
+user32.SetForegroundWindow.argtypes = [wintypes.HWND]
 
 
 def _scan(vk):
@@ -216,6 +217,17 @@ class WindowsBackend:
 
     def maus_setzen(self, x, y):
         user32.SetCursorPos(int(x), int(y))
+
+    def ist_eigenes(self, hwnd):
+        """Gehört das Fenster zur Spiel-KI selbst?"""
+        if not hwnd:
+            return False
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        return pid.value == self.eigene_pid
+
+    def nach_vorne(self, hwnd):
+        user32.SetForegroundWindow(hwnd)
 
     def rad(self, richtung):
         """Mausrad eine Raste drehen (+1 = vom Körper weg/hoch, -1 = runter)."""

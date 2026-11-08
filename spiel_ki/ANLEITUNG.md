@@ -41,6 +41,12 @@ Im Fenster siehst du eine Kurve: Wie viele Sekunden hält sie pro Runde durch?
    - **Punkte (freiwillig):** einen Rahmen um die Punkte-Anzeige ziehen. Dann freut sich die KI über jeden Punkt.
 5. **Ins Spiel klicken und F8 drücken.** Die KI übt. **Nochmal F8 = sofort Stopp.**
 
+Neben dem Spiel erscheint ein kleines Fenster **„Was die KI denkt“**. Dort schreibt sie, was sie gerade macht,
+zum Beispiel „Ich probiere mal: Leertaste.“, „Ich bin mir sicher: ↓ ist jetzt am besten.“,
+„Achtung, das sieht gefährlich aus!“ oder „Neuer Rekord!“. Die Sätze werden aus ihren echten Zahlen übersetzt
+(sie denkt nicht in Worten). Das Fenster liegt nie über dem Spielfeld, sonst würde die KI es sehen.
+Ist kein Platz daneben, steht der Gedanke im Spiel-KI-Fenster. Abschalten: Haken unten in Schritt 4.
+
 Was sie gelernt hat, wird gespeichert. Beim nächsten Start macht sie da weiter.
 
 ## Gut zu wissen
