@@ -1,0 +1,6 @@
+{
+  "name": "tiefenbot-testserver",
+  "private": true,
+  "description": "Nur für Entwickler: Test-Server für den Bot",
+  "dependencies": { "flying-squid": "^1.12.0" }
+}

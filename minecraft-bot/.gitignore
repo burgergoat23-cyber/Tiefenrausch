@@ -1,0 +1,7 @@
+node_modules/
+logs/
+data/state.json
+data/*.tmp
+data/*.kaputt-*
+data/auth/
+tools/testserver/node_modules/

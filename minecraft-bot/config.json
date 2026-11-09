@@ -1,0 +1,12 @@
+{
+  "host": "localhost",
+  "port": "auto",
+  "username": "Tiefenbot",
+  "auth": "offline",
+  "version": "auto",
+  "owners": [],
+  "commandPrefix": "!",
+  "viewer": { "enabled": true, "port": 3007, "firstPerson": false, "viewDistance": 6 },
+  "reconnect": { "enabled": true, "delaySeconds": 15 },
+  "log": { "level": "info", "toFile": true }
+}
