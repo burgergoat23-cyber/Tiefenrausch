@@ -56,7 +56,7 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - Aufbau: `src/index.js` (Verbinden, Neuverbinden, Fehler-Tipps), `src/core/` (`taskManager.js` Prioritäten 1 Überleben, 2 Kampf, 3 Recovery, 3.5 Chat-Befehl, 4 Ziel, 5 Idle; Provider-Funktionen + Warteschlange, AbortSignal; `state.js` → `data/state.json`; `commands.js` Chat mit Drossel; `lanDiscovery.js` Multicast 224.0.2.60:4445; `logger.js` → `logs/`). Module in `src/modules/` mit `init(ctx)` (einmal: Befehle/Provider/Aufgabentypen) und `onBot(bot, ctx)` (pro Verbindung). Platzhalter-Befehle in `placeholders.js` werden pro Phase ersetzt.
 - Tests: `npm run check` (ohne Minecraft). Test-Server `minecraft-bot/tools/testserver/` (flying-squid; **1.18.2** nehmen – bei 1.20.4/1.21.4 sehen sich Spieler nicht, `/tp` lässt 1.21.4 abstürzen; kein Respawn). Echtes Survival lässt sich hier nicht testen (Mojang-Downloads gesperrt) → ehrlich sagen.
 - Bekannte Hürde: Vanilla-LAN ist Online-Modus → Offline-Bot fliegt raus („Failed to verify username“). Lösungen in der README (Mod „Custom LAN“, eigener Server mit `online-mode=false`, oder `auth: microsoft` mit Zweitkonto).
-- Minecraft-Version hat der Nutzer noch nicht genannt → `version: "auto"`.
+- Minecraft-Version: Nutzer wollte 26.2 oder 1.21.11 → **1.21.11** (mineflayer 4.39 kann max. 1.21.11 und 26.1, nicht 26.2; minecraft-data hat für 26.2 keine Daten). `config.js` lehnt nicht unterstützte Versionen mit Hinweis ab. prismarine-viewer nimmt für 1.21.x die 1.21.4-Texturen, für 26.x nichts. Test-Server kann nur bis 1.21.4 → 1.21.11 hier nicht live getestet.
 
 ## Arbeitsweise
 - Änderungen mit Python-Ersetzungen an **eindeutigen** Ankern (`assert s.count(anker)==1`), danach `node --check` und ESLint (`no-undef`, `no-dupe-keys`).

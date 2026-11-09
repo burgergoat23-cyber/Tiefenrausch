@@ -3,12 +3,21 @@
 const fs = require('fs')
 const path = require('path')
 
+// Versionen, die mineflayer sicher kann (getestet). Andere nur, wenn
+// minecraft-data die Daten dafür hat.
+let SUPPORTED = []
+try { SUPPORTED = require('mineflayer').testedVersions || [] } catch {}
+function versionSupported (v) {
+  if (SUPPORTED.includes(v)) return true
+  try { return !!require('minecraft-data')(v) } catch { return false }
+}
+
 const DEFAULTS = {
   host: 'localhost',
   port: 'auto',
   username: 'Tiefenbot',
   auth: 'offline',
-  version: 'auto',
+  version: '1.21.11',
   owners: [],
   commandPrefix: '!',
   viewer: { enabled: true, port: 3007, firstPerson: false, viewDistance: 6 },
@@ -46,6 +55,10 @@ function loadConfig (file) {
   if (!['offline', 'microsoft'].includes(cfg.auth)) errors.push('"auth" muss "offline" oder "microsoft" sein.')
   if (!Array.isArray(cfg.owners)) errors.push('"owners" muss eine Liste sein, z. B. ["DeinName"].')
   if (cfg.version === 'auto' || cfg.version === '' || cfg.version == null) cfg.version = false
+  else if (!versionSupported(String(cfg.version))) {
+    errors.push(`Minecraft-Version "${cfg.version}" kann der Bot (noch) nicht. Empfohlen: "1.21.11". ` +
+      `Möglich sind z. B.: ${SUPPORTED.slice(-6).join(', ')}.`)
+  } else cfg.version = String(cfg.version)
   if (errors.length) throw new Error('Fehler in config.json:\n - ' + errors.join('\n - '))
 
   cfg.owners = cfg.owners.map(o => String(o).toLowerCase())
@@ -53,4 +66,4 @@ function loadConfig (file) {
   return cfg
 }
 
-module.exports = { loadConfig, DEFAULTS }
+module.exports = { loadConfig, DEFAULTS, versionSupported }

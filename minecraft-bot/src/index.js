@@ -59,8 +59,11 @@ function hintFor (text) {
       'Lösung: Mod "Custom LAN" o. ä. installieren und Online-Modus AUS stellen, ' +
       'oder in config.json "auth": "microsoft" mit einem zweiten Konto. Siehe README → "Probleme".'
   }
+  if (t.includes('unsupported protocol') || t.includes('not supported') || t.includes('unsupported version')) {
+    return 'Diese Minecraft-Version kann der Bot noch nicht (z. B. 26.2). Spiele mit 1.21.11 und trage in config.json "version": "1.21.11" ein.'
+  }
   if (t.includes('outdated') || t.includes('version') || t.includes('incompatible')) {
-    return 'Versionen passen nicht. Trage in config.json bei "version" deine Minecraft-Version ein (z. B. "1.21.4").'
+    return 'Versionen passen nicht. Trage in config.json bei "version" genau die Version ein, mit der du spielst (empfohlen "1.21.11").'
   }
   if (t.includes('duplicate') || t.includes('already') || t.includes('same name')) {
     return 'Der Name ist schon im Spiel. Ändere "username" in config.json.'

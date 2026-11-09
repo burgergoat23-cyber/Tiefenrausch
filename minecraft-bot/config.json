@@ -3,7 +3,7 @@
   "port": "auto",
   "username": "Tiefenbot",
   "auth": "offline",
-  "version": "auto",
+  "version": "1.21.11",
   "owners": [],
   "commandPrefix": "!",
   "viewer": { "enabled": true, "port": 3007, "firstPerson": false, "viewDistance": 6 },

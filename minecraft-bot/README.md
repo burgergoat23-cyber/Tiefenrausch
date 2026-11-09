@@ -12,7 +12,10 @@ und zeigt im Browser live, was er sieht.
 
 ## ⚠️ Vorher wichtig
 
-1. **Nur Minecraft Java Edition am PC** (Windows, Mac oder Linux).
+1. **Nur Minecraft Java Edition am PC** (Windows, Mac oder Linux), am besten
+   **Version 1.21.11**. (26.2 kann der Bot noch nicht – die Bot-Bibliothek
+   unterstützt bisher höchstens 26.1. Im Minecraft-Launcher unter
+   „Installationen“ → „Neue Installation“ kannst du 1.21.11 auswählen.)
    Die Bedrock-Version (iPad, Handy, Konsole, „Minecraft für Windows“ aus dem
    Microsoft Store) geht **nicht**.
 2. Der Bot läuft auf **demselben PC** wie Minecraft (oder einem PC im selben WLAN).
@@ -63,7 +66,7 @@ Am Ende muss **„Alles in Ordnung.“** stehen.
 | `port` | `"auto"` = Bot sucht die LAN-Welt selbst. Oder die Zahl, die Minecraft nach „Für LAN öffnen“ anzeigt | `"auto"` |
 | `username` | Name des Bots im Spiel (3–16 Zeichen, nur Buchstaben/Zahlen/_ ) | `Tiefenbot` |
 | `auth` | `"offline"` (kein Konto) oder `"microsoft"` (zweites echtes Konto) | `offline` |
-| `version` | Deine Minecraft-Version, z. B. `"1.21.4"`. `"auto"` = Bot fragt die Welt selbst | `"auto"` |
+| `version` | Deine Minecraft-Version. `"auto"` = Bot fragt die Welt selbst | `"1.21.11"` |
 | `owners` | Wer Befehle geben darf, z. B. `["DeinName"]`. Leer `[]` = alle | `[]` |
 | `viewer` | Live-Ansicht im Browser: an/aus, Port | an, 3007 |
 | `reconnect` | Nach Verbindungsabbruch neu verbinden, nach wie vielen Sekunden | an, 15 |
@@ -98,8 +101,9 @@ Wenn der Bot läuft, öffne im Browser: **http://localhost:3007**
 
 Du siehst die Welt um den Bot herum (Maus = umschauen). Wenn er läuft, zeigt
 eine **grüne Linie** seinen geplanten Weg.
-Hinweis: Die Ansicht kennt Texturen bis Minecraft 1.21.4. Bei neueren Versionen
-kann sie leer bleiben – der Bot selbst funktioniert trotzdem.
+Hinweis: Die Ansicht kennt Texturen bis Minecraft 1.21.4. Bei 1.21.11 nimmt sie
+diese – ganz neue Blöcke sehen dann evtl. komisch aus. Bei 26.x bleibt sie leer.
+Der Bot selbst funktioniert trotzdem.
 
 ---
 
@@ -174,8 +178,9 @@ geht nicht, das spielt ja schon).
   **Achtung:** Ohne Mod ändert sich dieser Port bei jedem Öffnen.
 
 ### „Versionen passen nicht“
-In `config.json` bei `"version"` deine Version eintragen, z. B. `"1.21.4"`.
-Unterstützt werden Minecraft 1.8 bis 1.21.11 und 26.1.
+In `config.json` bei `"version"` genau die Version eintragen, mit der du spielst.
+Unterstützt werden Minecraft 1.8 bis 1.21.11 und 26.1 – **nicht 26.2**.
+Empfohlen: `"1.21.11"`.
 
 ### „Der Name ist schon im Spiel“
 `username` in `config.json` ändern.
