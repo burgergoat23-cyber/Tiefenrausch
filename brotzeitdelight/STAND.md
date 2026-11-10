@@ -1,0 +1,65 @@
+# Stand
+
+Stand: 10.11.2026, nach Meilenstein 1 (Grundgerüst). Wartet auf dein Okay für Meilenstein 2.
+
+## Wo was liegt
+
+- Vorgabe: `BROTZEIT_DELIGHT_SPEC.md` (Version 2) in diesem Ordner. Immer zuerst lesen.
+- Projekt: Repository `burgergoat23-cyber/Tiefenrausch`, Branch `claude/new-session-lbc1s3`, Ordner `brotzeitdelight/`.
+  Der Mod teilt sich das Repository vorerst mit Tiefenrausch, berührt dessen Dateien aber nicht.
+  Für die Veröffentlichung (Meilenstein 10) zieht er in ein eigenes Repository um.
+- Mod-Datei nach dem Bauen: `build/libs/brotzeitdelight-1.21.1-0.1.0.jar` (wird nicht ins Repository eingecheckt).
+
+## Fertig
+
+**Meilenstein 1 – Grundgerüst**
+
+- NeoForge-Projekt nach dem offiziellen MDK (Minecraft 1.21.1, NeoForge 21.1.265, Java 21, Gradle 9.2.1).
+- Farmer's Delight 1.3.4 als Pflicht-Abhängigkeit, geladen vor unserem Mod. 1.3.4 ist weiterhin die neueste Version für 1.21.1 (geprüft auf Modrinth am 10.11.2026).
+- Kreativ-Tab „Brotzeit Delight" direkt hinter dem Tab von Farmer's Delight, Symbol: Breze (Platzhalter).
+- Datengenerator für Item-Modelle und beide Sprachdateien. Alle Texte stehen an einer Stelle (`data/ModTranslations.java`), jeder Eintrag verlangt Deutsch und Englisch.
+- Platzhalter-Werkzeug `tools/texturen/platzhalter.py`.
+- Unterlagen: `ABWEICHUNGEN.md` (1 Eintrag), `TEXTUREN.md`, `CHANGELOG.md`, `IDEEN.md`.
+
+## Was geprüft ist und was nicht
+
+Geprüft am 10.11.2026 in der Cloud-Umgebung:
+
+- Bau (`./gradlew build`) ohne Fehler und ohne Compiler-Warnungen.
+- Datengenerator (`./gradlew runData`) ohne Fehler; erzeugt 1 Modell und 2 Sprachdateien.
+- Entwicklungs-Server (`./gradlew runServer`): startet mit beiden Mods bis „Done".
+- Entwicklungs-Client (`./gradlew runClient`, virtueller Bildschirm, Software-Grafik): Titelbild zeigt „4 Mods"; Testwelt im Kreativmodus geladen; Tab „Brotzeit Delight" steht auf Seite 2 hinter Farmer's Delight und enthält die „Breze"; Mod-Liste zeigt Name, Version 0.1.0, Lizenz MIT und Beschreibung.
+- Echter NeoForge-Server 21.1.265 (Installer) mit `farmers-delight-1.21.1-1.3.4.jar` und unserer fertigen `.jar` im Ordner `mods`: startet, `brotzeitdelight:pretzel` ist vorhanden und heißt „Pretzel", sauberes Beenden.
+- Logs von allen vier Läufen gelesen: keine Fehler- oder Warnzeile, die von unserem Mod stammt.
+
+Nicht geprüft:
+
+- Start in einem echten Minecraft-Client mit Launcher (das kann nur am PC geschehen).
+- Englische Anzeige im Client (die Sprachdatei ist erzeugt, im Spiel angesehen wurde nur Deutsch).
+- Ton: Die Cloud-Umgebung hat kein Audiogerät.
+
+Warnungen im Log, die nicht von uns stammen und bei jedem Lauf erscheinen:
+
+- `VanillaPackResourcesBuilder … uses unexpected schema`: kommt von NeoForge selbst. In der Entwicklungsumgebung steht in der Zeile der Projektordner und damit das Wort `brotzeitdelight`; gemeint ist nur der Dateipfad.
+- `Commands: Ambiguity between arguments [teleport …]`, `Missing sound for event: minecraft:item.goat_horn.play`, `Shader … could not find sampler`: Vanilla.
+- `Failed to request yggdrasil public key`, `Couldn't look up profile properties`, `Error starting SoundSystem`: nur in der Cloud-Umgebung (kein Zugang zu Mojang-Konten, kein Audiogerät).
+
+## Als Nächstes
+
+**Meilenstein 2 – Faktencheck:** die echten IDs, Tags und Klassen von Farmer's Delight mit Fundstelle auflisten und alle Abweichungen von der Vorgabe nennen. Es wird dabei nichts am Mod gebaut.
+
+## Offene Fragen an dich
+
+1. **NeoForge-Mindestversion:** Im Moment verlangt der Mod NeoForge 21.1.265 oder neuer (die Version, mit der gebaut und getestet wird; so macht es die offizielle Vorlage). Farmer's Delight 1.3.4 selbst verlangt nur 21.1.219. Soll unser Mod ebenfalls ab 21.1.219 starten dürfen? Dann würde ich in Meilenstein 9 zusätzlich mit 21.1.219 testen.
+2. **Autorname:** Welcher Name soll in der Mod-Liste und in der `LICENSE` stehen? (Wird spätestens in Meilenstein 10 gebraucht.)
+3. **Referenzbilder:** Der Ordner `referenzen/` fehlt noch. Gebraucht wird er vor Meilenstein 8; welche Bilder, steht in `TEXTUREN.md`.
+
+## Technik-Notizen für die nächste Sitzung
+
+- Die Cloud-Umgebung „Standard" braucht diese erlaubten Adressen: `maven.neoforged.net`, `piston-meta.mojang.com`, `piston-data.mojang.com`, `libraries.minecraft.net`, `resources.download.minecraft.net` (Bau und Start), `api.modrinth.com`, `cdn.modrinth.com` (Farmer's Delight), `launchermeta.mojang.com` (nur der NeoForge-Server-Installer). Parchment kommt über `maven.neoforged.net`.
+- Quellcode von Farmer's Delight zum Nachschlagen (nicht im Repository):
+  `git clone --depth 1 --branch 1.21 https://github.com/vectorwing/FarmersDelight`
+- Entpackter Minecraft-Code nach dem ersten Bau: `build/moddev/artifacts/neoforge-21.1.265-sources.jar`.
+- Server-Test: `run/eula.txt` mit `eula=true` anlegen. `./gradlew runServer` reicht Eingaben nicht an den Server weiter; beenden mit `kill -TERM` auf den Java-Prozess oder gleich den echten Server nehmen (`java -jar neoforge-21.1.265-installer.jar --installServer .`, dann `run.sh nogui`).
+- Client-Test ohne Bildschirm: `Xvfb :99 -screen 0 1024x768x24 +extension GLX`, dann `DISPLAY=:99 LIBGL_ALWAYS_SOFTWARE=1 ./gradlew runClient`; Klicks und Tasten mit `xdotool`, Bilder mit `import -window root`. In `run/options.txt` helfen `onboardAccessibility:false` und `pauseOnLostFocus:false`. `--args` an `runClient` funktioniert nicht (ersetzt die Startklasse).
+- Eine Kreativ-Testwelt entsteht am schnellsten so: Server einmal mit `gamemode=creative` starten, `run/world` nach `run/saves/Testwelt` kopieren.
