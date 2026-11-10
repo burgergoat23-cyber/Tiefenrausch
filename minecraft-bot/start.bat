@@ -5,12 +5,14 @@ cd /d "%~dp0"
 
 where node >nul 2>nul
 if errorlevel 1 goto keinnode
+node -e "process.exit(parseInt(process.versions.node)<18?1:0)"
+if errorlevel 1 goto keinnode
 if not exist "node_modules\mineflayer" goto installieren
 goto starten
 
 :keinnode
 echo.
-echo  Auf diesem PC fehlt noch das Programm "Node.js".
+echo  Auf diesem PC fehlt das Programm "Node.js" (oder es ist zu alt).
 echo  Der Bot braucht es. Es ist kostenlos und sicher (nodejs.org).
 echo  Frag kurz deine Eltern, ob du es installieren darfst.
 echo.
@@ -50,6 +52,7 @@ goto starten
 :fehler
 echo.
 echo  Das Laden hat nicht geklappt. Pruefe das Internet und versuche es noch einmal.
+echo  Oder nimm die ZIP-Datei, in der schon alles drin ist: minecraft-bot.zip
 echo.
 pause
 exit /b
