@@ -93,6 +93,7 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 
 ## Minecraft-Bot (10.11.2026, hat nichts mit dem Spiel zu tun)
 - Ordner `minecraft-bot/`: Mitspieler-Bot „Kumpel“ für **Minecraft Java Edition** (Nutzer spielt am Windows-PC, Einzelspieler-Welt „im LAN öffnen“). Node.js + mineflayer, Start per `start.bat`, deutsche Chat-Befehle (`bot.js`, Wörterbuch `namen.js`, Anleitung `ANLEITUNG.md`). Fertige ZIP: `downloads/minecraft-bot.zip` – enthält die Bausteine (`node_modules`, verkleinert) schon, weil auf dem PC des Nutzers Node.js 20.18.1 ohne npm liegt (`AppData\Local\nodejs`); neu packen mit `bash minecraft-bot/packen.sh`. Läuft mit Node 20 (getestet), obwohl mineflayer „>=22“ angibt.
+- Nutzer hat Minecraft **26.2** – das kann mineflayer 4.39 noch nicht (höchstens 26.1.2). Er soll im Launcher eine Installation 26.1.2 anlegen und eine neue Welt nehmen; bei neuer mineflayer-Version `npm update` + neu packen.
 - Getestet nur gegen den Node-Testserver flying-squid (1.16.5): Verbinden, Welt-Suche, folgen, kommen, abbauen, Inventar, Koordinaten. **Nicht** getestet: echtes Minecraft, `start.bat` unter Windows, Kämpfen, Herstellen, Schlafen, Angeln, Sachen werfen (der Testserver kann das nicht).
 
 ## Offene Ideen / bekannte Grenzen

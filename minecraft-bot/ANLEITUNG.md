@@ -46,7 +46,7 @@ Du kannst Sachen (Essen, Werkzeug, Rüstung, Schwert) einfach vor ihm auf den Bo
 - Damit die Nacht übersprungen wird, muss auch Kumpel schlafen: zweites Bett hinstellen und `schlaf` schreiben.
 - Für Erze braucht er die passende Spitzhacke.
 - Den Namen kannst du in `einstellungen.json` ändern (er darf nicht so heißen wie du).
-- Unterstützte Minecraft-Versionen: 1.8 bis 1.21.11 und 26.1. Ist deine Version zu neu, sagt der Bot das beim Start.
+- Unterstützte Minecraft-Versionen: 1.8 bis 1.21.11 sowie 26.1, 26.1.1 und 26.1.2. **26.2 und neuer gehen noch nicht** – dann im Launcher unter „Installationen“ die Version 26.1.2 anlegen und damit eine **neue** Welt spielen (eine Welt aus 26.2 nicht mit 26.1.2 öffnen, sie kann kaputtgehen).
 - Nur für die **Java Edition**. Auf iPad, Handy und Konsole (Bedrock) geht er nicht.
 
 ## Technik (für Neugierige)

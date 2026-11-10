@@ -93,10 +93,11 @@ function fehlerText (e) {
   const t = String((e && e.message) || e)
   if (/ECONNREFUSED/.test(t)) return 'Unter diesem Port läuft keine Welt. Ist die Welt "im LAN geöffnet" und die Zahl richtig?'
   if (/ETIMEDOUT|ENOTFOUND|EHOSTUNREACH/.test(t)) return 'Die Welt ist nicht erreichbar. Läuft Minecraft auf diesem PC?'
-  if (/unsupported|not supported|protocol version|is not a supported|Unknown version/i.test(t)) {
+  if (/unsupported|not supported|protocol version|is not a supported|Unknown version|No data available for version/i.test(t)) {
     return 'Diese Minecraft-Version kennt der Bot (noch) nicht.\n' +
       'Der Bot kann: ' + mineflayer.testedVersions.join(', ') + '\n' +
-      'Tipp: Im Minecraft Launcher unter "Installationen" eine dieser Versionen anlegen und damit eine Welt spielen.'
+      'Tipp: Im Minecraft Launcher unter "Installationen" die Version 26.1.2 anlegen und damit eine NEUE Welt spielen.\n' +
+      '(Eine Welt aus einer neueren Version nicht mit einer älteren Version öffnen - sie kann dabei kaputtgehen.)'
   }
   return 'Fehler: ' + t
 }
