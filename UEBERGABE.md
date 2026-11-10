@@ -14,6 +14,12 @@ Stand: 2026-10-04. Zuerst diese Datei lesen, dann `index.html` nur gezielt (die 
 - `firestore.rules` – Firebase-Sicherheitsregeln. Nach jeder Änderung muss der **Nutzer** sie in der Konsole einfügen und veröffentlichen: https://console.firebase.google.com/project/tiefenrausch/firestore/rules (ganzen Text ersetzen → „Veröffentlichen“).
 - `tests/` – Testprogramme (Playwright). `bash tests/run.sh` bzw. `bash tests/run.sh --firebase`.
 
+## Zweites Spiel: Neonhafen (Ordner `neonhafen/`, seit 10.11.2026)
+- Eigenes 3D-Open-World-Stadtspiel (Genre wie GTA, aber **eigene** Stadt, Figuren, Namen – keine Kopie). Eine Datei `neonhafen/index.html` + `neonhafen/three.min.js` (three.js r128, MIT). Kein Build-Schritt, kein Firebase, Spielstand in `localStorage` (`neonhafen1`).
+- Online erst, wenn der Ordner auf dem GitHub-Pages-Branch liegt: dann unter …/Tiefenrausch/neonhafen/.
+- Inhalt: Stadt 12×12 Blöcke (`blocks`, Blockgröße `BS`), Autos (`CT`, `driveCar`, Verkehr `aiCar`), Passanten (`updPeds`), Fahndung mit 5 Sternen (`G.heat`, `stars()`), 6 Aufträge von Rosa (`MISSIONS`), Taxi-Jobs (`taxiJob`), Läden (`openPlace`), 15 Goldmöwen, Tag/Nacht (`updSky`), Radio (`ST`, `radioTick`), Touch-Steuerung (Knüppel + 4 Knöpfe). Test-Zugriff über `window.NH`.
+- Geprüft nur im simulierten Browser (PC + iPad-Größe), nicht auf einem echten iPad.
+
 ## Firebase (Projekt `tiefenrausch`)
 - Konfiguration steht im Code (`FB_CFG`), ist öffentlich und nicht geheim.
 - Aktiv: **Authentication → E-Mail/Passwort**, **Firestore** (Standort europe-west3, Produktionsmodus + eigene Regeln). Gratis-Tarif (Spark).
