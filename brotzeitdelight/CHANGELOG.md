@@ -6,6 +6,7 @@
 
 - NeoForge-Projekt für Minecraft 1.21.1 angelegt (Vorlage: offizielles NeoForge-MDK, NeoForge 21.1.265, Java 21).
 - Farmer's Delight 1.3.4 als Pflicht-Abhängigkeit eingebunden; es läuft in der Entwicklungsumgebung mit.
+- Der Mod startet ab NeoForge 21.1.219, derselben Untergrenze wie Farmer's Delight 1.3.4.
 - Kreativ-Tab „Brotzeit Delight" mit der Breze als Symbol, einsortiert direkt hinter dem Tab von Farmer's Delight.
 - Item „Breze" (`pretzel`) angemeldet, vorerst nur als Symbol des Tabs und mit Platzhalter-Textur.
 - Datengenerator eingerichtet: erzeugt Item-Modelle und die Sprachdateien für Deutsch und Englisch.

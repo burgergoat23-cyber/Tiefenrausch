@@ -1,6 +1,6 @@
 # Stand
 
-Stand: 10.11.2026, nach Meilenstein 1 (Grundgerüst). Wartet auf dein Okay für Meilenstein 2.
+Stand: 11.11.2026, nach Meilenstein 1 (Grundgerüst). Wartet auf dein Okay für Meilenstein 2.
 
 ## Wo was liegt
 
@@ -15,6 +15,7 @@ Stand: 10.11.2026, nach Meilenstein 1 (Grundgerüst). Wartet auf dein Okay für 
 **Meilenstein 1 – Grundgerüst**
 
 - NeoForge-Projekt nach dem offiziellen MDK (Minecraft 1.21.1, NeoForge 21.1.265, Java 21, Gradle 9.2.1).
+- Der Mod startet ab NeoForge 21.1.219, derselben Untergrenze wie Farmer's Delight 1.3.4 (deine Entscheidung vom 11.11.2026). Gebaut wird weiter gegen 21.1.265.
 - Farmer's Delight 1.3.4 als Pflicht-Abhängigkeit, geladen vor unserem Mod. 1.3.4 ist weiterhin die neueste Version für 1.21.1 (geprüft auf Modrinth am 10.11.2026).
 - Kreativ-Tab „Brotzeit Delight" direkt hinter dem Tab von Farmer's Delight, Symbol: Breze (Platzhalter).
 - Datengenerator für Item-Modelle und beide Sprachdateien. Alle Texte stehen an einer Stelle (`data/ModTranslations.java`), jeder Eintrag verlangt Deutsch und Englisch.
@@ -32,9 +33,16 @@ Geprüft am 10.11.2026 in der Cloud-Umgebung:
 - Echter NeoForge-Server 21.1.265 (Installer) mit `farmers-delight-1.21.1-1.3.4.jar` und unserer fertigen `.jar` im Ordner `mods`: startet, `brotzeitdelight:pretzel` ist vorhanden und heißt „Pretzel", sauberes Beenden.
 - Logs von allen vier Läufen gelesen: keine Fehler- oder Warnzeile, die von unserem Mod stammt.
 
+Geprüft am 11.11.2026 nach dem Senken der Mindestversion:
+
+- Der Quellcode lässt sich auch gegen NeoForge 21.1.219 ohne Fehler und Warnungen übersetzen (`./gradlew build -Pneo_version=21.1.219`).
+- Echter NeoForge-Server 21.1.219 mit Farmer's Delight 1.3.4 und unserer `.jar`: startet, `brotzeitdelight:pretzel` ist vorhanden, sauberes Beenden, keine Warnung von unserem Mod.
+- Dieselbe `.jar` noch einmal auf dem echten Server 21.1.265: unverändert in Ordnung.
+
 Nicht geprüft:
 
 - Start in einem echten Minecraft-Client mit Launcher (das kann nur am PC geschehen).
+- Client mit NeoForge 21.1.219 (bisher nur der Server; der vollständige Test mit 21.1.219 folgt in Meilenstein 9).
 - Englische Anzeige im Client (die Sprachdatei ist erzeugt, im Spiel angesehen wurde nur Deutsch).
 - Ton: Die Cloud-Umgebung hat kein Audiogerät.
 
@@ -50,9 +58,15 @@ Warnungen im Log, die nicht von uns stammen und bei jedem Lauf erscheinen:
 
 ## Offene Fragen an dich
 
-1. **NeoForge-Mindestversion:** Im Moment verlangt der Mod NeoForge 21.1.265 oder neuer (die Version, mit der gebaut und getestet wird; so macht es die offizielle Vorlage). Farmer's Delight 1.3.4 selbst verlangt nur 21.1.219. Soll unser Mod ebenfalls ab 21.1.219 starten dürfen? Dann würde ich in Meilenstein 9 zusätzlich mit 21.1.219 testen.
-2. **Autorname:** Welcher Name soll in der Mod-Liste und in der `LICENSE` stehen? (Wird spätestens in Meilenstein 10 gebraucht.)
-3. **Referenzbilder:** Der Ordner `referenzen/` fehlt noch. Gebraucht wird er vor Meilenstein 8; welche Bilder, steht in `TEXTUREN.md`.
+Beide Antworten hast du am 11.11.2026 für später angekündigt.
+
+1. **Autorname:** Welcher Name soll in der Mod-Liste und in der `LICENSE` stehen? (Wird spätestens in Meilenstein 10 gebraucht.)
+2. **Referenzbilder:** Der Ordner `referenzen/` fehlt noch. Gebraucht wird er vor Meilenstein 8; welche Bilder, steht in `TEXTUREN.md`.
+
+## Zusagen für spätere Meilensteine
+
+- **Selbstprüfung nach jedem Meilenstein:** zusätzlich `./gradlew build -Pneo_version=21.1.219` laufen lassen. So fällt sofort auf, wenn der Code etwas benutzt, das es in der ältesten erlaubten NeoForge-Version noch nicht gibt. Danach einmal normal bauen, damit wieder gegen 21.1.265 gearbeitet wird.
+- **Meilenstein 9:** Client und Server zusätzlich mit NeoForge 21.1.219 testen und den Punkt ins Handprotokoll aufnehmen.
 
 ## Technik-Notizen für die nächste Sitzung
 
