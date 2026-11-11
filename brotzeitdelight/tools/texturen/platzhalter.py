@@ -23,6 +23,7 @@ TEXTUR_ORDNER = PROJEKT_ORDNER / "src/main/resources/assets/brotzeitdelight/text
 
 # (Datei unterhalb von textures/, Buchstaben, Füllfarbe)
 PLATZHALTER = [
+    ("item/raw_pretzel.png", "RB", "#C98F45"),
     ("item/pretzel.png", "B", "#9C5524"),
 ]
 

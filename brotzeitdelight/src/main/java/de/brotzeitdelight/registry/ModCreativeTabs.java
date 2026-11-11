@@ -32,7 +32,11 @@ public final class ModCreativeTabs {
                     .title(Component.translatable(TITLE_KEY))
                     .icon(() -> new ItemStack(ModItems.PRETZEL.get()))
                     .withTabsBefore(FARMERS_DELIGHT_TAB)
-                    .displayItems((parameters, output) -> output.accept(ModItems.PRETZEL.get()))
+                    // Reihenfolge laut Vorgabe Abschnitt 2: Grundzutaten, rohe Zutaten, dann Gerichte.
+                    .displayItems((parameters, output) -> {
+                        output.accept(ModItems.RAW_PRETZEL.get());
+                        output.accept(ModItems.PRETZEL.get());
+                    })
                     .build());
 
     private ModCreativeTabs() {

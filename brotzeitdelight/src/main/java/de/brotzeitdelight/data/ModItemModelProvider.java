@@ -16,6 +16,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
+        basicItem(ModItems.RAW_PRETZEL.get());
         basicItem(ModItems.PRETZEL.get());
     }
 }

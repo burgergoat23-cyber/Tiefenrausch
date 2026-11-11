@@ -16,6 +16,7 @@ public final class ModTranslations {
     public static List<Translation> all() {
         return List.of(
                 new Translation(ModCreativeTabs.TITLE_KEY, "Brotzeit Delight", "Brotzeit Delight"),
+                name(ModItems.RAW_PRETZEL, "Rohe Breze", "Raw Pretzel"),
                 name(ModItems.PRETZEL, "Breze", "Pretzel"));
     }
 

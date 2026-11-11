@@ -1,0 +1,10 @@
+{
+  "values": {
+    "brotzeitdelight:pretzel": {
+      "chance": 0.85
+    },
+    "brotzeitdelight:raw_pretzel": {
+      "chance": 0.65
+    }
+  }
+}
