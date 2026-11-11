@@ -16,3 +16,11 @@
 
 - IDs, Tags, Klassen und Rezeptformate von Farmer's Delight 1.3.4 am Quellcode geprüft (`FAKTENCHECK.md`).
 - Zwei neue Abweichungen eingetragen (`ABWEICHUNGEN.md` Nr. 2 und 3).
+
+### Meilenstein 3 – Breze komplett
+
+- Neues Item „Rohe Breze" (`raw_pretzel`); die Breze ist jetzt essbar (5 Hunger, Sättigung 0,6).
+- Rezepte: 1 Weizenteig (Tag `c:foods/dough`) ergibt 1 rohe Breze; Ofen 200, Räucherofen 100, Lagerfeuer 600 Ticks, je 0,35 Erfahrung. Über das Lagerfeuer-Rezept geht auch Pfanne und Herd von Farmer's Delight.
+- Alle Rezepte werden im Rezeptbuch freigeschaltet, sobald man eine Zutat besitzt.
+- Kompost: rohe Breze 65 %, Breze 85 %.
+- Automatische Tests: 4 Spieltests (Rezepte, Werte, Kompost) und 3 Tests für die Sprachdateien.

@@ -1,6 +1,6 @@
 # Stand
 
-Stand: 11.11.2026, nach Meilenstein 2 (Faktencheck). Wartet auf deine Antworten und dein Okay für Meilenstein 3.
+Stand: 11.11.2026, nach Meilenstein 3 (Breze komplett). Wartet auf dein Okay für Meilenstein 4.
 
 ## Wo was liegt
 
@@ -54,9 +54,18 @@ Warnungen im Log, die nicht von uns stammen und bei jedem Lauf erscheinen:
 
 **Meilenstein 2 – Faktencheck** (11.11.2026): Ergebnis in `FAKTENCHECK.md`, neue Abweichungen Nr. 2 und 3 in `ABWEICHUNGEN.md`. Am Mod wurde nichts geändert.
 
+**Meilenstein 3 – Breze komplett** (11.11.2026)
+
+- Rohe Breze und Breze mit Werkbank-, Ofen-, Räucherofen- und Lagerfeuer-Rezept, Rezeptbuch-Freischaltung, Platzhalter-Texturen, beiden Sprachen und Kompost-Werten.
+- Diese Umsetzung ist die Vorlage für alle weiteren Gerichte: Werte in `item/ModFoods.java`, Items in `registry/ModItems.java`, Rezepte in `data/ModRecipeProvider.java`, Kompost in `data/ModDataMapProvider.java`, Texte in `data/ModTranslations.java`, Tests in `gametest/`.
+- Tests: `./gradlew build` führt die Sprachdatei-Tests aus, `./gradlew runGameTestServer` die Spieltests. Gegenprobe: Mit absichtlich falschen Werten schlagen die Spieltests an.
+- Hinweis: Die Spieltests und ihre leere Struktur (`data/brotzeitdelight/structure/empty.nbt`, erzeugt von `tools/strukturen/leere_teststruktur.py`) liegen im normalen Quellordner und damit auch in der fertigen `.jar`. NeoForge lädt sie nur, wenn Spieltests ausdrücklich eingeschaltet sind. Für Spieler ändert sich nichts.
+
+Geprüft am 11.11.2026: Datengenerator, Bau und alle Tests ohne Fehler und Warnungen; Übersetzen gegen NeoForge 21.1.219; echter Server 21.1.219 startet mit der neuen `.jar`. Im Client (Überlebensmodus): Teigball aufheben schaltet das Rezept frei, rohe Breze aus dem Rezeptbuch hergestellt (nichts bleibt zurück), danach werden die Back-Rezepte freigeschaltet; Namen und Kreativ-Tab stimmen. Kein Fehler oder Warnung unseres Mods im Log. Nicht im Spiel ausprobiert: Ofen, Räucherofen, Lagerfeuer, Pfanne und Herd tatsächlich benutzen (die Spieltests prüfen die Rezepte; das Ausprobieren kommt ins Handprotokoll).
+
 ## Als Nächstes
 
-**Meilenstein 3 – Breze komplett**, sobald du die Fragen unten beantwortet hast.
+**Meilenstein 4 – alle Zutaten und Gerichte** aus den Abschnitten 6 und 7 mit den Rezepten aus Abschnitt 8 (ohne Gär-Rezept), nach dem Muster der Breze.
 
 Technische Festlegungen aus dem Faktencheck (brauchen kein Okay):
 
@@ -68,16 +77,9 @@ Technische Festlegungen aus dem Faktencheck (brauchen kein Okay):
 
 ## Offene Fragen an dich
 
-Fragen aus dem Faktencheck (Empfehlung in Klammern):
+Die sechs Fragen aus dem Faktencheck sind entschieden (alle Empfehlungen angenommen, siehe `ABWEICHUNGEN.md` Nr. 4–9).
 
-A. Schnitzel mit Kartoffelsalat: Sättigung 0,8 ist stärker als FDs stärkstes Gericht (14 / 0,75). Auf 0,75 senken? (ja)
-B. Senfpflanze: Vanilla-Weizen hat kein Kreuzmodell, sondern das Raute-Modell `crop`. Welches? (`crop` wie Weizen)
-C. Senfkörner bei der Ernte: „2 bis 4" und „gleiche Formel wie Weizensamen" (ergibt 1 bis 4) widersprechen sich. Welches? (2 bis 4: 2 fest plus Zufall, mit Glück mehr)
-D. Wilder Senf als Blume braucht einen Effekt für Verdächtige Suppe. Welchen? (Feuerresistenz 4 s, „scharf")
-E. Texte: FD sagt auf Deutsch „Weißkohl". Tooltip „Rechtsklick mit Weißkohl: befüllen"? (ja)
-F. Breze im Tag `c:foods/bread`: Dann geht sie auch in FD-Sandwiches und in unseren Brot-Rezepten (Leberkässemmel, Schnitzel, Semmelknödel). In Ordnung? (ja)
-
-Beide Antworten hast du am 11.11.2026 für später angekündigt.
+Noch offen (du hast die Antworten für später angekündigt):
 
 1. **Autorname:** Welcher Name soll in der Mod-Liste und in der `LICENSE` stehen? (Wird spätestens in Meilenstein 10 gebraucht.)
 2. **Referenzbilder:** Der Ordner `referenzen/` fehlt noch. Gebraucht wird er vor Meilenstein 8; welche Bilder, steht in `TEXTUREN.md`.

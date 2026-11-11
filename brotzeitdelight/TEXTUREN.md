@@ -17,7 +17,7 @@ Alle Dateien liegen unter `src/main/resources/assets/brotzeitdelight/textures/`.
 | `mustard_seeds` | fehlt | 0 | |
 | `mustard` | fehlt | 0 | |
 | `sauerkraut` | fehlt | 0 | |
-| `raw_pretzel` | fehlt | 0 | |
+| `raw_pretzel` | Platzhalter | 0 | teigfarbenes Feld mit „RB" |
 | `raw_bratwurst` | fehlt | 0 | |
 | `raw_schnitzel` | fehlt | 0 | |
 | `raw_leberkaese` | fehlt | 0 | |
