@@ -1,0 +1,8 @@
+form_modell.onnx
+================
+Gekürzte Fassung (bis "stage3") des Bilderkennungs-Netzes ResNet18 v1
+aus dem ONNX Model Zoo (https://github.com/onnx/models,
+validated/vision/classification/resnet/model/resnet18-v1-7.onnx),
+ursprünglich aus GluonCV. Lizenz: Apache License 2.0
+(https://www.apache.org/licenses/LICENSE-2.0).
+Das Netz wurde nicht verändert, nur die hinteren Schichten wurden entfernt.

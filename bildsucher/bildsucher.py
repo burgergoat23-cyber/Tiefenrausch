@@ -405,6 +405,212 @@ class Sucher:
 
 
 # ---------------------------------------------------------------------------
+#  KI-Suche ("Ähnlich"): findet auch andere Farben / anderes Licht
+# ---------------------------------------------------------------------------
+
+MODELL = os.path.join(ORDNER, "form_modell.onnx")
+
+
+class FormSucher:
+    """
+    Sucht nicht nach gleichen Pixeln, sondern nach gleicher Form.
+    Ein vortrainiertes Bilderkennungs-Netz (ResNet18, gekürzt) macht aus
+    Bildschirm und Vorlage "Merkmal-Karten" (Kanten, Muster, Teile).
+    Diese werden in vielen Größen verglichen (Grobsuche), die besten
+    Stellen werden vergrößert noch einmal genau geprüft.
+    """
+
+    ZIEL_H = 540        # Bildschirm wird für die Grobsuche auf diese Höhe verkleinert
+    STUFE = 1.2         # Größen-Schritt (die genaue Prüfung gleicht ±25 % aus)
+    MIN_ZELLEN = 4      # Vorlage muss mindestens so viele Merkmal-Zellen haben
+    PRUEF_BREITE = 128  # Breite der Vorlage bei der genauen Prüfung
+    KANDIDATEN = 3      # so viele Stellen pro Bild werden genau geprüft
+    MAX_TREFFER = 10
+
+    def __init__(self, pfad=MODELL):
+        import onnxruntime as ort
+        so = ort.SessionOptions()
+        so.intra_op_num_threads = max(1, os.cpu_count() or 4)
+        so.log_severity_level = 3
+        self.sess = ort.InferenceSession(pfad, so, providers=["CPUExecutionProvider"])
+        self.mittel = np.array([0.485, 0.456, 0.406], np.float32) * 255
+        self.streu = np.array([0.229, 0.224, 0.225], np.float32) * 255
+        self.vorher = {}
+        self.werte = {}
+
+    def merkmale(self, bgr):
+        x = (bgr[:, :, ::-1].astype(np.float32) - self.mittel) / self.streu
+        x = np.ascontiguousarray(x.transpose(2, 0, 1)[None])
+        f = self.sess.run(None, {"data": x})[0][0]  # Kanäle x Höhe x Breite
+        return f / (np.sqrt((f * f).sum(0, keepdims=True)) + 1e-6)
+
+    def vorlage_m(self, v, w, h):
+        """Merkmale der Vorlage in Größe w x h (gemerkt). Rand-Zellen werden
+        weggelassen, weil sie den fehlenden Hintergrund 'sehen'."""
+        key = ("form", w, h)
+        c = v._cache.get(key)
+        if c is None:
+            inter = cv2.INTER_AREA if w < v.w else cv2.INTER_LINEAR
+            f = self.merkmale(cv2.resize(v.bgr, (w, h), interpolation=inter))
+            if f.shape[1] >= 5 and f.shape[2] >= 5:
+                c = (np.ascontiguousarray(f[:, 1:-1, 1:-1]), 1)
+            else:
+                c = (np.ascontiguousarray(f), 0)
+            with v._lock:
+                if len(v._cache) > 600:
+                    v._cache.clear()
+                v._cache[key] = c
+        return c
+
+    @staticmethod
+    def korr(fs, ft, Fs=None):
+        """Mittlere Ähnlichkeit (Kosinus) der Vorlage an jeder Stelle.
+        Große Vorlagen über FFT (Fs = vorberechnete FFT des Bildschirms)."""
+        C, Hs, Ws = fs.shape
+        _, h, w = ft.shape
+        Ho, Wo = Hs - h + 1, Ws - w + 1
+        if Fs is not None and h * w > 500:
+            Ft = np.fft.rfft2(ft[:, ::-1, ::-1], s=(Hs, Ws))
+            R = np.fft.irfft2(np.einsum("chw,chw->hw", Fs, Ft), s=(Hs, Ws))
+            return (R[h - 1:Hs, w - 1:Ws] / float(h * w)).astype(np.float32)
+        G = (ft.reshape(C, h * w).T @ fs.reshape(C, Hs * Ws)).reshape(h, w, Hs, Ws)
+        r = np.zeros((Ho, Wo), np.float32)
+        for dy in range(h):
+            for dx in range(w):
+                r += G[dy, dx, dy:dy + Ho, dx:dx + Wo]
+        return r / float(h * w)
+
+    @staticmethod
+    def _fein_spitze(r, py, px):
+        """Lage der Spitze zwischen den Zellen schätzen (Parabel)."""
+        def eins(a, b, c):
+            d = a - 2 * b + c
+            return 0.0 if d >= -1e-9 else max(-0.5, min(0.5, 0.5 * (a - c) / d))
+        oy = eins(r[py - 1, px], r[py, px], r[py + 1, px]) if 0 < py < r.shape[0] - 1 else 0.0
+        ox = eins(r[py, px - 1], r[py, px], r[py, px + 1]) if 0 < px < r.shape[1] - 1 else 0.0
+        return py + oy, px + ox
+
+    def pruef(self, frame, v, x, y, w, h, faktoren=(0.8, 0.9, 1.0, 1.1, 1.25)):
+        """Genaue Prüfung: Stelle vergrößern, in mehreren Größen vergleichen."""
+        H, W = frame.shape[:2]
+        f = self.PRUEF_BREITE / float(w)
+        x0, y0 = int(max(0, x - w * 0.5)), int(max(0, y - h * 0.5))
+        x1, y1 = int(min(W, x + w * 1.5)), int(min(H, y + h * 1.5))
+        if x1 - x0 < 8 or y1 - y0 < 8:
+            return None
+        cw, ch = max(32, int((x1 - x0) * f)), max(32, int((y1 - y0) * f))
+        inter = cv2.INTER_AREA if f < 1 else cv2.INTER_LINEAR
+        fc = self.merkmale(cv2.resize(frame[y0:y1, x0:x1], (cw, ch), interpolation=inter))
+        fx, fy = (x1 - x0) / float(cw), (y1 - y0) / float(ch)
+        best = None
+        for k in faktoren:
+            lw = int(round(self.PRUEF_BREITE * k))
+            lh = max(16, int(round(lw * v.h / float(v.w))))
+            ft, off = self.vorlage_m(v, lw, lh)
+            if ft.shape[1] > fc.shape[1] or ft.shape[2] > fc.shape[2]:
+                continue
+            r = self.korr(fc, ft)
+            py, px = np.unravel_index(int(r.argmax()), r.shape)
+            mx = float(r[py, px])
+            if best is None or mx > best[0]:
+                fy_, fx_ = self._fein_spitze(r, py, px)
+                best = (mx, x0 + (fx_ - off) * 16 * fx, y0 + (fy_ - off) * 16 * fy,
+                        lw * fx, lh * fy)
+        if best is None:
+            return None
+        mx, bx, by, bw, bh = best
+        return Treffer(v, bx, by, bw, bh, bw / float(v.w), mx)
+
+    def suche(self, frame, vorlagen, schwelle=0.5):
+        if not vorlagen:
+            self.vorher = {}
+            return []
+        # Bildschirm unverändert? Dann nicht neu rechnen.
+        mini = cv2.resize(frame, (160, 90), interpolation=cv2.INTER_AREA)
+        key = (tuple(id(v) for v in vorlagen), schwelle)
+        if (getattr(self, "_mini", None) is not None and self._key == key
+                and self._mini.shape == mini.shape
+                and cv2.norm(mini, self._mini, cv2.NORM_INF) <= 3):
+            return self._letzt
+        self._mini, self._key = mini, key
+        self._letzt = self._suche(frame, vorlagen, schwelle)
+        return self._letzt
+
+    def _suche(self, frame, vorlagen, schwelle):
+        H, W = frame.shape[:2]
+        down = max(1.0, H / float(self.ZIEL_H))
+        klein = frame if down == 1.0 else cv2.resize(
+            frame, (int(W / down), int(H / down)), interpolation=cv2.INTER_AREA)
+        fs = self.merkmale(klein)
+        _, Hs, Ws = fs.shape
+        st = 16.0 * down  # Bildschirm-Pixel pro Merkmal-Zelle
+        Fs = None
+        ergebnis = []
+        neu_vorher = {}
+        self.werte = {}
+        for v in vorlagen:
+            kand = []
+            tw = 40.0
+            while tw <= W:
+                th = tw * v.h / float(v.w)
+                if th > H * 0.95:
+                    break
+                lw, lh = int(round(tw / down)), int(round(th / down))
+                if lw >= 16 and lh >= 16:
+                    ft, off = self.vorlage_m(v, lw, lh)
+                    if (self.MIN_ZELLEN <= ft.shape[1] <= Hs and self.MIN_ZELLEN <= ft.shape[2] <= Ws):
+                        if Fs is None and ft.shape[1] * ft.shape[2] > 500:
+                            Fs = np.fft.rfft2(fs)
+                        r = self.korr(fs, ft, Fs)
+                        mu, sd = float(r.mean()), float(r.std()) + 1e-6
+                        for _ in range(2):
+                            py, px = np.unravel_index(int(r.argmax()), r.shape)
+                            mx = float(r[py, px])
+                            if mx < -0.5:
+                                break
+                            kand.append(((mx - mu) / sd, (px - off) * st, (py - off) * st, tw, th))
+                            ry, rx = max(1, ft.shape[1] // 2), max(1, ft.shape[2] // 2)
+                            r[max(0, py - ry):py + ry + 1, max(0, px - rx):px + rx + 1] = -1.0
+                tw *= self.STUFE
+            kand.sort(key=lambda k: -k[0])
+            alt = self.vorher.get(id(v), [])
+            pruefen = []
+            for k in kand:
+                box = (k[1], k[2], k[3], k[4])
+                if any(_iou(box, p) > 0.3 for p in pruefen):
+                    continue
+                if any(_iou(box, (a.x, a.y, a.w, a.h)) > 0.3 for a in alt):
+                    continue
+                pruefen.append(box)
+                if len(pruefen) >= self.KANDIDATEN:
+                    break
+            pruefen += [(a.x, a.y, a.w, a.h) for a in alt]  # Verfolgung
+            roh = [t for t in (self.pruef(frame, v, *b) for b in pruefen) if t is not None]
+            # gute Treffer noch einmal genau um die gefundene Stelle prüfen (Rahmen sitzt besser)
+            for i, t in enumerate(roh):
+                if t.score >= schwelle - 0.06:
+                    t2 = self.pruef(frame, v, t.x, t.y, t.w, t.h, (0.93, 1.0, 1.07))
+                    if t2 is not None and t2.score >= t.score - 0.02:
+                        roh[i] = t2
+            if roh:
+                self.werte[id(v)] = max(t.score for t in roh)
+            gut = []
+            for t in sorted(roh, key=lambda t: -t.score):
+                box = (t.x, t.y, t.w, t.h)
+                if any(_iou(box, (g.x, g.y, g.w, g.h)) > 0.3 for g in gut):
+                    continue
+                war_da = any(_iou(box, (a.x, a.y, a.w, a.h)) > 0.3 for a in alt)
+                if t.score >= schwelle or (war_da and t.score >= schwelle - 0.04):
+                    gut.append(t)
+                if len(gut) >= self.MAX_TREFFER:
+                    break
+            neu_vorher[id(v)] = gut
+            ergebnis.extend(gut)
+        self.vorher = neu_vorher
+        return ergebnis
+
+
+# ---------------------------------------------------------------------------
 #  Fenster (Steuerung + durchsichtige Anzeige über dem Bildschirm)
 # ---------------------------------------------------------------------------
 
@@ -539,13 +745,30 @@ def main():
         "testmark": 0.0,
         "schwarz": False,
         "bester": {},     # Vorlage-id -> (Wert, Zeit)
+        "modus": einst.get("modus", "genau"),        # "genau" oder "form"
+        "schwelle_form": float(einst.get("schwelle_form", 0.50)),
     }
+    try:
+        import onnxruntime as _ort
+        del _ort
+        form_ok = os.path.isfile(MODELL)
+        form_grund = "" if form_ok else "Die Datei form_modell.onnx fehlt im Ordner."
+    except Exception as e:
+        form_ok = False
+        form_grund = "Das Zusatzteil 'onnxruntime' fehlt (%s).\nBitte Start.bat noch einmal starten." % e
+    log("KI-Suche verfügbar:", form_ok, form_grund)
+    if not form_ok:
+        zustand["modus"] = "genau"
+
+    def akt_schwelle():
+        return zustand["schwelle_form"] if zustand["modus"] == "form" else zustand["schwelle"]
 
     def einst_speichern():
         try:
             with open(EINST, "w", encoding="utf-8") as f:
                 json.dump({"bildschirm": mon_nr_var["i"], "schwelle": zustand["schwelle"],
-                           "min_px": zustand["min_px"]}, f)
+                           "min_px": zustand["min_px"], "modus": zustand["modus"],
+                           "schwelle_form": zustand["schwelle_form"]}, f)
         except Exception:
             pass
     mon_nr_var = {"i": mon_nr}
@@ -567,7 +790,7 @@ def main():
         wert = ""
         if zustand["laeuft"] and b and time.time() - b[1] < 2.0:
             wert = "  –  %d%%" % round(max(0.0, b[0]) * 100)
-            if b[0] < zustand["schwelle"]:
+            if b[0] < akt_schwelle():
                 wert += " (zu wenig)"
         return "■ %s  [%dx%d]%s%s" % (v.name, v.w, v.h, hinweis, wert)
 
@@ -730,21 +953,46 @@ def main():
     om.config(width=38)
     om.pack(padx=8, fill="x")
 
+    tk.Label(root, text="Suchart:").pack(anchor="w", padx=8, pady=(8, 0))
+    modus_var = tk.StringVar(value=zustand["modus"])
+
+    def modus_waehlen():
+        neu = modus_var.get()
+        if neu == "form" and not form_ok:
+            messagebox.showwarning("Bildsucher", "Die KI-Suche geht noch nicht:\n" + form_grund)
+            modus_var.set("genau")
+            return
+        zustand["modus"] = neu
+        zustand["bester"] = {}
+        regler.set(int(round(akt_schwelle() * 100)))
+        log("Suchart:", neu)
+        einst_speichern()
+
+    tk.Radiobutton(root, text="Genau – gleiche Farben (sehr schnell)", variable=modus_var,
+                   value="genau", command=modus_waehlen).pack(anchor="w", padx=14)
+    tk.Radiobutton(root, text="Ähnlich – auch andere Farben/Licht (KI, langsamer)",
+                   variable=modus_var, value="form", command=modus_waehlen).pack(anchor="w", padx=14)
+
     tk.Label(root, text="Genauigkeit (höher = weniger Fehlalarme):").pack(anchor="w", padx=8, pady=(8, 0))
+
     def regler_neu(w):
-        zustand["schwelle"] = int(w) / 100.0
+        if zustand["modus"] == "form":
+            zustand["schwelle_form"] = int(w) / 100.0
+        else:
+            zustand["schwelle"] = int(w) / 100.0
         einst_speichern()
 
     def regler2_neu(w):
         zustand["min_px"] = int(w)
         einst_speichern()
 
-    regler = tk.Scale(root, from_=50, to=98, orient="horizontal", length=300,
+    zustand["schwelle"] = float(einst.get("schwelle", 0.8))
+    regler = tk.Scale(root, from_=30, to=98, orient="horizontal", length=300,
                       command=regler_neu)
-    regler.set(int(round(float(einst.get("schwelle", 0.8)) * 100)))
+    regler.set(int(round(akt_schwelle() * 100)))
     regler.pack(padx=8)
 
-    tk.Label(root, text="Kleinste Größe in Pixeln (kleiner = langsamer):").pack(anchor="w", padx=8)
+    tk.Label(root, text="Kleinste Größe in Pixeln (nur 'Genau'; kleiner = langsamer):").pack(anchor="w", padx=8)
     regler2 = tk.Scale(root, from_=8, to=120, orient="horizontal", length=300,
                        command=regler2_neu)
     regler2.set(int(einst.get("min_px", 16)))
@@ -767,6 +1015,14 @@ def main():
 
     # ---- Such-Schleife im Hintergrund ----
     sucher = Sucher()
+    form = {"s": None}
+
+    def form_sucher():
+        if form["s"] is None:
+            t0 = time.perf_counter()
+            form["s"] = FormSucher(MODELL)
+            log("KI-Modell geladen in %.1f s" % (time.perf_counter() - t0))
+        return form["s"]
 
 
     def fotografieren():
@@ -798,6 +1054,7 @@ def main():
             letzt = time.perf_counter()
             gesehen = 0
             alt_sig = None
+            alt_modus = None
             while not zustand["ende"]:
                 vl = zustand["vorlagen"]
                 if not zustand["laeuft"] or not vl:
@@ -819,6 +1076,8 @@ def main():
                     zustand["mon_neu"] = False
                     sucher.vorher = {}
                     sucher._key = None
+                    if form["s"] is not None:
+                        form["s"].vorher = {}
                     alt_sig = None
                     continue
                 if fm is not zustand["mon"]:
@@ -831,10 +1090,22 @@ def main():
                     x1, y1 = x1 - fm["left"], y1 - fm["top"]
                     if x1 > 0 and y1 > 0:
                         frame[y0:y1, x0:x1] = 0
-                sucher.min_px = zustand["min_px"]
-                erg = sucher.suche(frame, vl, zustand["schwelle"])
+                modus = zustand["modus"]
+                if modus == "form":
+                    aktiv = form_sucher()
+                    if modus != alt_modus:
+                        aktiv.vorher = {}
+                    erg = aktiv.suche(frame, vl, zustand["schwelle_form"])
+                else:
+                    aktiv = sucher
+                    if modus != alt_modus:
+                        sucher.vorher = {}
+                        sucher._key = None
+                    sucher.min_px = zustand["min_px"]
+                    erg = sucher.suche(frame, vl, zustand["schwelle"])
+                alt_modus = modus
                 jetzt_t = time.time()
-                for vid, w in sucher.werte.items():
+                for vid, w in aktiv.werte.items():
                     b = zustand["bester"].get(vid)
                     if b is None or w >= b[0] or jetzt_t - b[1] > 1.5:
                         zustand["bester"][vid] = (w, jetzt_t)

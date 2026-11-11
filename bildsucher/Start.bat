@@ -18,6 +18,12 @@ if errorlevel 1 (
     exit /b 1
   )
 )
+%PY% -c "import onnxruntime" >nul 2>nul
+if errorlevel 1 (
+  echo Lade das Zusatzteil fuer die KI-Suche herunter, einmalig ...
+  %PY% -m pip install --user --upgrade onnxruntime
+  if errorlevel 1 echo Hinweis: KI-Suche geht nicht, die normale Suche schon.
+)
 echo Bildsucher laeuft. Dieses schwarze Fenster bitte offen lassen.
 %PY% bildsucher.py
 if errorlevel 1 pause

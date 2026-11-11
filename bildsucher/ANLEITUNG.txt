@@ -26,6 +26,16 @@ Bilder zum Suchen geben (drei Wege)
   c) Bilder in den Ordner "bilder" legen und "Neu laden" klicken.
   Die Bilder bleiben gespeichert und sind beim nächsten Start wieder da.
 
+Suchart
+  - Genau: findet das Bild, wenn es genauso aussieht (gleiche Farben),
+    egal wie groß. Sehr schnell.
+  - Ähnlich (KI): findet auch dasselbe Ding in anderen Farben, anderem
+    Licht oder leicht anderem Aussehen (z. B. goldene und lila Truhe).
+    Dafür langsamer (einige Male pro Sekunde), und das Ding sollte auf dem
+    Bildschirm mindestens etwa 80-100 Pixel groß sein.
+    Genauigkeit hier am besten um 50 lassen (Treffer liegen meist bei
+    55-60 %, falsche Stellen unter 47 %).
+
 Einstellungen
   - Genauigkeit: höher = nur sehr sichere Treffer (weniger Fehlalarme),
     niedriger = findet auch leicht veränderte Bilder.
