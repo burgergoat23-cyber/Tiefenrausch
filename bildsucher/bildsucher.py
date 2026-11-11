@@ -497,8 +497,11 @@ class FormSucher:
         ox = eins(r[py, px - 1], r[py, px], r[py, px + 1]) if 0 < px < r.shape[1] - 1 else 0.0
         return py + oy, px + ox
 
-    def pruef(self, frame, v, x, y, w, h, faktoren=(0.8, 0.9, 1.0, 1.1, 1.25)):
+    FAKTOREN = (0.8, 0.9, 1.0, 1.1, 1.25)
+
+    def pruef(self, frame, v, x, y, w, h, faktoren=None):
         """Genaue Prüfung: Stelle vergrößern, in mehreren Größen vergleichen."""
+        faktoren = faktoren or self.FAKTOREN
         H, W = frame.shape[:2]
         f = self.PRUEF_BREITE / float(w)
         x0, y0 = int(max(0, x - w * 0.5)), int(max(0, y - h * 0.5))
@@ -651,6 +654,82 @@ class FormSucher:
 
 
 # ---------------------------------------------------------------------------
+#  Eigenes trainiertes Modell (Truhe): ein Durchgang pro Bildgröße
+# ---------------------------------------------------------------------------
+
+TRUHE_MODELL = os.path.join(ORDNER, "truhe_modell.onnx")
+
+
+class ModellSucher:
+    """
+    Ein eigens trainiertes Modell (hier: die Truhe in allen Farben und
+    Ansichten). Es sagt für jede Stelle direkt "Truhe ja/nein + Größe" –
+    ohne Vergleich mit einzelnen Bildern. Der Bildschirm wird in drei
+    Größen gerechnet, damit kleine und große Truhen gefunden werden.
+    """
+
+    STUFEN_H = (720, 360, 180)
+    MAX_TREFFER = 20
+
+    def __init__(self, vorlage, pfad=TRUHE_MODELL):
+        import onnxruntime as ort
+        so = ort.SessionOptions()
+        so.intra_op_num_threads = max(1, os.cpu_count() or 4)
+        so.log_severity_level = 3
+        so.add_session_config_entry("session.intra_op.allow_spinning", "0")
+        so.add_session_config_entry("session.inter_op.allow_spinning", "0")
+        self.sess = ort.InferenceSession(pfad, so, providers=["CPUExecutionProvider"])
+        self.mittel = np.array([0.485, 0.456, 0.406], np.float32) * 255
+        self.streu = np.array([0.229, 0.224, 0.225], np.float32) * 255
+        self.vorlage = vorlage
+        self.vorher = []
+        self.werte = {}
+        self.grenzen = {}
+        self._mini = None
+        self._letzt = []
+
+    def suche(self, frame, schwelle=0.5):
+        mini = cv2.resize(frame, (160, 90), interpolation=cv2.INTER_AREA)
+        if (self._mini is not None and self._mini.shape == mini.shape and self._schw == schwelle
+                and cv2.norm(mini, self._mini, cv2.NORM_INF) <= 3):
+            return self._letzt
+        self._mini, self._schw = mini, schwelle
+        H, W = frame.shape[:2]
+        kand = []
+        hoehen = sorted({min(H, h) for h in self.STUFEN_H}, reverse=True)
+        for zh in hoehen:
+            f = H / float(zh)
+            zw = max(32, int(round(W / f)))
+            img = frame if zh == H else cv2.resize(frame, (zw, zh), interpolation=cv2.INTER_AREA)
+            x = (img[:, :, ::-1].astype(np.float32) - self.mittel) / self.streu
+            o = self.sess.run(None, {"data": np.ascontiguousarray(x.transpose(2, 0, 1)[None])})[0][0]
+            p = o[0]
+            stx = sty = 16.0 * f  # Bildschirm-Pixel pro Zelle
+            spitze = (p >= cv2.dilate(p, np.ones((3, 3), np.uint8))) & (p > max(0.15, schwelle - 0.2))
+            for yy, xx in zip(*np.nonzero(spitze)):
+                fy, fx = FormSucher._fein_spitze(p, yy, xx)
+                cx, cy = (fx + 0.5) * stx, (fy + 0.5) * sty
+                bw, bh = math.exp(float(o[1, yy, xx])) * stx, math.exp(float(o[2, yy, xx])) * sty
+                kand.append(Treffer(self.vorlage, cx - bw / 2, cy - bh / 2, bw, bh, 1.0, float(p[yy, xx])))
+        kand.sort(key=lambda t: -t.score)
+        self.werte = {id(self.vorlage): kand[0].score} if kand else {id(self.vorlage): 0.0}
+        self.grenzen = {id(self.vorlage): schwelle}
+        gut = []
+        for t in kand:
+            box = (t.x, t.y, t.w, t.h)
+            if any(_iou(box, (g.x, g.y, g.w, g.h)) > 0.25 for g in gut):
+                continue
+            war_da = any(_iou(box, (a.x, a.y, a.w, a.h)) > 0.3 for a in self.vorher)
+            if t.score >= schwelle or (war_da and t.score >= schwelle - 0.12):
+                gut.append(t)
+            if len(gut) >= self.MAX_TREFFER:
+                break
+        self.vorher = gut
+        self._letzt = gut
+        return gut
+
+
+# ---------------------------------------------------------------------------
 #  Fenster (Steuerung + durchsichtige Anzeige über dem Bildschirm)
 # ---------------------------------------------------------------------------
 
@@ -788,7 +867,23 @@ def main():
         "modus": einst.get("modus", "genau"),        # "genau" oder "form"
         "schwelle_form": float(einst.get("schwelle_form", 0.50)),
         "grenzen": {},    # Vorlage-id -> aktuelle Grenze (Anzeige)
+        "schwelle_modell": float(einst.get("schwelle_modell", 0.50)),
+        "meldung": ("", 0.0),
+        "f8": False,
     }
+    truhe_ok = False
+    try:
+        import onnxruntime as _ort2
+        del _ort2
+        truhe_ok = os.path.isfile(TRUHE_MODELL)
+    except Exception:
+        pass
+    t_bild = np.zeros((64, 64, 3), np.uint8)
+    t_bild[:] = (40, 170, 230)
+    cv2.rectangle(t_bild, (8, 22), (56, 54), (30, 90, 150), -1)
+    cv2.rectangle(t_bild, (8, 12), (56, 26), (60, 200, 250), -1)
+    cv2.rectangle(t_bild, (28, 26), (36, 38), (230, 230, 250), -1)
+    modell_vorlage = Vorlage("Truhe", t_bild, None, "#ffd23b")
     try:
         import onnxruntime as _ort
         del _ort
@@ -798,18 +893,23 @@ def main():
         form_ok = False
         form_grund = "Das Zusatzteil 'onnxruntime' fehlt (%s).\nBitte Start.bat noch einmal starten." % e
     log("KI-Suche verfügbar:", form_ok, form_grund)
-    if not form_ok:
+    if not form_ok and zustand["modus"] == "form":
         zustand["modus"] = "genau"
 
     def akt_schwelle():
-        return zustand["schwelle_form"] if zustand["modus"] == "form" else zustand["schwelle"]
+        return {"form": zustand["schwelle_form"], "modell": zustand["schwelle_modell"]}.get(
+            zustand["modus"], zustand["schwelle"])
+
+    def gesuchte():
+        return [modell_vorlage] if zustand["modus"] == "modell" else zustand["vorlagen"]
 
     def einst_speichern():
         try:
             with open(EINST, "w", encoding="utf-8") as f:
                 json.dump({"bildschirm": mon_nr_var["i"], "schwelle": zustand["schwelle"],
                            "min_px": zustand["min_px"], "modus": zustand["modus"],
-                           "schwelle_form": zustand["schwelle_form"]}, f)
+                           "schwelle_form": zustand["schwelle_form"],
+                           "schwelle_modell": zustand["schwelle_modell"]}, f)
         except Exception:
             pass
     mon_nr_var = {"i": mon_nr}
@@ -955,7 +1055,7 @@ def main():
                 x0, x1 = 4 + (w - 8) * i / n, 4 + (w - 8) * (i + 1) / n
                 an = key == self.wert
                 if an:
-                    farbe = AKZ1 if i == 0 else AKZ2
+                    farbe = (AKZ1, AKZ2, GELB)[i % 3]
                     rund_rechteck(self, x0, 4, x1, h - 4, px(10), fill=mischen(farbe, BG, 0.72), outline=farbe)
                 self.create_text((x0 + x1) / 2, h / 2 - px(8), text=titel,
                                  fill=TEXT if an else DIM, font=(FONT, 10, "bold"))
@@ -1069,10 +1169,10 @@ def main():
         for w in liste.winfo_children():
             w.destroy()
         karten.clear()
-        if not zustand["vorlagen"]:
+        if not gesuchte():
             tk.Label(liste, text="Noch keine Bilder.\nUnten auf  ＋ Bilder  oder  Einfügen  klicken.",
                      bg=PANEL, fg=DIM, font=(FONT, 9), justify="center").pack(pady=px(14))
-        for v in zustand["vorlagen"]:
+        for v in gesuchte():
             k = tk.Frame(liste, bg=PANEL2, highlightthickness=1, highlightbackground=LINIE)
             k.pack(fill="x", pady=px(3))
             if id(v) not in vorschau:
@@ -1093,8 +1193,15 @@ def main():
             stat.pack(side="right", padx=px(4))
             balken = tk.Canvas(mitte, width=px(230), height=px(14), bg=PANEL2, highlightthickness=0)
             balken.pack(anchor="w", pady=(px(3), 0))
-            weg = tk.Label(k, text="✕", fg=DIM, bg=PANEL2, font=(FONT, 11), cursor="hand2")
+            weg = tk.Label(k, text="✕" if v is not modell_vorlage else "  ", fg=DIM, bg=PANEL2,
+                           font=(FONT, 11), cursor="hand2")
             weg.pack(side="right", padx=px(8))
+            if v is modell_vorlage:
+                weg.config(cursor="")
+                stat.config(text="")
+            if v is modell_vorlage:
+                karten[id(v)] = (stat, balken)
+                continue
             weg.bind("<Button-1>", lambda e, v=v: entfernen(v))
             weg.bind("<Enter>", lambda e, w=weg: w.config(fg=ROT))
             weg.bind("<Leave>", lambda e, w=weg: w.config(fg=DIM))
@@ -1104,7 +1211,7 @@ def main():
     def balken_neu():
         jetzt = time.time()
         gefunden = {id(t.vorlage) for t in zustand["ergebnis"]}
-        for v in zustand["vorlagen"]:
+        for v in gesuchte():
             if id(v) not in karten:
                 continue
             stat, balken = karten[id(v)]
@@ -1245,12 +1352,31 @@ def main():
         zustand["testmark"] = time.time() + 4.0
         zustand["nr"] += 1
 
+    LERN = os.path.join(ORDNER, "lernbilder")
+
+    def lernbild():
+        """Speichert das aktuelle Bildschirmfoto (für späteres Nachtrainieren)."""
+        b = foto["bild"]
+        if b is None:
+            with MSS() as sct:
+                b = np.ascontiguousarray(np.asarray(sct.grab(zustand["mon"]))[:, :, :3])
+        os.makedirs(LERN, exist_ok=True)
+        pfad = os.path.join(LERN, "lern_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3] + ".png")
+        cv2.imwrite(pfad, b)
+        n = len([f for f in os.listdir(LERN) if f.endswith(".png")])
+        zustand["meldung"] = ("📸 Lernbild %d gespeichert (Ordner 'lernbilder')" % n, time.time() + 2.5)
+        log("Lernbild gespeichert:", pfad)
+
     # Abschnitt: Suchart
     art_box = karte_rahmen("SUCHART")
 
     def modus_waehlen(neu):
         if neu == "form" and not form_ok:
             messagebox.showwarning("Bildsucher", "Die KI-Suche geht noch nicht:\n" + form_grund)
+            return
+        if neu == "modell" and not truhe_ok:
+            messagebox.showwarning("Bildsucher", "Das Truhen-Modell fehlt (truhe_modell.onnx) "
+                                   "oder 'onnxruntime' ist nicht installiert.")
             return
         zustand["modus"] = neu
         zustand["bester"] = {}
@@ -1261,14 +1387,18 @@ def main():
                     else "Strenge (höher = weniger Fehlalarme)")
         log("Suchart:", neu)
         einst_speichern()
+        liste_neu()
 
-    umsch = Umschalter(art_box, [("genau", "⚡ Genau", "gleiche Farben · blitzschnell"),
-                                 ("form", "🧠 Ähnlich (KI)", "auch andere Farben/Licht")],
+    umsch = Umschalter(art_box, [("genau", "⚡ Genau", "gleiche Farben"),
+                                 ("form", "🧠 Ähnlich", "KI, andere Farben"),
+                                 ("modell", "📦 Truhe", "eigenes Modell")],
                        zustand["modus"], modus_waehlen)
     umsch.pack(padx=px(12), pady=(px(2), px(6)))
 
     def regler_neu(w):
-        if zustand["modus"] == "form":
+        if zustand["modus"] == "modell":
+            zustand["schwelle_modell"] = int(w) / 100.0
+        elif zustand["modus"] == "form":
             zustand["schwelle_form"] = int(w) / 100.0
         else:
             zustand["schwelle"] = int(w) / 100.0
@@ -1330,8 +1460,9 @@ def main():
         knopf.setz_text("⏸  PAUSE" if zustand["laeuft"] else "▶  WEITER SUCHEN")
         balken_neu()
 
-    knopf = Knopf(unten, "⏸  PAUSE", umschalten, breite=280, hoehe=42, art="haupt")
+    knopf = Knopf(unten, "⏸  PAUSE", umschalten, breite=232, hoehe=42, art="haupt")
     knopf.pack(side="left")
+    Knopf(unten, "📸", lernbild, breite=42, hoehe=42).pack(side="left", padx=(px(6), 0))
     Knopf(unten, "👁", was_sehe_ich, breite=42, hoehe=42).pack(side="left", padx=(px(6), 0))
     Knopf(unten, "✕", lambda: schliessen(), breite=42, hoehe=42, art="gefahr").pack(side="left", padx=(px(6), 0))
 
@@ -1342,9 +1473,36 @@ def main():
     root.update()
     win_extras(root, False)
 
+    def f8_faden():
+        """Taste F8 überall (auch im Spiel): Lernbild speichern."""
+        try:
+            import ctypes.wintypes as wt
+            u = ctypes.windll.user32
+            if not u.RegisterHotKey(None, 1, 0x4000, 0x77):  # MOD_NOREPEAT, F8
+                log("F8 konnte nicht belegt werden")
+                return
+            msg = wt.MSG()
+            while u.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+                if msg.message == 0x0312:
+                    zustand["f8"] = True
+        except Exception as e:
+            log("F8-Taste geht nicht:", e)
+
+    if WIN:
+        threading.Thread(target=f8_faden, daemon=True).start()
+
     # ---- Such-Schleife im Hintergrund ----
     sucher = Sucher()
     form = {"s": None}
+
+    modell = {"s": None}
+
+    def modell_sucher():
+        if modell["s"] is None:
+            t0 = time.perf_counter()
+            modell["s"] = ModellSucher(modell_vorlage, TRUHE_MODELL)
+            log("Truhen-Modell geladen in %.1f s" % (time.perf_counter() - t0))
+        return modell["s"]
 
     def form_sucher():
         if form["s"] is None:
@@ -1359,7 +1517,7 @@ def main():
         try:
             with MSS() as sct:
                 while not zustand["ende"]:
-                    if not zustand["laeuft"] or not zustand["vorlagen"]:
+                    if not zustand["laeuft"] or not gesuchte():
                         time.sleep(0.05)
                         continue
                     m = zustand["mon"]
@@ -1385,7 +1543,7 @@ def main():
             alt_sig = None
             alt_modus = None
             while not zustand["ende"]:
-                vl = zustand["vorlagen"]
+                vl = gesuchte()
                 if not zustand["laeuft"] or not vl:
                     if zustand["ergebnis"]:
                         zustand["ergebnis"] = []
@@ -1407,6 +1565,9 @@ def main():
                     sucher._key = None
                     if form["s"] is not None:
                         form["s"].vorher = {}
+                    if modell["s"] is not None:
+                        modell["s"].vorher = []
+                        modell["s"]._mini = None
                     alt_sig = None
                     continue
                 if fm is not zustand["mon"]:
@@ -1420,7 +1581,13 @@ def main():
                     if x1 > 0 and y1 > 0:
                         frame[y0:y1, x0:x1] = 0
                 modus = zustand["modus"]
-                if modus == "form":
+                if modus == "modell":
+                    aktiv = modell_sucher()
+                    if modus != alt_modus:
+                        aktiv.vorher = []
+                        aktiv._mini = None
+                    erg = aktiv.suche(frame, zustand["schwelle_modell"])
+                elif modus == "form":
                     aktiv = form_sucher()
                     if modus != alt_modus:
                         aktiv.vorher = {}
@@ -1433,7 +1600,7 @@ def main():
                     sucher.min_px = zustand["min_px"]
                     erg = sucher.suche(frame, vl, zustand["schwelle"])
                 alt_modus = modus
-                if modus == "form":
+                if modus in ("form", "modell"):
                     zustand["grenzen"] = dict(aktiv.grenzen)
                 else:
                     zustand["grenzen"] = {}
@@ -1533,13 +1700,18 @@ def main():
                     pill = rund_rechteck(cv, bb[0] - 10, bb[1] - 4, bb[2] + 10, bb[3] + 4, 12,
                                          fill="#0b0e1c", outline=f, width=2)
                     cv.tag_lower(pill, tid)
+        if zustand["f8"]:
+            zustand["f8"] = False
+            lernbild()
         if zaehler["n"] % 12 == 0:
             balken_neu()
             puls_an = (zaehler["n"] // 12) % 2 == 0
-            if zustand["fehler"]:
+            if time.time() < zustand["meldung"][1]:
+                status.config(text=zustand["meldung"][0], fg=GRUEN)
+            elif zustand["fehler"]:
                 pille_setzen("FEHLER", ROT, False)
                 status.config(text="Fehler: " + zustand["fehler"][:70], fg=ROT)
-            elif not zustand["vorlagen"]:
+            elif not gesuchte():
                 pille_setzen("BEREIT", DIM, False)
                 status.config(text="Füge ein Bild hinzu, dann geht es los.", fg=DIM)
             elif not zustand["laeuft"]:
@@ -1551,10 +1723,10 @@ def main():
             else:
                 n = len(treffer)
                 pille_setzen("%d GEFUNDEN" % n if n else "SUCHT", GRUEN if n else AKZ1, puls_an)
-                art = "KI" if zustand["modus"] == "form" else "Genau"
+                art = {"form": "KI", "modell": "Truhen-Modell"}.get(zustand["modus"], "Genau")
                 status.config(text="%s · %.0f Suchen pro Sekunde · %d Bild%s"
-                              % (art, zustand["fps"], len(zustand["vorlagen"]),
-                                 "" if len(zustand["vorlagen"]) == 1 else "er"), fg=DIM)
+                              % (art, zustand["fps"], len(gesuchte()),
+                                 "" if len(gesuchte()) == 1 else "er"), fg=DIM)
         if zaehler["n"] % 120 == 0:  # Anzeige ganz oben halten
             try:
                 ov.attributes("-topmost", True)

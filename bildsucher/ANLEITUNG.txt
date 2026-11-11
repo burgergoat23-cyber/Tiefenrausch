@@ -36,6 +36,17 @@ Suchart
     Der Regler heißt hier "Strenge": 50 ist ein guter Wert. Die KI stellt
     für jedes Bild selbst eine Grenze ein (weißer Strich im Balken).
 
+  - Truhe (eigenes Modell): ein extra trainiertes Modell nur für die Truhe.
+    Erkennt sie in Gold, Lila und anderen Farben, von vorne, hinten und der
+    Seite, auch wenn nur die Hälfte zu sehen ist oder etwas davor steht.
+    Braucht keine Bilder in der Liste. Schnell (etwa 10 Mal pro Sekunde).
+
+Lernbilder (damit das Truhen-Modell besser wird)
+  Taste F8 (geht auch mitten im Spiel) oder der 📸-Knopf speichert ein
+  Bildschirmfoto in den Ordner "lernbilder". Am besten Fotos machen, wenn
+  eine Truhe zu sehen ist, die NICHT erkannt wird, oder wenn etwas falsch
+  markiert wird. Diese Bilder kann man zum Nachtrainieren schicken.
+
 Einstellungen
   - Genauigkeit: höher = nur sehr sichere Treffer (weniger Fehlalarme),
     niedriger = findet auch leicht veränderte Bilder.
