@@ -1,0 +1,46 @@
+﻿BILDSUCHER - Anleitung
+======================
+
+Was macht das Programm?
+  Es schaut ständig auf deinen Bildschirm und sucht die Bilder, die du ihm
+  gibst. Findet es eins, bekommt es einen farbigen Rahmen und einen Strich
+  von der Bildschirm-Mitte dorthin. Ist das Bild weg, verschwinden Rahmen
+  und Strich sofort. Es findet die Bilder auch, wenn sie größer oder
+  kleiner angezeigt werden. Du kannst mehrere Bilder gleichzeitig suchen.
+
+Starten (Windows 10 oder 11)
+  1. Den Ordner "Bildsucher" aus der ZIP-Datei auspacken
+     (Rechtsklick auf die ZIP -> "Alle extrahieren").
+  2. Im Ordner doppelt auf "Start.bat" klicken.
+     - Kommt eine blaue Warnung "Der Computer wurde durch Windows geschützt":
+       auf "Weitere Informationen" und dann "Trotzdem ausführen" klicken.
+     - Beim ersten Mal wird Python bzw. die Zusatzteile geladen. Wenn es
+       sagt "Start.bat noch einmal doppelklicken", das einfach machen.
+  3. Das schwarze Fenster offen lassen. Es erscheint das Fenster "Bildsucher".
+
+Bilder zum Suchen geben (drei Wege)
+  a) "Bilder hinzufügen" klicken und Bilder auswählen (PNG, JPG ...).
+     Es dürfen mehrere auf einmal sein.
+  b) Ausschnitt vom Bildschirm: Windows-Taste + Umschalt + S drücken,
+     den Bereich mit der Maus aufziehen, dann im Bildsucher "Einfügen".
+  c) Bilder in den Ordner "bilder" legen und "Neu laden" klicken.
+  Die Bilder bleiben gespeichert und sind beim nächsten Start wieder da.
+
+Einstellungen
+  - Genauigkeit: höher = nur sehr sichere Treffer (weniger Fehlalarme),
+    niedriger = findet auch leicht veränderte Bilder.
+  - Kleinste Größe: wie klein ein Bild auf dem Bildschirm sein darf.
+    Größerer Wert = schneller.
+  - Pause: Suche anhalten.
+  Unten im Fenster steht, wie oft pro Sekunde gesucht wird.
+
+Tipps
+  - Am besten kleine, deutliche Ausschnitte nehmen (z. B. ein Symbol),
+    nicht riesige Bilder mit viel Hintergrund.
+  - Einfarbige Bilder (nur eine Farbe) lassen sich schlecht suchen.
+  - Gesucht wird auf dem Hauptbildschirm.
+  - Bei Spielen im echten Vollbild kann Windows die Markierung verstecken.
+    Dann im Spiel "Fenster ohne Rahmen" (borderless) einstellen.
+  - Gedrehte oder gespiegelte Bilder werden nicht erkannt, nur
+    vergrößerte und verkleinerte.
+  - Beenden: das Bildsucher-Fenster schließen.
