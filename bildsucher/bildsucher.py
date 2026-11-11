@@ -180,6 +180,7 @@ class Sucher:
         self._key = None
         self._rr = 0              # nächste Grobsuch-Aufgabe (Runde um Runde)
         self._rest = 0            # Aufgaben bis zur vollen Runde seit letzter Änderung
+        self.werte = {}           # Vorlage-id -> bester Wert der letzten Suche (Anzeige)
         self.budget_ms = 15       # Zeit pro Bild für die Suche nach neuen Fundstellen
 
     def groessen(self, v, W, H):
@@ -306,6 +307,7 @@ class Sucher:
             if t is not None:
                 roh.setdefault(id(v), []).append(t)
 
+        self.werte = {k: max(t.score for t in ts) for k, ts in roh.items() if ts}
         for v in vorlagen:
             alt = self.vorher.get(id(v), [])
             liste = sorted(roh.get(id(v), []), key=lambda t: -t.score)
@@ -335,7 +337,7 @@ class Sucher:
         rand = 0.7 if verfolgen else 0.22   # Verfolgung: größerer Suchbereich
         t = self._fein1(cpyr, v, x, y, tw, th, s, (0.85, 0.92, 1.0, 1.08, 1.17), 20, rand)
         if t is None or t.score < schwelle - 0.15:
-            return None
+            return t  # zu schwach – wird später verworfen, Wert dient nur der Anzeige
         return self._fein1(cpyr, v, t.x, t.y, t.w, t.h, t.s, (0.96, 1.0, 1.04), self.FEIN_PX, 0.15)
 
     def _fein1(self, cpyr, v, x, y, tw, th, s, faktoren, fein_px, randf=0.22):
@@ -418,7 +420,28 @@ def rand_punkt(cx, cy, x0, y0, x1, y1):
     return cx + dx * t, cy + dy * t
 
 
+LOG = os.path.join(ORDNER, "bildsucher_log.txt")
+
+
+def log(*teile):
+    text = " ".join(str(t) for t in teile)
+    print(text)
+    try:
+        with open(LOG, "a", encoding="utf-8") as f:
+            f.write(datetime.now().strftime("%H:%M:%S ") + text + "\n")
+    except Exception:
+        pass
+
+
 def main():
+    try:
+        with open(LOG, "w", encoding="utf-8") as f:
+            f.write("Bildsucher-Protokoll %s\n" % datetime.now())
+    except Exception:
+        pass
+    import platform
+    log("System:", platform.platform(), "| Python", sys.version.split()[0],
+        "| OpenCV", cv2.__version__, "| numpy", np.__version__)
     if WIN:
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(2)  # echte Pixel
@@ -440,11 +463,28 @@ def main():
     root.attributes("-topmost", True)
     root.resizable(False, False)
 
-    # Bildschirm (Hauptbildschirm) bestimmen
+    import json
+    EINST = os.path.join(ORDNER, "einstellungen.json")
+    try:
+        with open(EINST, encoding="utf-8") as f:
+            einst = json.load(f)
+    except Exception:
+        einst = {}
+
+    # Bildschirme bestimmen
     with MSS() as s:
-        mons = s.monitors[1:]
-    mon = next((m for m in mons if m["left"] == 0 and m["top"] == 0), mons[0])
-    mon = {k: mon[k] for k in ("left", "top", "width", "height")}
+        mons = [{k: m[k] for k in ("left", "top", "width", "height")} for m in s.monitors[1:]]
+    log("mss", getattr(mss, "__version__", "?"), "Bildschirme:", mons)
+    haupt = next((i for i, m in enumerate(mons) if m["left"] == 0 and m["top"] == 0), 0)
+    mon_nr = einst.get("bildschirm", haupt)
+    if not isinstance(mon_nr, int) or not 0 <= mon_nr < len(mons):
+        mon_nr = haupt
+    mon = dict(mons[mon_nr])
+
+    def mon_name(i):
+        m = mons[i]
+        return "Bildschirm %d  (%dx%d)%s" % (i + 1, m["width"], m["height"],
+                                             "  – Hauptbildschirm" if i == haupt else "")
 
     # ---- Anzeige-Fenster (durchsichtig, Klicks gehen hindurch) ----
     KEY = "#010203"
@@ -474,9 +514,10 @@ def main():
                 st |= 0x80000 | 0x20 | 0x80 | 0x08000000  # layered, transparent, toolwindow, noactivate
                 u.SetWindowLongW(hwnd, GWL_EXSTYLE, st)
             # Fenster nicht mitfotografieren (Windows 10 ab 2004)
-            u.SetWindowDisplayAffinity(hwnd, 0x11)
-        except Exception:
-            pass
+            ok = u.SetWindowDisplayAffinity(hwnd, 0x11)
+            log("Fenster", hwnd, "durchklickbar" if durchklick else "", "ausgenommen:", bool(ok))
+        except Exception as e:
+            log("Fenster-Einstellung fehlgeschlagen:", e)
 
     ov.update()
     win_extras(ov, True)
@@ -493,7 +534,24 @@ def main():
         "sperre": None,   # Bereich des Steuerfensters (wird ausgeblendet)
         "fehler": "",
         "min_px": 16,
+        "mon": mon,
+        "mon_neu": False,
+        "testmark": 0.0,
+        "schwarz": False,
+        "bester": {},     # Vorlage-id -> (Wert, Zeit)
     }
+
+    def einst_speichern():
+        try:
+            with open(EINST, "w", encoding="utf-8") as f:
+                json.dump({"bildschirm": mon_nr_var["i"], "schwelle": zustand["schwelle"],
+                           "min_px": zustand["min_px"]}, f)
+        except Exception:
+            pass
+    mon_nr_var = {"i": mon_nr}
+
+    foto = {"bild": None, "nr": 0}
+    foto_neu = threading.Event()
 
     # ---- Steuerfenster ----
     pad = dict(padx=6, pady=3)
@@ -503,12 +561,25 @@ def main():
                     font=("Segoe UI", 10))
     lb.pack(padx=8)
 
+    def eintrag(v):
+        hinweis = "  (einfarbig!)" if v.flach else ""
+        b = zustand["bester"].get(id(v))
+        wert = ""
+        if zustand["laeuft"] and b and time.time() - b[1] < 2.0:
+            wert = "  –  %d%%" % round(max(0.0, b[0]) * 100)
+            if b[0] < zustand["schwelle"]:
+                wert += " (zu wenig)"
+        return "■ %s  [%dx%d]%s%s" % (v.name, v.w, v.h, hinweis, wert)
+
     def liste_neu():
+        auswahl = lb.curselection()
         lb.delete(0, "end")
         for i, v in enumerate(zustand["vorlagen"]):
-            hinweis = "  (einfarbig!)" if v.flach else ""
-            lb.insert("end", "■ %s  [%dx%d]%s" % (v.name, v.w, v.h, hinweis))
+            lb.insert("end", eintrag(v))
             lb.itemconfig(i, fg=v.farbe)
+        for i in auswahl:
+            if i < lb.size():
+                lb.selection_set(i)
 
     def farbe_frei():
         benutzt = {v.farbe for v in zustand["vorlagen"]}
@@ -615,16 +686,68 @@ def main():
     tk.Button(reihe2, text="📁 Ordner", command=ordner_oeffnen).pack(side="left", expand=True, fill="x")
     tk.Button(reihe2, text="🔄 Neu laden", command=ordner_neu_laden).pack(side="left", expand=True, fill="x")
 
+    reihe3 = tk.Frame(root)
+    reihe3.pack(fill="x", padx=8, pady=(4, 0))
+
+    def was_sehe_ich():
+        b = foto["bild"]
+        if b is None:
+            with MSS() as sct:
+                b = np.ascontiguousarray(np.asarray(sct.grab(zustand["mon"]))[:, :, :3])
+        pfad = os.path.join(ORDNER, "was_ich_sehe.png")
+        cv2.imwrite(pfad, b)
+        log("Bildschirmfoto gespeichert:", b.shape, "Helligkeit %.1f" % b.mean())
+        if WIN:
+            os.startfile(pfad)
+        else:
+            messagebox.showinfo("Bildsucher", "Gespeichert: " + pfad)
+
+    def anzeige_testen():
+        zustand["testmark"] = time.time() + 4.0
+        zustand["nr"] += 1
+
+    tk.Button(reihe3, text="👁 Was sieht das Programm?", command=was_sehe_ich).pack(side="left", expand=True, fill="x")
+    tk.Button(reihe3, text="🎯 Anzeige testen", command=anzeige_testen).pack(side="left", expand=True, fill="x")
+
+    tk.Label(root, text="Auf welchem Bildschirm suchen?").pack(anchor="w", padx=8, pady=(8, 0))
+    namen = [mon_name(i) for i in range(len(mons))]
+    mon_var = tk.StringVar(value=namen[mon_nr])
+
+    def mon_waehlen(name):
+        i = namen.index(name)
+        mon_nr_var["i"] = i
+        m = dict(mons[i])
+        ov.geometry("%dx%d+%d+%d" % (m["width"], m["height"], m["left"], m["top"]))
+        cv.config(width=m["width"], height=m["height"])
+        zustand["mon"] = m
+        zustand["mon_neu"] = True
+        zustand["nr"] += 1
+        log("Bildschirm gewählt:", i + 1, m)
+        einst_speichern()
+        anzeige_testen()
+
+    om = tk.OptionMenu(root, mon_var, *namen, command=mon_waehlen)
+    om.config(width=38)
+    om.pack(padx=8, fill="x")
+
     tk.Label(root, text="Genauigkeit (höher = weniger Fehlalarme):").pack(anchor="w", padx=8, pady=(8, 0))
+    def regler_neu(w):
+        zustand["schwelle"] = int(w) / 100.0
+        einst_speichern()
+
+    def regler2_neu(w):
+        zustand["min_px"] = int(w)
+        einst_speichern()
+
     regler = tk.Scale(root, from_=50, to=98, orient="horizontal", length=300,
-                      command=lambda w: zustand.__setitem__("schwelle", int(w) / 100.0))
-    regler.set(80)
+                      command=regler_neu)
+    regler.set(int(round(float(einst.get("schwelle", 0.8)) * 100)))
     regler.pack(padx=8)
 
     tk.Label(root, text="Kleinste Größe in Pixeln (kleiner = langsamer):").pack(anchor="w", padx=8)
     regler2 = tk.Scale(root, from_=8, to=120, orient="horizontal", length=300,
-                       command=lambda w: zustand.__setitem__("min_px", int(w)))
-    regler2.set(16)
+                       command=regler2_neu)
+    regler2.set(int(einst.get("min_px", 16)))
     regler2.pack(padx=8)
 
     knopf = tk.Button(root, text="⏸ Pause", font=("Segoe UI", 11, "bold"))
@@ -645,8 +768,6 @@ def main():
     # ---- Such-Schleife im Hintergrund ----
     sucher = Sucher()
 
-    foto = {"bild": None, "nr": 0}
-    foto_neu = threading.Event()
 
     def fotografieren():
         """Macht ständig Bildschirmfotos (eigener Faden, läuft parallel zur Suche)."""
@@ -656,14 +777,18 @@ def main():
                     if not zustand["laeuft"] or not zustand["vorlagen"]:
                         time.sleep(0.05)
                         continue
-                    shot = sct.grab(mon)
+                    m = zustand["mon"]
+                    shot = sct.grab(m)
                     foto["bild"] = np.ascontiguousarray(np.asarray(shot)[:, :, :3])
+                    foto["mon"] = m
+                    if foto["nr"] % 30 == 0:
+                        zustand["schwarz"] = float(foto["bild"][::16, ::16].max()) < 8
                     foto["nr"] += 1
                     foto_neu.set()
                     time.sleep(0.002)
         except Exception as e:
             import traceback
-            traceback.print_exc()
+            log("FEHLER Bildschirmfoto:", traceback.format_exc())
             zustand["fehler"] = "Bildschirmfoto: %s" % e
 
     threading.Thread(target=fotografieren, daemon=True).start()
@@ -689,16 +814,32 @@ def main():
                         foto_neu.wait(0.1)
                     continue
                 gesehen = foto["nr"]
+                fm = foto.get("mon")
+                if zustand["mon_neu"]:  # anderer Bildschirm gewählt: neu anfangen
+                    zustand["mon_neu"] = False
+                    sucher.vorher = {}
+                    sucher._key = None
+                    alt_sig = None
+                    continue
+                if fm is not zustand["mon"]:
+                    continue  # Foto stammt noch vom alten Bildschirm
                 frame = foto["bild"].copy()
                 sp = zustand["sperre"]
                 if sp:  # eigenes Steuerfenster nicht durchsuchen
                     x0, y0, x1, y1 = sp
-                    x0, y0 = max(0, x0 - mon["left"]), max(0, y0 - mon["top"])
-                    x1, y1 = x1 - mon["left"], y1 - mon["top"]
+                    x0, y0 = max(0, x0 - fm["left"]), max(0, y0 - fm["top"])
+                    x1, y1 = x1 - fm["left"], y1 - fm["top"]
                     if x1 > 0 and y1 > 0:
                         frame[y0:y1, x0:x1] = 0
                 sucher.min_px = zustand["min_px"]
                 erg = sucher.suche(frame, vl, zustand["schwelle"])
+                jetzt_t = time.time()
+                for vid, w in sucher.werte.items():
+                    b = zustand["bester"].get(vid)
+                    if b is None or w >= b[0] or jetzt_t - b[1] > 1.5:
+                        zustand["bester"][vid] = (w, jetzt_t)
+                for t in erg:
+                    zustand["bester"][id(t.vorlage)] = (t.score, jetzt_t)
                 sig = tuple((id(t.vorlage), int(t.x), int(t.y), int(t.w), int(t.h),
                              int(t.score * 100)) for t in erg)
                 if sig != alt_sig:  # nur neu zeichnen, wenn sich etwas geändert hat
@@ -711,7 +852,7 @@ def main():
                 zustand["fps"] = zustand["fps"] * 0.8 + (1.0 / max(dt, 1e-3)) * 0.2
         except Exception as e:  # Fehler anzeigen statt still abzustürzen
             import traceback
-            traceback.print_exc()
+            log("FEHLER Suche:", traceback.format_exc())
             zustand["fehler"] = str(e)
 
     threading.Thread(target=arbeit, daemon=True).start()
@@ -720,7 +861,6 @@ def main():
 
     # ---- Zeichnen ----
     gezeichnet = {"nr": -1}
-    cx, cy = mon["width"] / 2.0, mon["height"] / 2.0
     zaehler = {"n": 0}
 
     def zeichnen():
@@ -736,6 +876,17 @@ def main():
         if gezeichnet["nr"] != zustand["nr"] and not (test_s and not zustand["laeuft"]):
             gezeichnet["nr"] = zustand["nr"]
             cv.delete("all")
+            m = zustand["mon"]
+            cx, cy = m["width"] / 2.0, m["height"] / 2.0
+            if time.time() < zustand["testmark"]:
+                # Test: großer Rahmen am Rand + Kreuz in der Mitte
+                cv.create_rectangle(6, 6, m["width"] - 6, m["height"] - 6,
+                                    outline="#ff3bf0", width=10)
+                cv.create_line(cx - 60, cy, cx + 60, cy, fill="#ff3bf0", width=6)
+                cv.create_line(cx, cy - 60, cx, cy + 60, fill="#ff3bf0", width=6)
+                cv.create_text(cx, cy + 90, fill="#ff3bf0", font=("Segoe UI", 20, "bold"),
+                               text="Hier sucht der Bildsucher")
+                root.after(4100, lambda: zustand.__setitem__("nr", zustand["nr"] + 1))
             treffer = zustand["ergebnis"]
             if treffer:
                 cv.create_oval(cx - 5, cy - 5, cx + 5, cy + 5, fill="#ffffff", outline="#000000")
@@ -762,9 +913,14 @@ def main():
                 status.config(text="Noch keine Bilder – bitte hinzufügen", fg="#555")
             elif not zustand["laeuft"]:
                 status.config(text="Pause", fg="#555")
+            elif zustand["schwarz"]:
+                status.config(text="Bildschirmfoto ist schwarz! (Spiel im Vollbild? "
+                                   "Dann 'Fenster ohne Rahmen' einstellen)", fg="#c00")
             else:
                 status.config(text="%.0f Suchen pro Sekunde  ·  %d gefunden"
                               % (zustand["fps"], len(zustand["ergebnis"])), fg="#060")
+        if zaehler["n"] % 30 == 0 and zustand["vorlagen"]:
+            liste_neu()  # beste Werte in der Liste auffrischen
         if zaehler["n"] % 120 == 0:  # Anzeige ganz oben halten
             try:
                 ov.attributes("-topmost", True)
@@ -792,7 +948,7 @@ def main():
 
             def foto_speichern():
                 with MSS() as sct:
-                    bild = np.asarray(sct.grab(mon))[:, :, :3]
+                    bild = np.asarray(sct.grab(zustand["mon"]))[:, :, :3]
                 cv2.imwrite(os.environ.get("BILDSUCHER_PNG", "anzeige.png"), bild)
                 schliessen()
             root.after(500, foto_speichern)

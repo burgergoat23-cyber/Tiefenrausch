@@ -34,6 +34,18 @@ Einstellungen
   - Pause: Suche anhalten.
   Unten im Fenster steht, wie oft pro Sekunde gesucht wird.
 
+Wenn nichts markiert wird
+  1. "Anzeige testen" klicken: Ein rosa Rahmen zeigt, auf welchem Bildschirm
+     gesucht wird. Falscher Bildschirm? Oben bei "Auf welchem Bildschirm
+     suchen?" den richtigen wählen.
+  2. "Was sieht das Programm?" klicken: Es öffnet sich das Bild, das der
+     Bildsucher gerade sieht. Ist es schwarz, kann Windows dieses Programm
+     (z. B. Spiel im Vollbild) nicht abfotografieren.
+  3. In der Liste steht hinter jedem Bild ein Prozentwert: so ähnlich ist die
+     beste Stelle. Liegt er knapp unter der Genauigkeit, den Regler
+     "Genauigkeit" etwas nach links schieben.
+  Bei Problemen hilft die Datei "bildsucher_log.txt" im Ordner.
+
 Tipps
   - Am besten kleine, deutliche Ausschnitte nehmen (z. B. ein Symbol),
     nicht riesige Bilder mit viel Hintergrund.

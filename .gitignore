@@ -8,3 +8,7 @@ dist/
 tools/video/voice/
 tests/fb/database.rules.json
 __pycache__/
+bildsucher/bildsucher_log.txt
+bildsucher/einstellungen.json
+bildsucher/was_ich_sehe.png
+bildsucher/bilder/
