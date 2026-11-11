@@ -19,11 +19,11 @@ Starten (Windows 10 oder 11)
   3. Das schwarze Fenster offen lassen. Es erscheint das Fenster "Bildsucher".
 
 Bilder zum Suchen geben (drei Wege)
-  a) "Bilder hinzufügen" klicken und Bilder auswählen (PNG, JPG ...).
+  a) "＋ Bilder" klicken und Bilder auswählen (PNG, JPG ...).
      Es dürfen mehrere auf einmal sein.
   b) Ausschnitt vom Bildschirm: Windows-Taste + Umschalt + S drücken,
      den Bereich mit der Maus aufziehen, dann im Bildsucher "Einfügen".
-  c) Bilder in den Ordner "bilder" legen und "Neu laden" klicken.
+  c) Bilder in den Ordner "bilder" legen und auf ⟳ (neu laden) klicken.
   Die Bilder bleiben gespeichert und sind beim nächsten Start wieder da.
 
 Suchart
@@ -31,29 +31,29 @@ Suchart
     egal wie groß. Sehr schnell.
   - Ähnlich (KI): findet auch dasselbe Ding in anderen Farben, anderem
     Licht oder leicht anderem Aussehen (z. B. goldene und lila Truhe).
-    Dafür langsamer (einige Male pro Sekunde), und das Ding sollte auf dem
+    Etwas langsamer (mehrmals pro Sekunde), und das Ding sollte auf dem
     Bildschirm mindestens etwa 80-100 Pixel groß sein.
-    Genauigkeit hier am besten um 50 lassen (Treffer liegen meist bei
-    55-60 %, falsche Stellen unter 47 %).
+    Der Regler heißt hier "Strenge": 50 ist ein guter Wert. Die KI stellt
+    für jedes Bild selbst eine Grenze ein (weißer Strich im Balken).
 
 Einstellungen
   - Genauigkeit: höher = nur sehr sichere Treffer (weniger Fehlalarme),
     niedriger = findet auch leicht veränderte Bilder.
   - Kleinste Größe: wie klein ein Bild auf dem Bildschirm sein darf.
     Größerer Wert = schneller.
-  - Pause: Suche anhalten.
+  - PAUSE: Suche anhalten.  ✕: Programm beenden.
   Unten im Fenster steht, wie oft pro Sekunde gesucht wird.
 
 Wenn nichts markiert wird
-  1. "Anzeige testen" klicken: Ein rosa Rahmen zeigt, auf welchem Bildschirm
+  1. "Test" klicken: Ein rosa Rahmen zeigt, auf welchem Bildschirm
      gesucht wird. Falscher Bildschirm? Oben bei "Auf welchem Bildschirm
      suchen?" den richtigen wählen.
-  2. "Was sieht das Programm?" klicken: Es öffnet sich das Bild, das der
+  2. Auf das Auge (👁) klicken: Es öffnet sich das Bild, das der
      Bildsucher gerade sieht. Ist es schwarz, kann Windows dieses Programm
      (z. B. Spiel im Vollbild) nicht abfotografieren.
-  3. In der Liste steht hinter jedem Bild ein Prozentwert: so ähnlich ist die
-     beste Stelle. Liegt er knapp unter der Genauigkeit, den Regler
-     "Genauigkeit" etwas nach links schieben.
+  3. Bei jedem Bild zeigt ein Balken, wie ähnlich die beste Stelle ist.
+     Der weiße Strich ist die Grenze. Bleibt der Balken knapp davor, den
+     Regler etwas nach links schieben.
   Bei Problemen hilft die Datei "bildsucher_log.txt" im Ordner.
 
 Tipps

@@ -423,20 +423,27 @@ class FormSucher:
     ZIEL_H = 540        # Bildschirm wird für die Grobsuche auf diese Höhe verkleinert
     STUFE = 1.2         # Größen-Schritt (die genaue Prüfung gleicht ±25 % aus)
     MIN_ZELLEN = 4      # Vorlage muss mindestens so viele Merkmal-Zellen haben
+    MAX_VORLAGE = 160   # größer (Pixel) wird eine Vorlage nie gerechnet -> Pyramide
     PRUEF_BREITE = 128  # Breite der Vorlage bei der genauen Prüfung
     KANDIDATEN = 3      # so viele Stellen pro Bild werden genau geprüft
     MAX_TREFFER = 10
+    MIN_WERT = 0.45     # darunter nie ein Treffer
 
     def __init__(self, pfad=MODELL):
         import onnxruntime as ort
         so = ort.SessionOptions()
         so.intra_op_num_threads = max(1, os.cpu_count() or 4)
         so.log_severity_level = 3
+        # Threads nicht "leer drehen" lassen, sonst bremsen sie die übrige Rechnung aus
+        so.add_session_config_entry("session.intra_op.allow_spinning", "0")
+        so.add_session_config_entry("session.inter_op.allow_spinning", "0")
         self.sess = ort.InferenceSession(pfad, so, providers=["CPUExecutionProvider"])
         self.mittel = np.array([0.485, 0.456, 0.406], np.float32) * 255
         self.streu = np.array([0.229, 0.224, 0.225], np.float32) * 255
         self.vorher = {}
         self.werte = {}
+        self.pegel = {}     # Vorlage-id -> letzte Grundpegel-Werte
+        self.grenzen = {}   # Vorlage-id -> aktuelle Grenze (zur Anzeige)
 
     def merkmale(self, bgr):
         x = (bgr[:, :, ::-1].astype(np.float32) - self.mittel) / self.streu
@@ -522,6 +529,8 @@ class FormSucher:
         return Treffer(v, bx, by, bw, bh, bw / float(v.w), mx)
 
     def suche(self, frame, vorlagen, schwelle=0.5):
+        """schwelle 0.30..0.98 (Regler): wie deutlich ein Treffer über dem
+        Grundpegel liegen muss (0.50 -> Abstand 0.12)."""
         if not vorlagen:
             self.vorher = {}
             return []
@@ -537,14 +546,22 @@ class FormSucher:
         return self._letzt
 
     def _suche(self, frame, vorlagen, schwelle):
+        abstand = 0.06 + (schwelle - 0.30) * 0.3
         H, W = frame.shape[:2]
         down = max(1.0, H / float(self.ZIEL_H))
-        klein = frame if down == 1.0 else cv2.resize(
-            frame, (int(W / down), int(H / down)), interpolation=cv2.INTER_AREA)
-        fs = self.merkmale(klein)
-        _, Hs, Ws = fs.shape
-        st = 16.0 * down  # Bildschirm-Pixel pro Merkmal-Zelle
-        Fs = None
+        # Bildschirm-Pyramide: große Dinge auf kleinerem Bild suchen -> jede Vorlage
+        # ist höchstens ~10 Merkmal-Zellen groß, das hält alles schnell.
+        stufen = [frame if down == 1.0 else cv2.resize(
+            frame, (int(W / down), int(H / down)), interpolation=cv2.INTER_AREA)]
+        while min(stufen[-1].shape[:2]) >= 2 * 16 * self.MIN_ZELLEN and len(stufen) < 4:
+            stufen.append(cv2.pyrDown(stufen[-1]))
+        karten = [None] * len(stufen)
+
+        def karte(L):
+            if karten[L] is None:
+                karten[L] = self.merkmale(stufen[L])
+            return karten[L]
+
         ergebnis = []
         neu_vorher = {}
         self.werte = {}
@@ -555,13 +572,18 @@ class FormSucher:
                 th = tw * v.h / float(v.w)
                 if th > H * 0.95:
                     break
-                lw, lh = int(round(tw / down)), int(round(th / down))
+                lw0, lh0 = tw / down, th / down
+                L = 0
+                while min(lw0, lh0) / (2 ** L) > self.MAX_VORLAGE and L < len(stufen) - 1:
+                    L += 1
+                lw, lh = int(round(lw0 / 2 ** L)), int(round(lh0 / 2 ** L))
+                st = 16.0 * down * 2 ** L  # Bildschirm-Pixel pro Merkmal-Zelle
                 if lw >= 16 and lh >= 16:
                     ft, off = self.vorlage_m(v, lw, lh)
+                    fs = karte(L)
+                    _, Hs, Ws = fs.shape
                     if (self.MIN_ZELLEN <= ft.shape[1] <= Hs and self.MIN_ZELLEN <= ft.shape[2] <= Ws):
-                        if Fs is None and ft.shape[1] * ft.shape[2] > 500:
-                            Fs = np.fft.rfft2(fs)
-                        r = self.korr(fs, ft, Fs)
+                        r = self.korr(fs, ft)
                         mu, sd = float(r.mean()), float(r.std()) + 1e-6
                         for _ in range(2):
                             py, px = np.unravel_index(int(r.argmax()), r.shape)
@@ -584,11 +606,29 @@ class FormSucher:
                 pruefen.append(box)
                 if len(pruefen) >= self.KANDIDATEN:
                     break
+            neu_n = len(pruefen)
             pruefen += [(a.x, a.y, a.w, a.h) for a in alt]  # Verfolgung
-            roh = [t for t in (self.pruef(frame, v, *b) for b in pruefen) if t is not None]
+            roh_alle = [self.pruef(frame, v, *b) for b in pruefen]
+            # Grundpegel: wie gut passen die anderen (fast immer falschen) Stellen?
+            # Ein Treffer muss deutlich besser sein. Doppelte (gleiche Stelle) zählen einmal.
+            verschieden = []
+            for t in sorted((t for t in roh_alle[:neu_n] if t is not None), key=lambda t: -t.score):
+                if all(_iou((t.x, t.y, t.w, t.h), (d.x, d.y, d.w, d.h)) < 0.3 for d in verschieden):
+                    verschieden.append(t)
+            andere = verschieden if alt else verschieden[1:]
+            if andere:
+                hist = self.pegel.setdefault(id(v), [])
+                hist.append(float(np.mean([t.score for t in andere])))
+                del hist[:-10]
+            hist = self.pegel.get(id(v))
+            grenze = self.MIN_WERT
+            if hist:
+                grenze = max(self.MIN_WERT, float(np.median(hist)) + abstand)
+            self.grenzen[id(v)] = grenze
+            roh = [t for t in roh_alle if t is not None]
             # gute Treffer noch einmal genau um die gefundene Stelle prüfen (Rahmen sitzt besser)
             for i, t in enumerate(roh):
-                if t.score >= schwelle - 0.06:
+                if t.score >= grenze - 0.06:
                     t2 = self.pruef(frame, v, t.x, t.y, t.w, t.h, (0.93, 1.0, 1.07))
                     if t2 is not None and t2.score >= t.score - 0.02:
                         roh[i] = t2
@@ -600,7 +640,7 @@ class FormSucher:
                 if any(_iou(box, (g.x, g.y, g.w, g.h)) > 0.3 for g in gut):
                     continue
                 war_da = any(_iou(box, (a.x, a.y, a.w, a.h)) > 0.3 for a in alt)
-                if t.score >= schwelle or (war_da and t.score >= schwelle - 0.04):
+                if t.score >= grenze or (war_da and t.score >= grenze - 0.04):
                     gut.append(t)
                 if len(gut) >= self.MAX_TREFFER:
                     break
@@ -747,6 +787,7 @@ def main():
         "bester": {},     # Vorlage-id -> (Wert, Zeit)
         "modus": einst.get("modus", "genau"),        # "genau" oder "form"
         "schwelle_form": float(einst.get("schwelle_form", 0.50)),
+        "grenzen": {},    # Vorlage-id -> aktuelle Grenze (Anzeige)
     }
     try:
         import onnxruntime as _ort
@@ -776,33 +817,322 @@ def main():
     foto = {"bild": None, "nr": 0}
     foto_neu = threading.Event()
 
-    # ---- Steuerfenster ----
-    pad = dict(padx=6, pady=3)
-    tk.Label(root, text="🔎 Bildsucher", font=("Segoe UI", 14, "bold")).pack(**pad)
-    tk.Label(root, text="Gesuchte Bilder:").pack(anchor="w", padx=8)
-    lb = tk.Listbox(root, width=42, height=8, selectmode="extended",
-                    font=("Segoe UI", 10))
-    lb.pack(padx=8)
+    # ---- Steuerfenster (dunkles Design) ----
+    BG, PANEL, PANEL2, LINIE = "#0d1020", "#161a2e", "#1f2445", "#2c3366"
+    TEXT, DIM = "#eef1ff", "#8d96c4"
+    AKZ1, AKZ2, GRUEN, GELB, ROT = "#22d3ee", "#a855f7", "#34d399", "#fbbf24", "#f87171"
+    FONT = "Segoe UI" if WIN else "DejaVu Sans"
+    try:
+        SK = max(1.0, root.winfo_fpixels("1i") / 96.0)  # Bildschirm-Skalierung (125 %, 150 % ...)
+    except Exception:
+        SK = 1.0
 
-    def eintrag(v):
-        hinweis = "  (einfarbig!)" if v.flach else ""
-        b = zustand["bester"].get(id(v))
-        wert = ""
-        if zustand["laeuft"] and b and time.time() - b[1] < 2.0:
-            wert = "  –  %d%%" % round(max(0.0, b[0]) * 100)
-            if b[0] < akt_schwelle():
-                wert += " (zu wenig)"
-        return "■ %s  [%dx%d]%s%s" % (v.name, v.w, v.h, hinweis, wert)
+    def px(n):
+        return int(round(n * SK))
+
+    BREITE = px(400)
+    root.configure(bg=BG)
+    if WIN:  # dunkle Titelleiste (Windows 10/11)
+        try:
+            root.update()
+            hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+            wert = ctypes.c_int(1)
+            for attr in (20, 19):
+                ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(wert), 4)
+        except Exception:
+            pass
+
+    def mischen(a, b, t):
+        a = [int(a[i:i + 2], 16) for i in (1, 3, 5)]
+        b = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+        return "#%02x%02x%02x" % tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
+
+    def rund_rechteck(c, x0, y0, x1, y1, r, **kw):
+        r = max(1, min(r, (x1 - x0) / 2, (y1 - y0) / 2))
+        p = [x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1,
+             x1 - r, y1, x0 + r, y1, x0, y1, x0, y1 - r, x0, y0 + r, x0, y0]
+        return c.create_polygon(p, smooth=True, **kw)
+
+    class Knopf(tk.Canvas):
+        """Abgerundeter Knopf mit Hover-Effekt."""
+
+        def __init__(self, eltern, text, befehl, breite=120, hoehe=34, art="normal", hg=BG):
+            super().__init__(eltern, width=px(breite), height=px(hoehe), bg=hg,
+                             highlightthickness=0, bd=0, cursor="hand2")
+            self.text, self.befehl, self.art = text, befehl, art
+            self.b, self.h = px(breite), px(hoehe)
+            self.zustand = "normal"
+            self.bind("<Enter>", lambda e: self._setz("hover"))
+            self.bind("<Leave>", lambda e: self._setz("normal"))
+            self.bind("<ButtonPress-1>", lambda e: self._setz("druck"))
+            self.bind("<ButtonRelease-1>", self._los)
+            self.bind("<Configure>", lambda e: self._mal())
+            self._mal()
+
+        def _setz(self, z):
+            self.zustand = z
+            self._mal()
+
+        def _los(self, e):
+            self._setz("hover")
+            if 0 <= e.x <= self.winfo_width() and 0 <= e.y <= self.winfo_height():
+                self.befehl()
+
+        def setz_text(self, text, art=None):
+            self.text = text
+            if art:
+                self.art = art
+            self._mal()
+
+        def _mal(self):
+            self.delete("all")
+            w = max(self.winfo_width(), self.b) if self.winfo_width() > 1 else self.b
+            h = self.h
+            hell = {"normal": 0.0, "hover": 0.18, "druck": -0.15}[self.zustand]
+            if self.art == "haupt":
+                n = 24
+                for i in range(n):  # Farbverlauf
+                    farbe = mischen(AKZ1, AKZ2, i / (n - 1.0))
+                    if hell > 0:
+                        farbe = mischen(farbe, "#ffffff", hell * 0.6)
+                    elif hell < 0:
+                        farbe = mischen(farbe, "#000000", -hell)
+                    x0 = 2 + (w - 4) * i / n
+                    x1 = 2 + (w - 4) * (i + 1) / n + 1
+                    self.create_rectangle(x0, 2, x1, h - 2, fill=farbe, outline="")
+                # Ecken abrunden: mit Hintergrund übermalen
+                maske_r = px(10)
+                for (cx, cy) in ((2, 2), (w - 2, 2), (2, h - 2), (w - 2, h - 2)):
+                    self.create_rectangle(cx - maske_r if cx > w / 2 else cx, cy - maske_r if cy > h / 2 else cy,
+                                          cx if cx > w / 2 else cx + maske_r, cy if cy > h / 2 else cy + maske_r,
+                                          fill=self["bg"], outline="")
+                rund_rechteck(self, 2, 2, w - 2, h - 2, px(10), fill="", outline=mischen(AKZ1, AKZ2, 0.5))
+                for (cx, cy) in ((2 + maske_r, 2 + maske_r), (w - 2 - maske_r, 2 + maske_r),
+                                 (2 + maske_r, h - 2 - maske_r), (w - 2 - maske_r, h - 2 - maske_r)):
+                    farbe = mischen(AKZ1, AKZ2, cx / float(w))
+                    if hell > 0:
+                        farbe = mischen(farbe, "#ffffff", hell * 0.6)
+                    elif hell < 0:
+                        farbe = mischen(farbe, "#000000", -hell)
+                    self.create_oval(cx - maske_r, cy - maske_r, cx + maske_r, cy + maske_r, fill=farbe, outline="")
+                tf = "#0b0e1c"
+            else:
+                grund = PANEL2 if self.art == "normal" else "#3a1f2a"
+                rand = LINIE if self.art == "normal" else "#7f2d3d"
+                if hell > 0:
+                    grund, rand = mischen(grund, AKZ1, hell), mischen(rand, AKZ1, hell * 2)
+                elif hell < 0:
+                    grund = mischen(grund, "#000000", -hell)
+                rund_rechteck(self, 2, 2, w - 2, h - 2, px(9), fill=grund, outline=rand, width=1)
+                tf = TEXT
+            self.create_text(w / 2, h / 2, text=self.text, fill=tf,
+                             font=(FONT, 10, "bold" if self.art == "haupt" else "normal"))
+
+    class Umschalter(tk.Canvas):
+        """Zwei Felder nebeneinander, eins ist gewählt (Suchart)."""
+
+        def __init__(self, eltern, optionen, wert, befehl, hg=PANEL):
+            super().__init__(eltern, width=BREITE - px(48), height=px(52), bg=hg,
+                             highlightthickness=0, cursor="hand2")
+            self.opt, self.wert, self.befehl = optionen, wert, befehl
+            self.bind("<Button-1>", self._klick)
+            self._mal()
+
+        def setz(self, wert):
+            self.wert = wert
+            self._mal()
+
+        def _klick(self, e):
+            i = min(len(self.opt) - 1, int(e.x / (int(self["width"]) / len(self.opt))))
+            self.befehl(self.opt[i][0])
+
+        def _mal(self):
+            self.delete("all")
+            w, h = int(self["width"]), int(self["height"])
+            rund_rechteck(self, 1, 1, w - 1, h - 1, px(12), fill=BG, outline=LINIE)
+            n = len(self.opt)
+            for i, (key, titel, unter) in enumerate(self.opt):
+                x0, x1 = 4 + (w - 8) * i / n, 4 + (w - 8) * (i + 1) / n
+                an = key == self.wert
+                if an:
+                    farbe = AKZ1 if i == 0 else AKZ2
+                    rund_rechteck(self, x0, 4, x1, h - 4, px(10), fill=mischen(farbe, BG, 0.72), outline=farbe)
+                self.create_text((x0 + x1) / 2, h / 2 - px(8), text=titel,
+                                 fill=TEXT if an else DIM, font=(FONT, 10, "bold"))
+                self.create_text((x0 + x1) / 2, h / 2 + px(10), text=unter,
+                                 fill=TEXT if an else DIM, font=(FONT, 8))
+
+    class Regler(tk.Canvas):
+        """Schieberegler mit Verlauf."""
+
+        def __init__(self, eltern, titel, von, bis, wert, befehl, einheit="", hg=PANEL):
+            super().__init__(eltern, width=BREITE - px(48), height=px(46), bg=hg,
+                             highlightthickness=0, cursor="hand2")
+            self.titel, self.von, self.bis, self.wert = titel, von, bis, wert
+            self.befehl, self.einheit = befehl, einheit
+            for ev in ("<Button-1>", "<B1-Motion>"):
+                self.bind(ev, self._zieh)
+            self._mal()
+
+        def setz(self, wert, titel=None):
+            self.wert = max(self.von, min(self.bis, int(wert)))
+            if titel:
+                self.titel = titel
+            self._mal()
+
+        def _zieh(self, e):
+            w = int(self["width"])
+            t = (e.x - px(10)) / float(w - px(20))
+            neu = int(round(self.von + max(0.0, min(1.0, t)) * (self.bis - self.von)))
+            if neu != self.wert:
+                self.wert = neu
+                self._mal()
+                self.befehl(neu)
+
+        def _mal(self):
+            self.delete("all")
+            w = int(self["width"])
+            self.create_text(px(2), px(10), text=self.titel, anchor="w", fill=DIM, font=(FONT, 9))
+            self.create_text(w - px(2), px(10), text="%d%s" % (self.wert, self.einheit),
+                             anchor="e", fill=TEXT, font=(FONT, 10, "bold"))
+            y = px(32)
+            x0, x1 = px(10), w - px(10)
+            rund_rechteck(self, x0, y - px(4), x1, y + px(4), px(4), fill=BG, outline=LINIE)
+            t = (self.wert - self.von) / float(self.bis - self.von)
+            xk = x0 + (x1 - x0) * t
+            n = max(1, int((xk - x0) / 4))
+            for i in range(n):
+                xa = x0 + (xk - x0) * i / n
+                xb = x0 + (xk - x0) * (i + 1) / n
+                self.create_rectangle(xa, y - px(3), xb + 1, y + px(3),
+                                      fill=mischen(AKZ1, AKZ2, (xa - x0) / float(x1 - x0)), outline="")
+            r = px(8)
+            self.create_oval(xk - r - 2, y - r - 2, xk + r + 2, y + r + 2, fill=mischen(AKZ1, AKZ2, t), outline="")
+            self.create_oval(xk - r + 2, y - r + 2, xk + r - 2, y + r - 2, fill=TEXT, outline="")
+
+    def karte_rahmen(titel):
+        """Abschnitt mit Überschrift."""
+        f = tk.Frame(root, bg=PANEL, highlightthickness=1, highlightbackground=LINIE)
+        f.pack(fill="x", padx=px(12), pady=(px(8), 0))
+        tk.Label(f, text=titel, bg=PANEL, fg=DIM, font=(FONT, 8, "bold")).pack(anchor="w", padx=px(12), pady=(px(8), px(2)))
+        return f
+
+    # Kopfzeile mit Verlauf
+    kopf = tk.Canvas(root, width=BREITE, height=px(78), bg=BG, highlightthickness=0)
+    kopf.pack(fill="x")
+    for i in range(80):
+        x0 = BREITE * i / 80.0
+        kopf.create_rectangle(x0, 0, x0 + BREITE / 80.0 + 1, px(78),
+                              fill=mischen(mischen(AKZ1, AKZ2, i / 79.0), BG, 0.55), outline="")
+    kopf.create_rectangle(0, px(74), BREITE, px(78), fill=BG, outline="")
+    kopf.create_oval(px(16), px(18), px(56), px(58), fill=BG, outline=TEXT, width=2)
+    kopf.create_oval(px(26), px(28), px(42), px(44), outline=AKZ1, width=3)
+    kopf.create_line(px(40), px(42), px(50), px(52), fill=AKZ1, width=4, capstyle="round")
+    kopf.create_text(px(68), px(30), text="BILDSUCHER", anchor="w", fill=TEXT, font=(FONT, 17, "bold"))
+    kopf.create_text(px(69), px(53), text="findet deine Bilder auf dem Bildschirm", anchor="w",
+                     fill="#dfe4ff", font=(FONT, 9))
+    pille = {"punkt": kopf.create_oval(0, 0, 0, 0, fill=GRUEN, outline=""),
+             "text": kopf.create_text(BREITE - px(16), px(18), text="", anchor="e", fill=TEXT, font=(FONT, 8, "bold"))}
+
+    def pille_setzen(text, farbe, puls):
+        kopf.itemconfig(pille["text"], text=text)
+        bb = kopf.bbox(pille["text"])
+        r = px(4) + (px(1.5) if puls else 0)
+        if bb:
+            cx, cy = bb[0] - px(9), (bb[1] + bb[3]) / 2
+            kopf.coords(pille["punkt"], cx - r, cy - r, cx + r, cy + r)
+        kopf.itemconfig(pille["punkt"], fill=farbe)
+
+    # Abschnitt: Bilder
+    bilder_box = karte_rahmen("GESUCHTE BILDER")
+    liste = tk.Frame(bilder_box, bg=PANEL)
+    liste.pack(fill="x", padx=px(10))
+    karten = {}  # Vorlage-id -> Widgets
+    vorschau = {}
+
+    def vorschaubild(v):
+        try:
+            from PIL import Image, ImageTk
+            g = px(40)
+            img = cv2.cvtColor(v.bgr, cv2.COLOR_BGR2RGB)
+            f = g / float(max(v.w, v.h))
+            img = cv2.resize(img, (max(1, int(v.w * f)), max(1, int(v.h * f))), interpolation=cv2.INTER_AREA)
+            fl = np.zeros((g, g, 3), np.uint8)
+            fl[:] = (31, 36, 69)
+            y, x = (g - img.shape[0]) // 2, (g - img.shape[1]) // 2
+            fl[y:y + img.shape[0], x:x + img.shape[1]] = img
+            return ImageTk.PhotoImage(Image.fromarray(fl))
+        except Exception:
+            return None
 
     def liste_neu():
-        auswahl = lb.curselection()
-        lb.delete(0, "end")
-        for i, v in enumerate(zustand["vorlagen"]):
-            lb.insert("end", eintrag(v))
-            lb.itemconfig(i, fg=v.farbe)
-        for i in auswahl:
-            if i < lb.size():
-                lb.selection_set(i)
+        for w in liste.winfo_children():
+            w.destroy()
+        karten.clear()
+        if not zustand["vorlagen"]:
+            tk.Label(liste, text="Noch keine Bilder.\nUnten auf  ＋ Bilder  oder  Einfügen  klicken.",
+                     bg=PANEL, fg=DIM, font=(FONT, 9), justify="center").pack(pady=px(14))
+        for v in zustand["vorlagen"]:
+            k = tk.Frame(liste, bg=PANEL2, highlightthickness=1, highlightbackground=LINIE)
+            k.pack(fill="x", pady=px(3))
+            if id(v) not in vorschau:
+                vorschau[id(v)] = vorschaubild(v)
+            bild = vorschau[id(v)]
+            if bild is not None:
+                tk.Label(k, image=bild, bg=PANEL2, bd=0).pack(side="left", padx=px(6), pady=px(6))
+            mitte = tk.Frame(k, bg=PANEL2)
+            mitte.pack(side="left", fill="x", expand=True, pady=px(4))
+            zeile = tk.Frame(mitte, bg=PANEL2)
+            zeile.pack(fill="x")
+            tk.Label(zeile, text="●", fg=v.farbe, bg=PANEL2, font=(FONT, 10)).pack(side="left")
+            name = os.path.splitext(v.name)[0]
+            if len(name) > 22:
+                name = name[:20] + "…"
+            tk.Label(zeile, text=name, fg=TEXT, bg=PANEL2, font=(FONT, 10, "bold")).pack(side="left", padx=(px(3), 0))
+            stat = tk.Label(zeile, text="", fg=DIM, bg=PANEL2, font=(FONT, 8, "bold"))
+            stat.pack(side="right", padx=px(4))
+            balken = tk.Canvas(mitte, width=px(230), height=px(14), bg=PANEL2, highlightthickness=0)
+            balken.pack(anchor="w", pady=(px(3), 0))
+            weg = tk.Label(k, text="✕", fg=DIM, bg=PANEL2, font=(FONT, 11), cursor="hand2")
+            weg.pack(side="right", padx=px(8))
+            weg.bind("<Button-1>", lambda e, v=v: entfernen(v))
+            weg.bind("<Enter>", lambda e, w=weg: w.config(fg=ROT))
+            weg.bind("<Leave>", lambda e, w=weg: w.config(fg=DIM))
+            karten[id(v)] = (stat, balken)
+        balken_neu()
+
+    def balken_neu():
+        jetzt = time.time()
+        gefunden = {id(t.vorlage) for t in zustand["ergebnis"]}
+        for v in zustand["vorlagen"]:
+            if id(v) not in karten:
+                continue
+            stat, balken = karten[id(v)]
+            b = zustand["bester"].get(id(v))
+            wert = b[0] if (zustand["laeuft"] and b and jetzt - b[1] < 2.0) else None
+            grenze = zustand["grenzen"].get(id(v), akt_schwelle())
+            balken.delete("all")
+            w, h = int(balken["width"]), int(balken["height"])
+            rund_rechteck(balken, 0, px(3), w - px(44), h - px(3), px(4), fill=BG, outline="")
+            bw = w - px(44)
+            if wert is not None:
+                t = max(0.0, min(1.0, wert))
+                farbe = v.farbe if id(v) in gefunden else mischen(v.farbe, BG, 0.55)
+                if t > 0.02:
+                    rund_rechteck(balken, 0, px(3), max(px(8), bw * t), h - px(3), px(4), fill=farbe, outline="")
+                balken.create_text(w, h / 2, text="%d%%" % round(t * 100), anchor="e",
+                                   fill=TEXT if id(v) in gefunden else DIM, font=(FONT, 9, "bold"))
+            gx = bw * max(0.0, min(1.0, grenze))
+            balken.create_line(gx, 0, gx, h, fill=TEXT, width=2)
+            if not zustand["laeuft"]:
+                stat.config(text="PAUSE", fg=DIM)
+            elif id(v) in gefunden:
+                n = sum(1 for t in zustand["ergebnis"] if t.vorlage is v)
+                stat.config(text="✓ GEFUNDEN" + (" ×%d" % n if n > 1 else ""), fg=GRUEN)
+            elif v.flach:
+                stat.config(text="EINFARBIG", fg=GELB)
+            else:
+                stat.config(text="SUCHT …", fg=DIM)
 
     def farbe_frei():
         benutzt = {v.farbe for v in zustand["vorlagen"]}
@@ -867,25 +1197,18 @@ def main():
             hinzu(pfad)
         liste_neu()
 
-    def entfernen():
-        weg = set(lb.curselection())
-        if not weg:
+    def entfernen(v):
+        if not messagebox.askyesno("Bildsucher", "„%s“ entfernen?\n"
+                                   "(Es wird auch aus dem Ordner 'bilder' gelöscht.)" % v.name):
             return
-        if not messagebox.askyesno("Bildsucher", "Ausgewählte Bilder entfernen?\n"
-                                   "(Sie werden auch aus dem Ordner 'bilder' gelöscht.)"):
-            return
-        bleib = []
-        for i, v in enumerate(zustand["vorlagen"]):
-            if i in weg:
-                p = os.path.join(BILDER, v.name)
-                try:
-                    if os.path.isfile(p):
-                        os.remove(p)
-                except Exception:
-                    pass
-            else:
-                bleib.append(v)
-        zustand["vorlagen"] = bleib
+        p = os.path.join(BILDER, v.name)
+        try:
+            if os.path.isfile(p):
+                os.remove(p)
+        except Exception:
+            pass
+        zustand["vorlagen"] = [x for x in zustand["vorlagen"] if x is not v]
+        vorschau.pop(id(v), None)
         liste_neu()
 
     def ordner_oeffnen():
@@ -899,18 +1222,11 @@ def main():
                 hinzu(os.path.join(BILDER, n))
         liste_neu()
 
-    reihe = tk.Frame(root)
-    reihe.pack(fill="x", padx=8, pady=4)
-    tk.Button(reihe, text="➕ Bilder hinzufügen", command=bilder_waehlen).pack(side="left", expand=True, fill="x")
-    tk.Button(reihe, text="📋 Einfügen", command=einfuegen).pack(side="left", expand=True, fill="x")
-    reihe2 = tk.Frame(root)
-    reihe2.pack(fill="x", padx=8)
-    tk.Button(reihe2, text="🗑 Entfernen", command=entfernen).pack(side="left", expand=True, fill="x")
-    tk.Button(reihe2, text="📁 Ordner", command=ordner_oeffnen).pack(side="left", expand=True, fill="x")
-    tk.Button(reihe2, text="🔄 Neu laden", command=ordner_neu_laden).pack(side="left", expand=True, fill="x")
-
-    reihe3 = tk.Frame(root)
-    reihe3.pack(fill="x", padx=8, pady=(4, 0))
+    reihe = tk.Frame(bilder_box, bg=PANEL)
+    reihe.pack(fill="x", padx=px(10), pady=px(8))
+    for text, bef, b in (("＋ Bilder", bilder_waehlen, 96), ("📋 Einfügen", einfuegen, 96),
+                         ("📁 Ordner", ordner_oeffnen, 80), ("⟳", ordner_neu_laden, 40)):
+        Knopf(reihe, text, bef, breite=b, hg=PANEL).pack(side="left", padx=(0, px(6)))
 
     def was_sehe_ich():
         b = foto["bild"]
@@ -929,51 +1245,27 @@ def main():
         zustand["testmark"] = time.time() + 4.0
         zustand["nr"] += 1
 
-    tk.Button(reihe3, text="👁 Was sieht das Programm?", command=was_sehe_ich).pack(side="left", expand=True, fill="x")
-    tk.Button(reihe3, text="🎯 Anzeige testen", command=anzeige_testen).pack(side="left", expand=True, fill="x")
+    # Abschnitt: Suchart
+    art_box = karte_rahmen("SUCHART")
 
-    tk.Label(root, text="Auf welchem Bildschirm suchen?").pack(anchor="w", padx=8, pady=(8, 0))
-    namen = [mon_name(i) for i in range(len(mons))]
-    mon_var = tk.StringVar(value=namen[mon_nr])
-
-    def mon_waehlen(name):
-        i = namen.index(name)
-        mon_nr_var["i"] = i
-        m = dict(mons[i])
-        ov.geometry("%dx%d+%d+%d" % (m["width"], m["height"], m["left"], m["top"]))
-        cv.config(width=m["width"], height=m["height"])
-        zustand["mon"] = m
-        zustand["mon_neu"] = True
-        zustand["nr"] += 1
-        log("Bildschirm gewählt:", i + 1, m)
-        einst_speichern()
-        anzeige_testen()
-
-    om = tk.OptionMenu(root, mon_var, *namen, command=mon_waehlen)
-    om.config(width=38)
-    om.pack(padx=8, fill="x")
-
-    tk.Label(root, text="Suchart:").pack(anchor="w", padx=8, pady=(8, 0))
-    modus_var = tk.StringVar(value=zustand["modus"])
-
-    def modus_waehlen():
-        neu = modus_var.get()
+    def modus_waehlen(neu):
         if neu == "form" and not form_ok:
             messagebox.showwarning("Bildsucher", "Die KI-Suche geht noch nicht:\n" + form_grund)
-            modus_var.set("genau")
             return
         zustand["modus"] = neu
         zustand["bester"] = {}
-        regler.set(int(round(akt_schwelle() * 100)))
+        zustand["grenzen"] = {}
+        umsch.setz(neu)
+        regler.setz(int(round(akt_schwelle() * 100)),
+                    "Genauigkeit (höher = weniger Fehlalarme)" if neu == "genau"
+                    else "Strenge (höher = weniger Fehlalarme)")
         log("Suchart:", neu)
         einst_speichern()
 
-    tk.Radiobutton(root, text="Genau – gleiche Farben (sehr schnell)", variable=modus_var,
-                   value="genau", command=modus_waehlen).pack(anchor="w", padx=14)
-    tk.Radiobutton(root, text="Ähnlich – auch andere Farben/Licht (KI, langsamer)",
-                   variable=modus_var, value="form", command=modus_waehlen).pack(anchor="w", padx=14)
-
-    tk.Label(root, text="Genauigkeit (höher = weniger Fehlalarme):").pack(anchor="w", padx=8, pady=(8, 0))
+    umsch = Umschalter(art_box, [("genau", "⚡ Genau", "gleiche Farben · blitzschnell"),
+                                 ("form", "🧠 Ähnlich (KI)", "auch andere Farben/Licht")],
+                       zustand["modus"], modus_waehlen)
+    umsch.pack(padx=px(12), pady=(px(2), px(6)))
 
     def regler_neu(w):
         if zustand["modus"] == "form":
@@ -987,27 +1279,64 @@ def main():
         einst_speichern()
 
     zustand["schwelle"] = float(einst.get("schwelle", 0.8))
-    regler = tk.Scale(root, from_=30, to=98, orient="horizontal", length=300,
-                      command=regler_neu)
-    regler.set(int(round(akt_schwelle() * 100)))
-    regler.pack(padx=8)
+    zustand["min_px"] = int(einst.get("min_px", 16))
+    regler = Regler(art_box, "Genauigkeit (höher = weniger Fehlalarme)" if zustand["modus"] == "genau"
+                    else "Strenge (höher = weniger Fehlalarme)",
+                    30, 98, int(round(akt_schwelle() * 100)), regler_neu)
+    regler.pack(padx=px(12))
+    regler2 = Regler(art_box, "Kleinste Größe (nur ⚡ Genau)", 8, 120, zustand["min_px"], regler2_neu, " px")
+    regler2.pack(padx=px(12), pady=(0, px(8)))
 
-    tk.Label(root, text="Kleinste Größe in Pixeln (nur 'Genau'; kleiner = langsamer):").pack(anchor="w", padx=8)
-    regler2 = tk.Scale(root, from_=8, to=120, orient="horizontal", length=300,
-                       command=regler2_neu)
-    regler2.set(int(einst.get("min_px", 16)))
-    regler2.pack(padx=8)
+    # Abschnitt: Bildschirm
+    mon_box = karte_rahmen("BILDSCHIRM")
+    mon_reihe = tk.Frame(mon_box, bg=PANEL)
+    mon_reihe.pack(fill="x", padx=px(10), pady=(px(2), px(10)))
 
-    knopf = tk.Button(root, text="⏸ Pause", font=("Segoe UI", 11, "bold"))
-    knopf.pack(fill="x", padx=8, pady=6)
+    def mon_text(i):
+        m = mons[i]
+        return "Bildschirm %d · %d×%d%s ▾" % (i + 1, m["width"], m["height"], " ★" if i == haupt else "")
+
+    def mon_waehlen(i):
+        mon_nr_var["i"] = i
+        m = dict(mons[i])
+        ov.geometry("%dx%d+%d+%d" % (m["width"], m["height"], m["left"], m["top"]))
+        cv.config(width=m["width"], height=m["height"])
+        zustand["mon"] = m
+        zustand["mon_neu"] = True
+        zustand["nr"] += 1
+        mon_knopf.setz_text(mon_text(i))
+        log("Bildschirm gewählt:", i + 1, m)
+        einst_speichern()
+        anzeige_testen()
+
+    menue = tk.Menu(root, tearoff=0, bg=PANEL2, fg=TEXT, activebackground=AKZ2,
+                    activeforeground=TEXT, font=(FONT, 10), bd=0)
+    for i in range(len(mons)):
+        menue.add_command(label=mon_text(i).replace(" ▾", ""), command=lambda i=i: mon_waehlen(i))
+
+    def mon_menue():
+        menue.tk_popup(mon_knopf.winfo_rootx(), mon_knopf.winfo_rooty() + mon_knopf.winfo_height())
+
+    mon_knopf = Knopf(mon_reihe, mon_text(mon_nr), mon_menue, breite=250, hg=PANEL)
+    mon_knopf.pack(side="left")
+    Knopf(mon_reihe, "🎯 Test", anzeige_testen, breite=70, hg=PANEL).pack(side="left", padx=(px(6), 0))
+
+    # Unten: Start/Pause + Status
+    unten = tk.Frame(root, bg=BG)
+    unten.pack(fill="x", padx=px(12), pady=(px(10), px(4)))
 
     def umschalten():
         zustand["laeuft"] = not zustand["laeuft"]
-        knopf.config(text="⏸ Pause" if zustand["laeuft"] else "▶ Weiter suchen")
-    knopf.config(command=umschalten)
+        knopf.setz_text("⏸  PAUSE" if zustand["laeuft"] else "▶  WEITER SUCHEN")
+        balken_neu()
 
-    status = tk.Label(root, text="Starte …", fg="#555", font=("Segoe UI", 9))
-    status.pack(pady=(0, 8))
+    knopf = Knopf(unten, "⏸  PAUSE", umschalten, breite=280, hoehe=42, art="haupt")
+    knopf.pack(side="left")
+    Knopf(unten, "👁", was_sehe_ich, breite=42, hoehe=42).pack(side="left", padx=(px(6), 0))
+    Knopf(unten, "✕", lambda: schliessen(), breite=42, hoehe=42, art="gefahr").pack(side="left", padx=(px(6), 0))
+
+    status = tk.Label(root, text="Starte …", bg=BG, fg=DIM, font=(FONT, 8))
+    status.pack(pady=(px(2), px(10)))
 
     ordner_neu_laden()
     root.update()
@@ -1104,6 +1433,10 @@ def main():
                     sucher.min_px = zustand["min_px"]
                     erg = sucher.suche(frame, vl, zustand["schwelle"])
                 alt_modus = modus
+                if modus == "form":
+                    zustand["grenzen"] = dict(aktiv.grenzen)
+                else:
+                    zustand["grenzen"] = {}
                 jetzt_t = time.time()
                 for vid, w in aktiv.werte.items():
                     b = zustand["bester"].get(vid)
@@ -1144,54 +1477,84 @@ def main():
                                  root.winfo_rooty() + root.winfo_height())
         except Exception:
             pass
-        if gezeichnet["nr"] != zustand["nr"] and not (test_s and not zustand["laeuft"]):
+        treffer = zustand["ergebnis"]
+        test_an = time.time() < zustand["testmark"]
+        # neu zeichnen bei Änderung, und bei Treffern ständig (Animation)
+        neu = gezeichnet["nr"] != zustand["nr"] or ((treffer or test_an) and zaehler["n"] % 2 == 0)
+        if neu and not (test_s and not zustand["laeuft"]):
             gezeichnet["nr"] = zustand["nr"]
             cv.delete("all")
             m = zustand["mon"]
             cx, cy = m["width"] / 2.0, m["height"] / 2.0
-            if time.time() < zustand["testmark"]:
-                # Test: großer Rahmen am Rand + Kreuz in der Mitte
-                cv.create_rectangle(6, 6, m["width"] - 6, m["height"] - 6,
-                                    outline="#ff3bf0", width=10)
-                cv.create_line(cx - 60, cy, cx + 60, cy, fill="#ff3bf0", width=6)
-                cv.create_line(cx, cy - 60, cx, cy + 60, fill="#ff3bf0", width=6)
-                cv.create_text(cx, cy + 90, fill="#ff3bf0", font=("Segoe UI", 20, "bold"),
+            t_anim = time.time()
+            puls = math.sin(t_anim * 6.0)
+            if test_an:
+                for i, f in enumerate((AKZ1, mischen(AKZ1, AKZ2, 0.5), AKZ2)):
+                    d = 6 + i * 6
+                    cv.create_rectangle(d, d, m["width"] - d, m["height"] - d, outline=f, width=5)
+                cv.create_oval(cx - 40, cy - 40, cx + 40, cy + 40, outline=AKZ1, width=4)
+                cv.create_line(cx - 70, cy, cx + 70, cy, fill=AKZ2, width=4)
+                cv.create_line(cx, cy - 70, cx, cy + 70, fill=AKZ2, width=4)
+                rund_rechteck(cv, cx - 190, cy + 70, cx + 190, cy + 120, 20, fill=BG, outline=AKZ1, width=3)
+                cv.create_text(cx, cy + 95, fill=TEXT, font=(FONT, 16, "bold"),
                                text="Hier sucht der Bildsucher")
-                root.after(4100, lambda: zustand.__setitem__("nr", zustand["nr"] + 1))
-            treffer = zustand["ergebnis"]
             if treffer:
-                cv.create_oval(cx - 5, cy - 5, cx + 5, cy + 5, fill="#ffffff", outline="#000000")
+                r = 8 + 2 * puls
+                cv.create_oval(cx - r - 2, cy - r - 2, cx + r + 2, cy + r + 2, outline="#000000", width=4)
+                cv.create_oval(cx - r, cy - r, cx + r, cy + r, outline="#ffffff", width=2)
+                cv.create_oval(cx - 3, cy - 3, cx + 3, cy + 3, fill="#ffffff", outline="#000000")
             for t in treffer:
                 f = t.vorlage.farbe
-                p = 4
+                p = 6 + 3 * puls
                 x0, y0 = t.x - p, t.y - p
                 x1, y1 = t.x + t.w + p, t.y + t.h + p
+                # Strich mit Pfeil + wandernder Leuchtpunkt
                 rp = rand_punkt(cx, cy, x0, y0, x1, y1)
                 if rp:
-                    cv.create_line(cx, cy, rp[0], rp[1], fill="#000000", width=5)
-                    cv.create_line(cx, cy, rp[0], rp[1], fill=f, width=3)
-                cv.create_rectangle(x0 - 1, y0 - 1, x1 + 1, y1 + 1, outline="#000000", width=5)
-                cv.create_rectangle(x0, y0, x1, y1, outline=f, width=3)
-                ty = y0 - 12 if y0 > 20 else y1 + 12
-                cv.create_text(x0 + 2, ty, anchor="w", fill=f,
-                               font=("Segoe UI", 10, "bold"),
-                               text="%s %d%%" % (os.path.splitext(t.vorlage.name)[0],
-                                                 round(t.score * 100)))
-        if zaehler["n"] % 15 == 0:
+                    cv.create_line(cx, cy, rp[0], rp[1], fill="#000000", width=6, capstyle="round")
+                    cv.create_line(cx, cy, rp[0], rp[1], fill=f, width=3, arrow="last",
+                                   arrowshape=(16, 18, 7))
+                    for k in range(3):
+                        a = (t_anim * 0.9 + k / 3.0) % 1.0
+                        px_, py_ = cx + (rp[0] - cx) * a, cy + (rp[1] - cy) * a
+                        cv.create_oval(px_ - 4, py_ - 4, px_ + 4, py_ + 4, fill="#ffffff", outline=f, width=2)
+                # Ecken-Klammern
+                L = max(12, min(44, min(x1 - x0, y1 - y0) * 0.3))
+                for (ax, ay, sx, sy) in ((x0, y0, 1, 1), (x1, y0, -1, 1), (x0, y1, 1, -1), (x1, y1, -1, -1)):
+                    pts = (ax, ay + sy * L, ax, ay, ax + sx * L, ay)
+                    cv.create_line(*pts, fill="#000000", width=8, capstyle="round", joinstyle="round")
+                    cv.create_line(*pts, fill=f, width=4, capstyle="round", joinstyle="round")
+                # Namensschild
+                text = "%s  %d%%" % (os.path.splitext(t.vorlage.name)[0][:24], round(t.score * 100))
+                ty = y0 - 20 if y0 > 34 else y1 + 20
+                tid = cv.create_text(x0 + 14, ty, anchor="w", fill=TEXT, font=(FONT, 10, "bold"), text=text)
+                bb = cv.bbox(tid)
+                if bb:
+                    pill = rund_rechteck(cv, bb[0] - 10, bb[1] - 4, bb[2] + 10, bb[3] + 4, 12,
+                                         fill="#0b0e1c", outline=f, width=2)
+                    cv.tag_lower(pill, tid)
+        if zaehler["n"] % 12 == 0:
+            balken_neu()
+            puls_an = (zaehler["n"] // 12) % 2 == 0
             if zustand["fehler"]:
-                status.config(text="Fehler: " + zustand["fehler"], fg="#c00")
+                pille_setzen("FEHLER", ROT, False)
+                status.config(text="Fehler: " + zustand["fehler"][:70], fg=ROT)
             elif not zustand["vorlagen"]:
-                status.config(text="Noch keine Bilder – bitte hinzufügen", fg="#555")
+                pille_setzen("BEREIT", DIM, False)
+                status.config(text="Füge ein Bild hinzu, dann geht es los.", fg=DIM)
             elif not zustand["laeuft"]:
-                status.config(text="Pause", fg="#555")
+                pille_setzen("PAUSE", GELB, False)
+                status.config(text="Pausiert", fg=DIM)
             elif zustand["schwarz"]:
-                status.config(text="Bildschirmfoto ist schwarz! (Spiel im Vollbild? "
-                                   "Dann 'Fenster ohne Rahmen' einstellen)", fg="#c00")
+                pille_setzen("SCHWARZ", ROT, puls_an)
+                status.config(text="Bildschirmfoto ist schwarz – Spiel auf 'Fenster ohne Rahmen' stellen", fg=ROT)
             else:
-                status.config(text="%.0f Suchen pro Sekunde  ·  %d gefunden"
-                              % (zustand["fps"], len(zustand["ergebnis"])), fg="#060")
-        if zaehler["n"] % 30 == 0 and zustand["vorlagen"]:
-            liste_neu()  # beste Werte in der Liste auffrischen
+                n = len(treffer)
+                pille_setzen("%d GEFUNDEN" % n if n else "SUCHT", GRUEN if n else AKZ1, puls_an)
+                art = "KI" if zustand["modus"] == "form" else "Genau"
+                status.config(text="%s · %.0f Suchen pro Sekunde · %d Bild%s"
+                              % (art, zustand["fps"], len(zustand["vorlagen"]),
+                                 "" if len(zustand["vorlagen"]) == 1 else "er"), fg=DIM)
         if zaehler["n"] % 120 == 0:  # Anzeige ganz oben halten
             try:
                 ov.attributes("-topmost", True)
