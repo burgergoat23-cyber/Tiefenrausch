@@ -25,6 +25,9 @@ sourceSets.main.resources {
 }
 
 repositories {
+    // JUnit und Gson für die einfachen Tests
+    mavenCentral()
+
     // Farmer's Delight kommt aus dem Maven-Verzeichnis von Modrinth.
     exclusiveContent {
         forRepository {
@@ -92,6 +95,16 @@ neoForge {
 dependencies {
     // Farmer's Delight: wird zum Übersetzen gebraucht und läuft in der Entwicklungsumgebung mit.
     implementation "maven.modrinth:farmers-delight:${minecraft_version}-${farmers_delight_version}"
+
+    // Einfache Tests ohne Spiel (z. B. Sprachdateien), Aufruf: ./gradlew test
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.code.gson:gson:2.11.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
 }
 
 // Setzt die Werte aus gradle.properties in die Vorlage neoforge.mods.toml ein.
