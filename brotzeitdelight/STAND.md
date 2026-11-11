@@ -1,6 +1,6 @@
 # Stand
 
-Stand: 11.11.2026, nach Meilenstein 1 (Grundgerüst). Wartet auf dein Okay für Meilenstein 2.
+Stand: 11.11.2026, nach Meilenstein 2 (Faktencheck). Wartet auf deine Antworten und dein Okay für Meilenstein 3.
 
 ## Wo was liegt
 
@@ -52,11 +52,30 @@ Warnungen im Log, die nicht von uns stammen und bei jedem Lauf erscheinen:
 - `Commands: Ambiguity between arguments [teleport …]`, `Missing sound for event: minecraft:item.goat_horn.play`, `Shader … could not find sampler`: Vanilla.
 - `Failed to request yggdrasil public key`, `Couldn't look up profile properties`, `Error starting SoundSystem`: nur in der Cloud-Umgebung (kein Zugang zu Mojang-Konten, kein Audiogerät).
 
+**Meilenstein 2 – Faktencheck** (11.11.2026): Ergebnis in `FAKTENCHECK.md`, neue Abweichungen Nr. 2 und 3 in `ABWEICHUNGEN.md`. Am Mod wurde nichts geändert.
+
 ## Als Nächstes
 
-**Meilenstein 2 – Faktencheck:** die echten IDs, Tags und Klassen von Farmer's Delight mit Fundstelle auflisten und alle Abweichungen von der Vorgabe nennen. Es wird dabei nichts am Mod gebaut.
+**Meilenstein 3 – Breze komplett**, sobald du die Fragen unten beantwortet hast.
+
+Technische Festlegungen aus dem Faktencheck (brauchen kein Okay):
+
+- Gerichte mit Effekt und Schüssel: FD-Klasse `ConsumableItem`, Eigenschaften wie `ModItems.bowlFoodItem`.
+- Rezepte erzeugen mit FDs `CookingPotRecipeBuilder` und `CuttingBoardRecipeBuilder`; Messer = `knife_dig` oder `c:tools/knife` wie FD.
+- „Schnitzel mit Kartoffelsalat": Weil der Kartoffelsalat seine Schüssel als Werkbank-Rest hat, braucht dieses Rezept einen eigenen kleinen Rezepttyp, der genau diesen Rest unterdrückt (kein Mixin nötig). Wird ausdrücklich getestet.
+- Wilder Senf: eigene Klasse auf Basis der Vanilla-Blume (nicht `WildCropBlock`, weil dort Knochenmehl die Pflanze vermehrt und Sand erlaubt ist). Welterzeugung mit den Standardtypen von Minecraft/NeoForge (`minecraft:random_patch`, `neoforge:add_features`) und den Zahlen von Wildweißkohl (1 von 30 Chunks, 64 Versuche, Streuung 6/3). So hängt sie nicht an inneren FD-Typen, die sich ändern können.
+- Gärfass ohne `ignitedByLava`. Blasen-Partikel: Vorschlag `minecraft:bubble_pop`, Sichtprüfung in Meilenstein 6.
 
 ## Offene Fragen an dich
+
+Fragen aus dem Faktencheck (Empfehlung in Klammern):
+
+A. Schnitzel mit Kartoffelsalat: Sättigung 0,8 ist stärker als FDs stärkstes Gericht (14 / 0,75). Auf 0,75 senken? (ja)
+B. Senfpflanze: Vanilla-Weizen hat kein Kreuzmodell, sondern das Raute-Modell `crop`. Welches? (`crop` wie Weizen)
+C. Senfkörner bei der Ernte: „2 bis 4" und „gleiche Formel wie Weizensamen" (ergibt 1 bis 4) widersprechen sich. Welches? (2 bis 4: 2 fest plus Zufall, mit Glück mehr)
+D. Wilder Senf als Blume braucht einen Effekt für Verdächtige Suppe. Welchen? (Feuerresistenz 4 s, „scharf")
+E. Texte: FD sagt auf Deutsch „Weißkohl". Tooltip „Rechtsklick mit Weißkohl: befüllen"? (ja)
+F. Breze im Tag `c:foods/bread`: Dann geht sie auch in FD-Sandwiches und in unseren Brot-Rezepten (Leberkässemmel, Schnitzel, Semmelknödel). In Ordnung? (ja)
 
 Beide Antworten hast du am 11.11.2026 für später angekündigt.
 

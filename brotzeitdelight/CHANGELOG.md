@@ -11,3 +11,8 @@
 - Item „Breze" (`pretzel`) angemeldet, vorerst nur als Symbol des Tabs und mit Platzhalter-Textur.
 - Datengenerator eingerichtet: erzeugt Item-Modelle und die Sprachdateien für Deutsch und Englisch.
 - Projektunterlagen angelegt: `ABWEICHUNGEN.md`, `TEXTUREN.md`, `IDEEN.md`, `STAND.md`.
+
+### Meilenstein 2 – Faktencheck
+
+- IDs, Tags, Klassen und Rezeptformate von Farmer's Delight 1.3.4 am Quellcode geprüft (`FAKTENCHECK.md`).
+- Zwei neue Abweichungen eingetragen (`ABWEICHUNGEN.md` Nr. 2 und 3).
